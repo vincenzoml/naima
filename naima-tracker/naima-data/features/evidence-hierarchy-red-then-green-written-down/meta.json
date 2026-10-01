@@ -1,7 +1,7 @@
 {
   "id": "0f48de68-684b-4f95-8e74-0ea942a8ce94",
   "title": "Evidence hierarchy and red-then-green, written down",
-  "status": "requested",
+  "status": "shipped",
   "created": "2026-10-01",
   "impact": "high",
   "priority": "now",
@@ -12,5 +12,12 @@
       "rel": "relates-to",
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
     }
+  ],
+  "fixedOn": "2026-10-01",
+  "effort": "M",
+  "docs": [
+    "naima/docs/guide/prove-and-close.md#3-perform-it-keep-the-evidence",
+    "naima/docs/guide/concepts.md#evidence",
+    "naima/docs/guide/rules.md#evidence-is-ranked-and-no-number-stands-without-its-comparison"
   ]
 }

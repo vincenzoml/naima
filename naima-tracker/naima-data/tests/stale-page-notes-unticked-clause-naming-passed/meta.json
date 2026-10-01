@@ -1,0 +1,13 @@
+{
+  "id": "6fb59070-295f-4a7d-a11b-73d7ad07f115",
+  "title": "Stale-page notes: an unticked clause naming a passed test, an agent's test excusing itself, phrases configurable (test/plugins/trackers/trackers.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "82fcb7f4-6b9e-4cb9-b3ac-6d76044d7da6"
+    }
+  ]
+}
