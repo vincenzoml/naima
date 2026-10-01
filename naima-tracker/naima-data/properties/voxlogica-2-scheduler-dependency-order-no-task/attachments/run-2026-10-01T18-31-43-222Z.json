@@ -1,0 +1,21 @@
+{
+  "verifier": "mcrl2",
+  "model": "develop/case-studies/voxlogica-2-scheduler/scheduler.mcrl2",
+  "modelSha256": "af41764b2ef30523f1be3839893c0e8633978c3fdd1beda0a1d976efbfaf7db4",
+  "property": "develop/case-studies/voxlogica-2-scheduler/dependency-order.mcf",
+  "optionsSha256": "dc245c3cfd92ed5f13c5fe6cf8b11ca9c92cca168d77a6e859ae51b3abfa818d",
+  "inputs": [
+    {
+      "path": "develop/case-studies/voxlogica-2-scheduler/dependency-order.mcf",
+      "sha256": "4f3c7ba34ab2bfa0a7be6603790aad68f63fb4a17ce775a779ee6cbdb70c16c5"
+    },
+    {
+      "path": "develop/case-studies/voxlogica-2-scheduler/scheduler.mcrl2",
+      "sha256": "af41764b2ef30523f1be3839893c0e8633978c3fdd1beda0a1d976efbfaf7db4"
+    }
+  ],
+  "inputsSha256": "bf6d633682fdb9fc1781a4223e74e800f9dbe7693c857b79d75789e255588820",
+  "verdict": "error",
+  "output": "tool missing: mcrl22lps is not on PATH — install the mCRL2 toolset (https://www.mcrl2.org), put its tools on PATH or set plugins.verifier-mcrl2.options.bin to their directory",
+  "at": "2026-10-01T18:31:43.222Z"
+}

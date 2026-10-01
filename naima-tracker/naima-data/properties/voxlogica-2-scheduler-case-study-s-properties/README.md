@@ -1,15 +1,13 @@
-# The VoxLogicA 2 scheduler case study's properties (stated when the case study is built)
+# VoxLogicA 2 scheduler: deadlock freedom — until the run finishes, the scheduler can always take a step
 
-Filed, not built: a placeholder standing in for the paper's "four properties"
-of the VoxLogicA 2 scheduler case study
-(`todos/voxlogica-2-scheduler-case-study-description-model`). The paper's
-own checklist names a count (four) but not yet their content; whoever builds
-the case study splits this item into the real property items, each stating
-one property in words and naming its `verifier`, `model` and `property` —
-exactly as [prove and close](../../../../naima/docs/guide/prove-and-close.md#properties-proven-by-a-tool) describes — and this item is then withdrawn or
-dropped in their favour.
+Until a run has finished, the scheduler can always take a step of its own:
+memory pressure and duplicate offers, which come from outside the
+scheduler, do not count as progress. Formula:
+`develop/case-studies/voxlogica-2-scheduler/deadlock-freedom.mcf`. The progress floor of memory parking is what
+makes it hold: its negative experiment, `develop/case-studies/voxlogica-2-scheduler/scheduler-no-floor.mcrl2`
+(the floor switched off, nothing else), must be violated.
 
-Set `verifier`, `model` (a path from the project root) and `property` in meta.json, then `naima verify`.
+The model is the VoxLogicA 2 scheduler abstracted to its scheduling protocol, `develop/case-studies/voxlogica-2-scheduler/scheduler.mcrl2`; what each part of it stands for in the engine, and the results table, are in [the case study](../../../../develop/case-studies/voxlogica-2-scheduler/README.md). It holds when `naima verify` says so, with the mCRL2 toolset installed; none is installed on the machine where it was filed.
 
 ## Notes
 
