@@ -28,6 +28,13 @@ gesture also says `humanBecause` ([asking the human](asking-the-human.md)).
 
 A test nobody can find is a test nobody runs: [triage](../guide/glossary.md#triage) it like any item.
 
+When the item follows a spec (`specified-by`), confirm the code matches the
+spec's current version, and say so in the test's result; `naima check` notes an
+open item that still follows a superseded version. When it satisfies a
+requirement, link the same test `verifies` the requirement too, and set the
+requirement `met` once that test has passed — `naima check` refuses a `met`
+requirement with no passing proof.
+
 The [proof](../guide/glossary.md#proof) is the gesture as it stands, not as it once stood: `naima close`
 refuses an item that a verifying item refutes (a failed test, a violated
 property), and one whose verifying item `naima check` reports — a property

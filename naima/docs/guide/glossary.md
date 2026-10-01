@@ -52,19 +52,19 @@ yet. *Everyday example:* "kitchen usable by 1 March".
 
 ### Requirement
 
-*Planned as an item type.* Something the result must satisfy, stated so it
-can be checked. *Everyday example:* "the counter holds 50 kg".
+Something the result must satisfy, stated so it can be checked, and proven
+by a test linked to it ([planning](plan-with-requirements-specs-and-decisions.md)). *Everyday example:* "the counter holds 50 kg".
 
 ### Specification
 
-*Planned as an item type.* The precise description of how something must
-behave. *Everyday example:* the plumber's drawing with every pipe size.
+The precise description of how something must behave, kept in numbered
+versions: only one is current ([planning](plan-with-requirements-specs-and-decisions.md)). *Everyday example:* the plumber's drawing with every pipe size.
 
 ### Decision
 
 A choice that is the [owner](#owner)'s, recorded with its reason so it is
-never asked again. Today it is a todo with `kind=decision`; *planned* as an
-item type of its own. *Everyday example:* "white tiles, not grey".
+never asked again: an item of its own, dated, searched by agents before they
+ask anything ([planning](plan-with-requirements-specs-and-decisions.md)). *Everyday example:* "white tiles, not grey".
 
 ### Role
 

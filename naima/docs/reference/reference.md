@@ -13,6 +13,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them
 - [gates](#gates) — named release conditions backed by items
 - [epics](#epics) — epics: bodies of work that group items, their status and progress derived from them
+- [planning](#planning) — requirements proven by tests, specifications versioned name-vN, and the owner's decisions recorded once
 - [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
@@ -55,6 +56,8 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks |
 | [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs |
 | [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out |
+| [`spec`](#naima-spec) | planning | each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version |
+| [`decisions`](#naima-decisions) | planning | search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first |
 | [`loop`](#naima-loop) | loop | the non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his |
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
@@ -68,18 +71,18 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, loop, beta-markers, verifier, rules, docs |
-| `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, verifier, rules |
-| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, verifier, rules, docs |
-| `relations` | core | link relations between items, each naming its inverse | core, trackers, epics |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, beta-markers, verifier, rules, docs |
-| `views` | core | `naima view <name>`: a named rendering of derived state | triage |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, rules, docs |
+| `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
+| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, docs |
+| `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, rules, docs |
+| `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
 | `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to |  |
-| `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, verifier |
+| `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, planning, verifier |
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }` | verifier |
@@ -964,6 +967,130 @@ Traits: `group`.
 | Hook | What it does |
 |---|---|
 | `epic-status` | an epic's status follows its items: set on every write of the epic, and of an item it groups; setting it against them is refused |
+
+## planning
+
+Requirements proven by tests, specifications versioned name-vN, and the owner's decisions recorded once.
+
+Its contributions' qualified ids are `planning/<name>`.
+
+Planning as items, so each is proven or checked rather than implied by a test. A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again.
+
+**Uses**, declared by other plugins: fields `runBy`, `humanBecause`; relations `verified-by`.
+
+### naima spec
+
+Each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version.
+
+```sh
+naima spec [--json]
+naima spec revise <spec>
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--json` |  | print each specification as JSON: spec, current, versions, drafts, followedBy |
+
+Examples:
+
+```sh
+naima spec
+naima spec --json
+naima spec revise specs/export-format
+```
+
+### naima decisions
+
+Search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first.
+
+```sh
+naima decisions [<word>...] [--all] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--all` |  | search the superseded and reopened decisions too |
+| `--json` |  | print the decisions as JSON: item, title, status, decidedOn, standing, settles, text |
+
+Examples:
+
+```sh
+naima decisions
+naima decisions journal
+naima decisions licence --all --json
+```
+
+### type: requirements
+
+Requirements: something the result must satisfy, stated so it can be checked: delivered by the items that satisfy it, proven by the tests or properties that verify it. Items live in `naima-tracker/naima-data/requirements/`; a new one starts as `stated`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `stated` | open |  | stated, and not yet proven |
+| `met` | done |  | proven: a test or property linked to it has passed, and none refutes it |
+| `dropped` | done |  | no longer required; the page says why |
+
+### type: specs
+
+Specifications: how something must behave, versioned name-vN: a revision is a new item that supersedes the old, and one version per name is current. Items live in `naima-tracker/naima-data/specs/`; a new one starts as `draft`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `draft` | open |  | being written or agreed; the items that follow it wait for it |
+| `current` | done |  | the version in force: work follows it, and the close flow checks the code against it |
+| `superseded` | done |  | replaced by a later version, kept as history |
+
+### type: decisions
+
+Decisions: a choice or a standing permission of the owner's, recorded once: dated, in the owner's words restated, linked to what it settles; searched before the owner is asked. Items live in `naima-tracker/naima-data/decisions/`; a new one starts as `settled`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `settled` | done |  | in force: act on it, never ask it again |
+| `reopened` | open |  | the owner reopened it: the question may be asked again, and the answer is a new decision that supersedes this one |
+| `superseded` | done |  | replaced by a later decision, kept as history |
+
+**Fields**
+
+| Field | Kind | Applies to | Meaning | Values |
+|---|---|---|---|---|
+| `spec` | string | specs | the name every version of a specification shares; set from the title when the spec is opened |  |
+| `version` | number | specs | the specification's version, N in name-vN; set from the title (`… v2`), else 1 |  |
+| `decidedOn` | date | decisions | when the owner decided; stamped with today when the decision is recorded |  |
+| `standing` | boolean | decisions | a standing permission: the action it names may be taken again, every time, without asking |  |
+
+**Link relations** — only the direction written is stored; the inverse is derived when read.
+
+| Relation | Inverse | Reads as |
+|---|---|---|
+| `satisfies` | `satisfied-by` | delivers or proves the requirement |
+| `satisfied-by` | `satisfies` | is delivered by |
+| `specified-by` | `specifies` | follows the specification |
+| `specifies` | `specified-by` | is the specification followed by |
+| `supersedes` | `superseded-by` | replaces an earlier version or decision |
+| `superseded-by` | `supersedes` | is replaced by |
+| `settles` | `settled-by` | is the decision that answers |
+| `settled-by` | `settles` | is answered by the decision |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `requirements-proven` | a requirement marked met has a proof that passed and none that refutes it; one proven but still stated is noted; one that nothing satisfies or verifies is noted |
+| `specs-versioned` | one version of a specification is current; a version superseded by a current one is marked superseded; a spec supersedes only an earlier version of itself; an open item following a superseded version is noted |
+| `decisions-settled` | an open item waiting on the owner's decision (runBy human, humanBecause decision) that a settled decision settles is noted, to be acted on rather than asked; a decision superseded by a settled one is marked superseded |
+
+**Views**, printed by `naima view <name>`
+
+| View | What it shows |
+|---|---|
+| `requirements` | every requirement that is not dropped: its status, whether it is proven, what satisfies it and what proves it |
+
+**Write hooks**, run on every item write
+
+| Hook | What it does |
+|---|---|
+| `planning-stamps` | a new spec takes its name and version from its title (`Export format v2` is export-format, version 2) unless given; a new decision is dated today unless given |
 
 ## loop
 

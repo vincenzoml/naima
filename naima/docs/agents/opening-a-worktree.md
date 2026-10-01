@@ -9,6 +9,12 @@ Starting a piece of work. Four steps; the requirement they obey is
 If it has none, open one first ([reporting and triage](reporting-and-triage.md)).
 A fix with no trace is forgotten, and next time it is diagnosed from scratch.
 
+**Spec first.** If the item is linked `specified-by` a spec, read its current
+version (`naima spec`) before writing code. If the work changes what the spec
+says, change the spec first — `naima spec revise <spec>` opens the next version
+as a draft — and build once it is `current`. If the item has a requirement it
+`satisfies`, the proof you file for it also `verifies` the requirement.
+
 ## 2. Its own worktree, its own branch
 
 Name the branch `<who>/<what>`: who works (an agent's role or name) and on

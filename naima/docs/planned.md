@@ -18,18 +18,6 @@ The order is the order of the work: the first entries come first.
 - **Today:** a gate declared in `naima.json`, and a [todo](guide/glossary.md#todo)
   whose page lists its parts and the date in prose.
 
-## Requirements, specifications and decisions
-
-- **[Requirements](guide/glossary.md#requirement)** and
-  **[specifications](guide/glossary.md#specification)** as item types,
-  proven like any other item by a test or a property linked `verifies`.
-  Example: "every number in table 2 comes from the raw data by a script".
-- **[Decisions](guide/glossary.md#decision)** as an item type: the choice,
-  its reason, and who took it, so "never asked twice" is checked rather than
-  remembered. Example: "the paper targets the journal, not the conference".
-- **Today:** a todo with `kind=decision`, and the owner's working style as
-  [project rules](guide/write-a-project-rule.md).
-
 ## Item types for other work
 
 Packs of item types for work that is not software: experiments and analyses

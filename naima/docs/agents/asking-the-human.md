@@ -27,7 +27,34 @@ Everything else is an agent's. In particular:
   owner.** Pick one, say which in one line, and move on. If it was the wrong
   one, it is cheap to change.
 - **A settled permission stays settled.** Something the owner already allowed
-  is not asked again.
+  is not asked again: it is a [decision](../guide/glossary.md#decision), and the
+  decisions are searched before any question.
+
+## Before you ask: search the decisions
+
+```sh
+naima decisions <words of the question>
+```
+
+It prints the settled decisions whose title or page hold every word, newest
+first; a `standing permission` among them means the action may be taken again
+without asking. If one answers the question, act on it and say which in the
+report. Ask only when none does, or to reopen one — and then say which.
+`naima check` notes an item handed to the owner for a decision
+(`humanBecause: decision`) that a settled decision already answers.
+
+## After the owner answers: record it, once
+
+```sh
+naima new decisions "Ship under the MIT licence"
+naima link decisions/ship-under-mit-licence settles todos/choose-licence
+```
+
+The page restates the owner's words, the reason given, and what would make the
+question worth asking again. A permission meant to stand carries
+`--set standing=true`. A later answer that reverses one is a new decision
+linked `supersedes` to it, and the old one is set `superseded`; nothing is
+overwritten. The owner's words in a private chat are restated, never pasted.
 
 ## When you do ask
 

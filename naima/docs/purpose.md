@@ -124,9 +124,9 @@ comes from the raw data by a script". Milestone: "draft results by 15
 November".
 
 **Today:** features (`requested`, `planned`, `shipped`, `withdrawn`) and
-todos are item types. Epics and milestones are
-[planned first](planned.md#epics-and-milestones); requirements and
-specifications [after them](planned.md#requirements-specifications-and-decisions).
+todos are item types, and so are requirements, specifications and the
+owner's decisions ([planning with them](guide/plan-with-requirements-specs-and-decisions.md)). Epics and
+milestones are [planned](planned.md#epics-and-milestones).
 
 ### Gates and the queue
 
@@ -182,9 +182,10 @@ reads it before planning.
 ([asking the human](agents/asking-the-human.md): only for judgement, a
 decision, a credential such as a password, or a physical act; a settled
 permission stays settled), and work handed to you must say why
-(`humanBecause`, checked by `naima check`). Decisions as items, so "never
-asked twice" is checked rather than remembered, are
-[planned](planned.md#requirements-specifications-and-decisions).
+(`humanBecause`, checked by `naima check`). Each answer is recorded as a
+decision item, searched with `naima decisions` before any question, so "never
+asked twice" is checked rather than remembered
+([decisions](guide/plan-with-requirements-specs-and-decisions.md#decisions-asked-once-never-again)).
 
 ### Rules
 

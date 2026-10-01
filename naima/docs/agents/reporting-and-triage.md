@@ -23,10 +23,14 @@ report has to be said again.
 | "I'd like it to do X" — it does not exist | `features`, status `requested` |
 | "this exists now" | `features`, status `shipped`, with its `docs` |
 | "this still has to be tried" | `tests` |
-| "the behaviour must be Z" | the page of the feature it constrains; requirement and specification items are [planned](../planned.md#requirements-specifications-and-decisions) |
+| "it must always hold that Z" — a condition the result must meet | `requirements`, proven by a test linked `verifies` |
+| "the behaviour must be Z" — exactly how something behaves | `specs`: a new one, or the next version of the current one (`naima spec revise`) |
+| "yes, do that" / "we go with X" — the owner decides or permits | `decisions`, linked `settles` to the items that waited on it |
 
 A defect does not go in `todos`. A request is not a feature until the code
-exists. If an earlier request is reversed, record the reversal — never
+exists. A change of behaviour is a spec change first: write the new version
+of the spec, have it agreed, then build to it
+([planning with requirements, specs and decisions](../guide/plan-with-requirements-specs-and-decisions.md)). If an earlier request is reversed, record the reversal — never
 overwrite it.
 
 ## 2. Write it before you understand it

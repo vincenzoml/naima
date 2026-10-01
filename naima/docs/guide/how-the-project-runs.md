@@ -117,8 +117,11 @@ naima new rules "Ask before deleting" --set audience=agents --set strength=must
 naima rules --audience agents
 ```
 
-Detail: [write a project rule](write-a-project-rule.md). Decisions as items
-of their own are [planned](../planned.md#requirements-specifications-and-decisions).
+Detail: [write a project rule](write-a-project-rule.md). Each answer you give
+is recorded once as a [decision](glossary.md#decision), and an agent searches
+the decisions (`naima decisions <words>`) before it asks you anything, so a
+settled question is not asked again. What must hold and how things must behave
+are items too: [requirements and specifications](plan-with-requirements-specs-and-decisions.md).
 
 ## What agents do with git
 
