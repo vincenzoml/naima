@@ -29,3 +29,7 @@ viewport at 1280 and 390 on the home page and the docs pages.
 ### 2026-10-01 — triage agent, on claude/effort-triage
 
 Read the item: a single owner visual-judgement gesture (reload the built site a few times, dark/light, two widths).
+
+### 2026-10-01 — owner, on main
+
+The owner looked at the published site on 2026-10-01 and judged it right ("perfect").

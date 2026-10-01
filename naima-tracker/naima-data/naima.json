@@ -18,6 +18,12 @@
             "title": "Naima paper submitted",
             "says": "Every pre-submission checklist line of the paper's README is done before the paper deadline.",
             "due": "2026-10-28"
+          },
+          "release-1.1": {
+            "title": "Release 1.1",
+            "says": "Naima shines on every metric it records, and the owner's remaining read-throughs and UI checks are done.",
+            "version": "1.1",
+            "holdsOn": "code"
           }
         }
       }
