@@ -1,9 +1,15 @@
 {
   "id": "2d1d6b7d-5a9f-4aeb-a53c-c4250cf6d199",
   "title": "naima new with a rejected --set value exits 2 but leaves the item it refused on disk",
-  "status": "open",
+  "status": "wontfix",
   "created": "2026-09-30",
   "impact": "low",
   "priority": "next",
-  "confidence": "measured"
+  "confidence": "measured",
+  "links": [
+    {
+      "rel": "duplicate-of",
+      "id": "0cefc94f-17ff-465c-b4a2-b8400ea79ff0"
+    }
+  ]
 }

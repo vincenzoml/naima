@@ -23,3 +23,7 @@ ci.yml now runs bun test --timeout 30000 ./test/, the flag the local gates use, 
 ### 2026-10-01 — Vincenzo Ciancia, on claude/no-dist
 
 ci.yml is removed (owner's decision, 2026-10-01); the note above no longer applies. The gate is local: bun test --timeout 30000 ./test/, in AGENTS.md.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u10-proof-integrity
+
+Seen again on claude/u10-proof-integrity under load (load average 9-13, sibling workers running gates): bun test ./test/ failed 17, then 9, of 252, and test/init.test.ts alone failed 3 of 4, each at 5-6 seconds, git killed mid-clone (git failed, no stderr; Bun reports a dangling process killed) although bunfig.toml sets timeout = 30000. bun test --timeout 30000 ./test/ on the same tree: 252/0. So Bun 1.4.2 does not apply the bunfig.toml test timeout to these tests; the flag does.

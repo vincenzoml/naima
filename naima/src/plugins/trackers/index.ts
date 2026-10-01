@@ -35,6 +35,15 @@ import {
   usageError,
 } from "../../core/api.ts"
 
+/** The evidence ranking, strongest first: the values of a test's `evidenceKind`. */
+export const EVIDENCE: ReadonlyArray<readonly [string, string]> = [
+  ["owner-gesture", "the owner performed the gesture and saw the result"],
+  ["observation", "a screenshot, a log line or a number, kept with the item"],
+  ["live-read", "the live state, read by tooling: a query, an API call, the running program's own answer"],
+  ["diff", "a before-and-after comparison: counts, sizes, outputs"],
+  ["inspection", "the code looks right — which proves nothing"],
+]
+
 const ABOUT = `Three words that are not synonyms:
 
 - **fixed** — the code change exists: \`fixedOn\` is set. Nothing is proven.
@@ -45,9 +54,28 @@ const ABOUT = `Three words that are not synonyms:
 
 \`fixedOn\` applies to every type tagged \`fixable\` — bugs, todos, features and the archive here, and any other plugin's or project's type that carries the tag.
 
-An item whose proof needs a person says why in \`humanBecause\`. Only a judgement, a reserved decision, a credential or a physical act makes something a person's: needing the running software makes it \`agent-hands\`, not \`human\`.`
+An item whose proof needs a person says why in \`humanBecause\`. Only a judgement, a reserved decision, a credential or a physical act makes something a person's: needing the running software makes it \`agent-hands\`, not \`human\`.
+
+## The evidence ranking
+
+Not all evidence is worth the same. From strongest to weakest, the values of a test's \`evidenceKind\`:
+
+${EVIDENCE.map(([k, says], n) => `${n + 1}. \`${k}\` — ${says}`).join("\n")}
+
+No number without its comparison: a count, a timing or a size proves something only beside the value it is compared with — before and after, expected and seen.
+
+A regression test is one that \`verifies\` a bug. It proves the fix only if it was seen failing first, on the code before the fix: red, then green. \`redSeen\` records the day it was seen red, and the page's notes say how. \`naima check\` notes a passed regression test with no \`redSeen\`, and a passed test whose evidence is \`inspection\`.
+
+## Stale pages
+
+A page can outlive its answer. Two notes, never failures, find it: an open item's unticked \`- [ ]\` clause that names a test which has since passed, as \`tests/<slug>\` or as "the linked test" once every item verifying it has passed — \`unticked-clause-names-passed-test\`; and an open test marked \`runBy: agent\` whose page, below its title, excuses it with a resource being held — \`test-excuses-itself\`, matching the phrases in the option \`excusePhrases\`. Each can be weighed, or switched off, under \`plugins.trackers.checks\`.`
 
 const FIXED_ON = { name: "fixedOn", kind: "date" } as const
+const EVIDENCE_KIND = { name: "evidenceKind", kind: "enum" } as const
+const RED_SEEN = { name: "redSeen", kind: "date" } as const
+
+/** The phrases by which an agent's test says it could not run because something was held, unless the project gives its own. */
+export const EXCUSE_PHRASES = ["held by", "was held", "is held", "in use by", "locked by", "busy", "unavailable"]
 
 /** The trait of a type whose items are fixed, then proven, then closed: `fixedOn` applies to every type that carries it, whoever declares the type. */
 export const FIXABLE = "fixable"
@@ -178,6 +206,93 @@ const commitsAreReal: Check = {
     }),
 }
 
+/** A test that verifies a bug, open or archived: it proves the fix only if it was seen failing first. */
+const isRegression = (ctx: Context, t: Item): boolean =>
+  linked(ctx, t, "verifies").some((v) => v.type === "bugs" || (v.type === "closed" && v.meta["closedFrom"] === "bugs"))
+
+const regressionSawRed: Check = {
+  name: "regression-test-saw-red",
+  says: "a passed test that verifies a bug records the day it was seen failing first, in redSeen",
+  run: (ctx) =>
+    ctx.repo.items
+      .filter((i) => i.type === "tests" && proves(ctx, i) && fieldValue(i, RED_SEEN) === undefined && isRegression(ctx, i))
+      .map((i): Finding => ({
+        level: "note",
+        message: `${label(i)} passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix`,
+        item: i,
+      })),
+}
+
+const inspectionProvesNothing: Check = {
+  name: "inspection-proves-nothing",
+  says: "a passed test whose evidenceKind is inspection is noted: reading the code is no evidence",
+  run: (ctx) =>
+    ctx.repo.items
+      .filter((i) => i.type === "tests" && proves(ctx, i) && fieldValue(i, EVIDENCE_KIND) === "inspection")
+      .map((i): Finding => ({
+        level: "note",
+        message: `${label(i)} passed on inspection — "the code looks right" proves nothing: run it, or name stronger evidence`,
+        item: i,
+      })),
+}
+
+const UNTICKED = /^\s*[-*]\s*\[ \]/
+
+const untickedNamesPassed: Check = {
+  name: "unticked-clause-names-passed-test",
+  says:
+    "an open item's unticked clause that names a test which has passed — as tests/<slug>, or as its linked test once every item verifying it has passed — is noted: tick it, or reopen the test",
+  run(ctx) {
+    const passed = new Map(ctx.repo.items.filter((i) => i.type === "tests" && proves(ctx, i)).map((t) => [`tests/${t.slug}`, t]))
+    if (!passed.size) return []
+    const out: Finding[] = []
+    for (const i of ctx.repo.items) {
+      if (i.type === "closed" || !isOpen(ctx, i)) continue
+      const named = new Set<string>()
+      let linkedTest = false
+      for (const line of readReadme(i).split("\n").filter((l) => UNTICKED.test(l))) {
+        for (const m of line.matchAll(/tests\/[a-z0-9-]+/g)) if (passed.has(m[0])) named.add(m[0])
+        if (/\blinked test\b/i.test(line)) linkedTest = true
+      }
+      for (const n of named) {
+        out.push({ level: "note", message: `${label(i)}: an unticked clause names ${n}, which has passed — tick it, or reopen the test`, item: i })
+      }
+      const proofs = linked(ctx, i, "verified-by")
+      if (linkedTest && proofs.length && proofs.every((t) => proves(ctx, t))) {
+        out.push({
+          level: "note",
+          message: `${label(i)}: an unticked clause names its linked test, ${proofs.map(label).join(", ")}, which has passed — tick it, or reopen the test`,
+          item: i,
+        })
+      }
+    }
+    return out
+  },
+}
+
+const excusesItself = (phrases: string[]): Check => ({
+  name: "test-excuses-itself",
+  says: "an open test marked runBy agent whose page says a resource was held (the option excusePhrases) is noted: an agent's gesture waits on no one",
+  run: (ctx) =>
+    ctx.repo.items.flatMap((i): Finding[] => {
+      if (i.type !== "tests" || !isOpen(ctx, i) || fieldValue(i, RUN_BY) !== "agent") return []
+      const page = readReadme(i).split("\n").filter((l) => !/^#\s/.test(l)).join("\n").toLowerCase()
+      const hit = phrases.find((p) => page.includes(p.toLowerCase()))
+      return hit === undefined ? [] : [{
+        level: "note",
+        message: `${label(i)} is runBy agent, and its page excuses it: "${hit}" — run it now, or say who must (runBy, humanBecause)`,
+        item: i,
+      }]
+    }),
+})
+
+function readExcusePhrases(options: Record<string, unknown>): string[] {
+  const v = options["excusePhrases"]
+  if (v === undefined) return EXCUSE_PHRASES
+  if (!Array.isArray(v) || !v.every((x) => typeof x === "string" && x.trim())) throw new Error("trackers: options.excusePhrases must be a list of strings")
+  return v as string[]
+}
+
 const close: Command = {
   name: "close",
   says: "archive a resolved item: fixed, and proven by an item that has passed",
@@ -252,11 +367,17 @@ export default function trackers(options: Record<string, unknown> = {}): Plugin 
         .filter((i) => i.type === "closed" && (fieldValue(i, CLOSED_ON) ?? "") >= commitsRequiredFrom && !hasCommitFromTrunk(ctx, i) && !isGrandfathered(i))
         .map((i): Finding => ({ level: "problem", message: `${label(i)} is closed without a commit reachable from the trunk`, item: i })),
   }
+  const phrases = readExcusePhrases(options)
   return {
     name: "trackers",
     contract: CONTRACT,
     says: "bugs, todos, features, tests, and the archive of closed bugs",
     about: ABOUT,
+    options: [{
+      name: "excusePhrases",
+      says: "the phrases (any case) by which an open agent's test says it could not run because something was held; test-excuses-itself notes them",
+      default: JSON.stringify(EXCUSE_PHRASES),
+    }],
     types: [
       {
         id: "bugs",
@@ -355,6 +476,14 @@ export default function trackers(options: Record<string, unknown> = {}): Plugin 
         },
         appliesTo: ["tests", "bugs", "todos"],
       },
+      {
+        name: "evidenceKind",
+        kind: "enum",
+        says: "what the test's evidence is, from the ranking: strongest first",
+        values: Object.fromEntries(EVIDENCE),
+        appliesTo: ["tests"],
+      },
+      { name: "redSeen", kind: "date", says: "the day a regression test was seen failing on the code before the fix: red, then green", appliesTo: ["tests"] },
       { name: "area", kind: "string", says: "where it lives: the surface somebody would have open while working on it" },
       { name: "kind", kind: "string", says: "the mode of work it demands: code, decision, research, writing…" },
       {
@@ -369,7 +498,19 @@ export default function trackers(options: Record<string, unknown> = {}): Plugin 
       { name: "verifies", inverse: "verified-by", says: "is the gesture that proves" },
       { name: "verified-by", inverse: "verifies", says: "is proven by" },
     ],
-    checks: [partialWithoutClause, provenButOpen, fixNamesGesture, closedHasProof, humanSaysWhy, commitsAreReal, closedNamesCommits],
+    checks: [
+      partialWithoutClause,
+      provenButOpen,
+      fixNamesGesture,
+      closedHasProof,
+      humanSaysWhy,
+      commitsAreReal,
+      closedNamesCommits,
+      regressionSawRed,
+      inspectionProvesNothing,
+      untickedNamesPassed,
+      excusesItself(phrases),
+    ],
     commands: [close, bugs],
     summary: [bugCounts],
   }

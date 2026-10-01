@@ -1,7 +1,7 @@
 {
   "id": "82fcb7f4-6b9e-4cb9-b3ac-6d76044d7da6",
   "title": "Stale-page detectors: a passed-but-unticked clause; a test excusing itself",
-  "status": "requested",
+  "status": "shipped",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
@@ -12,5 +12,11 @@
       "rel": "relates-to",
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
     }
+  ],
+  "fixedOn": "2026-10-01",
+  "effort": "S",
+  "docs": [
+    "naima/docs/guide/prove-and-close.md#3-perform-it-keep-the-evidence",
+    "naima/docs/guide/rules.md#a-page-does-not-outlive-its-answer"
   ]
 }

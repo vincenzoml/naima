@@ -29,11 +29,20 @@ export interface Verifier {
    */
   runs?: string[]
   verify(request: VerifyRequest, ctx: Context): Promise<VerifyResult>
+  /**
+   * Every file a run on this request reads — the model and whatever it includes — as absolute paths. The run record
+   * keeps one digest over all of them and the tool version, so a change to any of them makes the verdict stale.
+   * Absent: the model alone.
+   */
+  inputs?(request: VerifyRequest, ctx: Context): string[] | Promise<string[]>
+  /** The version of the tool a run uses, recorded with the run; a property run by another version is stale. Absent: none recorded. */
+  version?(ctx: Context): string | Promise<string>
 }
 
 export const verifiersPoint: ExtensionPoint<Verifier> = {
   id: "verifiers",
-  says: "an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`",
+  says:
+    "an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest",
   noun: "verifier",
   stored: true,
   key: (v) => v.id,
@@ -41,7 +50,9 @@ export const verifiersPoint: ExtensionPoint<Verifier> = {
   validate: (v) => {
     const a = v as Partial<Verifier> | null
     if (!a || typeof a !== "object" || typeof a.id !== "string") return "has no id"
-    return typeof a.verify === "function" ? null : "has no verify function"
+    if (typeof a.verify !== "function") return "has no verify function"
+    for (const k of ["inputs", "version"] as const) if (a[k] !== undefined && typeof a[k] !== "function") return `has a ${k} that is not a function`
+    return null
   },
   gaps: (v) => (typeof v.says === "string" && v.says.trim() ? [] : ["does not say what it checks"]),
   document: (vs) => ["", "**Verifiers**, used by `naima verify`", ...table(["Verifier", "What it checks"], vs.map((v) => [code(v.id), v.says]))],

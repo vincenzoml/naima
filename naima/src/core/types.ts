@@ -72,8 +72,14 @@ export interface FieldDef {
   name: string
   kind: FieldKind
   says: string
-  /** For `enum`: value -> meaning. Declaration order is rank order. */
+  /**
+   * Value -> meaning. For `enum`, the fixed list: any other value is a
+   * problem; declaration order is rank order. For `string` and `strings`, an
+   * open list: a value off it is a note, never refused.
+   */
   values?: Record<string, string>
+  /** A value's title, where one was declared: value -> title. */
+  titles?: Record<string, string>
   /** Type ids the field belongs to. With `traits`, the field belongs to both; with neither, to every type. */
   appliesTo?: string[]
   /** Traits the field belongs to: every type carrying one of them, whoever declares the type. */
@@ -100,8 +106,15 @@ export interface Extension {
   statuses?: Record<string, StatusDef>
   traits?: string[]
   transitions?: Record<string, string[]>
-  values?: Record<string, string>
+  /** New values of an enum, or of a string field's open list: value -> what it means, or { title, says }. */
+  values?: Record<string, string | ValueDef>
   appliesTo?: string[]
+}
+
+/** One value of a field's list: a title to show, and what it means. */
+export interface ValueDef {
+  title?: string
+  says: string
 }
 
 export interface RelationDef {

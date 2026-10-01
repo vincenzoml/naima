@@ -63,7 +63,7 @@ Everything it needs to work without asking, because it cannot ask:
 | **Implementer** | one item, one cause, one branch | widening scope; spawning workers; touching the trunk |
 | **Tester** | performing gestures on the running software and writing down what happened | fixing what it finds; testing what it just wrote |
 | **Filer** | classification, [triage](../guide/glossary.md#triage) fields, reports routed to the right tracker | inventing scope; deciding whether something is proven |
-| **Evidence owner** | whether a gesture proves the claim | performing the gesture it then judges |
+| **Evidence owner** | whether a gesture proves the claim, weighed by [the evidence ranking](../guide/prove-and-close.md#3-perform-it-keep-the-evidence) and red-then-green for a regression | performing the gesture it then judges |
 
 Work passes between them in one direction:
 

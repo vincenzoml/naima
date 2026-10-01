@@ -1,0 +1,13 @@
+{
+  "id": "a024356d-ae31-4315-ac81-d62193646cdc",
+  "title": "A property set to holds by hand in meta.json, with no run, fails naima check (test/plugins/verifier/verifier.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "40187932-f3aa-4d20-a09e-4e4412af7be2"
+    }
+  ]
+}
