@@ -1,7 +1,0 @@
-{
-  "branch": "claude/windows-proof",
-  "claimedAt": "2026-10-01",
-  "note": "Prove install.ps1 and naima init on a real Windows machine",
-  "preparing": true,
-  "items": []
-}
