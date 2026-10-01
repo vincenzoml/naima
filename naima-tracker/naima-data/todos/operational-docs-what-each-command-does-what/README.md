@@ -13,3 +13,7 @@ Partially met already: naima --help and naima docs (the generated reference) sta
 ### 2026-10-01 — Vincenzo Ciancia, on claude/f-u5-policy-map
 
 Landed on claude/f-u5-policy-map (commit ab72b8d): commands carry an enforces field, filled for all 52; the documented check fails on one without it, so an outside plugin's command needs it too; the reference's Commands at a glance table has a What it enforces column, linked from naima/docs/README.md. Proof: tests/every-command-maps-what-enforces-reference.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/f-u5-policy-map
+
+Changed at e0824c5: enforces is optional in the plugin contract, so an outside plugin's command without it is a note in naima check, not a problem; first-party commands are held to it by test/plugins/docs/policy-map.test.ts. Proof tests/every-command-maps-what-enforces-reference passed.
