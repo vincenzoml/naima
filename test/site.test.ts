@@ -52,7 +52,7 @@ test("the agent prompt is one line naming the site, and the site tells an agent 
     assert.ok(text.includes(AGENT_LINE), `${where} gives the line to paste, verbatim`)
   }
   assert.match(llms, /install\.sh \| sh[\s\S]*naima rules --audience agents/)
-  assert.match(page, /<p class="about">Naima keeps/, "the page says what Naima is, for people")
+  assert.match(page, /<p class="about">Naima turns your AI agents into a small software company/, "the page says what Naima is, for people")
   assert.ok(existsSync(join(NAIMA, RUNTIME_DIR, "skills", "naima", "SKILL.md")), "the skill the prompt names ships")
 })
 

@@ -1,8 +1,11 @@
 # Naima
 
-> A project tracker whose items are files in your git repository, under
-> naima-tracker/, for software built by people and AI agents. It runs from a
-> clone of Naima's dist branch, locked to one commit; Deno runs it.
+> Naima turns AI agents into a small software company that works for the
+> person who owns the repository: they say what they want; agents write the
+> code, test it, prove it works and document it, every claim with its
+> evidence, nothing done until shown to be; the person only decides. It lives
+> in one folder, naima-tracker/, as files in the git repository, and runs
+> from a clone of Naima's dist branch, locked to one commit; Deno runs it.
 
 If you were asked to "install https://vincenzoml.github.io/naima/" in a
 repository, this file is the whole procedure: do steps 1 to 5 below, in order.
