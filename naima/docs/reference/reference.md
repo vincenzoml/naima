@@ -46,10 +46,11 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`runs`](#naima-runs) | core | list the external programs the loaded contributions declare they start (a model checker, say), which the launcher allows besides git |
 | [`close`](#naima-close) | trackers | archive a resolved item: fixed, and proven by an item that has passed |
 | [`bugs`](#naima-bugs) | trackers | how many bugs have no code written, and how many are fixed but unproven |
+| [`open`](#naima-open) | coordination | start a piece of work: a worktree <worktrees>/<what> on a new branch <who>/<what> from the trunk, and its claim on the items, in one step |
 | [`claim`](#naima-claim) | coordination | record that this branch is working on items (writes one file on this branch) |
-| [`release`](#naima-release) | coordination | drop this branch's claim on items; the last one removes the file |
+| [`release`](#naima-release) | coordination | drop this branch's claim on items; the last one removes the file, unless the branch is being prepared (claim --preparing) |
 | [`claims`](#naima-claims) | coordination | who holds what, recombined from every branch |
-| [`prune`](#naima-prune) | coordination | list (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there |
+| [`prune`](#naima-prune) | coordination | list (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds |
 | [`pass`](#naima-pass) | coordination | write this session's note (one new file), or list the newest |
 | [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves |
 | [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not |
@@ -629,29 +630,62 @@ Claims and session notes, one file per session, recombined from every branch.
 
 Its contributions' qualified ids are `coordination/<name>`.
 
-No session writes a file another session writes. A claim is one file per branch, `claims/<uuid>.json`; a session note is one file per session, `passes/<date>-<uuid>.md`. Both are written on the writer's own branch and never staged or committed by the tool: commit them with the work. `claims`, `pass --list` and `summary` recombine them at read time from every local branch — the trunk, every branch not merged into it, whatever each worktree stands on — each read from the disk of the worktree that stands on it, uncommitted files included, or from its ref when none does; remote-tracking refs are not read. The trunk is the branch origin's HEAD names, else `main`, else `master`; without one, every local branch is read. A claim belongs to a branch, so on a detached HEAD `claim` is refused. Several branches may claim one item: `claim` says who else holds it rather than refusing.
+No session writes a file another session writes. A claim is one file per branch, `claims/<uuid>.json`; a session note is one file per session, `passes/<date>-<uuid>.md`. Both are written on the writer's own branch and never staged or committed by the tool: commit them with the work. `claims`, `pass --list` and `summary` recombine them at read time from every local branch — the trunk, every branch not merged into it, whatever each worktree stands on — each read from the disk of the worktree that stands on it, uncommitted files included, or from its ref when none does; remote-tracking refs are not read. The trunk is the branch origin's HEAD names, else `main`, else `master`; without one, every local branch is read. A claim belongs to a branch, so on a detached HEAD `claim` is refused. Several branches may claim one item: `claim` says who else holds it rather than refusing. Work happens by one scheme, checked: the worktree `<worktrees>/<what>` stands on the branch `<who>/<what>` and carries a claim; `open` makes all three in one step. A claim marked `--preparing` is told when the trunk moves under it, and which commits were made on the trunk directly; `prune --branch` deletes a branch only when the trunk or an `archive/<branch>` tag holds its commits.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `who` |  | who works, when `naima open` is given no `--as`: the branch's first segment |
+| `worktrees` | `../<main worktree's folder>-worktrees` | the directory every worktree is a folder of, relative to the main worktree |
+| `exempt` | `[]` | branches the naming scheme does not apply to: names, or patterns with * |
+
+### naima open
+
+Start a piece of work: a worktree <worktrees>/<what> on a new branch <who>/<what> from the trunk, and its claim on the items, in one step.
+
+```sh
+naima open <item>... [--as <who>] [--name <what>] [--note "why"]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--as` |  | who works: the branch's first segment |
+| `--name` | `the first item's slug` | what the work is: the branch's last segment and the worktree's folder |
+| `--note` |  | why the branch holds the items, written in the claim |
+
+Examples:
+
+```sh
+naima open export-drops --as claude --note "alpha channel in the exporter"
+naima open export-drops export-keeps --as claude --name export-alpha
+```
 
 ### naima claim
 
 Record that this branch is working on items (writes one file on this branch).
 
 ```sh
-naima claim <item>... [--note "why"]
+naima claim <item>... [--note "why"] [--preparing
+naima --not-preparing]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--note` |  | why this branch holds the items; replaces the previous note |
+| `--preparing` |  | mark the branch as being prepared to enter the trunk: from then on naima check notes every commit the trunk takes that the branch lacks, and every one committed on the trunk directly; items are optional |
+| `--not-preparing` |  | drop the mark |
 
 Examples:
 
 ```sh
 naima claim export-drops export-keeps --note "alpha channel in the exporter"
+naima claim --preparing
 ```
 
 ### naima release
 
-Drop this branch's claim on items; the last one removes the file.
+Drop this branch's claim on items; the last one removes the file, unless the branch is being prepared (claim --preparing).
 
 ```sh
 naima release <item>...
@@ -684,21 +718,25 @@ naima claims --branch fix/export-alpha
 
 ### naima prune
 
-List (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there.
+List (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds.
 
 ```sh
 naima prune [--write]
+naima prune --branch <b> [--archive] [--write]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
-| `--write` |  | remove the stale claim files instead of listing them |
+| `--write` |  | remove the stale claim files, or the branch and its worktree, instead of listing what would go |
+| `--branch` |  | the branch to delete, with the worktree standing on it |
+| `--archive` |  | tag the branch's commits as archive/<branch> before deleting it, so none is lost |
 
 Examples:
 
 ```sh
 naima prune
 naima prune --write
+naima prune --branch claude/old-idea --archive --write
 ```
 
 ### naima pass
@@ -729,6 +767,8 @@ naima pass --list 3
 | Check | What it holds |
 |---|---|
 | `claims-resolve` | a claim written in this worktree names items that exist |
+| `worktree-policy` | every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem |
+| `trunk-moved-while-preparing` | a branch whose claim is marked preparing is told every commit the trunk took that it lacks, and which of them the trunk's reflog records as committed on the trunk directly |
 
 **Directories** it owns under the tracker root: `claims/`, `passes/`.
 

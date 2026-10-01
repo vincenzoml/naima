@@ -126,8 +126,8 @@ test("a second clone of the host aligns naima-tracker/naima/ to the recorded sou
     assert.equal(git(programOf(second), "remote", "get-url", "origin"), w.source)
 
     renameSync(w.source, `${w.source}.gone`) // no source: the clone must come from this disk
-    const tree = join(w.base, "worktree")
-    git(w.host, "worktree", "add", "-q", tree)
+    const tree = `${w.host}-worktrees/worktree` // by the naming scheme the check holds every worktree to
+    git(w.host, "worktree", "add", "-q", "-b", "test/worktree", tree)
     const inTree = launch(join(programOf(w.host), "naima.ts"), tree, "check") // any Naima at hand aligns this checkout's own
     assert.ok(existsSync(programOf(tree)))
     assert.equal(inTree.code, 0, inTree.err)

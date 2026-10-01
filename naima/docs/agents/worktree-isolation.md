@@ -20,7 +20,7 @@ fast-forward: what was a clean fast-forward becomes a merge over everything
 the branch touched. Work in hand goes on a branch:
 
 ```sh
-git worktree add -b <who>/<what> <worktrees-dir>/<what>
+naima open <item> --as <who> --name <what>
 ```
 
 If it happens anyway, move the commit onto the branch and rewind the trunk,

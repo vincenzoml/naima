@@ -151,6 +151,19 @@ Each piece of work has its own [worktree](glossary.md#worktree) and its own
 **Convention**: [work on several branches at once](several-branches.md),
 [worktree isolation](../agents/worktree-isolation.md).
 
+### Worktrees and branches are named by one scheme, and every worktree carries a claim
+
+The branch is `<who>/<what>`, each part lowercase letters, digits, dots and
+dashes; its worktree is the folder `<what>` of the worktrees directory
+(`<main checkout>-worktrees` beside the main checkout, unless configured).
+Every worktree carries a [claim file](glossary.md#claim-file). `naima open`
+makes the three in one step. **Enforced by** the check `worktree-policy`: a
+worktree outside the directory or misnamed, a branch off the scheme, and a
+worktree whose branch has commits the trunk lacks with no claim (now, or
+released in those commits) and no session note fail; a fresh worktree with
+no claim yet is a note. Branches the scheme does not cover are listed under
+the coordination plugin's `exempt` option.
+
 ### No shared mutable file
 
 Two sessions never edit one file to register, announce or log something;
@@ -164,7 +177,21 @@ are built this way.
 
 ### Nobody commits on the trunk while branches are being prepared
 
-**Convention**: [worktree isolation](../agents/worktree-isolation.md#2-nobody-commits-on-the-trunk-while-branches-are-being-prepared).
+**Enforced by** the check `trunk-moved-while-preparing`, as a note: a branch
+whose claim is marked `naima claim --preparing` is told every commit the
+trunk took that it lacks, and which of them the trunk's reflog records as
+committed on the trunk directly. The reflog is this clone's own: a commit
+made in another clone and pulled arrives as a fast-forward and is not named.
+[Worktree isolation](../agents/worktree-isolation.md#2-nobody-commits-on-the-trunk-while-branches-are-being-prepared).
+
+### No branch is deleted with work only it holds
+
+**Enforced by** `naima prune --branch`, which deletes a branch and its
+worktree only when the trunk or an `archive/<branch>` tag holds its commits;
+`--archive` makes the tag first. Before a bulk change of the tracker — many
+items moved, closed or deleted at once — tag the commit it starts from,
+`git tag checkpoint/<date>-<what>`. Plain `git branch -D` is not stopped:
+[closing a worktree](../agents/closing-a-worktree.md#8-only-then-remove-the-worktree-and-the-branch).
 
 ### Every merge to the trunk is a fast-forward
 

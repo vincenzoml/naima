@@ -216,8 +216,8 @@ test("a project clones the dist: its program holds exactly naima/, and init, che
 
     // A new worktree, with the source gone: its program is cloned from the main worktree's, still the dist.
     renameSync(w.source, `${w.source}.away`)
-    const tree = join(w.base, "worktree")
-    git(w.host, "worktree", "add", "-q", tree)
+    const tree = `${w.host}-worktrees/worktree` // by the naming scheme the check holds every worktree to
+    git(w.host, "worktree", "add", "-q", "-b", "test/worktree", tree)
     const inTree = launch(join(programOf(w.host), "naima.ts"), tree, "check")
     assert.equal(inTree.code, 0, inTree.err)
     assert.equal(git(programOf(tree), "rev-parse", "HEAD"), dist)
