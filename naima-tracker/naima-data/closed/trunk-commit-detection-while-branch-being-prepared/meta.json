@@ -1,7 +1,7 @@
 {
   "id": "4ebcd644-4871-479e-bb9e-f674281c172a",
   "title": "Trunk-commit detection while a branch is being prepared",
-  "status": "requested",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
@@ -18,5 +18,10 @@
     "naima/docs/agents/closing-a-worktree.md#0-say-the-branch-is-being-prepared",
     "naima/docs/guide/rules.md#nobody-commits-on-the-trunk-while-branches-are-being-prepared"
   ],
-  "effort": "M"
+  "effort": "M",
+  "commits": [
+    "fd399a2"
+  ],
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
 }

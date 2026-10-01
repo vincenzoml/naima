@@ -1,7 +1,7 @@
 {
   "id": "11c2a358-46cf-4136-b4ce-e4d9480a9755",
   "title": "Project-declared gate set with ratcheting budgets (covers the metrics request)",
-  "status": "requested",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "high",
   "priority": "now",
@@ -14,5 +14,11 @@
     }
   ],
   "fixedOn": "2026-10-01",
-  "effort": "L"
+  "effort": "L",
+  "commits": [
+    "8b5127e",
+    "9743d0e"
+  ],
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
 }
