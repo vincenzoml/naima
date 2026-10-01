@@ -178,6 +178,5 @@ This Naima carries one migration of the core's format, and one of the
 - **gates format 1 → 2**: the top-level `gates` key moves to
   `plugins.gates.options.gates`.
 
-Format 1 was the first format. The layout before it — a top-level `naima/` directory whose `config.json` held a
-version pin — had no anchor carrying a format, so it cannot be migrated from:
-Naima's own tracker, the only one in it, was moved by hand with `git mv`.
+Format 1 is the first format: data in no format cannot be migrated, and is
+refused.

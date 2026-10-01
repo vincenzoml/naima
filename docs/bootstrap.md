@@ -44,12 +44,3 @@ commit may not have yet, and the launcher lets Naima write only under
 `naima-tracker/`. So `deno task docs` writes the reference and `deno task
 verify` checks it, both with the working tree, and the `docs` plugin holds no
 reference file of its own by default.
-
-## History
-
-Until the Deno distribution, the tracker lived in a top-level `naima/`
-directory, and a version pin in `naima/config.json` chose the newest tagged
-release (`v0.1.0`, `v0.2.0`) to manage it. The tags remain as history; no
-tool reads them. The tracker moved to `naima-tracker/naima-data/` by hand,
-with `git mv`, because the old layout had no anchor carrying a format to
-migrate from ([migrations](format.md#migrations)).

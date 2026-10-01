@@ -92,6 +92,8 @@ rewriting published history, discarding someone's uncommitted work.
 - **Evidence travels with the claim.** "It works" without a number, a log line
   or an attachment is not a verification.
 - **English**, in code, docs, items and commit messages.
+- **Documentation states what is, never how it came to be.** History lives in
+  git and in the tracker.
 
 ## Before pushing
 
