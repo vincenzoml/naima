@@ -6,5 +6,6 @@
   "impact": "medium",
   "priority": "next",
   "confidence": "reported",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01"
 }

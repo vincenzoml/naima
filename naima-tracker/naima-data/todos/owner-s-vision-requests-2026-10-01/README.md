@@ -11,3 +11,7 @@ Done: every linked item is triaged (impact, priority, confidence); nothing here 
 ### 2026-10-01 — Vincenzo Ciancia, on claude/evidence-close-5
 
 Checked after this session's closings: of its linked items, 32 closed, 2 done, 2 withdrawn, 1 dropped (duplicates resolved) — but 12 are shipped and not yet closed (no proving test prepared this round), 5 are still open (document-naima-s-purpose-requirements-philosophy, jargon-audit-docs-site-skill-plain-english — confirmed still not done, locked-resources-owner-as-holder-stated-coordinator, operational-docs-what-each-command-does-what, public-framing-vision-silent-company-not-tracker), and 4 are requested/not started (adopt-existing-boards-without-loss-naima-adopt, dashboard-ui-redesigned-rather-than-ported, reference-install-skills-hosted-github-planned, ui-design-support-planned). Not all linked items are closed or owner-only: this umbrella stays open.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/final-sweep
+
+Final sweep (claude/final-sweep): measured from the meta.json files, all 58 items linked to this one in either direction carry impact, priority and confidence — the Done line holds. Eight are still open; each is routed: agent proofs added this sweep, or owner judgements on gate first-public.

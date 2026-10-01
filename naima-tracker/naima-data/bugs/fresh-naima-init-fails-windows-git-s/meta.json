@@ -7,5 +7,9 @@
   "confidence": "measured",
   "priority": "now",
   "effort": "S",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "b4230e5"
+  ]
 }

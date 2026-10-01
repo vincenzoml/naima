@@ -8,5 +8,8 @@
   "confidence": "measured",
   "effort": "S",
   "triagedOn": "2026-09-30",
-  "fixedOn": "2026-10-01"
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "610abf1"
+  ]
 }

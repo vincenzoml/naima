@@ -11,11 +11,16 @@
     {
       "rel": "verifies",
       "id": "778821a8-8955-4a6f-b77f-a121b04bd268"
+    },
+    {
+      "rel": "verifies",
+      "id": "220395ba-ce18-4df3-9720-74b333e5dc77"
     }
   ],
   "impact": "medium",
   "priority": "now",
   "confidence": "diagnosed",
   "effort": "M",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "gate": "first-public"
 }
