@@ -11,5 +11,7 @@
   "fixedOn": "2026-10-01",
   "commits": [
     "aebd210"
-  ]
+  ],
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
 }
