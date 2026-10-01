@@ -5,9 +5,9 @@ Naima is a project tracker for software built by people and AI agents together: 
 Formal-methods tools such as model checkers plug in, so that a property of
 the software is tracked and proven the same way a test is.
 
-Status: research project, private while it takes shape. Open source by
-design: the file format is an open specification, and changing Naima to fit a
-project is encouraged.
+Status: research project, open source, still taking shape. Open by design:
+the file format is an open specification, and changing Naima to fit a project
+is encouraged.
 
 Why Naima exists, what it requires of itself and the principles behind it:
 [purpose, requirements and principles](docs/purpose.md). Read it first.
