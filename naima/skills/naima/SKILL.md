@@ -81,6 +81,10 @@ The project's own rules for agents — how to work and report here — kept as
 items of its tracker. Obey them for the whole session; `naima guide` prints
 them first too ([read the project's rules](../../docs/agents/read-the-project-rules.md)).
 
+Before asking the owner anything, run `naima decisions <words>`: a settled
+decision answers it, and the owner's answer to a new question is recorded as
+one ([asking the human](../../docs/agents/asking-the-human.md)).
+
 ## 5. Work by the rules and the flows
 
 Read the rules before acting, then the flow that applies. They are plain

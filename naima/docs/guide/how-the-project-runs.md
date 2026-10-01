@@ -97,9 +97,10 @@ because everything is written down in files:
 - **One coordinator** talks to you; workers do the work in the background
   and report to it ([the coordinator and the workers](../agents/coordinator-and-workers.md)).
 
-A naming policy for worktrees with a check that each carries a claim file,
-and a way of working that keeps going until only your work is left, are
-[planned](../planned.md#worktree-names-and-claim-files).
+Worktrees and branches follow one naming scheme, and each worktree carries
+a claim file: `naima open` makes both, and `naima check` fails what breaks
+them. A way of working keeps going until only your work is left
+([while you are away](while-you-are-away.md)).
 
 ## Decisions
 
@@ -117,8 +118,11 @@ naima new rules "Ask before deleting" --set audience=agents --set strength=must
 naima rules --audience agents
 ```
 
-Detail: [write a project rule](write-a-project-rule.md). Decisions as items
-of their own are [planned](../planned.md#requirements-specifications-and-decisions).
+Detail: [write a project rule](write-a-project-rule.md). Each answer you give
+is recorded once as a [decision](glossary.md#decision), and an agent searches
+the decisions (`naima decisions <words>`) before it asks you anything, so a
+settled question is not asked again. What must hold and how things must behave
+are items too: [requirements and specifications](plan-with-requirements-specs-and-decisions.md).
 
 ## What agents do with git
 

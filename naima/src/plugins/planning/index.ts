@@ -1,0 +1,475 @@
+// Planning: what the result must satisfy, how it must behave, and what the
+// owner has decided — as items, so each is proven or checked, never implied.
+//
+//   requirements  what must hold; delivered by items linked `satisfies`, proven
+//                 by tests or properties linked `verifies`; met only once a
+//                 proof has passed and none refutes it.
+//   specs         how something must behave, versioned `name-vN`: a revision
+//                 is a new item that `supersedes` the old; one version per name
+//                 is current; items follow a spec by `specified-by`.
+//   decisions     a choice or a standing permission of the owner's, dated, in
+//                 the owner's words restated; it `settles` the items that
+//                 waited on it, and is searched before the owner is asked.
+//
+// Data only: three types, their fields and relations, checks that read them,
+// one view and two commands. No type derives from another.
+
+import {
+  bool,
+  type Check,
+  type Command,
+  type Context,
+  CONTRACT,
+  createItem,
+  type FieldDef,
+  fieldValue,
+  type Finding,
+  isOpen,
+  type Item,
+  label,
+  linked,
+  parse,
+  type Plugin,
+  proves,
+  readReadme,
+  refutes,
+  rendered,
+  saveProse,
+  slugify,
+  today,
+  type TypeDef,
+  typeOrThrow,
+  usageError,
+  type View,
+  type WriteHook,
+} from "../../core/api.ts"
+
+// ── requirements ──────────────────────────────────────────────────────────────
+
+const requirementsType: TypeDef = {
+  id: "requirements",
+  dir: "requirements",
+  title: "Requirements",
+  says:
+    "something the result must satisfy, stated so it can be checked: delivered by the items that satisfy it, proven by the tests or properties that verify it",
+  statuses: {
+    stated: { category: "open", says: "stated, and not yet proven" },
+    met: { category: "done", says: "proven: a test or property linked to it has passed, and none refutes it" },
+    dropped: { category: "done", says: "no longer required; the page says why" },
+  },
+  initialStatus: "stated",
+  template: (title) =>
+    `# ${title}\n\nWhat the result must satisfy, said so that a test or a property can check it.\n\n## How it is proven\n\nThe tests or properties linked \`verifies\`, and what each measures.\n`,
+}
+
+/** Where a requirement's proof stands: a refuting proof outweighs any that proves. */
+export type Proven = "proven" | "refuted" | "unproven"
+
+/** The items that prove or would prove a requirement: those verifying it, and any item satisfying it that is itself a proof. */
+const proofsOf = (ctx: Context, req: Item): Item[] =>
+  [...linked(ctx, req, "verified-by"), ...linked(ctx, req, "satisfied-by").filter((i) => proves(ctx, i) || refutes(ctx, i))]
+    .filter((i, n, all) => all.indexOf(i) === n)
+
+export function provenState(ctx: Context, req: Item): Proven {
+  const proofs = proofsOf(ctx, req)
+  if (proofs.some((p) => refutes(ctx, p))) return "refuted"
+  return proofs.some((p) => proves(ctx, p)) ? "proven" : "unproven"
+}
+
+const requirementsOf = (ctx: Context): Item[] => ctx.repo.items.filter((i) => i.type === requirementsType.id)
+
+const requirementsCheck: Check = {
+  name: "requirements-proven",
+  says:
+    "a requirement marked met has a proof that passed and none that refutes it; one proven but still stated is noted; one that nothing satisfies or verifies is noted",
+  run(ctx) {
+    const out: Finding[] = []
+    for (const req of requirementsOf(ctx)) {
+      const state = provenState(ctx, req)
+      const status = req.meta.status
+      if (status === "met" && state === "refuted") {
+        const by = proofsOf(ctx, req).filter((p) => refutes(ctx, p)).map(label).join(", ")
+        out.push({ level: "problem", item: req, message: `${label(req)} is met, but ${by} refutes it — fix it, or naima set ${label(req)} status=stated` })
+      } else if (status === "met" && state === "unproven") {
+        out.push({
+          level: "problem",
+          item: req,
+          message: `${label(req)} is met, but no proof has passed — naima link <test> verifies ${label(req)}, or naima set ${label(req)} status=stated`,
+        })
+      } else if (status === "stated" && state === "proven") {
+        out.push({ level: "note", item: req, message: `${label(req)} is proven — naima set ${label(req)} status=met` })
+      } else if (status === "stated" && !linked(ctx, req, "satisfied-by").length && !linked(ctx, req, "verified-by").length) {
+        out.push({
+          level: "note",
+          item: req,
+          message: `${label(req)}: nothing delivers or proves it — naima link <feature> satisfies ${label(req)}; naima link <test> verifies ${label(req)}`,
+        })
+      }
+    }
+    return out
+  },
+}
+
+/** One requirement, as `naima view --json requirements` prints it. */
+export interface Trace {
+  requirement: string
+  title: string
+  status: string
+  proven: Proven
+  satisfiedBy: string[]
+  provenBy: string[]
+}
+
+const requirementsView: View = {
+  name: "requirements",
+  says: "every requirement that is not dropped: its status, whether it is proven, what satisfies it and what proves it",
+  render(_args, ctx) {
+    const rows: Trace[] = requirementsOf(ctx).filter((r) => r.meta.status !== "dropped").map((r) => ({
+      requirement: label(r),
+      title: String(r.meta.title ?? ""),
+      status: r.meta.status,
+      proven: provenState(ctx, r),
+      satisfiedBy: linked(ctx, r, "satisfied-by").map(label),
+      provenBy: proofsOf(ctx, r).map(label),
+    }))
+    return rendered(rows, (rs) =>
+      rs.length
+        ? rs.flatMap((r) => [
+          `${r.proven === "proven" ? "✓" : "✗"} ${r.requirement}  ${r.title}  [${r.status}] ${r.proven}`,
+          `    satisfied by: ${r.satisfiedBy.join(", ") || "nothing"}`,
+          `    proven by:    ${r.provenBy.join(", ") || "nothing"}`,
+        ])
+        : [`no requirements — naima new requirements "<what must hold>"`])
+  },
+}
+
+// ── specs ─────────────────────────────────────────────────────────────────────
+
+const specsType: TypeDef = {
+  id: "specs",
+  dir: "specs",
+  title: "Specifications",
+  says: "how something must behave, versioned name-vN: a revision is a new item that supersedes the old, and one version per name is current",
+  statuses: {
+    draft: { category: "open", says: "being written or agreed; the items that follow it wait for it" },
+    current: { category: "done", says: "the version in force: work follows it, and the close flow checks the code against it" },
+    superseded: { category: "done", says: "replaced by a later version, kept as history" },
+  },
+  initialStatus: "draft",
+  template: (title) =>
+    `# ${title}\n\nThe behaviour, said so that it can be checked: what goes in, what comes out, and the cases at the edges.\n\n## Changes from the previous version\n\nNone: the first version.\n`,
+}
+
+const SPEC: FieldDef = {
+  name: "spec",
+  kind: "string",
+  says: "the name every version of a specification shares; set from the title when the spec is opened",
+  appliesTo: ["specs"],
+}
+const VERSION: FieldDef = {
+  name: "version",
+  kind: "number",
+  says: "the specification's version, N in name-vN; set from the title (`… v2`), else 1",
+  appliesTo: ["specs"],
+}
+
+const VERSIONED = /\s+v(\d+)$/i
+const specName = (s: Item): string => fieldValue(s, { name: SPEC.name, kind: "string" }) ?? s.slug
+const versionOf = (s: Item): number => fieldValue(s, { name: VERSION.name, kind: "number" }) ?? 1
+/** A spec's versioned name, `name-vN`. */
+export const versioned = (s: Item): string => `${specName(s)}-v${versionOf(s)}`
+const isSpec = (i: Item): boolean => i.type === specsType.id
+const specsOf = (ctx: Context): Item[] => ctx.repo.items.filter(isSpec)
+
+/** One specification, every version of it, as `naima spec --json` prints it. */
+export interface SpecRow {
+  spec: string
+  current: string | null
+  versions: number
+  drafts: string[]
+  /** The open items that follow some version of it, each with the version it follows. */
+  followedBy: string[]
+}
+
+function specRows(ctx: Context): SpecRow[] {
+  const byName = new Map<string, Item[]>()
+  for (const s of specsOf(ctx)) byName.set(specName(s), [...(byName.get(specName(s)) ?? []), s])
+  return [...byName].sort(([a], [b]) => a.localeCompare(b)).map(([spec, all]) => {
+    const vs = [...all].sort((a, b) => versionOf(a) - versionOf(b))
+    const current = vs.filter((s) => s.meta.status === "current").at(-1)
+    return {
+      spec,
+      current: current ? versioned(current) : null,
+      versions: vs.length,
+      drafts: vs.filter((s) => s.meta.status === "draft").map(versioned),
+      followedBy: vs.flatMap((s) => linked(ctx, s, "specifies").filter((i) => isOpen(ctx, i)).map((i) => `${label(i)} (${versioned(s)})`)),
+    }
+  })
+}
+
+const spec: Command = {
+  name: "spec",
+  says: "each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version",
+  usage: "spec [--json] | spec revise <spec>",
+  options: [{ name: "--json", says: "print each specification as JSON: spec, current, versions, drafts, followedBy" }],
+  examples: ["spec", "spec --json", "spec revise specs/export-format"],
+  run(args, ctx) {
+    const p = parse(args, { json: { type: "boolean" } })
+    const [sub, ref, ...extra] = p.positionals
+    if (sub === "revise") {
+      if (!ref || extra.length) throw usageError(this)
+      const old = ctx.repo.resolve(ref)
+      if (!isSpec(old)) throw new Error(`${label(old)} is not a spec — open one: naima new specs "<name>"`)
+      const name = specName(old)
+      const next = Math.max(...specsOf(ctx).filter((s) => specName(s) === name).map(versionOf)) + 1
+      const title = `${String(old.meta.title ?? name).replace(VERSIONED, "")} v${next}`
+      const made = createItem(ctx, typeOrThrow(ctx, specsType.id), title, {
+        [SPEC.name]: name,
+        [VERSION.name]: next,
+        links: [{ rel: "supersedes", id: old.meta.id }],
+      })
+      saveProse(ctx, made, `# ${title}\n${readReadme(old).replace(/^#[^\n]*\n/, "")}`)
+      ctx.reload()
+      ctx.out(`${label(made)}: ${name}-v${next} (draft) supersedes ${versioned(old)} — edit its page, then naima set ${label(made)} status=current`)
+      return 0
+    }
+    if (sub !== undefined) throw usageError(this)
+    const rows = specRows(ctx)
+    if (bool(p, "json")) {
+      ctx.out(JSON.stringify(rows, null, 2))
+      return 0
+    }
+    if (!rows.length) ctx.out(`no specifications — naima new specs "<name>"`)
+    for (const r of rows) {
+      ctx.out(
+        `${r.spec}  current ${r.current ?? "none"} · ${r.versions} version${r.versions === 1 ? "" : "s"}${
+          r.drafts.length ? ` · draft ${r.drafts.join(", ")}` : ""
+        }`,
+      )
+      for (const f of r.followedBy) ctx.out(`  followed by ${f}`)
+    }
+    return 0
+  },
+}
+
+const specsCheck: Check = {
+  name: "specs-versioned",
+  says:
+    "one version of a specification is current; a version superseded by a current one is marked superseded; a spec supersedes only an earlier version of itself; an open item following a superseded version is noted",
+  run(ctx) {
+    const out: Finding[] = []
+    const specs = specsOf(ctx)
+    for (const r of specRows(ctx)) {
+      const current = specs.filter((s) => specName(s) === r.spec && s.meta.status === "current")
+      const [first] = current
+      if (first && current.length > 1) {
+        out.push({
+          level: "problem",
+          item: first,
+          message: `${r.spec} has ${current.length} current versions: ${current.map(versioned).join(", ")} — keep one`,
+        })
+      }
+    }
+    for (const s of specs) {
+      for (const later of linked(ctx, s, "superseded-by").filter(isSpec)) {
+        if (specName(later) !== specName(s) || versionOf(later) <= versionOf(s)) {
+          out.push({ level: "problem", item: later, message: `${versioned(later)} supersedes ${versioned(s)}, which is not an earlier version of it` })
+        } else if (later.meta.status === "current" && s.meta.status !== "superseded") {
+          out.push({
+            level: "problem",
+            item: s,
+            message: `${versioned(s)} is superseded by ${versioned(later)}, which is current — naima set ${label(s)} status=superseded`,
+          })
+        }
+      }
+      if (s.meta.status !== "superseded") continue
+      const successor = linked(ctx, s, "superseded-by").filter(isSpec).sort((a, b) => versionOf(b) - versionOf(a))[0]
+      for (const i of linked(ctx, s, "specifies").filter((i) => isOpen(ctx, i))) {
+        out.push({
+          level: "note",
+          item: i,
+          message: `${label(i)} follows ${versioned(s)}, superseded${
+            successor ? ` by ${versioned(successor)}` : ""
+          } — check it against the current version, then naima link it specified-by that one`,
+        })
+      }
+    }
+    return out
+  },
+}
+
+// ── decisions ─────────────────────────────────────────────────────────────────
+
+const decisionsType: TypeDef = {
+  id: "decisions",
+  dir: "decisions",
+  title: "Decisions",
+  says:
+    "a choice or a standing permission of the owner's, recorded once: dated, in the owner's words restated, linked to what it settles; searched before the owner is asked",
+  statuses: {
+    settled: { category: "done", says: "in force: act on it, never ask it again" },
+    reopened: { category: "open", says: "the owner reopened it: the question may be asked again, and the answer is a new decision that supersedes this one" },
+    superseded: { category: "done", says: "replaced by a later decision, kept as history" },
+  },
+  initialStatus: "settled",
+  template: (title) =>
+    `# ${title}\n\n## The owner's words, restated\n\nWhat the owner decided, said once so that nobody asks again.\n\n## Why\n\nThe reason given.\n\n## When to reopen it\n\nWhat would make the question worth asking again; nothing else does.\n`,
+}
+
+const DECIDED_ON: FieldDef = {
+  name: "decidedOn",
+  kind: "date",
+  says: "when the owner decided; stamped with today when the decision is recorded",
+  appliesTo: ["decisions"],
+}
+const STANDING: FieldDef = {
+  name: "standing",
+  kind: "boolean",
+  says: "a standing permission: the action it names may be taken again, every time, without asking",
+  appliesTo: ["decisions"],
+}
+
+const RUN_BY = { name: "runBy", kind: "enum" } as const
+const HUMAN_BECAUSE = { name: "humanBecause", kind: "enum" } as const
+const isDecision = (i: Item): boolean => i.type === decisionsType.id
+const decidedOn = (d: Item): string => fieldValue(d, { name: DECIDED_ON.name, kind: "date" }) ?? String(d.meta["created"] ?? "")
+const isStanding = (d: Item): boolean => fieldValue(d, { name: STANDING.name, kind: "boolean" }) === true
+
+/** One decision, as `naima decisions --json` prints it. */
+export interface DecisionRow {
+  item: string
+  title: string
+  status: string
+  decidedOn: string
+  standing: boolean
+  settles: string[]
+  text: string
+}
+
+/** The decisions whose title or page hold every word of `words`, settled ones only unless `all`; newest first. */
+export function findDecisions(ctx: Context, words: string[], all = false): DecisionRow[] {
+  const wanted = words.map((w) => w.toLowerCase())
+  return ctx.repo.items
+    .filter((d) => isDecision(d) && (all || d.meta.status === "settled"))
+    .map((d): DecisionRow => ({
+      item: label(d),
+      title: String(d.meta.title ?? ""),
+      status: d.meta.status,
+      decidedOn: decidedOn(d),
+      standing: isStanding(d),
+      settles: linked(ctx, d, "settles").map(label),
+      text: readReadme(d).replace(/^#[^\n]*\n/, "").trim(),
+    }))
+    .filter((r) => wanted.every((w) => `${r.title}\n${r.text}`.toLowerCase().includes(w)))
+    .sort((a, b) => b.decidedOn.localeCompare(a.decidedOn) || a.item.localeCompare(b.item))
+}
+
+const decisions: Command = {
+  name: "decisions",
+  says: "search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first",
+  usage: "decisions [<word>...] [--all] [--json]",
+  options: [
+    { name: "--all", says: "search the superseded and reopened decisions too" },
+    { name: "--json", says: "print the decisions as JSON: item, title, status, decidedOn, standing, settles, text" },
+  ],
+  examples: ["decisions", "decisions journal", "decisions licence --all --json"],
+  run(args, ctx) {
+    const p = parse(args, { all: { type: "boolean" }, json: { type: "boolean" } })
+    const rows = findDecisions(ctx, p.positionals, bool(p, "all"))
+    if (bool(p, "json")) {
+      ctx.out(JSON.stringify(rows, null, 2))
+      return 0
+    }
+    if (!rows.length) {
+      const what = p.positionals.length ? ` matches "${p.positionals.join(" ")}"` : "s yet"
+      ctx.out(`no ${bool(p, "all") ? "" : "settled "}decision${what} — ask the owner, then record the answer: naima new decisions "<the decision>"`)
+    }
+    for (const r of rows) {
+      ctx.out(`${r.item}  ${r.title}  (${r.decidedOn}${r.status === "settled" ? "" : `, ${r.status}`})${r.standing ? " · standing permission" : ""}`)
+      if (r.settles.length) ctx.out(`  settles ${r.settles.join(", ")}`)
+    }
+    return 0
+  },
+}
+
+const decisionsCheck: Check = {
+  name: "decisions-settled",
+  says:
+    "an open item waiting on the owner's decision (runBy human, humanBecause decision) that a settled decision settles is noted, to be acted on rather than asked; a decision superseded by a settled one is marked superseded",
+  run(ctx) {
+    const out: Finding[] = []
+    for (const i of ctx.repo.items) {
+      if (isDecision(i)) {
+        for (const later of linked(ctx, i, "superseded-by").filter(isDecision)) {
+          if (later.meta.status === "settled" && i.meta.status !== "superseded") {
+            out.push({
+              level: "problem",
+              item: i,
+              message: `${label(i)} is superseded by ${label(later)}, which is settled — naima set ${label(i)} status=superseded`,
+            })
+          }
+        }
+        continue
+      }
+      if (!isOpen(ctx, i) || fieldValue(i, RUN_BY) !== "human" || fieldValue(i, HUMAN_BECAUSE) !== "decision") continue
+      for (const d of linked(ctx, i, "settled-by").filter((d) => isDecision(d) && d.meta.status === "settled")) {
+        out.push({
+          level: "note",
+          item: i,
+          message: `${label(i)} waits on a decision that ${label(d)} settled on ${decidedOn(d)} — act on it; ask the owner only to reopen it`,
+        })
+      }
+    }
+    return out
+  },
+}
+
+// ── hooks ─────────────────────────────────────────────────────────────────────
+
+const stamp: WriteHook = {
+  name: "planning-stamps",
+  says:
+    "a new spec takes its name and version from its title (`Export format v2` is export-format, version 2) unless given; a new decision is dated today unless given",
+  beforeWrite(write, ctx) {
+    if (write.kind !== "create") return
+    const meta = write.item.meta
+    if (write.item.type === specsType.id) {
+      const title = String(meta.title ?? "")
+      meta[SPEC.name] ??= slugify(title.replace(VERSIONED, ""))
+      meta[VERSION.name] ??= Number(VERSIONED.exec(title)?.[1] ?? 1)
+    } else if (write.item.type === decisionsType.id) {
+      meta[DECIDED_ON.name] ??= today(ctx)
+    }
+  },
+}
+
+export default function planning(): Plugin {
+  return {
+    name: "planning",
+    contract: CONTRACT,
+    says: "requirements proven by tests, specifications versioned name-vN, and the owner's decisions recorded once",
+    about: "Planning as items, so each is proven or checked rather than implied by a test. " +
+      "A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. " +
+      "A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. " +
+      "A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. " +
+      "Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again.",
+    types: [requirementsType, specsType, decisionsType],
+    fields: [SPEC, VERSION, DECIDED_ON, STANDING],
+    relations: [
+      { name: "satisfies", inverse: "satisfied-by", says: "delivers or proves the requirement" },
+      { name: "satisfied-by", inverse: "satisfies", says: "is delivered by" },
+      { name: "specified-by", inverse: "specifies", says: "follows the specification" },
+      { name: "specifies", inverse: "specified-by", says: "is the specification followed by" },
+      { name: "supersedes", inverse: "superseded-by", says: "replaces an earlier version or decision" },
+      { name: "superseded-by", inverse: "supersedes", says: "is replaced by" },
+      { name: "settles", inverse: "settled-by", says: "is the decision that answers" },
+      { name: "settled-by", inverse: "settles", says: "is answered by the decision" },
+    ],
+    // What it reads of others: who performs a proof and why, and what proves an item.
+    uses: { fields: [RUN_BY.name, HUMAN_BECAUSE.name], relations: ["verified-by"] },
+    commands: [spec, decisions],
+    views: [requirementsView],
+    checks: [requirementsCheck, specsCheck, decisionsCheck],
+    hooks: [stamp],
+  }
+}

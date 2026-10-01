@@ -18,18 +18,6 @@ The order is the order of the work: the first entries come first.
 - **Today:** a gate declared in `naima.json`, and a [todo](guide/glossary.md#todo)
   whose page lists its parts and the date in prose.
 
-## Requirements, specifications and decisions
-
-- **[Requirements](guide/glossary.md#requirement)** and
-  **[specifications](guide/glossary.md#specification)** as item types,
-  proven like any other item by a test or a property linked `verifies`.
-  Example: "every number in table 2 comes from the raw data by a script".
-- **[Decisions](guide/glossary.md#decision)** as an item type: the choice,
-  its reason, and who took it, so "never asked twice" is checked rather than
-  remembered. Example: "the paper targets the journal, not the conference".
-- **Today:** a todo with `kind=decision`, and the owner's working style as
-  [project rules](guide/write-a-project-rule.md).
-
 ## Item types for other work
 
 Packs of item types for work that is not software: experiments and analyses
@@ -55,14 +43,6 @@ closing have one. Missing today:
   the field and leaves the title line of `README.md` as it was. **Today:** that
   line is edited by hand.
 
-## Worktree names and claim files
-
-- **A naming policy** for [worktrees](guide/glossary.md#worktree) and
-  branches, checked: who works, and on what.
-- **A check that every worktree carries a [claim file](guide/glossary.md#claim-file).**
-- **Today:** the [opening flow](agents/opening-a-worktree.md) names the
-  branch `<who>/<what>` and claims before any work, by convention.
-
 ## Model checkers and the strength of evidence
 
 - **Real [model checkers](guide/glossary.md#model-checker) as verifiers**:
@@ -80,12 +60,12 @@ closing have one. Missing today:
 
 ## Metrics
 
-A metric is a named measurement and the command that measures it: test time,
-coverage, warnings, size, how long an analysis runs. It is recorded on every
-commit as evidence, compared with its baseline (no number without a
-comparison), shown as a trend, and usable as a gate ("coverage must not
-drop"). **Today:** `naima triage` counts how many items have each triage
-field set; nothing measures the work itself.
+Metrics measured on every commit without anyone asking: a commit hook that
+runs them and records the numbers, and a trend drawn as a chart on a
+dashboard. **Today:** `naima metrics run --record` runs the project's
+metrics when asked, records them per commit, holds each to a budget, a floor
+or a baseline, and `naima metrics trend` draws the trend as text
+([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ## Structuring a project from the start
 

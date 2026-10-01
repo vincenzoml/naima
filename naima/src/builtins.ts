@@ -10,6 +10,8 @@ import epics from "./plugins/epics/index.ts"
 import coordination from "./plugins/coordination/index.ts"
 import gates from "./plugins/gates/index.ts"
 import loop from "./plugins/loop/index.ts"
+import metrics from "./plugins/metrics/index.ts"
+import planning from "./plugins/planning/index.ts"
 import rules from "./plugins/rules/index.ts"
 import trackers from "./plugins/trackers/index.ts"
 import triage from "./plugins/triage/index.ts"
@@ -22,9 +24,11 @@ export const firstParty: readonly FirstParty[] = [
   { name: "triage", factory: triage },
   { name: "gates", factory: gates },
   { name: "epics", factory: epics },
+  { name: "planning", factory: planning },
   { name: "loop", factory: loop },
   { name: "beta-markers", factory: betaMarkers },
   { name: "verifier", factory: verifier },
+  { name: "metrics", factory: metrics },
   { name: "rules", factory: rules },
   { name: "docs", factory: docs },
 ]

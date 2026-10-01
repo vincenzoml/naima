@@ -9,6 +9,20 @@ this page is the procedure. Preparing the branch is the developer's work. Decidi
 trunk is a separate call: whoever wrote the code does not also decide it
 ships.
 
+## 0. Say the branch is being prepared
+
+```sh
+naima claim --preparing
+```
+
+From then on `naima check` notes every commit the trunk takes that the
+branch lacks — merge it in again (step 6) — and names each one the trunk's
+reflog records as committed on the trunk directly, outside the flow
+([worktree isolation](worktree-isolation.md#2-nobody-commits-on-the-trunk-while-branches-are-being-prepared)).
+While the mark is set, releasing the last item (step 3) keeps the claim
+file, empty, to hold it; `naima claim --not-preparing` drops the mark and
+removes that file, just before the hand-over (step 7).
+
 ## 1. Every fix names the gesture that would prove it
 
 The fix feels finished when the tests are green. It is not resolved until
@@ -27,6 +41,13 @@ other way round. Set `runBy` by the instrument that settles it; a person's
 gesture also says `humanBecause` ([asking the human](asking-the-human.md)).
 
 A test nobody can find is a test nobody runs: [triage](../guide/glossary.md#triage) it like any item.
+
+When the item follows a spec (`specified-by`), confirm the code matches the
+spec's current version, and say so in the test's result; `naima check` notes an
+open item that still follows a superseded version. When it satisfies a
+requirement, link the same test `verifies` the requirement too, and set the
+requirement `met` once that test has passed — `naima check` refuses a `met`
+requirement with no passing proof.
 
 The [proof](../guide/glossary.md#proof) is the gesture as it stands, not as it once stood: `naima close`
 refuses an item that a verifying item refutes (a failed test, a violated
@@ -80,7 +101,10 @@ never number yours.
 
 ## 5. Run the gates, and read what breaks
 
-The project's full [gate](../guide/glossary.md#gate) set, including `naima check`. A red result that
+The project's full [gate](../guide/glossary.md#gate) set, including `naima check`; where the project
+declares [metrics](../guide/metrics-and-budgets.md), `naima metrics run --record` too, and commit the
+record with the work. Report each number with the one it is compared to, as the command prints it; a
+bound loosened to make the work fit is refused unless an item says why (`--because`). A red result that
 arrives with the trunk is not yours to absorb silently: prove where it comes
 from (a detached worktree at the trunk settles it in one command), and if it
 is the trunk's, open an item and say so in the [session note](../guide/glossary.md#session-note).
@@ -98,7 +122,7 @@ not tested with yours.
 
 ## 7. Hand it over
 
-Say: the merge command, that it fast-forwards, what arrives red and from
+Drop the mark and commit the removal: `naima claim --not-preparing`. Then say: the merge command, that it fast-forwards, what arrives red and from
 where, and what is left open with its gesture. The merge itself:
 
 ```sh
@@ -107,11 +131,19 @@ git merge --ff-only <branch>
 
 If it refuses, stop ([worktree isolation](worktree-isolation.md), rule 3).
 
-## 8. Only then, remove the worktree
+## 8. Only then, remove the worktree and the branch
 
 ```sh
-git worktree remove <path>
+naima prune --branch <who>/<what>             # what would go
+naima prune --branch <who>/<what> --write     # remove the worktree, delete the branch
 ```
+
+From the main checkout. It refuses a branch with commits the trunk lacks
+unless an `archive/<branch>` tag holds them; `--archive` makes the tag
+first, so abandoned work stays recoverable (`git switch -c <branch>
+archive/<branch>`). Never `git branch -D` a branch whose work is not on the
+trunk. Before a bulk sweep of the tracker (many items closed, moved or
+deleted in one go), tag where it starts: `git tag checkpoint/<date>-<what>`.
 
 ## Not part of closing
 

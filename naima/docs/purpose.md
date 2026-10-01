@@ -124,9 +124,9 @@ comes from the raw data by a script". Milestone: "draft results by 15
 November".
 
 **Today:** features (`requested`, `planned`, `shipped`, `withdrawn`) and
-todos are item types. Epics and milestones are
-[planned first](planned.md#epics-and-milestones); requirements and
-specifications [after them](planned.md#requirements-specifications-and-decisions).
+todos are item types, and so are requirements, specifications and the
+owner's decisions ([planning with them](guide/plan-with-requirements-specs-and-decisions.md)). Epics and
+milestones are [planned](planned.md#epics-and-milestones).
 
 ### Gates and the queue
 
@@ -140,8 +140,9 @@ while any is open, so a release cannot slip through. `naima queue v1
 
 **Today:** gates declared in `naima-tracker/naima-data/naima.json`, waiting
 on code or on proof; `naima gates`, `naima queue`, `naima queue --human`
-([read the board, the queue and the gates](guide/read-the-board.md)). Gates
-with a date and gates on metrics are [planned](planned.md#epics-and-milestones).
+([read the board, the queue and the gates](guide/read-the-board.md)). A gate
+on the project's metrics is the `metrics` gate
+([metrics and budgets](guide/metrics-and-budgets.md#as-a-gate)).
 
 ### Process management over the long run
 
@@ -164,10 +165,11 @@ the other: they write in separate copies, and Naima never has two sessions
 edit the same file.
 
 **Today:** session notes, claim files, the worktree flows, a check that a
-claim file names items that exist. A naming policy for worktrees and
-branches with a check that every worktree carries a claim file, and a
-working method that keeps going until only your items are left, are
-[planned](planned.md#worktree-names-and-claim-files).
+claim file names items that exist, and one naming scheme for worktrees and
+branches — `naima open` makes the worktree, the branch and the claim in one
+step, and a check fails a worktree off the scheme or holding work without a
+claim. A working method keeps going until only your items are left
+([while you are away](guide/while-you-are-away.md)).
 
 ### Decisions
 
@@ -182,9 +184,10 @@ reads it before planning.
 ([asking the human](agents/asking-the-human.md): only for judgement, a
 decision, a credential such as a password, or a physical act; a settled
 permission stays settled), and work handed to you must say why
-(`humanBecause`, checked by `naima check`). Decisions as items, so "never
-asked twice" is checked rather than remembered, are
-[planned](planned.md#requirements-specifications-and-decisions).
+(`humanBecause`, checked by `naima check`). Each answer is recorded as a
+decision item, searched with `naima decisions` before any question, so "never
+asked twice" is checked rather than remembered
+([decisions](guide/plan-with-requirements-specs-and-decisions.md#decisions-asked-once-never-again)).
 
 ### Rules
 
@@ -241,14 +244,18 @@ the mCRL2 example above is [planned](planned.md#model-checkers-and-the-strength-
 as are a check for red-then-green and a written order of how strong each
 kind of evidence is.
 
-### Metrics (planned)
+### Metrics
 
-Numbers measured on every commit (each saved change): speed, quality, test
-coverage, each compared with a baseline, shown as a trend, and usable as a
-gate. **Example:** "the analysis must still run in under ten minutes",
-measured on every commit, and a release waits if it gets slower. Today only
-`naima triage` counts how many items have each field set
-([planned](planned.md#metrics)).
+Numbers measured per commit (each saved change): speed, quality, test
+coverage, each a name and the command that measures it, printed with the
+number it is compared to, shown as a trend, and usable as a gate.
+**Example:** "the analysis must still run in under ten minutes": a budget of
+600 seconds, and a release waits if it gets slower.
+
+**Today:** `naima metrics run --record`, budgets, floors and baselines, a
+ratchet that only lets a number improve, and `naima metrics trend`
+([metrics and budgets](guide/metrics-and-budgets.md)). Measuring on every
+commit without being asked is [planned](planned.md#metrics).
 
 ### Structuring a project from the start (planned)
 
@@ -329,9 +336,9 @@ are in [the tutorial](guide/tutorial.md).
 2. **Triaged by an agent.** It writes the description in its own words,
    checks for duplicates, and runs `naima triage set export-drops
    impact=high priority=now confidence=measured`.
-3. **Claimed, in a worktree.** A worker agent runs `git worktree add -b
-   worker/export-alpha ../worktrees/export-alpha`, then `naima claim
-   export-drops`.
+3. **Claimed, in a worktree.** A worker agent runs `naima open export-drops
+   --as worker --name export-alpha`: a worktree on the branch
+   `worker/export-alpha`, with the claim written in it.
 4. **Fixed, with a proof.** It fixes the exporter and writes the test as its
    own item: `naima new tests "Export keeps the alpha channel" --set
    runBy=agent` and `naima link export-keeps verifies export-drops`. The test

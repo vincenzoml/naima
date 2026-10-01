@@ -13,9 +13,11 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them
 - [gates](#gates) — named release conditions backed by items
 - [epics](#epics) — epics: bodies of work that group items, their status and progress derived from them
+- [planning](#planning) — requirements proven by tests, specifications versioned name-vN, and the owner's decisions recorded once
 - [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
+- [metrics](#metrics) — named measurements, each the command that measures it, recorded per commit and held to a budget, a floor or a baseline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
 - [docs](#docs) — every feature is documented as part of its implementation, and naima check holds it
 
@@ -45,20 +47,24 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`runs`](#naima-runs) | core | list the external programs the loaded contributions declare they start (a model checker, say), which the launcher allows besides git |
 | [`close`](#naima-close) | trackers | archive a resolved item: fixed, and proven by an item that has passed |
 | [`bugs`](#naima-bugs) | trackers | how many bugs have no code written, and how many are fixed but unproven |
+| [`open`](#naima-open) | coordination | start a piece of work: a worktree <worktrees>/<what> on a new branch <who>/<what> from the trunk, and its claim on the items, in one step |
 | [`claim`](#naima-claim) | coordination | record that this branch is working on items (writes one file on this branch) |
-| [`release`](#naima-release) | coordination | drop this branch's claim on items; the last one removes the file |
+| [`release`](#naima-release) | coordination | drop this branch's claim on items; the last one removes the file, unless the branch is being prepared (claim --preparing) |
 | [`claims`](#naima-claims) | coordination | who holds what, recombined from every branch |
-| [`prune`](#naima-prune) | coordination | list (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there |
+| [`prune`](#naima-prune) | coordination | list (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds |
 | [`pass`](#naima-pass) | coordination | write this session's note (one new file), or list the newest |
 | [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves |
 | [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not |
 | [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks |
 | [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs |
 | [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out |
+| [`spec`](#naima-spec) | planning | each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version |
+| [`decisions`](#naima-decisions) | planning | search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first |
 | [`loop`](#naima-loop) | loop | the non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his |
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
+| [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command that measures it — run, recorded per commit, held to a budget, a floor or a baseline, and shown as a trend; every number with the one it is compared to |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
 | [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
 
@@ -68,21 +74,23 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, loop, beta-markers, verifier, rules, docs |
-| `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, verifier, rules |
-| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, verifier, rules, docs |
-| `relations` | core | link relations between items, each naming its inverse | core, trackers, epics |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, beta-markers, verifier, rules, docs |
-| `views` | core | `naima view <name>`: a named rendering of derived state | triage |
-| `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, metrics, rules, docs |
+| `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
+| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, docs |
+| `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, metrics, rules, docs |
+| `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
+| `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
 | `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to |  |
-| `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, verifier |
+| `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, planning, verifier |
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }` | verifier |
+| `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
+| `metrics` | metrics | a named measurement: `run` (a program and its arguments), `kind`, and a bound — `atMost`, `atLeast` or `equals` |  |
 
 ## core
 
@@ -625,29 +633,62 @@ Claims and session notes, one file per session, recombined from every branch.
 
 Its contributions' qualified ids are `coordination/<name>`.
 
-No session writes a file another session writes. A claim is one file per branch, `claims/<uuid>.json`; a session note is one file per session, `passes/<date>-<uuid>.md`. Both are written on the writer's own branch and never staged or committed by the tool: commit them with the work. `claims`, `pass --list` and `summary` recombine them at read time from every local branch — the trunk, every branch not merged into it, whatever each worktree stands on — each read from the disk of the worktree that stands on it, uncommitted files included, or from its ref when none does; remote-tracking refs are not read. The trunk is the branch origin's HEAD names, else `main`, else `master`; without one, every local branch is read. A claim belongs to a branch, so on a detached HEAD `claim` is refused. Several branches may claim one item: `claim` says who else holds it rather than refusing.
+No session writes a file another session writes. A claim is one file per branch, `claims/<uuid>.json`; a session note is one file per session, `passes/<date>-<uuid>.md`. Both are written on the writer's own branch and never staged or committed by the tool: commit them with the work. `claims`, `pass --list` and `summary` recombine them at read time from every local branch — the trunk, every branch not merged into it, whatever each worktree stands on — each read from the disk of the worktree that stands on it, uncommitted files included, or from its ref when none does; remote-tracking refs are not read. The trunk is the branch origin's HEAD names, else `main`, else `master`; without one, every local branch is read. A claim belongs to a branch, so on a detached HEAD `claim` is refused. Several branches may claim one item: `claim` says who else holds it rather than refusing. Work happens by one scheme, checked: the worktree `<worktrees>/<what>` stands on the branch `<who>/<what>` and carries a claim; `open` makes all three in one step. A claim marked `--preparing` is told when the trunk moves under it, and which commits were made on the trunk directly; `prune --branch` deletes a branch only when the trunk or an `archive/<branch>` tag holds its commits.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `who` |  | who works, when `naima open` is given no `--as`: the branch's first segment |
+| `worktrees` | `../<main worktree's folder>-worktrees` | the directory every worktree is a folder of, relative to the main worktree |
+| `exempt` | `[]` | branches the naming scheme does not apply to: names, or patterns with * |
+
+### naima open
+
+Start a piece of work: a worktree <worktrees>/<what> on a new branch <who>/<what> from the trunk, and its claim on the items, in one step.
+
+```sh
+naima open <item>... [--as <who>] [--name <what>] [--note "why"]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--as` |  | who works: the branch's first segment |
+| `--name` | `the first item's slug` | what the work is: the branch's last segment and the worktree's folder |
+| `--note` |  | why the branch holds the items, written in the claim |
+
+Examples:
+
+```sh
+naima open export-drops --as claude --note "alpha channel in the exporter"
+naima open export-drops export-keeps --as claude --name export-alpha
+```
 
 ### naima claim
 
 Record that this branch is working on items (writes one file on this branch).
 
 ```sh
-naima claim <item>... [--note "why"]
+naima claim <item>... [--note "why"] [--preparing
+naima --not-preparing]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--note` |  | why this branch holds the items; replaces the previous note |
+| `--preparing` |  | mark the branch as being prepared to enter the trunk: from then on naima check notes every commit the trunk takes that the branch lacks, and every one committed on the trunk directly; items are optional |
+| `--not-preparing` |  | drop the mark |
 
 Examples:
 
 ```sh
 naima claim export-drops export-keeps --note "alpha channel in the exporter"
+naima claim --preparing
 ```
 
 ### naima release
 
-Drop this branch's claim on items; the last one removes the file.
+Drop this branch's claim on items; the last one removes the file, unless the branch is being prepared (claim --preparing).
 
 ```sh
 naima release <item>...
@@ -680,21 +721,25 @@ naima claims --branch fix/export-alpha
 
 ### naima prune
 
-List (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there.
+List (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds.
 
 ```sh
 naima prune [--write]
+naima prune --branch <b> [--archive] [--write]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
-| `--write` |  | remove the stale claim files instead of listing them |
+| `--write` |  | remove the stale claim files, or the branch and its worktree, instead of listing what would go |
+| `--branch` |  | the branch to delete, with the worktree standing on it |
+| `--archive` |  | tag the branch's commits as archive/<branch> before deleting it, so none is lost |
 
 Examples:
 
 ```sh
 naima prune
 naima prune --write
+naima prune --branch claude/old-idea --archive --write
 ```
 
 ### naima pass
@@ -725,6 +770,8 @@ naima pass --list 3
 | Check | What it holds |
 |---|---|
 | `claims-resolve` | a claim written in this worktree names items that exist |
+| `worktree-policy` | every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem |
+| `trunk-moved-while-preparing` | a branch whose claim is marked preparing is told every commit the trunk took that it lacks, and which of them the trunk's reflog records as committed on the trunk directly |
 
 **Directories** it owns under the tracker root: `claims/`, `passes/`.
 
@@ -965,6 +1012,130 @@ Traits: `group`.
 |---|---|
 | `epic-status` | an epic's status follows its items: set on every write of the epic, and of an item it groups; setting it against them is refused |
 
+## planning
+
+Requirements proven by tests, specifications versioned name-vN, and the owner's decisions recorded once.
+
+Its contributions' qualified ids are `planning/<name>`.
+
+Planning as items, so each is proven or checked rather than implied by a test. A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again.
+
+**Uses**, declared by other plugins: fields `runBy`, `humanBecause`; relations `verified-by`.
+
+### naima spec
+
+Each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version.
+
+```sh
+naima spec [--json]
+naima spec revise <spec>
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--json` |  | print each specification as JSON: spec, current, versions, drafts, followedBy |
+
+Examples:
+
+```sh
+naima spec
+naima spec --json
+naima spec revise specs/export-format
+```
+
+### naima decisions
+
+Search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first.
+
+```sh
+naima decisions [<word>...] [--all] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--all` |  | search the superseded and reopened decisions too |
+| `--json` |  | print the decisions as JSON: item, title, status, decidedOn, standing, settles, text |
+
+Examples:
+
+```sh
+naima decisions
+naima decisions journal
+naima decisions licence --all --json
+```
+
+### type: requirements
+
+Requirements: something the result must satisfy, stated so it can be checked: delivered by the items that satisfy it, proven by the tests or properties that verify it. Items live in `naima-tracker/naima-data/requirements/`; a new one starts as `stated`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `stated` | open |  | stated, and not yet proven |
+| `met` | done |  | proven: a test or property linked to it has passed, and none refutes it |
+| `dropped` | done |  | no longer required; the page says why |
+
+### type: specs
+
+Specifications: how something must behave, versioned name-vN: a revision is a new item that supersedes the old, and one version per name is current. Items live in `naima-tracker/naima-data/specs/`; a new one starts as `draft`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `draft` | open |  | being written or agreed; the items that follow it wait for it |
+| `current` | done |  | the version in force: work follows it, and the close flow checks the code against it |
+| `superseded` | done |  | replaced by a later version, kept as history |
+
+### type: decisions
+
+Decisions: a choice or a standing permission of the owner's, recorded once: dated, in the owner's words restated, linked to what it settles; searched before the owner is asked. Items live in `naima-tracker/naima-data/decisions/`; a new one starts as `settled`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `settled` | done |  | in force: act on it, never ask it again |
+| `reopened` | open |  | the owner reopened it: the question may be asked again, and the answer is a new decision that supersedes this one |
+| `superseded` | done |  | replaced by a later decision, kept as history |
+
+**Fields**
+
+| Field | Kind | Applies to | Meaning | Values |
+|---|---|---|---|---|
+| `spec` | string | specs | the name every version of a specification shares; set from the title when the spec is opened |  |
+| `version` | number | specs | the specification's version, N in name-vN; set from the title (`… v2`), else 1 |  |
+| `decidedOn` | date | decisions | when the owner decided; stamped with today when the decision is recorded |  |
+| `standing` | boolean | decisions | a standing permission: the action it names may be taken again, every time, without asking |  |
+
+**Link relations** — only the direction written is stored; the inverse is derived when read.
+
+| Relation | Inverse | Reads as |
+|---|---|---|
+| `satisfies` | `satisfied-by` | delivers or proves the requirement |
+| `satisfied-by` | `satisfies` | is delivered by |
+| `specified-by` | `specifies` | follows the specification |
+| `specifies` | `specified-by` | is the specification followed by |
+| `supersedes` | `superseded-by` | replaces an earlier version or decision |
+| `superseded-by` | `supersedes` | is replaced by |
+| `settles` | `settled-by` | is the decision that answers |
+| `settled-by` | `settles` | is answered by the decision |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `requirements-proven` | a requirement marked met has a proof that passed and none that refutes it; one proven but still stated is noted; one that nothing satisfies or verifies is noted |
+| `specs-versioned` | one version of a specification is current; a version superseded by a current one is marked superseded; a spec supersedes only an earlier version of itself; an open item following a superseded version is noted |
+| `decisions-settled` | an open item waiting on the owner's decision (runBy human, humanBecause decision) that a settled decision settles is noted, to be acted on rather than asked; a decision superseded by a settled one is marked superseded |
+
+**Views**, printed by `naima view <name>`
+
+| View | What it shows |
+|---|---|
+| `requirements` | every requirement that is not dropped: its status, whether it is proven, what satisfies it and what proves it |
+
+**Write hooks**, run on every item write
+
+| Hook | What it does |
+|---|---|
+| `planning-stamps` | a new spec takes its name and version from its title (`Export format v2` is export-format, version 2) unless given; a new decision is dated today unless given |
+
 ## loop
 
 The non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list.
@@ -1137,6 +1308,65 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 | Verifier | What it checks |
 |---|---|
 | `example-regex` | line-regex properties over a text file: "some <re>" or "never <re>" |
+
+## metrics
+
+Named measurements, each the command that measures it, recorded per commit and held to a budget, a floor or a baseline.
+
+Its contributions' qualified ids are `metrics/<name>`.
+
+A metric is a name and the command that measures it — test time, coverage, lint warnings, size, how long an analysis runs. The project declares its metrics as data in its configuration; this plugin brings none. `naima metrics run` runs them and prints every number with the one it is compared to: the last recorded on an earlier commit of this line of history, and the bound. A bound is a budget (`atMost`), a floor (`atLeast`) or a baseline (`equals`); a `ratchet` makes a gain fail until the bound follows it, so a budget only goes down and a floor only up; loosening a bound names the item that says why. `--record` writes the numbers, with the commit they measure, as evidence; `naima metrics trend` draws them along history. How a number is read is a kind, and any plugin may contribute one to the `metric-kinds` point. Naima may start the programs the metrics name, and only those: the launcher grants each one.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `metrics` | `{}` | `plugins.metrics.options.metrics` in `naima-tracker/naima-data/naima.json`: metric name → { "run": [program, ...args], "kind", "pattern", "unit", "says", one of "atMost" \| "atLeast" \| "equals", "ratchet", "tolerance", "because" }. kind defaults to exit, which with no bound must equal 0. |
+
+**Extension points** it declares: `metric-kinds`, `metrics`.
+
+### naima metrics
+
+The project's metrics — each a name and the command that measures it — run, recorded per commit, held to a budget, a floor or a baseline, and shown as a trend; every number with the one it is compared to.
+
+```sh
+naima metrics [list]
+naima metrics run [name...] [--record]
+naima metrics bound <name> <value> [--because <item>]
+naima metrics trend <name>
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--record` |  | run: write the numbers, with the commit they measure, to metrics/ in the data directory |
+| `--because` |  | bound: the item that says why a bound is loosened — a budget raised, a floor lowered; refused without it |
+
+Examples:
+
+```sh
+naima metrics
+naima metrics run --record
+naima metrics run tests coverage
+naima metrics bound test-time 140 --because bugs/slow-ci
+naima metrics trend tests
+```
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `metric-bound-because` | a metric's `because` names an item of the tracker |
+
+**Directories** it owns under the tracker root: `metrics/`.
+
+**Metric kinds**, how `naima metrics` reads a number
+
+| Kind | What it reads |
+|---|---|
+| `exit` | the command's exit code: 0 is a pass; with no bound it must equal 0 |
+| `number` | the first group of `pattern` in the output, stdout then stderr — with no pattern, the first number |
+| `count` | how many lines of the output match `pattern` (every non-blank line, with none): warnings, findings, files |
+| `duration` | how many seconds the command took, wall clock |
 
 ## rules
 
