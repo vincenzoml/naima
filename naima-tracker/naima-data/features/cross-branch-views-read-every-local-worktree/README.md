@@ -30,3 +30,9 @@ describe exactly this behaviour.
 
 Source: REVIEW.md section 2, decision D-08 (recommendation a); DECISIONS.md
 line 9. Repro: plugins-repro/coord.ts (case R1).
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
+
+U4 proof run: its proving test has passed (see the test item's own Notes). Not set to shipped: the item carries no docs field naming a real page, and assigning one is a judgment call outside a tester's gesture. Left requested/planned for the filer or lead developer to pick a page and ship.

@@ -24,3 +24,9 @@ fallback values; `docs/flows/reporting-and-triage.md` already documents the
 intended behaviour and needs no change.
 
 Source: REVIEW.md section 2, decision D-14; DECISIONS.md line 15.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
+
+U4 proof run: its proving test has passed (see the test item's own Notes). Not set to shipped: the item carries no docs field naming a real page, and assigning one is a judgment call outside a tester's gesture. Left requested/planned for the filer or lead developer to pick a page and ship.
