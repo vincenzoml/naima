@@ -16,17 +16,18 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
+import { RUNTIME_DIR } from "../naima/src/core/layout.ts"
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 
-/** The file of this repository a copied source is, or null: `…/naima-tracker/naima/src/x.ts` or `…/<tmp>/naima/src/x.ts` → `src/x.ts`. */
+/** The file of this repository a copied source is, or null: `…/naima-tracker/naima/src/x.ts` or `…/<tmp>/naima/src/x.ts` → `naima/src/x.ts`. */
 export function original(url: string, root = ROOT): string | null {
   if (!url.startsWith("file://")) return null
   const path = fileURLToPath(url)
   if (path.startsWith(root + "/") || path.startsWith(root + "\\")) return null // already this repository's
   const m = path.replace(/\\/g, "/").match(/\/naima\/((?:src\/.+|naima\.ts))$/)
   if (!m?.[1]) return null
-  const mine = join(root, m[1])
+  const mine = join(root, RUNTIME_DIR, m[1])
   return existsSync(mine) && readFileSync(mine, "utf8") === readFileSync(path, "utf8") ? mine : null
 }
 
@@ -79,7 +80,7 @@ if (import.meta.main) {
     // The copies must still exist when they are compared: the tests keep their temporary projects (NAIMA_KEEP_TEMP), under a TMPDIR removed at the end.
     const env = { ...process.env, NAIMA_KEEP_TEMP: "1", TMPDIR: temps, TMP: temps, TEMP: temps }
     // The test run's own output is kept back: it names every copy's path, which is what this script resolves.
-    const test = spawnSync("deno", ["test", "-A", `--coverage=${dir}`, "src/"], {
+    const test = spawnSync("deno", ["test", "-A", `--coverage=${dir}`, "test/"], {
       cwd: ROOT,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
@@ -92,7 +93,7 @@ if (import.meta.main) {
     }
     const { mapped, dropped } = remap(dir)
     console.error(`coverage: ${mapped} records of copied sources mapped back to this repository; ${dropped} of files outside it dropped`)
-    const report = spawnSync("deno", ["coverage", ...(lcov ? ["--lcov"] : []), "--exclude=\\.test\\.ts$", "--exclude=/scripts/", dir], {
+    const report = spawnSync("deno", ["coverage", ...(lcov ? ["--lcov"] : []), "--exclude=\\.test\\.ts$", "--exclude=/scripts/", "--exclude=/test/", dir], {
       cwd: ROOT,
       stdio: ["ignore", "inherit", "inherit"],
     })

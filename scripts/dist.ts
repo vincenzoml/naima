@@ -1,13 +1,14 @@
 // The dist branch: from a commit of main, the commit that holds only what
-// runs Naima — the files dist.json allows, and nothing else — with a
-// `Source-Commit:` trailer naming the main commit it was built from. CI runs
-// it on every commit of main and pushes the branch (.github/workflows/ci.yml);
-// projects clone and lock the dist (docs/guide/install.md#the-dist-branch).
+// runs Naima — a plain copy of the runtime folder, naima/, and nothing else —
+// with a `Source-Commit:` trailer naming the main commit it was built from. CI
+// runs it on every commit of main and pushes the branch
+// (.github/workflows/ci.yml); projects clone and lock the dist
+// (docs/guide/install.md#the-dist-branch).
 //
 // Built with git's plumbing from the commit's own tree, never from a working
-// tree, so it is reproducible: the same main commit, with the same dist.json,
-// gives the same tree; with the same parent, the same commit. A main commit
-// that changes no runtime file (the tracker, the tests) adds no dist commit.
+// tree, so it is reproducible: the same main commit gives the same tree; with
+// the same parent, the same commit. A main commit that changes nothing under
+// naima/ (the tracker, the tests) adds no dist commit.
 //
 //   deno run -A scripts/dist.ts [--commit <rev>] [--branch <name>] [--list]
 //
@@ -16,16 +17,18 @@
 import { mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { type GitOptions, gitReason, runGit } from "../src/core/git.ts"
-import { DIST_BRANCH } from "../src/core/layout.ts"
+import { type GitOptions, gitReason, runGit } from "../naima/src/core/git.ts"
+import { DIST_BRANCH, RUNTIME_DIR } from "../naima/src/core/layout.ts"
 
-export const MANIFEST = "dist.json"
+export { RUNTIME_DIR }
 export const TRAILER = "Source-Commit"
 
-export interface Manifest {
-  include: string[]
-  exclude: string[]
-}
+/**
+ * Until the documentation moves into the runtime folder, naima/docs is a
+ * symbolic link to the repository's docs/: the dist holds the files it links
+ * to, not the link.
+ */
+const LINKED_DOCS = `${RUNTIME_DIR}/docs`
 
 export interface Built {
   /** The dist commit that holds `source`'s runtime files: new, or the branch's head when its tree is the same. */
@@ -47,35 +50,25 @@ const tryGit = (repo: string, args: string[]): string | null => {
   return r.ok ? r.out : null
 }
 
-/** A glob as a regular expression: `**` any path, `*` any name part; nothing else is special. */
-export function globRegex(glob: string): RegExp {
-  const body = glob
-    .split("/")
-    .map((part) => (part === "**" ? "\uFFFF" : part.replace(/[.+^${}()|[\]\\?]/g, "\\$&").replace(/\*/g, "[^/]*")))
-    .join("/")
-    .replace(/\uFFFF\//g, "(?:.*/)?")
-    .replace(/\/\uFFFF$/, "(?:/.*)?")
-    .replace(/\uFFFF/g, ".*")
-  return new RegExp(`^${body}$`)
-}
-
-export function parseManifest(text: string): Manifest {
-  const raw = JSON.parse(text) as Partial<Manifest>
-  const strings = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === "string")
-  if (!strings(raw.include) || !strings(raw.exclude)) throw new Error(`${MANIFEST}: include and exclude must be lists of globs`)
-  return { include: raw.include, exclude: raw.exclude }
-}
-
-/** The paths, of `paths`, that the manifest ships: included by one glob and excluded by none. */
-export function selectRuntime(manifest: Manifest, paths: string[]): string[] {
-  const inc = manifest.include.map(globRegex)
-  const exc = manifest.exclude.map(globRegex)
-  return paths.filter((p) => inc.some((r) => r.test(p)) && !exc.some((r) => r.test(p))).sort()
+/**
+ * Where each runtime file of `paths` (repository paths) lands in the dist:
+ * every path under naima/, without the prefix. Returns [repository path, dist path] pairs, sorted by dist path.
+ */
+export function selectRuntime(paths: string[]): [string, string][] {
+  const prefix = `${RUNTIME_DIR}/`
+  const linked = paths.includes(LINKED_DOCS)
+  return paths
+    .filter((p) => p !== LINKED_DOCS)
+    .flatMap((p): [string, string][] => {
+      if (p.startsWith(prefix)) return [[p, p.slice(prefix.length)]]
+      if (linked && p.startsWith("docs/")) return [[p, p]]
+      return []
+    })
+    .sort((x, y) => (x[1] < y[1] ? -1 : x[1] > y[1] ? 1 : 0))
 }
 
 /** The runtime tree of `commit`, written into the repository's objects: its hash and its files. */
 export function runtimeTree(repo: string, commit: string): { tree: string; files: string[] } {
-  const manifest = parseManifest(git(repo, ["show", `${commit}:${MANIFEST}`]))
   const entries = git(repo, ["ls-tree", "-r", "-z", "--full-tree", commit])
     .split("\0")
     .filter(Boolean)
@@ -85,13 +78,17 @@ export function runtimeTree(repo: string, commit: string): { tree: string; files
       return { mode: mode as string, type: type as string, sha: sha as string, path: line.slice(tab + 1) }
     })
     .filter((e) => e.type === "blob")
-  const files = selectRuntime(manifest, entries.map((e) => e.path))
-  const keep = new Set(files)
+  const runtime = selectRuntime(entries.map((e) => e.path))
+  const files = runtime.map(([, to]) => to)
+  const byPath = new Map(entries.map((e) => [e.path, e]))
   const scratch = mkdtempSync(join(tmpdir(), "naima-dist-index-"))
   try {
     const env = { GIT_INDEX_FILE: join(scratch, "index") }
     git(repo, ["read-tree", "--empty"], { env })
-    const info = entries.filter((e) => keep.has(e.path)).map((e) => `${e.mode} ${e.sha}\t${e.path}\0`).join("")
+    const info = runtime.map(([from, to]) => {
+      const e = byPath.get(from) as (typeof entries)[number]
+      return `${e.mode} ${e.sha}\t${to}\0`
+    }).join("")
     git(repo, ["update-index", "-z", "--index-info"], { env, input: info })
     return { tree: git(repo, ["write-tree"], { env }), files }
   } finally {

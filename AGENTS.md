@@ -99,7 +99,7 @@ rewriting published history, discarding someone's uncommitted work.
 
 ```sh
 deno task verify    # typecheck, lint, format, tests, check (working tree and lock), reference current
-node --test "src/**/*.test.ts" && bun test ./src/     # the same tests on Node and Bun
+node --test "test/**/*.test.ts" && bun test ./test/     # the same tests on Node and Bun
 ```
 
 Architecture and the dependency rule: [docs/architecture.md](docs/develop/architecture.md).

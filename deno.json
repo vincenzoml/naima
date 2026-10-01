@@ -10,25 +10,25 @@
     "noPropertyAccessFromIndexSignature": true
   },
   "tasks": {
-    "naima": "deno run -A naima.ts",
-    "dev": "deno run -A src/cli.ts",
-    "typecheck": "deno check naima.ts src/ scripts/",
-    "test": "deno test -A src/",
-    "docs": "deno run -A src/cli.ts docs --write docs/reference/reference.md",
+    "naima": "deno run -A naima/naima.ts",
+    "dev": "deno run -A naima/src/cli.ts",
+    "typecheck": "deno check naima/naima.ts naima/src/ test/ scripts/",
+    "test": "deno test -A test/",
+    "docs": "deno run -A naima/src/cli.ts docs --write docs/reference/reference.md",
     "dist": "deno run -A scripts/dist.ts",
     "coverage": "deno run -A scripts/coverage.ts",
     "lint": "deno lint",
     "fmt": "deno fmt",
-    "verify": "deno task typecheck && deno task lint && deno fmt --check && deno task test && deno run -A src/cli.ts check && deno run -A src/cli.ts docs --check docs/reference/reference.md && deno run -A naima.ts check"
+    "verify": "deno task typecheck && deno task lint && deno fmt --check && deno task test && deno run -A naima/src/cli.ts check && deno run -A naima/src/cli.ts docs --check docs/reference/reference.md && deno run -A naima/naima.ts check"
   },
   "fmt": {
-    "include": ["naima.ts", "src/", "scripts/"],
+    "include": ["naima/naima.ts", "naima/src/", "test/", "scripts/"],
     "lineWidth": 160,
     "indentWidth": 2,
     "semiColons": false
   },
   "lint": {
-    "include": ["naima.ts", "src/", "scripts/"],
+    "include": ["naima/naima.ts", "naima/src/", "test/", "scripts/"],
     "rules": { "tags": ["recommended"] }
   },
   "lock": false,

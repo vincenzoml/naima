@@ -9,7 +9,7 @@
 name: install
 on:
   push:
-    paths: ["site/install.*", "scripts/dist.ts", "dist.json", "naima.ts", "src/**", ".github/workflows/install.yml"]
+    paths: ["site/install.*", "scripts/dist.ts", "naima/**", ".github/workflows/install.yml"]
   pull_request:
   workflow_dispatch:
 permissions:
