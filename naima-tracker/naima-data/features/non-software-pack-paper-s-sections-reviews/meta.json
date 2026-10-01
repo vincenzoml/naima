@@ -12,5 +12,12 @@
       "rel": "relates-to",
       "id": "a47c22cd-21fd-4b08-8be6-e978851b6da5"
     }
+  ],
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "1f5cda091b9579d154a72bedc1bc38e515f1ad8d"
+  ],
+  "docs": [
+    "naima/docs/guide/paper-sections-and-reviews.md"
   ]
 }

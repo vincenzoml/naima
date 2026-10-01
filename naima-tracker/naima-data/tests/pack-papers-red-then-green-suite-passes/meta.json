@@ -1,0 +1,13 @@
+{
+  "id": "e8dd8c34-3a4f-461c-a264-ed25d36f29b7",
+  "title": "pack-papers red-then-green suite passes",
+  "status": "passed",
+  "created": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "33bc6bed-2d54-454c-92a6-5e9895f361b9"
+    }
+  ],
+  "evidenceKind": "diff"
+}
