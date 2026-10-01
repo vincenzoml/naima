@@ -37,3 +37,9 @@ Windows filesystem).
 
 `install (windows-latest)` job green on a push of the fix — see
 tests/install-workflow-passes-ubuntu-macos-windows.
+
+## Notes
+
+### 2026-10-01 — evidence owner, on claude/evidence-close-6
+
+Evidence review (final pass): confirmed still unproven end-to-end. tests/nativepath-turns-git-s-forward-slash-toplevel is a sound unit-level regression test (red/green) but only simulates the Windows separator; tests/install-workflow-passes-ubuntu-macos-windows (the CI proof the item's own 'Done' section cites) is withdrawn — CI was removed; tests/install-ps1-installs-naima-windows-machine-fresh (the real gesture) is still open, runBy=human. Not closing: Windows install remains unverified on a real machine.

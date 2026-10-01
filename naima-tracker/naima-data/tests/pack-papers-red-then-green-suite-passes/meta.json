@@ -9,5 +9,12 @@
       "id": "33bc6bed-2d54-454c-92a6-5e9895f361b9"
     }
   ],
-  "evidenceKind": "diff"
+  "evidenceKind": "observation",
+  "attached": {
+    "pack-papers-run-2026-10-01.log": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  }
 }

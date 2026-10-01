@@ -1,7 +1,7 @@
 {
   "id": "e2c397fe-e108-4162-af31-d98f045fb3b5",
   "title": "Reference and install skills hosted on GitHub (planned)",
-  "status": "requested",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "low",
   "priority": "later",
@@ -17,5 +17,7 @@
     "20dd602"
   ],
   "fixedOn": "2026-10-01",
-  "effort": "S"
+  "effort": "S",
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
 }

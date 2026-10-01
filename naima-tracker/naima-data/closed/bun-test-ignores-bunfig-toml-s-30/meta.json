@@ -1,7 +1,7 @@
 {
   "id": "bbdc3275-754a-46bb-9170-6d40f9ed1fbd",
   "title": "bun test ignores bunfig.toml's 30-second timeout: spawn-heavy init and update tests fail at 5 seconds under load",
-  "status": "open",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
@@ -18,5 +18,7 @@
     "9968ca0",
     "176a7e7"
   ],
-  "effort": "S"
+  "effort": "S",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
 }

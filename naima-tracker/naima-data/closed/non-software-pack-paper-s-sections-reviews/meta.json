@@ -1,7 +1,7 @@
 {
   "id": "33bc6bed-2d54-454c-92a6-5e9895f361b9",
   "title": "Non-software pack: a paper's sections and reviews",
-  "status": "requested",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "low",
   "priority": "later",
@@ -20,5 +20,7 @@
   "docs": [
     "naima/docs/guide/paper-sections-and-reviews.md"
   ],
-  "effort": "M"
+  "effort": "M",
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
 }

@@ -1,7 +1,7 @@
 {
   "id": "5c5044fa-9c0b-45fc-9eba-ae97cd27c7f4",
   "title": "Test runs leave naima ui processes running and the suites hang",
-  "status": "open",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "high",
   "priority": "now",
@@ -11,5 +11,7 @@
     "bd1715e"
   ],
   "confidence": "measured",
-  "effort": "S"
+  "effort": "S",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
 }

@@ -23,3 +23,7 @@ Design is not part of this item: the page is functional.
 ### 2026-10-01 — Claude, on claude/evidence-close-2
 
 Evidence review (evidence-close-2): the server, permissions and launcher plumbing are proven (tests/naima-ui-macos-opens-naima-webview-window, tests/naima-ui-serves-views-data-only-run, tests/through-launcher-ui-serves-loopback-interface-stops, all passed). The usability claim is not: tests/owner-opens-naima-ui-project-recorded-metrics is still open, runBy=human, humanBecause=judgement — only the owner can judge the dashboard usable. Not closing pending that gesture.
+
+### 2026-10-01 — evidence owner, on claude/evidence-close-6
+
+Evidence review (final pass): confirms the prior evidence-close-2 finding still holds — server/permissions/launcher plumbing proven (3 tests passed), usability not (tests/owner-opens-naima-ui-project-recorded-metrics open, runBy=human, humanBecause=judgement). Not closing.

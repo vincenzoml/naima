@@ -30,6 +30,11 @@
       "from": "agent",
       "by": "Vincenzo Ciancia",
       "on": "2026-10-01"
+    },
+    "site-docs-check-2026-10-01.log": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
     }
   },
   "evidenceKind": "observation"

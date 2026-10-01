@@ -1,11 +1,11 @@
 {
-  "id": "f1d68726-7476-40cd-a4f4-91fa68f45ec6",
-  "title": "Locked resources and the owner as a holder, stated in the coordinator flow",
-  "status": "open",
+  "id": "b276af50-8f52-42d4-abad-fc765c8ddc6b",
+  "title": "Public framing: the vision is a silent company, not a tracker",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
-  "confidence": "diagnosed",
+  "confidence": "reported",
   "triagedOn": "2026-10-01",
   "links": [
     {
@@ -17,5 +17,7 @@
   "commits": [
     "470e343"
   ],
-  "effort": "S"
+  "effort": "S",
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
 }

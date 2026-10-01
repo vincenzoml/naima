@@ -26,3 +26,7 @@ First screen landed: naima ui opens on Home, three panels — summary (ui plugin
 ### 2026-10-01 — Vincenzo Ciancia, on claude/big-dashboard
 
 Beyond the first screen landed on claude/big-dashboard: the claims across branches are a fourth panel of Home (coordination plugin, as naima claims --json); new tabs Boards (as naima board <type> --json, type picked by a labelled select), Session notes (as naima pass --list [n] --json) and Item (as naima show <item> --json), whose evidence section lists the attachments and the linked items of a type that can prove, each marked proves, refutes or not yet; every item reference in the window links to it. Proof: tests/naima-ui-s-boards-claims-session-notes (agent, red seen as a 404 on /data/board before the views existed). Look and feel left to the owner: tests/naima-ui-s-boards-claims-session-notes-2 (runBy human). Gates green: deno task verify (368 passed), node --test (368), bun test --timeout 30000 (368).
+
+### 2026-10-01 — evidence owner, on claude/evidence-close-6
+
+Evidence pass: tests/naima-ui-s-first-screen-shows-summary and tests/naima-ui-s-boards-claims-session-notes both now genuinely pass (the latter backfilled — it was marked open with no run recorded despite a note citing it as proof). Not closing: two owner-judgement gestures remain open (tests/naima-ui-s-first-screen-looks-right, tests/naima-ui-s-boards-claims-session-notes-2) — only the owner can say the look and feel is right.

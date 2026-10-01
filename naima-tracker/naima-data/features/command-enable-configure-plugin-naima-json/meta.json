@@ -1,0 +1,11 @@
+{
+  "id": "9230f722-adf2-4eec-830e-ec322b5e26bc",
+  "title": "A command to enable or configure a plugin in naima.json",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "reported",
+  "effort": "M",
+  "triagedOn": "2026-10-01"
+}

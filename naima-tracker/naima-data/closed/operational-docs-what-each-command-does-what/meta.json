@@ -1,7 +1,7 @@
 {
   "id": "464a6b4b-0eda-4942-adb0-c4e1a6082152",
   "title": "Operational docs: what each command does, what policies exist, how each is enforced",
-  "status": "open",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
@@ -23,5 +23,7 @@
     "ab72b8d",
     "e0824c5"
   ],
-  "effort": "M"
+  "effort": "M",
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
 }

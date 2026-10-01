@@ -1,7 +1,7 @@
 {
   "id": "6eb94426-09df-4a11-a0dd-36fce97a398b",
   "title": "Host leakage: the installed program directory holds only what runs Naima",
-  "status": "planned",
+  "status": "closed",
   "created": "2026-09-30",
   "impact": "high",
   "priority": "now",

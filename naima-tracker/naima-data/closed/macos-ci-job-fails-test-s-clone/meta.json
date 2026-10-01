@@ -1,7 +1,7 @@
 {
   "id": "6385ac3f-beba-4cfa-813e-365ffff25ad4",
   "title": "The macOS CI job fails: a test's clone races git's background auto-maintenance",
-  "status": "open",
+  "status": "closed",
   "created": "2026-09-30",
   "impact": "high",
   "priority": "now",
@@ -11,5 +11,7 @@
   "fixedOn": "2026-10-01",
   "commits": [
     "610abf1"
-  ]
+  ],
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
 }

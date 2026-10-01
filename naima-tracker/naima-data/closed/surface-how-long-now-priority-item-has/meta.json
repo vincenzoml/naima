@@ -1,7 +1,7 @@
 {
   "id": "d651abd5-0a75-496b-8206-f308926f974d",
   "title": "Surface how long a now-priority item has sat unclaimed",
-  "status": "open",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "later",
@@ -17,5 +17,7 @@
   "commits": [
     "3071c75"
   ],
-  "effort": "S"
+  "effort": "S",
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
 }

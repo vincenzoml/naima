@@ -14,3 +14,9 @@ carry labelled controls, column headers, escaped titles and links to the item
 view; the claims panel is on Home and no panel failed.
 
 Pass: the test green on Deno, Node and Bun.
+
+## Notes
+
+### 2026-10-01 — evidence owner, on claude/evidence-close-6
+
+Re-run: deno test -A test/plugins/ui/ui.test.ts, 12/12 pass including this test. Status was open despite the feature item's note claiming it as proof; backfilled with a real run (ui-test-run-2026-10-01.log).
