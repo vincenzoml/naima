@@ -4,9 +4,10 @@
 // first answer sets — or is refused: another user of the machine, or a page
 // in a browser, cannot read the project through it.
 //
-//   /                     the first view
-//   /view/<name>?…        a view's page: the views as tabs, then the view
-//   /data/<name>?…        a view's data, as JSON
+//   /                     the first screen: every panel, one under the other;
+//                         the first tab when no view is a panel
+//   /view/<name>?…        a view's page: the tabs, then the view
+//   /data/<name>?…        a view's data, as JSON — a panel's too
 //
 // Each request renders the view again from the files: the page is live.
 
@@ -23,8 +24,10 @@ export interface UiView {
   /** Its tab. */
   title: string
   says: string
-  /** Where its tab stands: lower first, 0 when absent; equal ones in load order. */
+  /** Where its tab, or its panel, stands: lower first, 0 when absent; equal ones in load order. */
   order?: number
+  /** Shown on the first screen, beside the other panels, rather than as a tab of its own. */
+  panel?: boolean
   /** The view for these query parameters, rendered from the files at each request: its data, its HTML, and the styles that HTML needs. */
   render(params: Record<string, string[]>, ctx: Context): UiRender | Promise<UiRender>
 }
@@ -59,24 +62,55 @@ const same = (a: string, b: string): boolean => {
 const cookieToken = (req: IncomingMessage): string | undefined =>
   (req.headers.cookie ?? "").split(";").map((c) => c.trim().split("=")).find(([k]) => k === COOKIE)?.[1]
 
-/** The page around a view: the views as tabs, then the view. */
-function page(views: readonly UiView[], current: UiView, body: string, css = ""): string {
-  const tabs = views.map((v) =>
-    `<a href="/view/${encodeURIComponent(v.name)}"${v === current ? ' aria-current="page"' : ""} title="${esc(v.says)}">${esc(v.title)}</a>`
-  )
+/** The first screen's tab. */
+const HOME = { title: "Home", says: "where the project stands: the panels the plugins contribute" }
+
+/** The page around a body: the tabs — the first screen's when there are panels, then every view that is not one — then the body. */
+function page(views: readonly UiView[], current: UiView | null, title: string, body: string, css = ""): string {
+  const link = (href: string, here: boolean, says: string, name: string) =>
+    `<a href="${href}"${here ? ' aria-current="page"' : ""} title="${esc(says)}">${esc(name)}</a>`
+  const tabs = [
+    ...(views.some((v) => v.panel) ? [link("/", current === null || current.panel === true, HOME.says, HOME.title)] : []),
+    ...views.filter((v) => !v.panel).map((v) => link(`/view/${encodeURIComponent(v.name)}`, v === current, v.says, v.title)),
+  ]
   return [
     "<!doctype html>",
     '<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
-    `<title>Naima — ${esc(current.title)}</title>`,
+    `<title>Naima — ${esc(title)}</title>`,
     "<style>",
-    css,
+    "body{font-family:system-ui,sans-serif;margin:16px;line-height:1.4}",
     "nav{display:flex;gap:12px;margin-bottom:12px}nav a{color:inherit}nav a[aria-current]{font-weight:700;text-decoration:none}",
     "form.pick{margin:8px 0 16px}fieldset{border:1px solid #8888;margin:0 0 8px}label{margin-right:10px;white-space:nowrap}",
+    "section.panel{margin:0 0 24px}",
+    css,
     "</style></head><body>",
-    `<nav>${tabs.join("")}</nav>`,
+    `<nav aria-label="Views">${tabs.join("")}</nav>`,
+    "<main>",
     body,
+    "</main>",
     "</body></html>",
   ].join("\n")
+}
+
+/** The first screen: every panel, each rendered now, in a section headed by its title; one that fails says so in its place. */
+async function home(views: readonly UiView[], ctx: Context): Promise<string> {
+  const panels = views.filter((v) => v.panel)
+  const parts = await Promise.all(panels.map(async (v) => {
+    const id = `panel-${v.name}`
+    const head = `<h2 id="${id}"><a href="/view/${encodeURIComponent(v.name)}">${esc(v.title)}</a></h2>`
+    try {
+      const r = await v.render({}, ctx)
+      return { html: `<section class="panel" aria-labelledby="${id}">${head}\n${r.html}</section>`, css: r.css ?? "" }
+    } catch (e) {
+      return {
+        html: `<section class="panel" aria-labelledby="${id}">${head}<p role="alert">This panel failed: ${
+          esc(e instanceof Error ? e.message : String(e))
+        }</p></section>`,
+        css: "",
+      }
+    }
+  }))
+  return page(views, null, HOME.title, ["<h1>Naima</h1>", ...parts.map((p) => p.html)].join("\n"), [...new Set(parts.map((p) => p.css))].join("\n"))
 }
 
 function paramsOf(url: URL): Record<string, string[]> {
@@ -120,6 +154,14 @@ export function serve(
       return send(res, 400, "text/plain", "naima ui: a path that is not one\n", headers)
     }
     const [, kind, name] = parts
+    if (url.pathname === "/" && views.some((v) => v.panel)) {
+      try {
+        ctx.reload()
+        return send(res, 200, "text/html", await home(views, ctx), headers)
+      } catch (e) {
+        return send(res, 500, "text/plain", `naima ui: the first screen failed: ${e instanceof Error ? e.message : String(e)}\n`, headers)
+      }
+    }
     if (url.pathname === "/") {
       const first = views[0]
       if (!first) return send(res, 200, "text/html", "<!doctype html><title>Naima</title><p>No plugin contributes a view.</p>", headers)
@@ -131,7 +173,7 @@ export function serve(
       ctx.reload()
       const r = await view.render(paramsOf(url), ctx)
       if (kind === "data") return send(res, 200, "application/json", JSON.stringify(r.data, null, 2), headers)
-      return send(res, 200, "text/html", page(views, view, r.html, r.css), headers)
+      return send(res, 200, "text/html", page(views, view, view.title, r.html, r.css), headers)
     } catch (e) {
       return send(res, 500, "text/plain", `naima ui: the ${view.name} view failed: ${e instanceof Error ? e.message : String(e)}\n`, headers)
     }

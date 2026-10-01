@@ -1,0 +1,12 @@
+{
+  "branch": "claude/f-u9-dashboard",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "b62da281-24df-4da5-8b87-5a895bf57df2",
+      "ref": "features/dashboard-ui-redesigned-rather-than-ported",
+      "title": "Dashboard UI, redesigned rather than ported"
+    }
+  ],
+  "note": "U9: dashboard first screen"
+}

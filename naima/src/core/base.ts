@@ -28,7 +28,7 @@ import { CONTRACT } from "./contract.ts"
 import { shortOrId } from "./names.ts"
 import { asRendered, type Format, linesAs, rendered } from "./rendered.ts"
 import { flagsOf } from "./vocabulary.ts"
-import type { Command, Context, Contribution, FieldDef, Item, Plugin, SummarySection, TypeDef, View, WriteHook } from "./types.ts"
+import type { Command, Context, Contribution, FieldDef, Item, Plugin, Rendered, SummarySection, TypeDef, View, WriteHook } from "./types.ts"
 
 export function typeOrThrow(ctx: Context, id: string | undefined): TypeDef {
   const type = id ? ctx.registry.types.get(id) : undefined
@@ -457,6 +457,16 @@ const view: Command = {
   },
 }
 
+/** Every plugin's summary section, rendered now, under the name `naima summary` prints it with: what the command and the window both show. */
+export function summarySections(ctx: Context): Promise<{ name: string; rendering: Rendered }[]> {
+  return Promise.all(
+    ctx.registry.contributions("summary").map(async (c) => ({
+      name: shortOrId(ctx, "summary", c),
+      rendering: asRendered(await (c.value as SummarySection).render(ctx), `summary section "${c.name}"`),
+    })),
+  )
+}
+
 const summary: Command = {
   name: "summary",
   says: "where the project stands, in one screen: every plugin's section",
@@ -469,12 +479,7 @@ const summary: Command = {
   async run(args, ctx) {
     const p = parse(args, { json: { type: "boolean" }, markdown: { type: "boolean" } })
     if (bool(p, "json") && bool(p, "markdown")) throw usageError(this)
-    const sections = await Promise.all(
-      ctx.registry.contributions("summary").map(async (c) => ({
-        name: shortOrId(ctx, "summary", c),
-        rendering: asRendered(await (c.value as SummarySection).render(ctx), `summary section "${c.name}"`),
-      })),
-    )
+    const sections = await summarySections(ctx)
     if (bool(p, "json")) {
       ctx.out(JSON.stringify(Object.fromEntries(sections.map((s) => [s.name, s.rendering.data])), null, 2))
       return 0
