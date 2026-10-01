@@ -1,0 +1,17 @@
+{
+  "id": "063883d5-76ab-4edc-99a7-47c759a3215e",
+  "title": "VoxLogicA 2 scheduler case study: description, model, its properties checked, results table",
+  "status": "open",
+  "created": "2026-10-01",
+  "links": [
+    {
+      "rel": "blocks",
+      "id": "6745e159-810e-4bfb-83f0-a53ffb421d7f"
+    }
+  ],
+  "gate": "paper-submission",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01"
+}

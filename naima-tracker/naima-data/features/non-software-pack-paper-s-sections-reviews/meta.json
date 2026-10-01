@@ -1,0 +1,16 @@
+{
+  "id": "33bc6bed-2d54-454c-92a6-5e9895f361b9",
+  "title": "Non-software pack: a paper's sections and reviews",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "unclear",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "a47c22cd-21fd-4b08-8be6-e978851b6da5"
+    }
+  ]
+}

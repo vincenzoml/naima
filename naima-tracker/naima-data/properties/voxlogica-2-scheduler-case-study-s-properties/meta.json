@@ -1,0 +1,17 @@
+{
+  "id": "79507bea-b3c7-41e7-983b-13aa231cf2f0",
+  "title": "The VoxLogicA 2 scheduler case study's properties (stated when the case study is built)",
+  "status": "open",
+  "created": "2026-10-01",
+  "links": [
+    {
+      "rel": "blocks",
+      "id": "6745e159-810e-4bfb-83f0-a53ffb421d7f"
+    }
+  ],
+  "gate": "paper-submission",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "75cd527c-0abf-4385-87d8-eb255b204bcf",
+  "title": "Abstract of the Naima paper final, including one sentence of case-study result",
+  "status": "open",
+  "created": "2026-10-01",
+  "links": [
+    {
+      "rel": "blocks",
+      "id": "6745e159-810e-4bfb-83f0-a53ffb421d7f"
+    }
+  ],
+  "gate": "paper-submission",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01"
+}

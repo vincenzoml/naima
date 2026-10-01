@@ -13,6 +13,11 @@
             "title": "First public release",
             "says": "The repository opens to the public: licence chosen, Naima tracking itself through its own lock, the agent flows written.",
             "holdsOn": "code"
+          },
+          "paper-submission": {
+            "title": "Naima paper submitted",
+            "says": "Every pre-submission checklist line of the paper's README is done before the paper deadline.",
+            "due": "2026-10-28"
           }
         }
       }
