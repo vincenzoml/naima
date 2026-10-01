@@ -14,5 +14,6 @@
   "priority": "later",
   "confidence": "reported",
   "triagedOn": "2026-10-01",
-  "runBy": "agent"
+  "runBy": "agent",
+  "effort": "M"
 }

@@ -21,8 +21,9 @@ other work are [planned](../planned.md#item-types-for-other-work).
 No: Naima has no server and no account. The board is `naima board <type>`,
 and `naima summary --markdown` prints the state of the project as markdown
 you can paste anywhere. `naima ui` opens a window on your machine whose first
-screen shows the summary, the gates and what is next; a fuller dashboard is
-[planned](../planned.md#design-skills-and-a-dashboard).
+screen shows the summary, the gates, what is next and who holds what; its
+tabs show the boards, the session notes and each item with its evidence. A
+look of its own is [planned](../planned.md#design-skills-and-a-dashboard).
 
 ## Where is my data? Does anything leave my machine?
 

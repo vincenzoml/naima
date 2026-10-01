@@ -1,7 +1,7 @@
 {
   "id": "92552bf4-de93-402e-933d-233e41f21228",
   "title": "Coordination-protocol properties filed as property items in Naima and verified by the mCRL2 verifier plugin",
-  "status": "open",
+  "status": "partial",
   "created": "2026-10-01",
   "links": [
     {
@@ -14,5 +14,7 @@
   "priority": "later",
   "confidence": "reported",
   "triagedOn": "2026-10-01",
-  "runBy": "agent"
+  "runBy": "human",
+  "humanBecause": "decision",
+  "effort": "L"
 }

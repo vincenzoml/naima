@@ -64,10 +64,10 @@ running the checklist on its own, unprompted, at a project's first commit.
 - **A dashboard**: a visual page of the project's state — boards, gates, the
   ranked queue, claims and notes across branches, the evidence attached to
   each item, in a look of its own. **Today:** `naima ui` opens a window whose
-  first screen shows the summary, the gates and what is next, with the
-  metrics, the timeline and the coverage as tabs, and plugins can add panels
-  and tabs beside them; the boards, the claims and notes across branches and
-  the evidence have no view of their own yet, and the look is plain; and
+  first screen shows the summary, the gates, what is next and the claims
+  across branches, with the boards, the metrics, the timeline, the coverage,
+  the session notes across branches and each item with its evidence as tabs,
+  and plugins can add panels and tabs beside them; the look is plain; and
   `naima summary --markdown` prints the state as text you can paste anywhere.
 
 ## A pointer in the agent's instruction file

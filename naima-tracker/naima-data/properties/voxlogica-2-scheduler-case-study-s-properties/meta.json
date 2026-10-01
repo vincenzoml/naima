@@ -24,5 +24,6 @@
   "verifierOptions": {
     "timeoutSeconds": 600
   },
-  "lastRun": "run-2026-10-01T18-31-43-186Z.json"
+  "lastRun": "run-2026-10-01T18-31-43-186Z.json",
+  "effort": "S"
 }

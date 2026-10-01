@@ -20,3 +20,9 @@ The model lives in this repository and is filed as a property item, so
 - [ ] write the model
 - [ ] file each property as a `properties` item pointing at it
 - [ ] verify with the mCRL2 adapter
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/big-mcrl2-model
+
+Dropped as a duplicate of todos/mcrl2-model-coordination-protocol-complete-checked-negative (the mCRL2 model of the coordination protocol, with the negative experiment), which now carries this page's protocol description and candidate properties. Its slug still says TLA from before the switch to mCRL2.

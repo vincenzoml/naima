@@ -20,6 +20,10 @@ abstract's sentence cites.
 
 ## Notes
 
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read naima-paper/sections/casestudy.tex in full: modeling the scheduler, checking four properties, building the evidence trail in Naima and producing a results table is the paper's heaviest open section.
+
 ### 2026-10-01 — Vincenzo Ciancia, on claude/big-voxlogica-case
 
 Built on branch claude/big-voxlogica-case. The model, formulas, negative variants and description are in develop/case-studies/voxlogica-2-scheduler/; the four property items are filed and wired to verifier-mcrl2, which is now switched on in naima.json.

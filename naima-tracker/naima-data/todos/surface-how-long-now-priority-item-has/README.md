@@ -16,3 +16,7 @@ past a configurable age with nobody holding it.
 ### 2026-10-01 — claude, on claude/f-u2-age
 
 Implemented: naima view next carries an age column (days since triagedOn, or created) and marks an unclaimed now item; added check unclaimed-now-item-aging (options.maxNowAgeDays, default 3). Proven by tests/view-next-s-age-column-unclaimed-now. Gates green: deno task verify, node --test, bun test --timeout 30000.
+
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read the item's note and commit 3071c75 (naima view next age column, check unclaimed-now-item-aging): a small, contained, already-shipped feature.

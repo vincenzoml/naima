@@ -23,7 +23,7 @@ import {
   today,
   type WriteOptions,
 } from "./item.ts"
-import { byUrgency, isOpen, label } from "./lifecycle.ts"
+import { byUrgency, isEvidenceType, isOpen, label, proves, refutes } from "./lifecycle.ts"
 import { CONTRACT } from "./contract.ts"
 import { shortOrId } from "./names.ts"
 import { asRendered, type Format, linesAs, rendered } from "./rendered.ts"
@@ -152,29 +152,95 @@ const newCommand: Command = {
   },
 }
 
+/** A link of an item, as `naima show --json` gives it: the other end's title and status, and whether it is evidence — an item of a type that can prove — and proves or refutes now. */
+export interface ItemLink {
+  rel: string
+  /** What the relation says, read from this item's side. */
+  says: string
+  id: string
+  /** The other end, or null when it is not in the tracker. */
+  ref: string | null
+  title: string | null
+  status: string | null
+  /** Derived from the other end's stored link, not stored on this item. */
+  implied: boolean
+  evidence: boolean
+  proves: boolean
+  refutes: boolean
+}
+
+/** One item, as `naima show --json` prints it and the window's item view shows it: its fields, its links both ways, its attachments, its prose. */
+export interface ItemData {
+  id: string
+  ref: string
+  type: string
+  title: string
+  status: string
+  /** Every other field of meta.json, as stored. */
+  fields: Record<string, unknown>
+  links: ItemLink[]
+  /** The files of its attachments/ directory: the evidence attached to it. */
+  attachments: string[]
+  readme: string
+}
+
+/** One item, read now: what `naima show` prints. */
+export function itemData(ctx: Context, item: Item): ItemData {
+  const { id, title, status, links: _links, ...fields } = item.meta
+  const att = join(item.dir, ATTACHMENTS)
+  return {
+    id,
+    ref: label(item),
+    type: item.type,
+    title,
+    status,
+    fields,
+    links: ctx.repo.linksOf(item).map((l) => {
+      const other = ctx.repo.byId.get(l.id)
+      return {
+        rel: l.rel,
+        says: ctx.registry.relations.get(l.rel)?.says ?? l.rel,
+        id: l.id,
+        ref: other ? label(other) : null,
+        title: other?.meta.title ?? null,
+        status: other?.meta.status ?? null,
+        implied: l.implied === true,
+        evidence: other ? isEvidenceType(ctx, other.type) : false,
+        proves: other ? proves(ctx, other) : false,
+        refutes: other ? refutes(ctx, other) : false,
+      }
+    }),
+    attachments: existsSync(att) ? readdirSync(att).filter((f) => !f.startsWith(".")).sort() : [],
+    readme: readReadme(item).trimEnd(),
+  }
+}
+
 const show: Command = {
   name: "show",
   says: "print one item: fields, links in both directions, attachments, prose",
   enforces: "nothing: it only reads",
-  usage: "show <item>",
-  examples: ["show export-drops", "show bugs/export-drops-alpha-channel"],
+  usage: "show <item> [--json]",
+  options: [{
+    name: "--json",
+    says:
+      "print the item as JSON: its fields, its links with the other end's title and status and whether it is evidence that proves or refutes, its attachments, its prose",
+  }],
+  examples: ["show export-drops", "show bugs/export-drops-alpha-channel", "show export-drops --json"],
   run(args, ctx) {
-    const ref = parse(args).positionals[0]
+    const p = parse(args, { json: { type: "boolean" } })
+    const ref = p.positionals[0]
     if (!ref?.trim()) throw usageError(this)
-    const item = ctx.repo.resolve(ref)
-    const { id, title, status, links: _links, ...rest } = item.meta
-    ctx.out(`${title}\n${label(item)}  ${id}  [${status}]`)
-    for (const [k, v] of Object.entries(rest)) ctx.out(`  ${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`)
-    for (const l of ctx.repo.linksOf(item)) {
-      const other = ctx.repo.byId.get(l.id)
-      const says = ctx.registry.relations.get(l.rel)?.says ?? l.rel
-      ctx.out(`  ${says} ${other ? `${label(other)} [${other.meta.status}]` : l.id}${l.implied ? "  (inverse)" : ""}`)
+    const d = itemData(ctx, ctx.repo.resolve(ref))
+    if (bool(p, "json")) {
+      ctx.out(JSON.stringify(d, null, 2))
+      return 0
     }
-    const att = join(item.dir, ATTACHMENTS)
-    const files = existsSync(att) ? readdirSync(att).filter((f) => !f.startsWith(".")) : []
-    if (files.length) ctx.out(`  attachments: ${files.join(", ")}`)
+    ctx.out(`${d.title}\n${d.ref}  ${d.id}  [${d.status}]`)
+    for (const [k, v] of Object.entries(d.fields)) ctx.out(`  ${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`)
+    for (const l of d.links) ctx.out(`  ${l.says} ${l.ref ? `${l.ref} [${l.status}]` : l.id}${l.implied ? "  (inverse)" : ""}`)
+    if (d.attachments.length) ctx.out(`  attachments: ${d.attachments.join(", ")}`)
     ctx.out("")
-    ctx.out(readReadme(item).trimEnd())
+    ctx.out(d.readme)
     return 0
   },
 }
@@ -391,19 +457,51 @@ const check: Command = {
   },
 }
 
+/** An item on a board, as `naima board --json` gives it. */
+export interface BoardRow {
+  id: string
+  ref: string
+  title: string
+  status: string
+}
+
+/** A type's board, as `naima board --json` prints it and the window's board view shows it: its open items by section, most urgent first; its done ones when asked for. */
+export interface BoardData {
+  type: string
+  title: string
+  open: number
+  done: number
+  /** The open items by section, sections by name, the items with none last under "". */
+  sections: { section: string; items: BoardRow[] }[]
+  /** The done items, with --all; absent otherwise. */
+  closed?: BoardRow[]
+}
+
 /** A board is derived on demand and never stored. */
-export function renderBoard(ctx: Context, type: TypeDef, all: boolean): string[] {
+export function boardData(ctx: Context, type: TypeDef, all: boolean): BoardData {
   const items = ctx.repo.items.filter((i) => i.type === type.id)
   const open = byUrgency(ctx, items.filter((i) => isOpen(ctx, i)))
-  const out = [`# ${type.title}`, "", `${open.length} open, ${items.length - open.length} done`]
-  const sections = groupBy(open, (item) => fieldValue(item, SECTION) ?? "")
-  for (const [section, group] of [...sections].sort(([a], [b]) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b)))) {
-    out.push("", `## ${section || "(no section)"}`, ...group.map(line))
+  const row = (i: Item): BoardRow => ({ id: i.meta.id, ref: label(i), title: i.meta.title, status: i.meta.status })
+  const sections = [...groupBy(open, (item) => fieldValue(item, SECTION) ?? "")]
+    .sort(([a], [b]) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b)))
+    .map(([section, group]) => ({ section, items: group.map(row) }))
+  return {
+    type: type.id,
+    title: type.title,
+    open: open.length,
+    done: items.length - open.length,
+    sections,
+    ...(all ? { closed: items.filter((i) => !isOpen(ctx, i)).map(row) } : {}),
   }
-  if (all) {
-    const done = items.filter((i) => !isOpen(ctx, i))
-    if (done.length) out.push("", "## done", ...done.map(line))
-  }
+}
+
+const boardLine = (r: BoardRow): string => `  ${r.status.padEnd(9)} ${r.title}  — ${r.ref}`
+
+export function renderBoard(ctx: Context, type: TypeDef, all: boolean): string[] {
+  const d = boardData(ctx, type, all)
+  const out = [`# ${d.title}`, "", `${d.open} open, ${d.done} done`]
+  for (const s of d.sections) out.push("", `## ${s.section || "(no section)"}`, ...s.items.map(boardLine))
+  if (d.closed?.length) out.push("", "## done", ...d.closed.map(boardLine))
   return out
 }
 
@@ -423,12 +521,20 @@ const board: Command = {
   name: "board",
   says: "print a type's board, grouped by section, most urgent first; at its foot, the summary sections that stand beside the work, such as the metrics",
   enforces: "nothing: it prints derived state, never stored",
-  usage: "board <type> [--all]",
-  options: [{ name: "--all", says: "also list the items whose status is done" }],
-  examples: ["board bugs", "board todos --all"],
+  usage: "board <type> [--all] [--json]",
+  options: [
+    { name: "--all", says: "also list the items whose status is done" },
+    { name: "--json", says: "print the board as JSON: the open items by section, most urgent first, and the done ones with --all; the foot is the summary's" },
+  ],
+  examples: ["board bugs", "board todos --all", "board bugs --json"],
   async run(args, ctx) {
-    const p = parse(args, { all: { type: "boolean" } })
-    for (const l of renderBoard(ctx, typeOrThrow(ctx, p.positionals[0]), bool(p, "all"))) ctx.out(l)
+    const p = parse(args, { all: { type: "boolean" }, json: { type: "boolean" } })
+    const type = typeOrThrow(ctx, p.positionals[0])
+    if (bool(p, "json")) {
+      ctx.out(JSON.stringify(boardData(ctx, type, bool(p, "all")), null, 2))
+      return 0
+    }
+    for (const l of renderBoard(ctx, type, bool(p, "all"))) ctx.out(l)
     for (const l of await alongside(ctx)) ctx.out(l)
     return 0
   },

@@ -4,7 +4,9 @@
 // metrics view picks metrics and a commit range; a plugin's view appears as a
 // tab without the ui plugin knowing it; the first screen holds the summary,
 // the gates and what is next, each panel's data what the command prints with
-// --json for the same tree.
+// --json for the same tree; beyond it, the boards, the claims and the session
+// notes across branches, and an item with its evidence, each view's data what
+// its command prints with --json.
 
 import assert from "node:assert/strict"
 import { networkInterfaces } from "node:os"
@@ -14,6 +16,8 @@ import { firstPartyPlugins } from "../../../naima/src/builtins.ts"
 import { BROWSER_OPENER, permissions, uiGrant } from "../../../naima/src/launcher.ts"
 import ui, { runUi, serve, type UiDeps, type UiView, viewsOf } from "../../../naima/src/plugins/ui/index.ts"
 import { browserCommand, denoDir, type Opened, WEBVIEW, windowCommand, windowUnavailable } from "../../../naima/src/plugins/ui/open.ts"
+import { mkdirSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
 import { tempProject } from "../../core/testing.ts"
 
 const hello: UiView = {
@@ -77,10 +81,14 @@ test("a view a plugin contributes is a tab, without the ui plugin knowing that p
     const views = viewsOf(p.ctx)
     assert.deepEqual(
       views.filter((v) => !v.panel).map((v) => v.name),
-      ["metrics", "hello", "timeline", "coverage"],
+      ["metrics", "hello", "board", "timeline", "coverage", "notes", "item"],
       "a later order puts a tab after, whatever the load order",
     )
-    assert.deepEqual(views.filter((v) => v.panel).map((v) => v.name), ["summary", "gates", "next"], "the first screen: summary, gates, next up")
+    assert.deepEqual(
+      views.filter((v) => v.panel).map((v) => v.name),
+      ["summary", "gates", "next", "claims"],
+      "the first screen: summary, gates, next up, claims",
+    )
   } finally {
     p.cleanup()
   }
@@ -165,6 +173,97 @@ test("the first screen shows the summary, the gates and what is next; each panel
     // a panel is a page of its own too, under the Home tab
     const one = await (await fetch(`${base}/view/gates?token=${served.token}`)).text()
     assert.match(one, /<a href="\/" aria-current="page"/)
+  } finally {
+    await served.close()
+    p.cleanup()
+  }
+})
+
+test("beyond the first screen: boards, claims and session notes across branches, an item's evidence; each view's data is its command's --json", async () => {
+  const p = tempProject(firstPartyPlugins(), { git: true })
+  const served = await serve(p.ctx, viewsOf(p.ctx))
+  try {
+    for (const t of ["Export drops rows", "Crash on <empty> input"]) assert.equal(await p.run("new", "bugs", t), 0)
+    assert.equal(await p.run("new", "tests", "Export keeps rows"), 0)
+    const titled = (t: string) => p.ctx.repo.items.find((i) => i.meta.title === t)!
+    const [bug, crash, proof] = [titled("Export drops rows"), titled("Crash on <empty> input"), titled("Export keeps rows")]
+    assert.equal(await p.run("link", proof.meta.id, "verifies", bug.meta.id), 0)
+    assert.equal(await p.run("set", proof.meta.id, "status=passed", "evidenceKind=observation"), 0)
+    mkdirSync(join(bug.dir, "attachments"), { recursive: true })
+    writeFileSync(join(bug.dir, "attachments", "run.log"), "ok\n")
+    // a claim and a note on another branch, committed there; a claim and a note on the trunk's working tree
+    p.git("add", "-A")
+    p.git("commit", "-q", "-m", "items")
+    p.git("switch", "-q", "-c", "fix/export")
+    assert.equal(await p.run("claim", bug.meta.id, "--note", "rows <lost> on export"), 0)
+    assert.equal(await p.run("pass", "Export: the rows come back."), 0)
+    p.git("add", "-A")
+    p.git("commit", "-q", "-m", "claim")
+    p.git("switch", "-q", "main")
+    assert.equal(await p.run("claim", crash.meta.id, bug.meta.id), 0)
+    assert.equal(await p.run("pass", "Crash: <empty> input reproduced."), 0)
+    p.ctx.reload()
+    const cli = async (command: string, ...args: string[]) => {
+      p.output.length = 0
+      assert.equal(await p.run(command, ...args), 0)
+      return JSON.parse(p.output.join("\n"))
+    }
+    const base = `http://${served.host}:${served.port}`
+    const get = async (path: string) => {
+      const r = await fetch(`${base}${path}${path.includes("?") ? "&" : "?"}token=${served.token}`)
+      assert.equal(r.status, 200, path)
+      return r
+    }
+    const data = async (path: string) => await (await get(`/data/${path}`)).json()
+    const html = async (path: string) => await (await get(`/view/${path}`)).text()
+
+    // the boards: one type at a time, picked by a labelled control; done items with all=1
+    assert.deepEqual(await data("board"), await cli("board", "bugs", "--json"), "the first type's board when none is picked")
+    assert.deepEqual(await data("board?type=tests&all=1"), await cli("board", "tests", "--all", "--json"))
+    const board = await data("board?type=bugs") as { type: string; open: number; sections: { items: { title: string }[] }[] }
+    assert.deepEqual([board.type, board.open], ["bugs", 2])
+    const bp = await html("board?type=bugs")
+    assert.match(bp, /<label for="board-type">Type<\/label>\s*<select id="board-type" name="type">/)
+    assert.match(bp, /<option value="bugs" selected>/)
+    assert.match(bp, /<th scope="col">Status<\/th>/)
+    assert.match(bp, /Crash on &lt;empty&gt; input/, "titles are escaped")
+    assert.match(bp, new RegExp(`<a href="/view/item\\?item=${bug.meta.id}">`), "an item links to its evidence")
+    assert.match(bp, /<nav aria-label="Views">[^\n]*<a href="\/view\/board" aria-current="page"/)
+
+    // the claims, across branches: a panel of the first screen
+    const claims = await data("claims") as { claims: { branch: string; items: { id: string }[] }[]; contested: { id: string; branches: string[] }[] }
+    assert.deepEqual(claims, await cli("claims", "--json"))
+    assert.deepEqual(claims.claims.map((c) => c.branch).sort(), ["fix/export", "main"])
+    assert.deepEqual(claims.contested.map((c) => [c.id, c.branches.sort()]), [[bug.meta.id, ["fix/export", "main"]]])
+    const home = await (await fetch(served.url)).text()
+    assert.match(home, /<section class="panel" aria-labelledby="panel-claims">/)
+    assert.match(home, /rows &lt;lost&gt; on export/)
+    assert.doesNotMatch(home, /This panel failed/)
+
+    // the session notes, across branches, newest first
+    assert.deepEqual(await data("notes"), await cli("pass", "--list", "--json"))
+    assert.deepEqual(await data("notes?n=1"), await cli("pass", "--list", "1", "--json"))
+    const notes = await data("notes") as { branch: string }[]
+    assert.deepEqual(notes.map((n) => n.branch).sort(), ["fix/export", "main"])
+    assert.match(await html("notes"), /Crash: &lt;empty&gt; input reproduced\./)
+
+    // an item and its evidence: the attachments, and the items that verify it, with whether each proves
+    const item = await data(`item?item=${bug.meta.id}`) as {
+      ref: string
+      attachments: string[]
+      links: { id: string; proves: boolean; refutes: boolean; evidence: boolean }[]
+    }
+    assert.deepEqual(item, await cli("show", bug.meta.id, "--json"))
+    assert.deepEqual(item.attachments, ["run.log"])
+    assert.deepEqual(item.links.filter((l) => l.evidence).map((l) => [l.id, l.proves, l.refutes]), [[proof.meta.id, true, false]])
+    const ip = await html(`item?item=${bug.meta.id}`)
+    assert.match(ip, /<h2 id="evidence">Evidence<\/h2>/)
+    assert.match(ip, /Export keeps rows/)
+    assert.match(ip, /run\.log/)
+    assert.match(ip, /<label for="item-ref">Item<\/label>/, "another item can be picked")
+    assert.equal(await data("item"), null, "no item picked: no data")
+    const missing = await fetch(`${base}/view/item?item=nothing&token=${served.token}`)
+    assert.equal(missing.status, 500)
   } finally {
     await served.close()
     p.cleanup()
