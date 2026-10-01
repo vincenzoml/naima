@@ -245,10 +245,10 @@ number it is compared to, shown as a trend, and usable as a gate.
 600 seconds, and a release waits if they get slower.
 
 **Today:** `naima metrics run --record`, budgets, floors and baselines, a
-ratchet that only lets a number improve, and `naima metrics trend`
-([metrics and budgets](guide/metrics-and-budgets.md)). Code-quality metrics
-side by side with tests, and measuring on every commit without being asked,
-are [planned](planned.md#metrics).
+ratchet that only lets a number improve, code-quality metrics built in
+(complexity, duplication, coverage and more) shown beside the tests, a
+backfill of past commits, and the trend as text, a table or a chart over the
+commit timeline ([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ### Structuring a project from the start (planned)
 
