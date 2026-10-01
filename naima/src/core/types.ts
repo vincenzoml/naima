@@ -134,6 +134,8 @@ export interface Check {
   says: string
   /** May be async: a check that runs an external tool awaits it. */
   run(ctx: Context): Finding[] | Promise<Finding[]>
+  /** True for a check that reads only the change staged for the next commit: `naima check --staged`, what a pre-commit hook runs, runs these alone. */
+  staged?: boolean
 }
 
 /** One documented option: a command's `--flag`, or a plugin's configuration key. */

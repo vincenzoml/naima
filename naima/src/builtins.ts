@@ -9,6 +9,7 @@ import docs from "./plugins/docs/index.ts"
 import epics from "./plugins/epics/index.ts"
 import coordination from "./plugins/coordination/index.ts"
 import gates from "./plugins/gates/index.ts"
+import hooks from "./plugins/hooks/index.ts"
 import loop from "./plugins/loop/index.ts"
 import metrics from "./plugins/metrics/index.ts"
 import planning from "./plugins/planning/index.ts"
@@ -33,6 +34,7 @@ export const firstParty: readonly FirstParty[] = [
   { name: "ui", factory: ui },
   { name: "metrics", factory: metrics },
   { name: "rules", factory: rules },
+  { name: "commit-hooks", factory: hooks },
   { name: "privacy", factory: privacy },
   { name: "docs", factory: docs },
 ]

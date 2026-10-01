@@ -105,7 +105,7 @@ The core's points, each also a typed key of the manifest:
 | `fields` | fields with a kind (`string`, `strings`, `date`, `enum`, `boolean`, `number`, `object`), enum values in rank order — or `valuesFrom` a point, and `multiple` for several — and the types they apply to, by name (`appliesTo`) or by trait (`traits`); `configured: true` when the values come from the project's configuration, so the program's reference does not list them |
 | `extends` | additive changes to another plugin's types and fields ([extending](#extending-another-plugins-types-and-fields)) |
 | `relations` | link relations; each names its inverse, which must also be declared |
-| `checks` | `run(ctx) → Finding[]`, or a promise of them; `problem` fails `naima check`, `note` does not; the project may weigh each one `off`, `note` or `problem` ([check severity](../guide/config.md#check-severity)) |
+| `checks` | `run(ctx) → Finding[]`, or a promise of them; `problem` fails `naima check`, `note` does not; the project may weigh each one `off`, `note` or `problem` ([check severity](../guide/config.md#check-severity)); `staged: true` for one that reads only the change staged for the next commit, which `naima check --staged` — what the pre-commit hook runs — runs alone ([commit hooks](../guide/commit-hooks.md)) |
 | `views` | `naima view <name>`: a named rendering of derived state, `render(args, ctx) → { data, text() }` ([below](#views-and-summaries)) |
 | `dirs` | directories under the tracker root the plugin owns that are not item types |
 | `summary` | a block of `naima summary`, `render(ctx) → { data, text() }` |

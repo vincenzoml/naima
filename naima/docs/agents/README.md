@@ -50,7 +50,7 @@ them, and Naima's own repository does.
 | [Worker protocol](worker-protocol.md) | the report shape every worker owes the coordinator, and how finished workers are merged together |
 | [Opening a worktree](opening-a-worktree.md) | starting a piece of work |
 | [Closing a worktree](closing-a-worktree.md) | before a branch is merged |
-| [Commit messages](commit-messages.md) | writing the message for any commit |
+| [Commit messages](commit-messages.md) | writing the message for any commit, and the records a change must carry in it |
 | [Reporting and triage](reporting-and-triage.md) | when something is said, seen or found |
 | [Planning: epics, milestones and gates](plan-with-epics-and-gates.md) | when the owner names a body of work, a release or a date |
 | [The non-stop loop](the-non-stop-loop.md) | when work should go on while the owner is away, until only the owner's is left |

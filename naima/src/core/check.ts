@@ -161,10 +161,14 @@ export interface CheckReport {
   notes: Finding[]
 }
 
-/** Run every check, in load order, awaiting the ones that are async. A check that throws or rejects is itself a problem, never a crash. */
-export async function runChecks(ctx: Context): Promise<CheckReport> {
+/**
+ * Run every check, in load order, awaiting the ones that are async — with `staged`, only those that read the
+ * change staged for the next commit. A check that throws or rejects is itself a problem, never a crash.
+ */
+export async function runChecks(ctx: Context, opts: { staged?: boolean } = {}): Promise<CheckReport> {
   const findings: Finding[] = []
   for (const check of ctx.registry.checks) {
+    if (opts.staged && check.staged !== true) continue
     try {
       findings.push(...await check.run(ctx))
     } catch (e) {

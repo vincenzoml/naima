@@ -1,0 +1,16 @@
+{
+  "branch": "claude/u14-commit-hook",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "3d7f3d91-ba0d-4e80-b000-e0ddb9980eda",
+      "ref": "features/companion-records-required-same-commit",
+      "title": "Companion records required in the same commit"
+    },
+    {
+      "id": "bf49a723-ba10-44f7-8806-4194659f361f",
+      "ref": "features/path-scoped-pre-commit-hook-naima-hooks",
+      "title": "Path-scoped pre-commit hook (`naima hooks install`)"
+    }
+  ]
+}
