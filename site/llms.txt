@@ -38,6 +38,8 @@ deno run -A naima-tracker/naima/naima.ts check
 
 ## More
 
-- Installing and updating: https://github.com/vincenzoml/naima/blob/main/docs/install.md
-- Using Naima in a project: https://github.com/vincenzoml/naima/blob/main/docs/using-naima.md
+- For agents, how to learn a project and the flows: https://github.com/vincenzoml/naima/blob/main/docs/agents/README.md
+- The rules every project holds to: https://github.com/vincenzoml/naima/blob/main/docs/guide/rules.md
+- Installing and updating: https://github.com/vincenzoml/naima/blob/main/docs/guide/install.md
+- The guide for people, with a tutorial: https://github.com/vincenzoml/naima/blob/main/docs/guide/README.md
 - Source: https://github.com/vincenzoml/naima

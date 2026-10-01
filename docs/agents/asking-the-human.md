@@ -1,8 +1,7 @@
 # Asking the human
 
-> **Don't ask the human if you know the answer.**
-
-Decide, act, report. The owner's attention is the most expensive resource in
+How to keep [the rule](../guide/rules.md#dont-ask-the-human-if-you-know-the-answer):
+don't ask the human if you know the answer. Decide, act, report. The owner's attention is the most expensive resource in
 the project: every question spends it, and a question an agent could have
 answered spends it for nothing.
 
@@ -42,8 +41,7 @@ Everything else is an agent's. In particular:
 ## When you hand work to a person
 
 An item whose proof only a person can perform carries `runBy: human` **and**
-`humanBecause: <reason>`. `naima check` fails on the first without the second
-(`human-says-why`), and `naima queue --human` prints each item with its
+`humanBecause: <reason>` ([the rule](../guide/rules.md#work-handed-to-a-person-says-why)), and `naima queue --human` prints each item with its
 reason, so a list handed to the owner says, line by line, why each is theirs.
 
 Both mistakes cost:

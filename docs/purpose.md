@@ -120,7 +120,7 @@ checks `documented` (every contribution carries its documentation),
 (the generated reference matches the code).
 
 **agent-rules-checked.** Where a rule for people and agents can be checked,
-it is ([enforced, not only written](agents/README.md#enforced-not-only-written)):
+it is ([the rules](guide/rules.md), each marked enforced or convention):
 a person is asked only for what is theirs, a fix names the gesture that
 proves it, a branch does not close what it claims on its own tests. Held by:
 the checks `human-says-why`, `fix-names-its-gesture` (a note) and

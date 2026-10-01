@@ -1,12 +1,28 @@
 # The documentation rule
 
-> **Features are documented always, as part of their implementation.**
+The rule, for every project that uses Naima, is on the rules page:
+[features are documented as part of their implementation](../guide/rules.md#features-are-documented-as-part-of-their-implementation),
+for people and for agents. This page says how Naima's own repository keeps
+it, and how `naima check` holds it in any project.
 
-A feature is not done until its documentation is in the same change. This
-repository follows the rule, and any project that uses Naima can switch it on
-by loading the `docs` plugin; `naima check` then holds it in three places.
+## Where a feature of Naima is documented
 
-## 1. The manifests
+A feature of Naima is documented in the same change that implements it, in
+three places, each for its reader:
+
+| For | Where | What it says |
+|---|---|---|
+| people, who never read the code | [`docs/guide/`](../guide/README.md) | the task it serves, step by step, on the how-to page for that task (a new one when no page fits), its terms in the [glossary](../guide/glossary.md), and its rule on the [rules page](../guide/rules.md) when it adds or enforces one |
+| agents | [`docs/agents/`](../agents/README.md) and the [skill](../../skills/naima/SKILL.md) | what an agent must do differently: the flow that changes, or a pointer the skill needs; never a copy of a rule |
+| everyone looking something up | the [reference](../reference/reference.md), generated | every command, option, type, status, field, check and gate, from the manifests, regenerated with `deno task docs` |
+
+The feature's item names those pages in `docs` when it ships.
+
+## How `naima check` holds it
+
+In any project, in three places; the `docs` plugin is always loaded.
+
+### 1. The manifests
 
 Every contribution of every loaded plugin carries its documentation in the
 manifest that implements it, and the `documented` check fails on one that
@@ -27,7 +43,7 @@ when the file differs from what the code generates, so the reference cannot
 drift. In this repository the working tree runs that check (see [Naima tracking itself](bootstrap.md#why-the-reference-is-checked-by-the-working-tree)),
 and the generated file is [reference.md](../reference/reference.md).
 
-## 2. The tracker
+### 2. The tracker
 
 An item of a feature type (`features` by default) in a documented status
 (`shipped` by default) names its documentation in `docs`:
@@ -40,7 +56,7 @@ Each entry is a path from the project root, optionally `#heading`. The
 `features-documented` check fails when a shipped feature names nothing, or
 when a named file or heading does not exist.
 
-## 3. The prose
+### 3. The prose
 
 The `links-resolve` check follows every relative link in every markdown file
 git tracks (or would track), and fails on any that does not resolve —

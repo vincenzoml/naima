@@ -1,7 +1,9 @@
 # Worktree isolation
 
 A system requirement, not a preference: every other flow is written to obey
-it, and a procedure that violates it is a defect in the procedure.
+it, and a procedure that violates it is a defect in the procedure. Each rule
+below is stated on [the rules page](../guide/rules.md#branches-and-worktrees),
+marked enforced or convention; this page says why, and how.
 
 ## The five rules
 

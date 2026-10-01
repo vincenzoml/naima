@@ -54,17 +54,20 @@ When it says the source's dist moved, run `naima update`, then `naima check`,
 then commit `naima-tracker/` as one change. Updating is your job, not a
 person's: [updating](../../docs/guide/install.md#updating).
 
-## 4. Work by the flows
+## 4. Work by the rules and the flows
 
-Every change to the tracker goes through the CLI (`naima new`, `set`, `link`,
-`claim`, `close`); `naima check` must pass before a commit. What to do, and
-when, is in the flows — read the one that applies before acting. They are
-plain files in the clone; `naima guide` prints where:
+Read the rules before acting, then the flow that applies. They are plain
+files in the clone; `naima guide` prints where:
 
-- [the flows, and when each applies](../../docs/agents/README.md)
+- [the rules](../../docs/guide/rules.md): every rule a project holds to, each
+  marked enforced by a check or kept by convention — read them; they are
+  written there and nowhere else
+- [for agents](../../docs/agents/README.md): how an agent learns a project, and
+  the flows, with when each applies
 - [concepts](../../docs/guide/concepts.md): items, links, fixed / resolved / closed
 - [the format](../../docs/reference/format.md): every file and field
 - [reference](../../docs/reference/reference.md): every command, type, status, field and gate
+- [glossary](../../docs/guide/glossary.md): every term, defined once
 
 `naima help` lists the commands of the Naima in use; `naima summary` says where
 the project stands.

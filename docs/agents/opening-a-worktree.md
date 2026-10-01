@@ -1,7 +1,8 @@
 # Opening a worktree
 
 Starting a piece of work. Four steps; the requirement they obey is
-[worktree isolation](worktree-isolation.md).
+[worktree isolation](worktree-isolation.md), and the rules they apply are on
+[the rules page](../guide/rules.md).
 
 ## 1. The work has an item
 

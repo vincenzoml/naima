@@ -1,8 +1,36 @@
-# Flows for people and AI agents
+# For agents
 
-The written procedures for working on a project that Naima tracks, when some
-or all of the work is done by agents. They are general: any project that
-adopts Naima can adopt them, and this repository follows them itself.
+Pages for an AI agent working on a project that Naima tracks. A person
+using Naima reads [the guide](../guide/README.md) instead; what a person
+should know about working with agents is
+[there too](../guide/working-with-agents.md).
+
+## How an agent learns a project
+
+1. **Load the skill**, [`skills/naima/SKILL.md`](../../skills/naima/SKILL.md)
+   in the program directory: it says how to install or align Naima, to update
+   at the start of a session, and where everything else is
+   ([the Naima skill](skill.md)).
+2. **Read [the rules](../guide/rules.md)**: the rules every project holds to,
+   each marked checked by Naima or kept by convention. They are written there
+   and nowhere else; the flows below apply them.
+3. **Read the project's own rules**, which are data in its
+   `naima-tracker/naima-data/` ([a project's own rules](../guide/rules.md#a-projects-own-rules)).
+4. **See where the project stands**: `naima summary`, `naima queue`,
+   `naima claims` ([read the board](../guide/read-the-board.md)).
+5. **Before acting, read the flow that applies**, below.
+
+Everything is plain markdown in the program directory, the documentation of
+the exact Naima the project runs: `naima guide` prints where. `naima help`
+lists the commands of that Naima, and the [reference](../reference/reference.md)
+documents each. A term not defined on a page is in the
+[glossary](../guide/glossary.md).
+
+## The flows
+
+The written procedures for working on a project when some or all of the work
+is done by agents. They are general: any project that adopts Naima can follow
+them, and Naima's own repository does.
 
 | Flow | When |
 |---|---|
@@ -13,9 +41,9 @@ adopts Naima can adopt them, and this repository follows them itself.
 | [Closing a worktree](closing-a-worktree.md) | before a branch is merged |
 | [Reporting and triage](reporting-and-triage.md) | when something is said, seen or found |
 
-Two words used throughout. The **owner** is the person the project answers
-to: the one who decides. The **trunk** is the branch releases come from,
-usually `main`.
+Two words used throughout: the [owner](../guide/glossary.md#owner), the person
+the project answers to, and the [trunk](../guide/glossary.md#trunk), the
+branch releases come from.
 
 ## As agent commands
 
@@ -30,20 +58,5 @@ project, copy the directory into its `.claude/commands/flow/`, and the pages if
 the project does not depend on Naima's docs.
 
 In the commands, `naima` is the CLI: `deno run -A
-naima-tracker/naima/naima.ts` ([installing](../guide/install.md)). In this
-repository it is `deno task naima`.
-
-## Enforced, not only written
-
-Where a rule can be checked, Naima checks it:
-
-| Rule | Enforced by |
-|---|---|
-| a person is asked only for what is theirs | `human-says-why`: an item with `runBy: human` says why in `humanBecause` |
-| every fix names the gesture that proves it | `fix-names-its-gesture` (a note) |
-| closed means proven | `closed-carries-proof`, and `naima close` refuses anything not resolved |
-| a claim names real items | `claims-resolve` |
-| a feature is documented as part of its implementation | the [`docs` plugin](../develop/documentation.md) |
-| the flows an instruction names exist | `links-resolve`, over the markdown the `docs` plugin is given |
-
-Full list of checks: [reference](../reference/reference.md).
+naima-tracker/naima/naima.ts` ([installing](../guide/install.md)). In Naima's
+own repository it is `deno task naima`.

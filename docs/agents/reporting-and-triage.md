@@ -67,8 +67,8 @@ naima triage set <item> impact=high priority=next confidence=reported
 | `confidence` | do we understand it? `measured` · `diagnosed` · `reported` · `unclear` |
 | `effort` | **never guessed.** Nothing in a report says what a fix costs; leave it empty until someone has looked at the code. An unsized item sinks in the ranking, which is the honest outcome |
 
-**Triage what you touch**: opening, reporting or fixing an item means leaving
-its fields set. `naima triage` prints coverage per type; do not add to what it
+[Triage what you touch](../guide/rules.md#triage-what-you-touch): opening,
+reporting or fixing an item means leaving its fields set. `naima triage` prints coverage per type; do not add to what it
 says is missing.
 
 ## 5. Cross-reference instead of repeating

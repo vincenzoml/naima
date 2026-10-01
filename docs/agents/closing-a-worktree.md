@@ -4,7 +4,8 @@ Everything that has to be true before a branch is merged, in the order that
 makes each step possible. Several steps cannot be done from the trunk
 afterwards, and the first is the one most often skipped.
 
-Preparing the branch is the developer's work. Deciding that it may enter the
+The rules it applies are on [the rules page](../guide/rules.md#branches-and-worktrees);
+this page is the procedure. Preparing the branch is the developer's work. Deciding that it may enter the
 trunk is a separate call: whoever wrote the code does not also decide it
 ships.
 
