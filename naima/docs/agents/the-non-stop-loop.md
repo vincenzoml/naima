@@ -64,3 +64,13 @@ finds new agent work resumes the loop.
 
 What each option prints: [the reference](../reference/reference.md#naima-loop);
 for people, [what happens while you are away](../guide/while-you-are-away.md).
+
+## Safety rules
+
+- **No target, no loop.** Enforced: `naima loop` refuses to run without one.
+- **The owner is never the reason work resumes.** Convention: the wake-up
+  timer, not a reply, brings the coordinator back.
+- **STOPPED means only the owner's work is left.** Convention, kept by
+  `naima loop`'s own stop verdict, read from the target's definition in step
+  1; nothing yet re-checks a STOPPED loop against a tracker changed after it
+  stopped — candidate property for a later model.
