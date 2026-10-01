@@ -40,3 +40,7 @@ Read the item and its 64 linked items: an index/umbrella that is effectively clo
 ### 2026-10-01 — Vincenzo Ciancia, on claude/final-sweep
 
 Final sweep (claude/final-sweep): its Done line (every fix and design decision filed and linked) holds — 64 linked items, none untriaged; two are open: the host-leakage feature, now proven by tests/host-leakage-copy-install-installed-program-holds, and the purpose page, waiting on the owner's read. Whether a standing index should be closed is the evidence owner's call.
+
+### 2026-10-01 — status sync agent, on claude/status-sync
+
+Status sync: done. All 64 linked items are closed, withdrawn, done or wontfix except one, which is owner-only: todos/document-naima-s-purpose-requirements-philosophy (waits on the owner's go to start, per AGENTS.md, and its own proving gesture is runBy human).

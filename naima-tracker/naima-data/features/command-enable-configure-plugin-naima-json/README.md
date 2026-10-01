@@ -3,3 +3,9 @@
 A worker had to hand-edit naima.json to switch on the mCRL2 verifier (plugins.verifier-mcrl2) because no command does it. Every agent action should go through a command, never a hand-edit of the tracker's own config.
 
 Done: a command (e.g. 'naima plugin enable <name>' or similar) that turns a plugin on/off and sets its options in naima.json, validated the way naima set validates item fields, instead of requiring a direct edit of the file.
+
+## Notes
+
+### 2026-10-01 — status sync agent, on claude/status-sync
+
+Status sync: shipped. Proven by tests/naima-plugin-enable-disable-set-show-manage (passed); fixedOn, commits and docs already set. Was left requested though naima plugin enable|disable|set|show landed.

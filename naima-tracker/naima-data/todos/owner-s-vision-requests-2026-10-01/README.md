@@ -19,3 +19,7 @@ Read the item and its ~65 links: an umbrella whose own remaining work is a perio
 ### 2026-10-01 — Vincenzo Ciancia, on claude/final-sweep
 
 Final sweep (claude/final-sweep): measured from the meta.json files, all 58 items linked to this one in either direction carry impact, priority and confidence — the Done line holds. Eight are still open; each is routed: agent proofs added this sweep, or owner judgements on gate first-public.
+
+### 2026-10-01 — status sync agent, on claude/status-sync
+
+Status sync: done. Of its ~58 linked items, all are closed, done, withdrawn, dropped or shipped except three, all owner-only: todos/document-naima-s-purpose-requirements-philosophy (owner's go to start, runBy-human proof), features/dashboard-ui-redesigned-rather-than-ported (code and plumbing proven, two runBy-human look-and-feel gestures still open), features/ui-design-support-planned (owner must scope it before any implementation, runBy-human decision).
