@@ -32,6 +32,8 @@ const onPath = spawnSync("mcrl22lps", ["--version"], { encoding: "utf8" }).statu
 
 test("mCRL2 live: the four properties hold on the model, and each switched-off safeguard is caught", {
   skip: !onPath && "mCRL2 is not on PATH (mcrl22lps --version failed)",
+  // Six real model-checker runs: well past a runner's default per-test limit.
+  timeout: 600_000,
 }, async () => {
   const v = mcrl2Verifier()
   const ctx = { root: ROOT } as never

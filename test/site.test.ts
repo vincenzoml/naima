@@ -193,7 +193,10 @@ test("install.ps1 looks for Deno where its installer puts it, before and after i
   const install = ps1.indexOf("Invoke-RestMethod https://deno.land/install.ps1 | Invoke-Expression")
   assert.ok(install > 0, "install.ps1 runs Deno's official installer")
   const find = /function Find-Deno \{[\s\S]*?\n {2}\}/.exec(ps1)?.[0] ?? ""
-  assert.ok(find.includes("Get-Command deno") && find.includes("'.deno'") && find.includes("'deno.exe'"), "Find-Deno looks on the path, then in the installer's folder")
+  assert.ok(
+    find.includes("Get-Command deno") && find.includes("'.deno'") && find.includes("'deno.exe'"),
+    "Find-Deno looks on the path, then in the installer's folder",
+  )
   const after = ps1.slice(install)
   assert.match(after.split("\n").slice(0, 3).join("\n"), /\$Deno = Find-Deno/, "after installing, the same lookup runs again")
   assert.ok(!/\$Deno = Get-Command deno/.test(after), "never the path alone after installing")
