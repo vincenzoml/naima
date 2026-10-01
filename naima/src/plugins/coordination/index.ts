@@ -8,7 +8,7 @@
 // by the tool. The collections are recombined at read time from every branch.
 
 import { randomUUID } from "node:crypto"
-import { existsSync, mkdirSync, readFileSync, unlinkSync } from "node:fs"
+import { mkdirSync, readFileSync, unlinkSync } from "node:fs"
 import { join } from "node:path"
 import {
   allRefNames,
@@ -40,7 +40,20 @@ import {
   type WriteHook,
   writeJson,
 } from "../../core/api.ts"
-import { ahead, home, plural, type Policy, policyFindings, preparingFindings, readPolicy, SEGMENT, SEGMENT_SAYS, worktreesDir } from "./worktrees.ts"
+import {
+  ahead,
+  exists,
+  home,
+  plural,
+  type Policy,
+  policyFindings,
+  preparingFindings,
+  readPolicy,
+  SEGMENT,
+  SEGMENT_SAYS,
+  worktreesDir,
+  writeThroughGit,
+} from "./worktrees.ts"
 
 export const CLAIMS = "claims"
 export const PASSES = "passes"
@@ -132,8 +145,8 @@ export function readPasses(ctx: Context): Pass[] {
     .sort((a, b) => (key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : a.file < b.file ? 1 : -1))
 }
 
-function writeClaim(ctx: Context, claim: Claim, root: string = ctx.root): string {
-  const dir = join(root, rel(ctx, CLAIMS))
+function writeClaim(ctx: Context, claim: Claim): string {
+  const dir = join(ctx.root, rel(ctx, CLAIMS))
   mkdirSync(dir, { recursive: true })
   const { file, ref: _ref, local: _local, ...body } = claim
   writeJson(join(dir, file), body)
@@ -409,9 +422,8 @@ function openCommand(policy: Policy): Command {
       if (gitOrNull(ctx.root, "rev-parse", "--verify", "--quiet", `refs/heads/${branch}`) !== null) {
         throw new Error(`branch ${branch} already exists: pick another --name, or work in it where it stands`)
       }
-      if (existsSync(path)) throw new Error(`${path} already exists: pick another --name`)
+      if (exists(path)) throw new Error(`${path} already exists: pick another --name`)
       const base = trunk(ctx.root) ?? "HEAD"
-      mkdirSync(join(path, ".."), { recursive: true })
       mustGit(ctx.root, "worktree", "add", "-q", "-b", branch, path, base)
       const others = readClaims(ctx)
       const claim: Claim = { branch, claimedAt: today(ctx), items: [], file: `${randomUUID()}.json`, ref: branch, local: true }
@@ -423,7 +435,10 @@ function openCommand(policy: Policy): Command {
         if (holders.length) ctx.out(`note: ${label(item)} is also claimed by ${holders.join(", ")} — allowed, and worth knowing`)
         claim.items.push({ id: item.meta.id, ref: label(item), title: item.meta.title })
       }
-      const file = writeClaim(ctx, claim, path)
+      // The new worktree is outside what this run may write: git writes the claim there.
+      const { file: name, ref: _ref, local: _local, ...body } = claim
+      const file = `${rel(ctx, CLAIMS)}/${name}`
+      writeThroughGit(path, file, JSON.stringify(body, null, 2) + "\n")
       ctx.out(`opened ${path} on ${branch}, from ${base}`)
       ctx.out(`claimed ${claim.items.map((e) => e.ref).join(", ")} in ${file} — commit it on ${branch} with the work`)
       ctx.out(`next: cd ${path}, and install the dependencies a fresh checkout lacks`)

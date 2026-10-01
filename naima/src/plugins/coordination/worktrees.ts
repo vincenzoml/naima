@@ -5,7 +5,7 @@
 
 import { existsSync, realpathSync } from "node:fs"
 import { basename, dirname, resolve } from "node:path"
-import { type Finding, gitOrNull, isGitRepo, trunk, type Worktree, worktrees } from "../../core/api.ts"
+import { type Finding, gitOrNull, gitReason, isGitRepo, mustGit, runGit, trunk, type Worktree, worktrees } from "../../core/api.ts"
 
 /** The plugin's options that shape the scheme. */
 export interface Policy {
@@ -49,8 +49,36 @@ export function home(root: string, trees: Worktree[] = worktrees(root)): string 
 
 /** The directory every worktree is a folder of: `<main>-worktrees` beside the main worktree, unless configured. */
 export function worktreesDir(policy: Policy, main: string): string {
-  const dir = resolve(realOr(main), policy.worktrees ?? `../${basename(main)}-worktrees`)
-  return existsSync(dir) ? realOr(dir) : dir
+  return resolve(main, policy.worktrees ?? `../${basename(main)}-worktrees`)
+}
+
+/** One directory, whether or not either path can be resolved here: the program may not read outside its project. */
+const same = (a: string, b: string): boolean => a === b || realOr(a) === realOr(b)
+
+/** Whether a path exists, false when this run may not look: what git is then asked to refuse. */
+export const exists = (path: string): boolean => {
+  try {
+    return existsSync(path)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Put a file in another worktree, untracked, through git: the program may
+ * write only its own worktree's tracker, while git runs unfenced. The file
+ * goes through that worktree's index and out of it again, so nothing is left
+ * staged.
+ */
+export function writeThroughGit(worktree: string, file: string, text: string): void {
+  const blob = runGit(worktree, ["hash-object", "-w", "--stdin"], { input: text })
+  if (!blob.ok) throw new Error(`git hash-object: ${gitReason(blob)}`)
+  mustGit(worktree, "update-index", "--add", "--cacheinfo", `100644,${blob.out.trim()},${file}`)
+  try {
+    mustGit(worktree, "checkout-index", "--", file)
+  } finally {
+    mustGit(worktree, "update-index", "--force-remove", "--", file)
+  }
 }
 
 export const plural = (n: number, what: string): string => `${n} ${what}${n === 1 ? "" : "s"}`
@@ -87,7 +115,7 @@ export function policyFindings(root: string, policy: Policy, holders: Holders): 
   for (const w of trees.slice(1)) {
     if (!w.branch || isExempt(policy, w.branch)) continue
     const last = w.branch.split("/").pop() ?? w.branch
-    if (realOr(dirname(w.path)) !== dir) {
+    if (!same(dirname(w.path), dir)) {
       out.push({ level: "problem", message: `worktree ${w.path} is outside ${dir}: a worktree is ${dir}/<what>, on <who>/<what> (naima open)` })
     } else if (basename(w.path) !== last) {
       out.push({ level: "problem", message: `worktree ${w.path} is on ${w.branch}: its folder must be named ${last}, the branch's last segment` })
