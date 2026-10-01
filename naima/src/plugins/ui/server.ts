@@ -23,6 +23,8 @@ export interface UiView {
   /** Its tab. */
   title: string
   says: string
+  /** Where its tab stands: lower first, 0 when absent; equal ones in load order. */
+  order?: number
   /** The view for these query parameters, rendered from the files at each request: its data, its HTML, and the styles that HTML needs. */
   render(params: Record<string, string[]>, ctx: Context): UiRender | Promise<UiRender>
 }

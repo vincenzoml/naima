@@ -15,6 +15,8 @@
 // due, version    a gate with a date is a milestone: `naima gates` and
 //                 `naima queue` say the days left, a check warns once it is
 //                 past its date and does not hold.
+// coverage        the coverage lists it requires (coverage.ts): each entry
+//                 with NO TEST blocks it.
 //
 // `naima gate new|add|remove|show` declares a gate and puts items on it, so
 // nobody edits naima.json by hand. An item whose type carries the `group`
@@ -60,6 +62,9 @@ import {
   usageError,
   writeJson,
 } from "../../core/api.ts"
+import { type CoverageConfig, coverageLines, coverageOf, coverageReasons, coverageUiView, COVERS, readCoverage, staleCovers } from "./coverage.ts"
+
+export { type CoverageConfig, coverageOf, type CoverageRow } from "./coverage.ts"
 
 export interface GateResult {
   holds: boolean
@@ -125,6 +130,8 @@ export interface GateConfig {
   due?: string
   /** The version a milestone ships as. */
   version?: string
+  /** The coverage lists it requires: each entry with NO TEST blocks it. */
+  coverage?: string[]
 }
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/
@@ -133,6 +140,7 @@ const isDate = (v: unknown): v is string => typeof v === "string" && DATE.test(v
 const GATE_NAME = /^[a-z0-9][a-z0-9._-]*$/
 
 function readOptions(options: Record<string, unknown>): Record<string, GateConfig> {
+  const lists = readCoverage(options)
   const gates = options["gates"] ?? {}
   if (!gates || typeof gates !== "object" || Array.isArray(gates)) throw new Error("gates: options.gates must be an object")
   for (const [name, g] of Object.entries(gates as Record<string, unknown>)) {
@@ -142,6 +150,12 @@ function readOptions(options: Record<string, unknown>): Record<string, GateConfi
     if (c.says !== undefined && typeof c.says !== "string") throw new Error(`gates: gate "${name}": says is a sentence`)
     if (c.due !== undefined && !isDate(c.due)) throw new Error(`gates: gate "${name}": due is a date, YYYY-MM-DD, got ${JSON.stringify(c.due)}`)
     if (c.version !== undefined && (typeof c.version !== "string" || !c.version.trim())) throw new Error(`gates: gate "${name}": version is a non-empty string`)
+    if (c.coverage !== undefined) {
+      if (!Array.isArray(c.coverage) || !c.coverage.every((l) => typeof l === "string")) {
+        throw new Error(`gates: gate "${name}": coverage is a list of list names`)
+      }
+      for (const l of c.coverage) if (!Object.hasOwn(lists, l)) throw new Error(`gates: gate "${name}": coverage names no list "${l}"`)
+    }
   }
   return gates as Record<string, GateConfig>
 }
@@ -379,12 +393,13 @@ const gateCommand: Command = {
   says:
     "declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks",
   usage:
-    'gate new <name> "<title>" [--says <s>] [--due YYYY-MM-DD] [--version <v>] [--holds-on code|proof] | gate add <gate> <item>... | gate remove <gate> <item>... | gate show <gate>',
+    'gate new <name> "<title>" [--says <s>] [--due YYYY-MM-DD] [--version <v>] [--holds-on code|proof] [--coverage <list>,...] | gate add <gate> <item>... | gate remove <gate> <item>... | gate show <gate>',
   options: [
     { name: "--says", says: "gate new: what the gate is for, in one sentence" },
     { name: "--due", says: "gate new: the date it is due, YYYY-MM-DD, which makes it a milestone" },
     { name: "--version", says: "gate new: the version it ships as" },
     { name: "--holds-on", says: 'gate new: "code" (the default) waits for code and lets proof be owed; "proof" waits for every proof too' },
+    { name: "--coverage", says: "gate new: the coverage lists it requires, comma-separated: each entry with NO TEST blocks it" },
   ],
   examples: [
     'gate new beta "Public beta" --says "the first outside users" --due 2026-12-01 --version 0.9',
@@ -393,18 +408,26 @@ const gateCommand: Command = {
     "gate show beta",
   ],
   async run(args, ctx) {
-    const p = parse(args, { says: { type: "string" }, due: { type: "string" }, version: { type: "string" }, "holds-on": { type: "string" } })
+    const p = parse(args, {
+      says: { type: "string" },
+      due: { type: "string" },
+      version: { type: "string" },
+      "holds-on": { type: "string" },
+      coverage: { type: "string" },
+    })
     const [sub, name, ...rest] = p.positionals
     if (sub === "new") {
       const title = rest[0]
       if (!name || !title?.trim() || rest.length > 1) throw usageError(this)
       const says = str(p, "says"), due = str(p, "due"), version = str(p, "version"), holdsOn = str(p, "holds-on")
+      const coverage = str(p, "coverage")?.split(",").map((l) => l.trim()).filter(Boolean)
       const gate = {
         title: title.trim(),
         ...(says !== undefined ? { says } : {}),
         ...(due !== undefined ? { due } : {}),
         ...(version !== undefined ? { version } : {}),
         ...(holdsOn !== undefined ? { holdsOn } : {}),
+        ...(coverage?.length ? { coverage } : {}),
       } as GateConfig
       declareGate(ctx, name, gate)
       ctx.out(`gate ${name} declared in ${ctx.trackerDir}/${DATA_FILE} — put items on it: naima gate add ${name} <item>...`)
@@ -457,8 +480,47 @@ const overdue: Check = {
   },
 }
 
+/** `naima coverage`: every entry of the lists, with its test or NO TEST. */
+function coverageCommand(lists: Record<string, CoverageConfig>): Command {
+  return {
+    name: "coverage",
+    says: "each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST",
+    usage: "coverage [list...] [--check] [--json]",
+    options: [
+      { name: "--check", says: "exit 1 when an entry has NO TEST, or a list's source cannot be read" },
+      { name: "--json", says: "print each list as JSON: list, says, entries (entry, tests), error" },
+    ],
+    examples: ["coverage", "coverage paid --check"],
+    run(args, ctx) {
+      const p = parse(args, { check: { type: "boolean" }, json: { type: "boolean" } })
+      const rows = coverageOf(ctx, lists, p.positionals.length ? p.positionals : undefined)
+      if (bool(p, "json")) ctx.out(JSON.stringify(rows, null, 2))
+      else if (!rows.length) ctx.out(`no coverage list — declare one in plugins.gates.options.coverage of ${ctx.trackerDir}/${DATA_FILE}`)
+      else for (const l of rows.flatMap(coverageLines)) ctx.out(l)
+      return bool(p, "check") && rows.some((r) => r.error || r.entries.some((e) => !e.tests.length)) ? 1 : 0
+    },
+  }
+}
+
+function coverageCheck(lists: Record<string, CoverageConfig>): Check {
+  return {
+    name: "coverage-lists",
+    says: "a coverage list's source can be read; an item's covers names an entry its list holds",
+    run(ctx) {
+      const rows = coverageOf(ctx, lists)
+      return [
+        ...rows.flatMap((r): Finding[] =>
+          r.error ? [{ level: "problem", message: `coverage ${r.list}: ${r.error} — fix plugins.gates.options.coverage.${r.list}, or the file` }] : []
+        ),
+        ...staleCovers(ctx, lists, rows).map(({ item, message }): Finding => ({ level: "note", item, message })),
+      ]
+    },
+  }
+}
+
 export default function gates(options: Record<string, unknown> = {}): Plugin {
   const configured = readOptions(options)
+  const lists = readCoverage(options)
   const defs: GateDef[] = Object.entries(configured).map(([name, c]) => ({
     name,
     configured: true,
@@ -470,8 +532,15 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
       ((c.holdsOn ?? "code") === "code"
         ? `blocked by every open item with gate=${name} that still owes code: no fixedOn, and not itself a proving gesture. Fixed items and open proving gestures are owed, not blocking — unless refuted: one whose status refutes (a failed test, a violated property), or one verified by such an item, blocks.`
         : `blocked by every open item with gate=${name}, proof included.`) +
-      " An item whose type groups others (an epic) stands for the items it groups.",
-    evaluate: (ctx) => evaluateGate(ctx, name, c.holdsOn ?? "code"),
+      " An item whose type groups others (an epic) stands for the items it groups." +
+      (c.coverage?.length
+        ? ` Blocked too by every entry with NO TEST of the coverage list${c.coverage.length === 1 ? "" : "s"} ${c.coverage.join(", ")}.`
+        : ""),
+    evaluate: (ctx) => {
+      const r = evaluateGate(ctx, name, c.holdsOn ?? "code")
+      const reasons = c.coverage?.length ? coverageReasons(ctx, lists, c.coverage) : []
+      return reasons.length ? { ...r, holds: false, reasons } : r
+    },
   }))
   const status: SummarySection = {
     name: "gates",
@@ -502,7 +571,9 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
       "Gates are configured, never hard-coded, and any plugin may contribute one through the contract; `naima gates` lists them all. " +
       "`naima gate new` declares one in the project's configuration and `naima gate add` puts items on it, so nobody edits naima.json by hand. " +
       "A gate with a `due` date (and, optionally, a `version`) is a milestone: `naima gates` and `naima queue` say the days left, and a check warns once it is overdue. " +
-      "An item whose type carries the `group` trait — an epic — stands on a gate for the items it groups.",
+      "An item whose type carries the `group` trait — an epic — stands on a gate for the items it groups. " +
+      "A coverage list is a normative list the project keeps elsewhere — paid features, limits, API endpoints — named by its source, a JSON file and a path in it, or files and a regular expression, and read from it on every run, never copied. " +
+      "A proving item names the entry it proves in `covers`; `naima coverage` prints every entry with its test or NO TEST, `--check` exits 1 on one, and a gate that lists it in `coverage` is blocked by each.",
     options: [
       {
         name: "gates",
@@ -510,8 +581,19 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
           `\`plugins.gates.options.gates\` in \`${DEFAULT_DATA}/${DATA_FILE}\`, written by \`naima gate new\`: gate name → { "title", "says", "holdsOn", "due", "version" }. due (YYYY-MM-DD) makes the gate a milestone; version is what it ships as. holdsOn "code" (the default) waits for code, not proof: a fixed item that owes only its proving gesture, and the gestures themselves, are owed but do not block. holdsOn "proof": every open item on the gate blocks it.`,
         default: "{}",
       },
+      {
+        name: "coverage",
+        says:
+          `\`plugins.gates.options.coverage\` in \`${DEFAULT_DATA}/${DATA_FILE}\`: list name → { "says", and one source: "json" (a file from the project root) with "path" (keys joined by dots, * for every element or value) and "key" (the field naming an entry when elements are objects, default id); or "files" (paths or patterns with * and **) with "pattern" (a regular expression; each match is an entry, its first group when it has one) }. A gate requires lists with "coverage": [names].`,
+        default: "{}",
+      },
     ],
     fields: [
+      {
+        name: COVERS.name,
+        kind: COVERS.kind,
+        says: "the entries of the coverage lists this proving item proves: `<entry>`, or `<list>:<entry>` to say which list; comma-separated",
+      },
       {
         name: "gate",
         kind: "enum",
@@ -524,11 +606,13 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
     points: [gatesPoint],
     // What it reads of the trackers' vocabulary: without it loaded, gates would decide on nothing.
     uses: { fields: [FIXED_ON.name, RUN_BY.name, HUMAN_BECAUSE.name], relations: ["verifies", "verified-by"] },
-    contributes: { gates: defs },
+    contributes: { gates: defs, "ui-views": [coverageUiView(lists)] },
+    // Coverage is a tab of naima ui when the ui plugin is loaded; without it, still a command.
+    optional: ["ui-views"],
     migrations: [moveGates],
     rank: [{ name: "gate", score: (i) => (onGates(i).length ? 0 : 4) }],
-    checks: [gatedProofIsGated, overdue],
-    commands: [gatesCommand, gateCommand, queue],
+    checks: [gatedProofIsGated, overdue, coverageCheck(lists)],
+    commands: [gatesCommand, gateCommand, queue, coverageCommand(lists)],
     summary: [status],
   }
 }

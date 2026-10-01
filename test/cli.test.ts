@@ -297,7 +297,7 @@ test("list, unlink, view, types and help each do what their usage says", async (
 
     assert.match((await naima(h.root, ["view"])).out, /^ {2}next {13}open items, most urgent first$/m)
     assert.match((await naima(h.root, ["view", "next", "1"])).out, /high .*bugs\/export-drops-alpha/)
-    assert.match((await naima(h.root, ["view", "nope"])).err, /no view "nope" — views: next/)
+    assert.match((await naima(h.root, ["view", "nope"])).err, /no view "nope" — views: timeline, next/)
 
     const types = (await naima(h.root, ["types"])).out
     assert.match(types, /^bugs \(naima-tracker\/naima-data\/bugs\/\) — something that is broken$/m)

@@ -20,7 +20,8 @@ const blank = (s: unknown): boolean => typeof s !== "string" || !s.trim()
 /** The point this plugin declares: every plugin's views, which `naima ui` shows as tabs. */
 export const viewsPoint: ExtensionPoint<UiView> = {
   id: "ui-views",
-  says: "a view `naima ui` shows as a tab: `name` (its path), `title`, `says`, `render(params, ctx) → { data, html, css? }`, rendered at each request",
+  says:
+    "a view `naima ui` shows as a tab: `name` (its path), `title`, `says`, `order` (lower first, 0 when absent), `render(params, ctx) → { data, html, css? }`, rendered at each request",
   noun: "ui view",
   key: (v) => v.name,
   validate: (v) => {
@@ -28,6 +29,7 @@ export const viewsPoint: ExtensionPoint<UiView> = {
     if (!u || typeof u !== "object") return "is not an object"
     if (typeof u.name !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(u.name)) return "has no name of lowercase letters, digits and dashes"
     if (typeof u.title !== "string") return "has no title"
+    if (u.order !== undefined && !Number.isFinite(u.order)) return "has an order that is not a number"
     return typeof u.render === "function" ? null : "has no render function"
   },
   gaps: (v) => (blank(v.says) ? ["does not say what it shows"] : []),
@@ -36,9 +38,11 @@ export const viewsPoint: ExtensionPoint<UiView> = {
   ) => ["", "**UI views**, the tabs of `naima ui`", ...table(["View", "Title", "What it shows"], vs.map((v) => [`\`${v.name}\``, v.title, v.says]))],
 }
 
-/** Every view a loaded plugin contributes, in load order, each served under its short name, or its qualified id when another shares it. */
+/** Every view a loaded plugin contributes, by its order, then in load order, each served under its short name, or its qualified id when another shares it. */
 export function viewsOf(ctx: Context): UiView[] {
-  return ctx.registry.contributions("ui-views").map((c) => ({ ...(c.value as UiView), name: shortOrId(ctx, "ui-views", c).replace("/", "-") }))
+  return ctx.registry.contributions("ui-views")
+    .map((c) => ({ ...(c.value as UiView), name: shortOrId(ctx, "ui-views", c).replace("/", "-") }))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 }
 
 /** What `naima ui` does besides serving: each replaced by a test. */

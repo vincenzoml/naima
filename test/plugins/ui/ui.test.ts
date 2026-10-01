@@ -71,7 +71,7 @@ test("the server binds the loopback interface only: another interface of this ma
 test("a view a plugin contributes is a tab, without the ui plugin knowing that plugin; the metrics view is first among the first-party ones", () => {
   const p = tempProject([...firstPartyPlugins(), helloPlugin()])
   try {
-    assert.deepEqual(viewsOf(p.ctx).map((v) => v.name), ["metrics", "hello"])
+    assert.deepEqual(viewsOf(p.ctx).map((v) => v.name), ["metrics", "hello", "timeline", "coverage"], "a later order puts a tab after, whatever the load order")
   } finally {
     p.cleanup()
   }
