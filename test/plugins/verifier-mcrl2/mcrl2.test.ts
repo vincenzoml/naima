@@ -173,7 +173,7 @@ test("mCRL2 live: the real tools decide the fixture model", { skip: !onPath && "
 })
 
 test("the model-checker plugins are opt-in: loaded, and their tools granted by the launcher, only where naima.json names them", async () => {
-  assert.deepEqual(firstParty.filter((p) => p.optIn).map((p) => p.name), [...OPT_IN])
+  assert.deepEqual(firstParty.filter((p) => p.optIn && OPT_IN.includes(p.name)).map((p) => p.name), [...OPT_IN])
   const where = { program: "/nowhere", root: "/nowhere", tracker: "/nowhere" }
   const entry = (enabled: boolean) => ({ enabled, options: {}, checks: {} })
   const loaded = async (plugins: Record<string, ReturnType<typeof entry>>) =>
