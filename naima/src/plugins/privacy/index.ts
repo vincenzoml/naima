@@ -1,0 +1,346 @@
+// The owner's privacy and the project's secrets. A file enters an item's
+// attachments through `naima attach`, which records whose it is — the owner's,
+// with the owner's yes restated, or the writer's own — and refuses one holding
+// a secret; `naima check` flags an attachment a branch adds with no such
+// record, and any secret in the project's files or attachments.
+
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync } from "node:fs"
+import { basename, join, relative, resolve } from "node:path"
+import {
+  ATTACHMENTS,
+  bool,
+  type Check,
+  type Command,
+  type Context,
+  CONTRACT,
+  type FieldDef,
+  type Finding,
+  gitOrNull,
+  gitPath,
+  isGitRepo,
+  isRegularFile,
+  type Item,
+  label,
+  parse,
+  type Plugin,
+  type PluginApi,
+  projectFiles,
+  saveMeta,
+  str,
+  today,
+  trunk,
+  usageError,
+  walkFiles,
+} from "../../core/api.ts"
+
+/** One secret shape: its name, said after an article, and how it is found. */
+interface Shape {
+  name: string
+  pattern: RegExp
+}
+
+/**
+ * The shapes a secret takes. A private key counts only with a body after its
+ * header — a line of base64 — so a page that names the header is not one.
+ */
+const SHAPES: readonly Shape[] = [
+  {
+    name: "private key",
+    pattern: /-----BEGIN (?:(?:RSA|EC|DSA|OPENSSH|ENCRYPTED|PGP) )?PRIVATE KEY(?: BLOCK)?-----[ \t]*\r?\n(?:[A-Za-z-]+:[^\n]*\n)*\s*[A-Za-z0-9+/=]{40,}/g,
+  },
+  { name: "AWS access key", pattern: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g },
+  { name: "GitHub token", pattern: /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{60,})/g },
+  { name: "Slack token", pattern: /\bxox[abposr]-[A-Za-z0-9-]{10,}/g },
+  { name: "API secret key", pattern: /\b(?:sk-(?:ant-|proj-)?[A-Za-z0-9_-]{32,}|[sr]k_live_[A-Za-z0-9]{24,})/g },
+  { name: "Google API key", pattern: /\bAIza[0-9A-Za-z_-]{35}/g },
+]
+
+/** One secret found in a text: its shape and the line it starts on, from 1. */
+export interface Secret {
+  shape: string
+  line: number
+}
+
+/** Every secret in `text`, in the order they appear. */
+export function findSecrets(text: string): Secret[] {
+  const out: (Secret & { at: number })[] = []
+  for (const s of SHAPES) {
+    for (const m of text.matchAll(s.pattern)) out.push({ shape: s.name, at: m.index, line: text.slice(0, m.index).split("\n").length })
+  }
+  return out.sort((a, b) => a.at - b.at).map(({ shape, line }) => ({ shape, line }))
+}
+
+const article = (shape: string): string => `${/^[AEIOU]/.test(shape) ? "an" : "a"} ${shape}`
+
+/** Larger files are not read: no secret is pasted into a file this size by hand. */
+const MAX_BYTES = 2 * 1024 * 1024
+
+/** A file's text, or null for one too large or binary (a NUL in its first 8 KiB). */
+function textOf(path: string): string | null {
+  try {
+    if (statSync(path).size > MAX_BYTES) return null
+    const buf = readFileSync(path)
+    return buf.subarray(0, 8192).includes(0) ? null : buf.toString("utf8")
+  } catch {
+    return null
+  }
+}
+
+/** An exception of the secrets check: a file allowed to hold one, why, and the item that tracks it. */
+interface Exception {
+  path: string
+  reason: string
+  item: string
+}
+
+/** Whose an attachment is, as `naima attach` records it. */
+interface Provenance {
+  from: "owner" | "agent"
+  consent?: string
+  by: string
+  on: string
+}
+
+const ATTACHED: FieldDef = {
+  name: "attached",
+  kind: "object",
+  says:
+    "whose each attachment is, as naima attach records it: file name → { from: owner or agent, consent: the owner's yes restated (for the owner's), by, on }",
+}
+
+const GENERATED = ["run-*.json", "counterexample-*.txt"]
+
+const glob = (pattern: string): RegExp => new RegExp(`^${pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*").replace(/\?/g, "[^/]")}$`)
+
+const isObject = (v: unknown): v is { [k: string]: unknown } => !!v && typeof v === "object" && !Array.isArray(v)
+
+/** The attachment records of an item: an empty map when it has none, or the field is not an object (the fields check reports that). */
+const recordsOf = (
+  item: Item,
+): { [name: string]: unknown } => (isObject(item.meta[ATTACHED.name]) ? item.meta[ATTACHED.name] as { [name: string]: unknown } : {})
+
+/** The files in an item's attachments, by name from attachments/, but hidden ones (.gitkeep). */
+function attachmentsOf(item: Item): string[] {
+  const dir = join(item.dir, ATTACHMENTS)
+  return walkFiles(dir)
+    .map((f) => gitPath(relative(dir, f)))
+    .filter((n) => !n.split("/").some((part) => part.startsWith(".")))
+}
+
+/** The trunk and the files it holds under `dir`, or null outside git or with no trunk. */
+function trunkFiles(ctx: Context, dir: string): { name: string; files: Set<string> } | null {
+  if (!isGitRepo(ctx.root)) return null
+  const name = trunk(ctx.root)
+  if (!name) return null
+  const listed = gitOrNull(ctx.root, "ls-tree", "-r", "-z", "--name-only", name, "--", dir) ?? ""
+  return { name, files: new Set(listed.split("\0").filter(Boolean)) }
+}
+
+/** Who writes: `--by`, else git's user.name; refused when neither says. */
+function author(ctx: Context, by: string | undefined): string {
+  const who = by?.trim() || (isGitRepo(ctx.root) ? gitOrNull(ctx.root, "config", "user.name") : null)
+  if (!who) throw new Error("say who attaches the file: --by <name>, or set git's user.name")
+  return who
+}
+
+export default function privacy(options: { [key: string]: unknown } = {}, api?: PluginApi): Plugin {
+  const self = api?.plugin ?? "privacy"
+  const generated = (Array.isArray(options["generated"]) ? options["generated"].map(String) : GENERATED).map(glob)
+  const exceptions: unknown[] = Array.isArray(options["exceptions"]) ? options["exceptions"] : []
+
+  const attach: Command = {
+    name: "attach",
+    says:
+      "copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused",
+    usage: 'attach <item> <file> (--consent "<the owner\'s yes, restated>" | --own) [--as <name>] [--by <who>]',
+    options: [
+      { name: "--consent", says: "the file is the owner's: their explicit yes to storing it, restated; recorded on the item" },
+      { name: "--own", says: "the file is the writer's own material: a log, a test's output, a measurement" },
+      { name: "--as", says: "the name it takes in attachments/", default: "the file's own name" },
+      { name: "--by", says: "who attaches it; without it, git's user.name" },
+    ],
+    examples: [
+      'attach export-drops ~/Desktop/alpha.png --consent "Yes, attach my screenshot of the export"',
+      "attach export-drops test-run.out --own --as proof.out",
+    ],
+    run(args, ctx) {
+      const p = parse(args, { consent: { type: "string" }, own: { type: "boolean" }, as: { type: "string" }, by: { type: "string" } })
+      const [ref, file, ...rest] = p.positionals
+      if (!ref?.trim() || !file?.trim() || rest.length) throw usageError(this)
+      const consent = str(p, "consent")?.trim()
+      const own = bool(p, "own")
+      if (consent !== undefined && own) throw new Error("give one of --consent and --own: a file is the owner's or yours")
+      if (!consent && !own) {
+        throw new Error(
+          `say whose the file is: --consent "<the owner's yes, restated>" for the owner's material, given only after they said yes, or --own for your own (a log, a test's output)`,
+        )
+      }
+      const item = ctx.repo.resolve(ref)
+      const name = str(p, "as") ?? basename(file)
+      if (!name || /[/\\]/.test(name) || name.startsWith(".")) throw new Error(`"${name}" is no attachment name: a plain file name, not hidden`)
+      const src = resolve(file)
+      if (!isRegularFile(src)) throw new Error(`${file} is not a file`)
+      const text = textOf(src)
+      const secret = text === null ? undefined : findSecrets(text)[0]
+      if (secret) {
+        throw new Error(`${file}:${secret.line} holds ${article(secret.shape)}: redact it before attaching — an attachment is permanent once committed`)
+      }
+      const dest = join(item.dir, ATTACHMENTS, name)
+      const records = recordsOf(item)
+      const inPlace = src === resolve(dest)
+      if (Object.hasOwn(records, name) || (existsSync(dest) && !inPlace)) {
+        throw new Error(`${label(item)} already holds ${name}: attach it under another name with --as`)
+      }
+      const record: Provenance = consent
+        ? { from: "owner", consent, by: author(ctx, str(p, "by")), on: today(ctx) }
+        : { from: "agent", by: author(ctx, str(p, "by")), on: today(ctx) }
+      if (!inPlace) {
+        mkdirSync(join(item.dir, ATTACHMENTS), { recursive: true })
+        copyFileSync(src, dest)
+      }
+      try {
+        saveMeta(ctx, { ...item, meta: { ...item.meta, [ATTACHED.name]: { ...records, [name]: record } } })
+      } catch (e) {
+        if (!inPlace) rmSync(dest, { force: true })
+        throw e
+      }
+      ctx.out(`${label(item)}: attached ${name} (${consent ? "the owner's, consent recorded" : "your own"})`)
+      return 0
+    },
+  }
+
+  const consentCheck: Check = {
+    name: "attachment-consent",
+    says:
+      "every attachment a branch adds has a record of whose it is (naima attach), every record names a file that is there, and the owner's carry their yes; what the trunk already holds, and what a tool writes itself, is not asked",
+    run(ctx) {
+      const out: Finding[] = []
+      const onTrunk = trunkFiles(ctx, ctx.trackerDir)
+      for (const item of ctx.repo.items) {
+        const records = recordsOf(item)
+        const files = attachmentsOf(item)
+        const here = gitPath(relative(ctx.root, join(item.dir, ATTACHMENTS)))
+        for (const name of files) {
+          if (Object.hasOwn(records, name) || generated.some((g) => g.test(name)) || onTrunk?.files.has(`${here}/${name}`)) continue
+          out.push({
+            level: "problem",
+            item,
+            message: `${label(item)}: ${ATTACHMENTS}/${name} has no consent record — naima attach ${
+              label(item)
+            } ${here}/${name} --consent "<the owner's yes>" if it is the owner's (after asking), --own if it is yours; or remove it`,
+          })
+        }
+        for (const [name, raw] of Object.entries(records)) {
+          if (!files.includes(name)) {
+            out.push({ level: "problem", item, message: `${label(item)}: ${ATTACHED.name} names ${name}, which is not in ${ATTACHMENTS}/` })
+            continue
+          }
+          const r = isObject(raw) ? raw : {}
+          if (r["from"] === "owner" && !(typeof r["consent"] === "string" && r["consent"].trim())) {
+            out.push({
+              level: "problem",
+              item,
+              message: `${label(item)}: ${ATTACHMENTS}/${name} is the owner's, with no consent recorded — ask them, or remove it`,
+            })
+          } else if (r["from"] !== "owner" && r["from"] !== "agent") {
+            out.push({ level: "problem", item, message: `${label(item)}: the record of ${ATTACHMENTS}/${name} says neither owner nor agent` })
+          }
+        }
+      }
+      return out
+    },
+  }
+
+  const secretsCheck: Check = {
+    name: "secrets",
+    says:
+      "no project file or attachment holds a private key with its body, or an AWS, GitHub, Slack, API-secret or Google key; an exception names its file, a reason and an item, and the list of exceptions only shrinks",
+    run(ctx) {
+      const out: Finding[] = []
+      const excepted = new Map<string, boolean>()
+      for (const raw of exceptions) {
+        const e = (isObject(raw) ? raw : {}) as Partial<Exception>
+        const path = typeof e.path === "string" ? e.path : ""
+        let tracked = false
+        try {
+          tracked = typeof e.item === "string" && !!ctx.repo.resolve(e.item)
+        } catch { /* reported below */ }
+        if (!path || !(typeof e.reason === "string" && e.reason.trim()) || !tracked) {
+          out.push({
+            level: "problem",
+            message: `${self}: the exception for ${path || "(no path)"} needs a reason and an item that exists: { path, reason, item }`,
+          })
+        }
+        if (path) excepted.set(path, false)
+      }
+      const onTrunk = excepted.size ? trunkExceptions(ctx) : null
+      if (onTrunk) {
+        for (const path of excepted.keys()) {
+          if (!onTrunk.paths.has(path)) {
+            out.push({
+              level: "problem",
+              message: `${self}: the exception for ${path} is not on the trunk (${onTrunk.name}): the list only shrinks — redact the file instead`,
+            })
+          }
+        }
+      }
+      const files = new Set(projectFiles(ctx.root, ctx.program))
+      for (const item of ctx.repo.items) {
+        for (const name of attachmentsOf(item)) files.add(gitPath(relative(ctx.root, join(item.dir, ATTACHMENTS, name))))
+      }
+      for (const file of [...files].sort()) {
+        const text = textOf(join(ctx.root, file))
+        if (text === null) continue
+        const found = findSecrets(text)
+        if (!found.length) continue
+        if (excepted.has(file)) {
+          excepted.set(file, true)
+          continue
+        }
+        for (const s of found) {
+          out.push({ level: "problem", message: `${file}:${s.line}: ${article(s.shape)} — remove it and revoke it; history keeps what was committed` })
+        }
+      }
+      for (const [path, used] of excepted) if (!used) out.push({ level: "note", message: `${self}: the exception for ${path} matches no secret: remove it` })
+      return out
+    },
+  }
+
+  /** The exception paths in the trunk's configuration, or null when there is no trunk to compare with. */
+  function trunkExceptions(ctx: Context): { name: string; paths: Set<string> } | null {
+    if (!isGitRepo(ctx.root)) return null
+    const name = trunk(ctx.root)
+    if (!name) return null
+    const text = gitOrNull(ctx.root, "show", `${name}:${ctx.trackerDir}/naima.json`)
+    let list: unknown = []
+    try {
+      const raw: unknown = text ? JSON.parse(text) : {}
+      const entry = isObject(raw) && isObject(raw["plugins"]) ? raw["plugins"][self] : undefined
+      list = isObject(entry) && isObject(entry["options"]) ? entry["options"]["exceptions"] : []
+    } catch { /* an unreadable trunk configuration holds no exception */ }
+    const paths = new Set((Array.isArray(list) ? list : []).flatMap((e) => (isObject(e) && typeof e["path"] === "string" ? [e["path"]] : [])))
+    return { name, paths }
+  }
+
+  return {
+    name: "privacy",
+    contract: CONTRACT,
+    says: "the owner's material enters the repository only with their recorded yes, and no secret enters it at all",
+    about: "The conversation between the owner and an agent is private: nothing from it is copied into the repository without the owner's explicit yes. " +
+      "A file enters an item's `attachments/` through `naima attach`, which records on the item, in the field `attached`, whose it is: the owner's (`--consent`, their yes restated) or the writer's own (`--own`). " +
+      "The check `attachment-consent` flags an attachment with no record — one copied in by hand — unless the trunk already holds it, or a tool of the program writes it itself (a property's run records). " +
+      "The check `secrets` reads every project file and every attachment for six shapes of secret: a private key with its body (a header alone is not one), and AWS, GitHub, Slack, API-secret and Google keys; `naima attach` refuses a file holding one. " +
+      "A file that must keep one is an exception in the plugin's options, with a reason and the item that tracks it; an exception the trunk's configuration does not hold is refused, so the list only shrinks.",
+    options: [
+      {
+        name: "exceptions",
+        says: "files allowed to hold a secret: a list of { path, reason, item }, path from the project root; one not on the trunk is refused",
+        default: "[]",
+      },
+      { name: "generated", says: "attachment names a tool writes itself, which need no record: shell-style patterns", default: JSON.stringify(GENERATED) },
+    ],
+    fields: [ATTACHED],
+    commands: [attach],
+    checks: [consentCheck, secretsCheck],
+  }
+}
