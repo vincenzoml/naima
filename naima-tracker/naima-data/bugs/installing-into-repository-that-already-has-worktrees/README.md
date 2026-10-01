@@ -1,0 +1,3 @@
+# Installing into a repository that already has worktrees outside <repo>-worktrees ends in a failed check and exit 1, though the install itself succeeded
+
+Seen 2026-10-01 installing Naima into the paper repository with the site's installer: it already had three clean worktrees beside it (../naima-paper-evidence and two more), made before Naima. init succeeded, then naima check failed with 'worktree ... is outside <repo>-worktrees' for each, and the installer exited 1. A fresh install should not fail on the project's prior layout: either the check notes such worktrees instead of failing on first install, or the installer says what to do. Worked around by removing the clean worktrees (branches kept).
