@@ -31,7 +31,7 @@ does not:
 | Contribution | Must carry |
 |---|---|
 | plugin | `says`; each of its `options` a `says` |
-| command | `says`, `enforces` (the policy or invariant it holds, or `nothing:` and what it does instead), `usage`, at least one entry in `examples`, and an `options` entry for every `--flag` its usage names (and none that it does not) |
+| command | `says`, `usage`, at least one entry in `examples`, and an `options` entry for every `--flag` its usage names (and none that it does not); `enforces` is optional for any plugin (a note when missing) and held for every first-party command by test/plugins/docs/policy-map.test.ts |
 | item type, status | `says` |
 | field | `says`; for an enum, a meaning for every value |
 | relation, check, view, verifier | `says` |

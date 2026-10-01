@@ -1,17 +1,25 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { type Command, commandGaps } from "../../../naima/src/core/api.ts"
+import { type Command, commandGaps, runChecks } from "../../../naima/src/core/api.ts"
 import { cliCommands } from "../../../naima/src/core/entry.ts"
 import { firstParty, firstPartyPlugins } from "../../../naima/src/builtins.ts"
-import { renderReference } from "../../../naima/src/plugins/docs/index.ts"
+import { renderReference, unstatedEnforcement } from "../../../naima/src/plugins/docs/index.ts"
 import { tempProject } from "../../core/testing.ts"
 
 const everyPlugin = () => firstPartyPlugins(Object.fromEntries(firstParty.filter((p) => p.optIn).map((p) => [p.name, {}])))
 
-test("a command that does not say what it enforces is undocumented", () => {
-  const go = { name: "go", says: "go", usage: "go", examples: ["go"] }
-  assert.ok(commandGaps(go).some((g) => g.startsWith("does not say what it enforces")))
-  assert.deepEqual(commandGaps({ ...go, enforces: "nothing: it only prints" }), [])
+test("a plugin command that does not say what it enforces is a note in check, named with how to add it, never a problem", async () => {
+  const go = { name: "go", says: "go somewhere", usage: "go", examples: ["go"], run: () => 0 }
+  assert.deepEqual(commandGaps(go), [])
+  const p = tempProject([...firstPartyPlugins(), { name: "outside", says: "a plugin written before enforces", commands: [go] }])
+  try {
+    assert.deepEqual(unstatedEnforcement(p.ctx), ['command "go" (outside) does not say what it enforces'])
+    const { problems, notes } = await runChecks(p.ctx)
+    assert.ok(!problems.some((f) => f.message.includes("enforces")))
+    assert.ok(notes.some((f) => f.message.startsWith('command "go" (outside) does not say what it enforces — add enforces')))
+  } finally {
+    p.cleanup()
+  }
 })
 
 test("every command, the entry point's and every first-party plugin's, says what it enforces, and the reference maps each to it", () => {

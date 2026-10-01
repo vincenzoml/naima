@@ -100,7 +100,7 @@ The core's points, each also a typed key of the manifest:
 
 | Point | What a contribution is |
 |---|---|
-| `commands` | `naima <name>`: `says`, `enforces` (the policy or invariant it holds, or `nothing:` and what it does instead), `usage`, `options` (one per `--flag` in the usage), `examples` (invocations without the leading `naima`); `run(args, ctx)` returns an exit code (may be async) |
+| `commands` | `naima <name>`: `says`, `usage`, `options` (one per `--flag` in the usage), `examples` (invocations without the leading `naima`); optional and recommended, `enforces`: the policy or invariant it holds, or `nothing:` and what it does instead — a command without it is a note in `naima check`, never a problem; `run(args, ctx)` returns an exit code (may be async) |
 | `types` | item types: `id`, `dir`, `statuses` (each `open` or `done`, with open-ended `flags`; `proves` — evidence for what the item verifies — and `refutes` — evidence against it, which blocks a gate and a close — are two, also said as keys), `initialStatus`, a README `template`, `creatable: false` for archives, plain `traits`, an optional `transitions` map ([extending](#extending-another-plugins-types-and-fields)) |
 | `fields` | fields with a kind (`string`, `strings`, `date`, `enum`, `boolean`, `number`, `object`), enum values in rank order — or `valuesFrom` a point, and `multiple` for several — and the types they apply to, by name (`appliesTo`) or by trait (`traits`); `configured: true` when the values come from the project's configuration, so the program's reference does not list them |
 | `extends` | additive changes to another plugin's types and fields ([extending](#extending-another-plugins-types-and-fields)) |

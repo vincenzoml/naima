@@ -47,9 +47,8 @@ export function optionsTable(options: readonly OptionDoc[], what: string): strin
 const FLAG = /--[a-z][a-z0-9-]*/g
 
 /** What a command lacks of its documentation. */
-export function commandGaps(c: Pick<Command, "says" | "usage" | "options" | "examples" | "enforces">): string[] {
+export function commandGaps(c: Pick<Command, "says" | "usage" | "options" | "examples">): string[] {
   const out = [...says(c, "does")]
-  if (blank(c.enforces)) out.push("does not say what it enforces — a policy or invariant, or nothing and why")
   if (blank(c.usage)) out.push("has no usage")
   if (!c.examples?.length) out.push("has no example")
   const documented = new Set((c.options ?? []).map((o) => o.name))

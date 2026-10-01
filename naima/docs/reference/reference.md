@@ -29,7 +29,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 
 ## Commands at a glance
 
-Every command: what it does, and the policy or invariant it enforces — or nothing, and what it does instead. Each command's manifest says both, and `documented` fails on one that does not.
+Every command: what it does, and the policy or invariant it enforces — or nothing, and what it does instead. Each command's manifest says what it does; `enforces` is optional, and `documented` notes a command without it.
 
 | Command | Plugin | What it does | What it enforces |
 |---|---|---|---|
@@ -2132,7 +2132,7 @@ naima docs --check docs/reference.md
 
 | Check | What it holds |
 |---|---|
-| `documented` | every loaded plugin, command (with an example and every option), type, status, field, value, relation, check, view, gate and verifier carries its documentation |
+| `documented` | every loaded plugin, command (with an example and every option), type, status, field, value, relation, check, view, gate and verifier carries its documentation; a command that does not say what it enforces is a note |
 | `reference-current` | with the reference option set, the reference file is what `naima docs` generates from the loaded manifests |
 | `features-documented` | a feature in a documented status names its documentation in `docs`, and every name there resolves to a markdown file, and a heading when it names one |
 | `links-resolve` | every relative link in every markdown file of the project (or under the links option) points at a file, and a heading (ATX or setext) when it names one |

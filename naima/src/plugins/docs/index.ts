@@ -105,6 +105,15 @@ export function documentationGaps(ctx: Context): string[] {
   return out
 }
 
+/** Every command, the entry point's and every loaded plugin's, that does not say what it enforces: optional, so a note, never a problem. */
+export function unstatedEnforcement(ctx: Context): string[] {
+  const commands = [
+    ...cliCommands.map((c) => ({ c, by: "core" })),
+    ...ctx.registry.contributions("commands").map((c) => ({ c: c.value as Command, by: c.plugin })),
+  ]
+  return commands.filter(({ c }) => blank(c.enforces)).map(({ c, by }) => `command "${c.name}" (${by}) does not say what it enforces`)
+}
+
 /** The reference, generated from the manifests of the loaded plugins: every point's contributions, as each point documents them. Deterministic. */
 export function renderReference(ctx: Context): string {
   const r = ctx.registry
@@ -125,7 +134,7 @@ export function renderReference(ctx: Context): string {
     "",
     "## Commands at a glance",
     "",
-    "Every command: what it does, and the policy or invariant it enforces — or nothing, and what it does instead. Each command's manifest says both, and `documented` fails on one that does not.",
+    "Every command: what it does, and the policy or invariant it enforces — or nothing, and what it does instead. Each command's manifest says what it does; `enforces` is optional, and `documented` notes a command without it.",
     "",
     "| Command | Plugin | What it does | What it enforces |",
     "|---|---|---|---|",
@@ -268,8 +277,14 @@ export default function docs(options: Record<string, unknown> = {}): Plugin {
   const documented: Check = {
     name: "documented",
     says:
-      "every loaded plugin, command (with an example and every option), type, status, field, value, relation, check, view, gate and verifier carries its documentation",
-    run: (ctx) => documentationGaps(ctx).map((message): Finding => ({ level: "problem", message: `undocumented: ${message}` })),
+      "every loaded plugin, command (with an example and every option), type, status, field, value, relation, check, view, gate and verifier carries its documentation; a command that does not say what it enforces is a note",
+    run: (ctx) => [
+      ...documentationGaps(ctx).map((message): Finding => ({ level: "problem", message: `undocumented: ${message}` })),
+      ...unstatedEnforcement(ctx).map((message): Finding => ({
+        level: "note",
+        message: `${message} — add enforces to its manifest: the policy or invariant it holds, or "nothing: " and what it does instead`,
+      })),
+    ],
   }
 
   const referenceCurrent: Check = {
