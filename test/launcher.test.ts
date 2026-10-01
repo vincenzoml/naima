@@ -76,6 +76,9 @@ function world(name = "project") {
   return { base, source, host, init, cleanup: () => removeTemp(base) }
 }
 
+/** A test that spawns Naima through the launcher: past Bun's 5 second default under load (bugs/bun-test-ignores-bunfig-toml-s-30). */
+const LAUNCHED = 30_000
+
 test("the environment allow-list keeps Naima's, git's, ssh's and the locale's variables, and nothing else", () => {
   const kept = allowedEnv({
     HOME: "/h",
@@ -93,7 +96,7 @@ test("the environment allow-list keeps Naima's, git's, ssh's and the locale's va
   assert.deepEqual(Object.keys(kept).sort(), ["GIT_SSH_COMMAND", "HOME", "LC_ALL", "NAIMA_DATA", "PATH", "Path", "SSH_AUTH_SOCK", "https_proxy"])
 })
 
-test("the program is handed only the allow-listed environment: an unrelated secret is not there, git's variables are", { skip }, () => {
+test("the program is handed only the allow-listed environment: an unrelated secret is not there, git's variables are", { skip, timeout: LAUNCHED }, () => {
   const w = world()
   try {
     assert.equal(w.init().code, 0)
@@ -107,7 +110,7 @@ test("the program is handed only the allow-listed environment: an unrelated secr
   }
 })
 
-test("a project path with a comma is refused in one named line, not with Deno's NotCapable", { skip }, () => {
+test("a project path with a comma is refused in one named line, not with Deno's NotCapable", { skip, timeout: LAUNCHED }, () => {
   const w = world("my,project")
   try {
     const r = w.init()
@@ -120,7 +123,7 @@ test("a project path with a comma is refused in one named line, not with Deno's 
   }
 })
 
-test("init --write-excludes may write the host's deno.json through the launcher; init alone may not touch it", { skip }, () => {
+test("init --write-excludes may write the host's deno.json through the launcher; init alone may not touch it", { skip, timeout: LAUNCHED }, () => {
   const w = world()
   try {
     writeFileSync(join(w.host, "deno.json"), "{}\n")
@@ -136,7 +139,7 @@ test("init --write-excludes may write the host's deno.json through the launcher;
   }
 })
 
-test("init --write-agent-pointer may write the host's AGENTS.md through the launcher; init alone may not touch it", { skip }, () => {
+test("init --write-agent-pointer may write the host's AGENTS.md through the launcher; init alone may not touch it", { skip, timeout: LAUNCHED }, () => {
   const w = world()
   try {
     writeFileSync(join(w.host, "AGENTS.md"), "# Working here\n")
@@ -154,6 +157,7 @@ test("init --write-agent-pointer may write the host's AGENTS.md through the laun
 
 test("through the launcher, ui may serve on the loopback interface and no other command may listen", {
   skip: skip || (process.platform === "win32" && "a process group is POSIX"),
+  timeout: LAUNCHED,
 }, async () => {
   const w = world()
   try {
