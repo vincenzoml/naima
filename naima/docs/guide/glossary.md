@@ -225,6 +225,18 @@ release or loses work), `high` (a newcomer would hit it and not come back),
 
 A triage field: when. `now`, `next`, `later`, `parked`.
 
+### Deferral
+
+An item with `priority=parked`, or a bug `wontfix` or a todo `dropped`:
+deliberately not being worked on now, with the reason on its page. See
+[reopensWhen](#reopenswhen) and [`naima view parked`](triage.md).
+
+### ReopensWhen
+
+A field on a deferral: what would make it worth re-arguing, as prose or a
+link to the item or document that would. Unset, a deferral is silently
+re-argued the next time someone notices it.
+
 ### Confidence
 
 A triage field: do we understand it? `measured`, `diagnosed`, `reported`,

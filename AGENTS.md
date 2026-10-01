@@ -23,9 +23,7 @@ reference regenerated from the manifests with `deno task docs`
 The working modes every agent obeys (quiet, simple, fast, reporting,
 irreversible actions) are this project's rules, kept as tracker data: read
 them with `deno task naima rules --audience agents` at the start of work
-([rules as data](naima/docs/agents/read-the-project-rules.md)). Until the lock moves to a commit
-with the `rules` plugin, they are in
-[the seed](naima-tracker/naima-data/features/project-rules-as-tracker-data-rules-type/attachments/seed-rules.sh).
+([rules as data](naima/docs/agents/read-the-project-rules.md)). Read them before anything else; QUIET MODE and FAST MODE are of paramount importance.
 
 ## Working rules
 
