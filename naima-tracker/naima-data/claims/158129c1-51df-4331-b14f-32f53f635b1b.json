@@ -1,0 +1,12 @@
+{
+  "branch": "claude/runtime-folder",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "8081585f-2432-46eb-a03b-1e1b06205818",
+      "ref": "features/runtime-one-folder",
+      "title": "Runtime in one folder"
+    }
+  ],
+  "note": "runtime moved into naima/, tests into test/"
+}
