@@ -310,6 +310,26 @@ test("new validates every --set before it writes anything", async () => {
   }
 })
 
+test("new --dedupe prints likely duplicates of the same type before writing, and still writes", async () => {
+  const p = tempProject([notes])
+  try {
+    createItem(p.ctx, p.ctx.registry.types.get("notes")!, "Export drops the alpha channel")
+    p.output.length = 0
+    assert.equal(await p.run("new", "notes", "Export drops alpha on save", "--dedupe"), 0)
+    assert.match(p.output[0] ?? "", /possible duplicates/)
+    assert.match(p.output.join("\n"), /Export drops the alpha channel/)
+    assert.equal(p.ctx.repo.items.length, 2)
+
+    // No --dedupe never looks, however similar the title: only the one line a plain `new` always prints.
+    p.output.length = 0
+    assert.equal(await p.run("new", "notes", "Export drops alpha again"), 0)
+    assert.equal(p.output.length, 1)
+    assert.match(p.output[0] ?? "", new RegExp(`^${p.ctx.trackerDir}/NOTES/export-drops-alpha-again/ {2}[0-9a-f-]{36}$`))
+  } finally {
+    p.cleanup()
+  }
+})
+
 test("features/renaming-item-keeps-page-s-title-line: naima set of title rewrites the page's title line too, in one write", async () => {
   const p = tempProject([notes])
   try {

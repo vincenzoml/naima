@@ -192,19 +192,21 @@ naima help
 Open an item.
 
 ```sh
-naima new <type> "<title>" [--section <s>] [--set field=value]...
+naima new <type> "<title>" [--section <s>] [--set field=value]... [--dedupe]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--section` |  | the heading the item is grouped under on its board |
 | `--set` |  | a field=value pair to set on the new item; repeatable |
+| `--dedupe` |  | print items of the same type with a similar title before writing; never blocks |
 
 Examples:
 
 ```sh
 naima new bugs "Export drops the alpha channel"
 naima new tests "Export keeps the alpha channel" --set runBy=agent --section export
+naima new todos "Retry export on timeout" --dedupe
 ```
 
 ### naima show
