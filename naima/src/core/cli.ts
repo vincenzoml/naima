@@ -11,7 +11,7 @@ import { cliCommands } from "./entry.ts"
 import { FORMAT, formatRefusal, isFormat, migrate, MIGRATIONS, type Step } from "./format.ts"
 import { formatsFor, type OpenOptions, openProject, owed } from "./project.ts"
 import { bool, parse } from "./args.ts"
-import { gitOrNull, toplevel } from "./git.ts"
+import { gitOrNull, nativePath, toplevel } from "./git.ts"
 import { exclusions } from "./excludes.ts"
 import {
   DATA_DIR,
@@ -69,7 +69,11 @@ const usage = (name: string): string => `usage: naima ${cliCommands.find((c) => 
  * null when it is vendored into a project.
  */
 function runningCommit(programRoot: string): string | null {
-  const top = toplevel(programRoot)
+  // git always prints --show-toplevel with forward slashes, even on Windows, where real(programRoot)
+  // (node:fs) uses backslashes: without nativePath() the two never compared equal there, so a fresh
+  // Windows clone was never recognized as its own clone (naima: this Naima is not a clone with an origin).
+  const gitTop = toplevel(programRoot)
+  const top = gitTop === null ? null : nativePath(gitTop)
   const own = top !== null && (top === real(programRoot) || join(top, RUNTIME_DIR) === real(programRoot))
   return own ? gitOrNull(programRoot, "rev-parse", "HEAD") : null
 }
