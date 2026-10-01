@@ -49,6 +49,17 @@ first-party plugin the table does not name is loaded as it is.
 }
 ```
 
+`naima plugin` turns a plugin on or off, or sets one of its options, without
+a hand-edit: `naima plugin enable <name>`, `naima plugin disable <name>`,
+`naima plugin set <name> <option>=<value>...` (an empty value removes it),
+and `naima plugin show [<name>]` to see what is set now, and what a plugin's
+options are. It refuses a name that is neither first-party nor already in the
+table with its own `source`, and an option a plugin does not declare — the
+case this exists for is an opt-in plugin that starts a program, such as
+`verifier-mcrl2`: `naima plugin enable verifier-mcrl2` then
+`naima plugin set verifier-mcrl2 bin=/usr/local/bin`. Switching a plugin's
+`checks`, and adding a third-party plugin's `source`, are still a hand-edit.
+
 | Key | Default | What it is |
 |---|---|---|
 | `options` | `{}` | the plugin's own options, as its reference documents them: the `gates` plugin's `gates`, the `docs` plugin's `reference`, `beta-markers`' `paths` |

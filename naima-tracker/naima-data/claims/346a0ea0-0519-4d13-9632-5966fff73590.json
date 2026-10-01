@@ -1,0 +1,12 @@
+{
+  "branch": "claude/plugin-command",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "9230f722-adf2-4eec-830e-ec322b5e26bc",
+      "ref": "features/command-enable-configure-plugin-naima-json",
+      "title": "A command to enable or configure a plugin in naima.json"
+    }
+  ],
+  "note": "Implementing naima plugin enable|disable|set|show"
+}

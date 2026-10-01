@@ -37,6 +37,7 @@ Every command: what it does, and the policy or invariant it enforces — or noth
 | [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given | the program is locked to a commit of its source that is committed and pushed, and nothing outside the tracker directory is written unless --write-excludes or --write-agent-pointer asks |
 | [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything | the lock moves only to the head of the source's main, with the data migrated forward in the same change; a source naima.json names other than the one the program was aligned from is refused, by every command, until --accept-source |
 | [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change | nothing: it switches how the program is carried and stages the switch as one change for a person to commit |
+| [`plugin`](#naima-plugin) | core | turn a plugin on or off, or set one of its options, in naima.json's plugins table — validated the way the project is validated on every load, instead of a hand-edit of the file | a name must be a first-party plugin (loaded or opt-in) or one the table already names with its own source; an option set on one whose options are known here must be one it declares; the whole file is re-validated before it is written, so nothing a later load would refuse ever reaches disk |
 | [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files | nothing: it only prints |
 | [`help`](#naima-help) | core | list every command the loaded plugins provide, with its usage | nothing: it only prints |
 | [`new`](#naima-new) | core | open an item | every field is validated against its type's declarations before the item exists, and every write hook runs: a typo or a refusal leaves nothing behind; an archive type takes no new item |
@@ -184,6 +185,29 @@ Examples:
 ```sh
 naima carry vendored
 naima carry copy
+```
+
+### naima plugin
+
+Turn a plugin on or off, or set one of its options, in naima.json's plugins table — validated the way the project is validated on every load, instead of a hand-edit of the file.
+
+**Enforces**: A name must be a first-party plugin (loaded or opt-in) or one the table already names with its own source; an option set on one whose options are known here must be one it declares; the whole file is re-validated before it is written, so nothing a later load would refuse ever reaches disk.
+
+```sh
+naima plugin enable <name>
+naima plugin disable <name>
+naima plugin set <name> <option>=<value>...
+naima plugin show [<name>]
+```
+
+Examples:
+
+```sh
+naima plugin enable verifier-mcrl2
+naima plugin set verifier-mcrl2 bin=/usr/local/bin
+naima plugin disable rule-templates
+naima plugin show verifier-mcrl2
+naima plugin show
 ```
 
 ### naima guide

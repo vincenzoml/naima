@@ -68,20 +68,29 @@ check.
 
 ## Switch a plugin off
 
-```json
-{ "plugins": { "beta-markers": { "enabled": false } } }
+```sh
+naima plugin disable beta-markers
 ```
 
+the same as hand-editing `{ "plugins": { "beta-markers": { "enabled": false } } }`.
 Everything that plugin declares — its types, fields, checks, commands — is
-gone while it is off.
+gone while it is off; `naima plugin enable beta-markers` turns it back on.
+An opt-in plugin that starts a program — `verifier-mcrl2`, `verifier-voxlogica`
+— is off until named this way too.
 
 ## Give a plugin its options
 
-```json
-{ "plugins": { "beta-markers": { "options": { "paths": ["src"] } } } }
+```sh
+naima plugin set beta-markers 'paths=["src"]'
 ```
 
-Every plugin's options, with their defaults: [reference](../reference/reference.md).
+the same as hand-editing `{ "plugins": { "beta-markers": { "options": { "paths": ["src"] } } } }`
+— the value is read as JSON when it parses (a list, a number, `true`), a
+plain string otherwise; refused when `beta-markers` declares no option named
+`paths`. An empty value (`paths=`) removes it. `naima plugin show <name>`
+prints what a plugin's options are, and what the project has set; every
+plugin's options, with their defaults, are also in the
+[reference](../reference/reference.md).
 
 ## Keep Naima out of your own tools
 

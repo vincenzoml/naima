@@ -17,12 +17,13 @@ import {
   sourceRefusal,
   withCarry,
   writeRaw,
+  writeValidatedRaw,
 } from "./config.ts"
 import { consoleIO, type IO, type Place } from "./context.ts"
 import { cliCommands } from "./entry.ts"
 import { FORMAT, formatRefusal, isFormat, migrate, MIGRATIONS, type Step } from "./format.ts"
 import { formatsFor, type OpenOptions, openProject, owed } from "./project.ts"
-import { bool, parse } from "./args.ts"
+import { bool, pairs, parse } from "./args.ts"
 import { gitOrNull, nativePath, toplevel } from "./git.ts"
 import { exclusions } from "./excludes.ts"
 import { DEFAULT_ENTRY_FILES, entryPointers, writePointer } from "./pointer.ts"
@@ -60,7 +61,7 @@ import {
   withoutCredentials,
 } from "./program.ts"
 import { EXIT, isInternal, message, NaimaError } from "./errors.ts"
-import type { Carry, Command, Context, GuideSection } from "./types.ts"
+import type { Carry, Command, Context, GuideSection, Plugin } from "./types.ts"
 import { asRendered, linesAs } from "./rendered.ts"
 import { shortOrId } from "./names.ts"
 import { apiFor } from "./plugins.ts"
@@ -288,6 +289,149 @@ async function update(args: string[], opts: CliOptions, place: Place, lock: Lock
   return 0
 }
 
+type PluginTable = Record<string, Record<string, unknown>>
+
+/** Every plugin this project could be asked about: "core", every first-party (loaded or opt-in), and every third-party name the table already adds with its own `source`. */
+function knownPlugins(opts: CliOptions, raw: Record<string, unknown>): { firstPartyNames: string[]; thirdPartyNames: string[] } {
+  const firstPartyNames = opts.firstParty.map((p) => p.name)
+  const table = (raw["plugins"] as PluginTable | undefined) ?? {}
+  return { firstPartyNames, thirdPartyNames: Object.keys(table).filter((n) => n !== "core" && !firstPartyNames.includes(n)) }
+}
+
+/** Why `name` cannot be configured here, or null: it must be "core", a first-party plugin, or a third-party one the table already names — adding a third-party plugin's `source` is not this command's. */
+function pluginRefusal(name: string, opts: CliOptions, raw: Record<string, unknown>): string | null {
+  if (name === "core") return null
+  const { firstPartyNames, thirdPartyNames } = knownPlugins(opts, raw)
+  if (firstPartyNames.includes(name) || thirdPartyNames.includes(name)) return null
+  return `no plugin named "${name}" — first-party: ${firstPartyNames.join(", ")}${
+    thirdPartyNames.length ? `; this project's own: ${thirdPartyNames.join(", ")}` : ""
+  } — a third-party plugin is added by naming its code in plugins.${name}.source, not by naima plugin`
+}
+
+/** A first-party plugin's manifest, made with no options: only to read its static declarations (`says`, `options`), never run with the project's own, which might not (yet) be valid. Null for a third-party plugin, not instantiated here. */
+function firstPartyManifest(name: string, opts: CliOptions): Plugin | null {
+  const fp = opts.firstParty.find((p) => p.name === name)
+  return fp ? fp.factory({}, apiFor(name, { rename: {} })) : null
+}
+
+/** The option names `name` declares, or null when they cannot be known here (a third-party plugin). */
+function declaredOptions(name: string, opts: CliOptions): string[] | null {
+  const manifest = firstPartyManifest(name, opts)
+  return manifest ? (manifest.options ?? []).map((o) => o.name) : null
+}
+
+const pluginEntry = (raw: Record<string, unknown>, name: string): Record<string, unknown> => ({
+  ...(((raw["plugins"] as PluginTable | undefined) ?? {})[name] ?? {}),
+})
+
+/**
+ * `raw` with `name`'s entry replaced by `entry` — or removed when `entry` is
+ * now empty and its mere presence is not what loads the plugin (`keepPresence`,
+ * true for an opt-in first-party plugin: `optIn && !entry` is how it stays off).
+ */
+function withPluginEntry(raw: Record<string, unknown>, name: string, entry: Record<string, unknown>, keepPresence: boolean): Record<string, unknown> {
+  const table = { ...((raw["plugins"] as PluginTable | undefined) ?? {}) }
+  if (Object.keys(entry).length === 0 && !keepPresence) delete table[name]
+  else table[name] = entry
+  const { plugins: _was, ...rest } = raw
+  return Object.keys(table).length ? { ...rest, plugins: table } : rest
+}
+
+const isOptIn = (name: string, opts: CliOptions): boolean => opts.firstParty.find((p) => p.name === name)?.optIn === true
+
+const CORE_ENABLED_REFUSAL = "core is always loaded, and cannot be switched off or replaced — only its checks can be weighed: plugins.core.checks"
+const CORE_OPTIONS_REFUSAL = "core takes no options — only its checks can be weighed: plugins.core.checks"
+
+function statusOf(name: string, opts: CliOptions, raw: Record<string, unknown>): string {
+  if (name === "core") return "always loaded"
+  const entry = ((raw["plugins"] as PluginTable | undefined) ?? {})[name]
+  if (isOptIn(name, opts) && !entry) return "off (opt-in)"
+  return entry?.["enabled"] === false ? "off" : "on"
+}
+
+function showAllPlugins(opts: CliOptions, raw: Record<string, unknown>, io: IO): number {
+  const { thirdPartyNames } = knownPlugins(opts, raw)
+  io.out(`${"core".padEnd(16)} ${statusOf("core", opts, raw)}`)
+  for (const { name } of opts.firstParty) io.out(`${name.padEnd(16)} ${statusOf(name, opts, raw)}`)
+  for (const name of thirdPartyNames) io.out(`${name.padEnd(16)} ${statusOf(name, opts, raw)} (third-party)`)
+  return 0
+}
+
+function showOnePlugin(name: string, opts: CliOptions, raw: Record<string, unknown>, io: IO): number {
+  const refusal = pluginRefusal(name, opts, raw)
+  if (refusal) throw new Error(refusal)
+  const entry = ((raw["plugins"] as PluginTable | undefined) ?? {})[name]
+  io.out(`${name}: ${statusOf(name, opts, raw)}`)
+  if (name === "core") return 0
+  if (entry?.["source"] !== undefined) io.out(`  source: ${JSON.stringify(entry["source"])}`)
+  if (entry?.["replacedBy"] !== undefined) io.out(`  replacedBy: ${JSON.stringify(entry["replacedBy"])}`)
+  const manifest = firstPartyManifest(name, opts)
+  const options = (entry?.["options"] as Record<string, unknown> | undefined) ?? {}
+  if (manifest?.options?.length) {
+    io.out("  options:")
+    for (const o of manifest.options) {
+      const held = options[o.name]
+      const said = held !== undefined ? `= ${JSON.stringify(held)}` : o.default !== undefined ? `(default ${o.default})` : "(unset)"
+      io.out(`    ${o.name} ${said} — ${o.says}`)
+    }
+  } else if (Object.keys(options).length) {
+    io.out(`  options: ${JSON.stringify(options)}`)
+  }
+  if (entry?.["checks"] && Object.keys(entry["checks"] as object).length) io.out(`  checks: ${JSON.stringify(entry["checks"])}`)
+  return 0
+}
+
+function pluginCommand(args: string[], opts: CliOptions, place: Place, raw: Record<string, unknown>, io: IO): number {
+  const [sub, name, ...rest] = parse(args).positionals
+  if (sub === "show") {
+    if (rest.length) throw new Error(usage("plugin"))
+    return name ? showOnePlugin(name, opts, raw, io) : showAllPlugins(opts, raw, io)
+  }
+  if (sub !== "enable" && sub !== "disable" && sub !== "set") throw new Error(usage("plugin"))
+  if (!name?.trim()) throw new Error(usage("plugin"))
+  if (sub === "enable" || sub === "disable") {
+    if (rest.length) throw new Error(usage("plugin"))
+    if (name === "core") throw new Error(CORE_ENABLED_REFUSAL)
+    const refusal = pluginRefusal(name, opts, raw)
+    if (refusal) throw new Error(refusal)
+    const entry = pluginEntry(raw, name)
+    if (sub === "enable") delete entry["enabled"]
+    else entry["enabled"] = false
+    writeValidatedRaw(place.data, withPluginEntry(raw, name, entry, isOptIn(name, opts)))
+    io.out(`${name}: ${sub === "enable" ? "enabled" : "disabled"}`)
+    return 0
+  }
+  // sub === "set"
+  if (!rest.length) throw new Error(usage("plugin"))
+  if (name === "core") throw new Error(CORE_OPTIONS_REFUSAL)
+  const refusal = pluginRefusal(name, opts, raw)
+  if (refusal) throw new Error(refusal)
+  const assigns = pairs(rest)
+  const known = declaredOptions(name, opts)
+  for (const [key] of assigns) {
+    if (known && !known.includes(key)) throw new Error(`plugins.${name} declares no option "${key}" — its options: ${known.join(", ") || "none"}`)
+  }
+  const entry = pluginEntry(raw, name)
+  const options = { ...((entry["options"] as Record<string, unknown> | undefined) ?? {}) }
+  for (const [key, value] of assigns) {
+    if (value === "") delete options[key]
+    else {
+      let parsed: unknown = value
+      try {
+        parsed = JSON.parse(value)
+      } catch {
+        // not JSON: kept as the plain string it was typed as
+      }
+      options[key] = parsed
+    }
+  }
+  if (Object.keys(options).length) entry["options"] = options
+  else delete entry["options"]
+  writeValidatedRaw(place.data, withPluginEntry(raw, name, entry, isOptIn(name, opts)))
+  io.out(`${name}: ${rest.join(" ")}`)
+  return 0
+}
+
 function carryCommand(args: string[], opts: CliOptions, place: Place, lock: Lock, raw: Record<string, unknown>, io: IO): number {
   const [to, ...extra] = parse(args).positionals
   if (!to || extra.length || !CARRY_MODES.includes(to as Carry)) throw new Error(usage("carry"))
@@ -398,6 +542,7 @@ export async function runCli(argv: string[], opts: CliOptions): Promise<number> 
       }
       return command === "update" ? await update(args, opts, place, place.lock, place.raw, io) : carryCommand(args, opts, place, place.lock, place.raw, io)
     }
+    if (command === "plugin") return pluginCommand(args, opts, place, place.raw, io)
     const ctx = await openProject(place, opts, io)
     if (isHelp(command)) return help(ctx, io)
     const cmd = ctx.registry.find<Command>("commands", command as string)?.value

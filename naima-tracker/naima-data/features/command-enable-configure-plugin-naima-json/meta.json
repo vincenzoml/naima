@@ -7,5 +7,11 @@
   "priority": "next",
   "confidence": "reported",
   "effort": "M",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/guide/config.md",
+    "naima/docs/guide/configure-the-project.md",
+    "naima/docs/reference/reference.md"
+  ]
 }

@@ -149,3 +149,72 @@ test("the development build reads format-1 data as migrated, in memory: its gate
     p.cleanup()
   }
 })
+
+test("naima plugin show lists every plugin: core always loaded, a first-party one on, an opt-in one off until named", async () => {
+  const p = project()
+  try {
+    const show = await p.run("plugin", "show")
+    assert.equal(show.code, 0, show.err)
+    assert.match(show.out, /^core\s+always loaded$/m)
+    assert.match(show.out, /^trackers\s+on$/m)
+    assert.match(show.out, /^verifier-mcrl2\s+off \(opt-in\)$/m)
+    assert.equal(p.raw()["plugins"], undefined, "only reads")
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("naima plugin enable turns on an opt-in plugin, set writes a validated option and an empty value removes it, disable turns it off keeping its options", async () => {
+  const p = project()
+  try {
+    const enable = await p.run("plugin", "enable", "verifier-mcrl2")
+    assert.equal(enable.code, 0, enable.err)
+    assert.deepEqual(p.raw()["plugins"], { "verifier-mcrl2": {} }, "present, even empty: that alone loads an opt-in plugin")
+
+    const shown = await p.run("plugin", "show", "verifier-mcrl2")
+    assert.equal(shown.code, 0, shown.err)
+    assert.match(shown.out, /^verifier-mcrl2: on$/m)
+    assert.match(shown.out, /bin \(default PATH\) — the absolute directory holding the mCRL2 tools/)
+
+    const bad = await p.run("plugin", "set", "verifier-mcrl2", "nope=1")
+    assert.equal(bad.code, 2)
+    assert.match(bad.err, /plugins\.verifier-mcrl2 declares no option "nope" — its options: bin/)
+    assert.deepEqual((p.raw()["plugins"] as Record<string, unknown>)["verifier-mcrl2"], {}, "nothing written on refusal")
+
+    const set = await p.run("plugin", "set", "verifier-mcrl2", "bin=/opt/mcrl2")
+    assert.equal(set.code, 0, set.err)
+    assert.deepEqual(p.raw()["plugins"], { "verifier-mcrl2": { options: { bin: "/opt/mcrl2" } } })
+
+    const unset = await p.run("plugin", "set", "verifier-mcrl2", "bin=")
+    assert.equal(unset.code, 0, unset.err)
+    assert.deepEqual(p.raw()["plugins"], { "verifier-mcrl2": {} }, "empty value removes it, but the plugin stays enabled")
+
+    const disable = await p.run("plugin", "disable", "verifier-mcrl2")
+    assert.equal(disable.code, 0, disable.err)
+    assert.deepEqual(p.raw()["plugins"], { "verifier-mcrl2": { enabled: false } })
+    assert.match((await p.run("plugin", "show", "verifier-mcrl2")).out, /^verifier-mcrl2: off$/m)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("naima plugin enable on a plugin the table only disabled prunes the entry back to the default; disable and set refuse the core and an unknown name", async () => {
+  const p = project({ plugins: { "beta-markers": { enabled: false } } })
+  try {
+    const enable = await p.run("plugin", "enable", "beta-markers")
+    assert.equal(enable.code, 0, enable.err)
+    assert.equal(p.raw()["plugins"], undefined, "nothing left to say: a non-opt-in plugin the table does not name is loaded as it is")
+
+    for (const argv of [["plugin", "enable", "core"], ["plugin", "disable", "core"], ["plugin", "set", "core", "x=1"]]) {
+      const r = await p.run(...argv)
+      assert.equal(r.code, 2, argv.join(" "))
+      assert.match(r.err, /core is always loaded|core takes no options/)
+    }
+
+    const unknown = await p.run("plugin", "enable", "nope")
+    assert.equal(unknown.code, 2)
+    assert.match(unknown.err, /no plugin named "nope" — first-party: trackers,/)
+  } finally {
+    p.cleanup()
+  }
+})

@@ -224,6 +224,18 @@ export function writeRaw(data: string, raw: Record<string, unknown>): void {
 }
 
 /**
+ * Write `<data>/naima.json`, refused instead when `raw` as a whole is not a
+ * config this core reads — the same check every load makes — so a command
+ * that edits the file by hand, such as `naima plugin`, never writes what the
+ * next load would refuse. Returns the config it validated.
+ */
+export function writeValidatedRaw(data: string, raw: Record<string, unknown>): Config {
+  const config = parseConfig(raw)
+  writeRaw(data, raw)
+  return config
+}
+
+/**
  * The program directory `<data>/naima.json` names, or the default one when the
  * file cannot be read — the program then reports what is wrong with it. For
  * the launcher, which must know where the program is before anything runs.

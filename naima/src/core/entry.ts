@@ -54,6 +54,21 @@ export const cliCommands: Omit<Command, "run">[] = [
     examples: ["carry vendored", "carry copy"],
   },
   {
+    name: "plugin",
+    says:
+      "turn a plugin on or off, or set one of its options, in naima.json's plugins table — validated the way the project is validated on every load, instead of a hand-edit of the file",
+    enforces:
+      "a name must be a first-party plugin (loaded or opt-in) or one the table already names with its own source; an option set on one whose options are known here must be one it declares; the whole file is re-validated before it is written, so nothing a later load would refuse ever reaches disk",
+    usage: "plugin enable <name> | plugin disable <name> | plugin set <name> <option>=<value>... | plugin show [<name>]",
+    examples: [
+      "plugin enable verifier-mcrl2",
+      "plugin set verifier-mcrl2 bin=/usr/local/bin",
+      "plugin disable rule-templates",
+      "plugin show verifier-mcrl2",
+      "plugin show",
+    ],
+  },
+  {
     name: "guide",
     says:
       "inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files",
