@@ -1,7 +1,7 @@
 {
   "id": "778821a8-8955-4a6f-b77f-a121b04bd268",
   "title": "Documentation split by reader: a guide for people, pages for agents, one rules page",
-  "status": "requested",
+  "status": "planned",
   "created": "2026-10-01",
   "area": "docs",
   "kind": "docs",
@@ -9,5 +9,13 @@
   "priority": "now",
   "confidence": "diagnosed",
   "effort": "L",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/README.md",
+    "naima/docs/guide/README.md",
+    "naima/docs/guide/tutorial.md",
+    "naima/docs/guide/rules.md",
+    "naima/docs/agents/README.md",
+    "develop/documentation.md"
+  ]
 }

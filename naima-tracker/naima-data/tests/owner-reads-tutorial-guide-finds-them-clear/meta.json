@@ -1,0 +1,21 @@
+{
+  "id": "a4dc9cee-4795-4f43-9d7e-212fb4abe1a7",
+  "title": "The owner reads the tutorial and the guide and finds them clear without the code",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "human",
+  "humanBecause": "judgement",
+  "area": "docs",
+  "kind": "writing",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "778821a8-8955-4a6f-b77f-a121b04bd268"
+    }
+  ],
+  "impact": "medium",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "effort": "M",
+  "triagedOn": "2026-10-01"
+}

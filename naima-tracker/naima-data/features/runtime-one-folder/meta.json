@@ -9,5 +9,10 @@
   "priority": "now",
   "confidence": "diagnosed",
   "effort": "L",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/guide/install.md#the-dist-branch",
+    "develop/architecture.md#layout"
+  ]
 }

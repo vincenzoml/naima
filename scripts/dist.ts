@@ -23,13 +23,6 @@ import { DIST_BRANCH, RUNTIME_DIR } from "../naima/src/core/layout.ts"
 export { RUNTIME_DIR }
 export const TRAILER = "Source-Commit"
 
-/**
- * Until the documentation moves into the runtime folder, naima/docs is a
- * symbolic link to the repository's docs/: the dist holds the files it links
- * to, not the link.
- */
-const LINKED_DOCS = `${RUNTIME_DIR}/docs`
-
 export interface Built {
   /** The dist commit that holds `source`'s runtime files: new, or the branch's head when its tree is the same. */
   commit: string
@@ -56,14 +49,9 @@ const tryGit = (repo: string, args: string[]): string | null => {
  */
 export function selectRuntime(paths: string[]): [string, string][] {
   const prefix = `${RUNTIME_DIR}/`
-  const linked = paths.includes(LINKED_DOCS)
   return paths
-    .filter((p) => p !== LINKED_DOCS)
-    .flatMap((p): [string, string][] => {
-      if (p.startsWith(prefix)) return [[p, p.slice(prefix.length)]]
-      if (linked && p.startsWith("docs/")) return [[p, p]]
-      return []
-    })
+    .filter((p) => p.startsWith(prefix))
+    .map((p): [string, string] => [p, p.slice(prefix.length)])
     .sort((x, y) => (x[1] < y[1] ? -1 : x[1] > y[1] ? 1 : 0))
 }
 

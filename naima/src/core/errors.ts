@@ -1,5 +1,5 @@
 // How Naima fails: a refusal the user can act on, or a bug; and the exit
-// code each one ends in (docs/develop/plugin-contract.md#exit-codes).
+// code each one ends in (docs/reference/plugin-contract.md#exit-codes).
 
 /** The exit codes of `naima`. A command returns OK or FAILED; the entry point adds the rest. */
 export const EXIT = {

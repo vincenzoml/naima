@@ -168,6 +168,13 @@ export interface SummarySection {
   render(ctx: Context): Rendered | Promise<Rendered>
 }
 
+/** A block `naima guide` prints first, inside a project, before the documentation pages: what an agent reads before anything else. May be async; one with nothing to say renders no lines. */
+export interface GuideSection {
+  name: string
+  says: string
+  render(ctx: Context): Rendered | Promise<Rendered>
+}
+
 /** One additive term of an item's urgency. Lower is more urgent. */
 export interface RankTerm {
   name: string
@@ -204,7 +211,7 @@ export interface ExtensionPoint<T = any> {
 }
 
 /**
- * One write of one item, as the write hooks see it (docs/develop/plugin-contract.md#write-hooks).
+ * One write of one item, as the write hooks see it (docs/reference/plugin-contract.md#write-hooks).
  * `create` opens an item, `update` rewrites its fields, `move` archives or moves it to another type's directory.
  */
 export interface Write {
@@ -254,6 +261,8 @@ export interface Plugin {
   commands?: Command[]
   views?: View[]
   summary?: SummarySection[]
+  /** Blocks `naima guide` prints first, inside a project. */
+  guide?: GuideSection[]
   rank?: RankTerm[]
   /** Hooks on every item write, in load order. */
   hooks?: WriteHook[]

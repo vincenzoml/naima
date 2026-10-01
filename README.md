@@ -10,7 +10,7 @@ the file format is an open specification, and changing Naima to fit a project
 is encouraged.
 
 Why Naima exists, what it requires of itself and the principles behind it:
-[purpose, requirements and principles](docs/purpose.md). Read it first.
+[purpose, requirements and principles](naima/docs/purpose.md). Read it first.
 
 ## Why the name
 
@@ -64,25 +64,39 @@ deno run -A naima-tracker/naima/naima.ts new bugs "Export drops the alpha channe
 deno run -A naima-tracker/naima/naima.ts check
 ```
 
-Details: [installing and updating](docs/guide/install.md), [using Naima in your
-project](docs/guide/tracker-folder.md), [the format](docs/reference/format.md). An agent can do
-all of this itself: [the Naima skill](docs/agents/skill.md).
+The whole path, from an empty repository to a closed bug, every command with
+its real output: [the tutorial](naima/docs/guide/tutorial.md). Details:
+[installing and updating](naima/docs/guide/install.md),
+[the tracker folder](naima/docs/guide/tracker-folder.md),
+[the format](naima/docs/reference/format.md). An agent can do all of this itself:
+[the Naima skill](naima/docs/agents/skill.md).
 
 ## Documentation
 
-**[Purpose, requirements and principles](docs/purpose.md)** — read first:
+**[Purpose, requirements and principles](naima/docs/purpose.md)** — read first:
 why Naima exists, whom it serves, what it requires of itself and what holds
 each requirement, its design principles and its non-goals.
 
-**[docs/](docs/README.md)** — concepts, configuration, the generated
-reference of every command, type, field, relation, check, gate and plugin, the
-plugin contract, the bootstrap policy, and the flows for people and AI agents.
-Rules for working on this repository: [AGENTS.md](https://github.com/vincenzoml/naima/blob/main/AGENTS.md).
+**[The documentation map](naima/docs/README.md)** — where to start, by who you are:
+
+- **[the guide](naima/docs/guide/README.md)**, for people using Naima, no code
+  assumed: a tutorial, a page per everyday task, concepts, configuration,
+  questions, a glossary, and **[the rules](naima/docs/guide/rules.md)** every
+  project holds to, each marked enforced or convention;
+- **[for agents](naima/docs/agents/README.md)**: how an agent learns a project, the
+  skill, and the flows;
+- **reference**: [the format](naima/docs/reference/format.md) of every file, and
+  [the reference](naima/docs/reference/reference.md) of every command, type, field,
+  check, gate and plugin, generated from the code;
+- **[developing Naima](develop/README.md)**: architecture, the plugin
+  contract, the documentation rule, how Naima tracks itself.
+
+Rules only for working on this repository: [AGENTS.md](https://github.com/vincenzoml/naima/blob/main/AGENTS.md).
 
 Naima tracks itself, in `naima-tracker/`, managed by a clone of its own
 `dist`, locked by commit, as every project is (`deno task naima`);
 `deno task verify` runs the typecheck, the tests, and `check` with both the
-lock and the working tree: [Naima tracking itself](docs/develop/bootstrap.md).
+lock and the working tree: [Naima tracking itself](develop/bootstrap.md).
 
 ## Licence
 

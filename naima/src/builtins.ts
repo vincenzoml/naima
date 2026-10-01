@@ -8,6 +8,7 @@ import betaMarkers from "./plugins/beta-markers/index.ts"
 import docs from "./plugins/docs/index.ts"
 import coordination from "./plugins/coordination/index.ts"
 import gates from "./plugins/gates/index.ts"
+import rules from "./plugins/rules/index.ts"
 import trackers from "./plugins/trackers/index.ts"
 import triage from "./plugins/triage/index.ts"
 import verifier from "./plugins/verifier/index.ts"
@@ -20,6 +21,7 @@ export const firstParty: readonly FirstParty[] = [
   { name: "gates", factory: gates },
   { name: "beta-markers", factory: betaMarkers },
   { name: "verifier", factory: verifier },
+  { name: "rules", factory: rules },
   { name: "docs", factory: docs },
 ]
 

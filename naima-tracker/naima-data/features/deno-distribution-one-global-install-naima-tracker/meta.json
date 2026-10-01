@@ -14,11 +14,11 @@
     }
   ],
   "docs": [
-    "docs/format.md",
-    "docs/install.md",
-    "docs/using-naima.md",
-    "docs/skill.md",
-    "docs/bootstrap.md",
-    "docs/config.md"
+    "naima/docs/reference/format.md",
+    "naima/docs/guide/install.md",
+    "naima/docs/guide/tracker-folder.md",
+    "naima/docs/agents/skill.md",
+    "develop/bootstrap.md",
+    "naima/docs/guide/config.md"
   ]
 }

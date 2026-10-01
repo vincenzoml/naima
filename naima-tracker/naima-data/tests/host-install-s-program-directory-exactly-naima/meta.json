@@ -1,0 +1,20 @@
+{
+  "id": "dd6eee23-3a10-4c27-b139-574ed779a088",
+  "title": "A host install's program directory is exactly naima/",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "area": "distribution",
+  "kind": "test",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "8081585f-2432-46eb-a03b-1e1b06205818"
+    }
+  ]
+}
