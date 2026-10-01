@@ -1,0 +1,3 @@
+# install.ps1 installs Naima on a Windows machine: fresh, again, refusing outside a repository, and the piped form
+
+On a Windows machine with git and Deno, in a fresh `git init` folder: `irm https://vincenzoml.github.io/naima/install.ps1 | iex` (or `pwsh -File site/install.ps1` with `NAIMA_SOURCE` naming a local source). Pass: `all invariants hold`; naima-tracker\naima\ holds naima/'s files and `.naima-copy.json`, no `.git`, no tests, no AGENTS.md; run again says `already installed`; outside a repository it refuses with `not a git repository`; the piped form installs too. Windows is not exercised by any test: only a person on a Windows machine can run this.

@@ -1,0 +1,14 @@
+{
+  "id": "b1cf3371-0723-4b7b-b3ad-e80746419089",
+  "title": "`naima show`/`naima set` with an empty reference silently acts on the only item",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

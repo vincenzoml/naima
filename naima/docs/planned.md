@@ -8,40 +8,18 @@ what does, and [what Naima is for](purpose.md#what-exists-today) sums it up.
 Each entry says what it is, what you can do today instead, and an example.
 The order is the order of the work: the first entries come first.
 
-## Epics and milestones
+## Metrics
 
-- **[Epics](guide/glossary.md#epic)** as an item type: a large goal grouping
-  features and todos. Example: "Replicate the 2024 study".
-- **[Milestones](guide/glossary.md#milestone)**: a [gate](guide/glossary.md#gate)
-  with a date, so `naima queue` can say what is late. Example: "draft results
-  by 15 November".
-- **Today:** a gate declared in `naima.json`, and a [todo](guide/glossary.md#todo)
-  whose page lists its parts and the date in prose.
-
-## Item types for other work
-
-Packs of item types for work that is not software: experiments and analyses
-whose evidence is a reproducible run; sections and reviews of a paper.
-**Today:** bugs, todos, features and tests fit most of this already ("figure
-3 uses last year's data" is a bug), and a project can add its own types with
-a [plugin](guide/add-a-plugin.md).
-
-## Commands for every action
-
-Every action an agent takes on an item has a command, so each is recorded
-the same way and can be checked. Opening, fields, triage, links,
-the description (`naima describe`), notes (`naima note`), claims, proof and
-closing have one. Missing today:
-
-- **Attaching a file** to an item's `attachments/`, with the consent of whoever
-  owns it recorded on the item when it is the owner's material. **Today:** the
-  file is copied in by hand.
-- **Moving an item to another type** (a bug that turns out to be a request).
-  **Today:** a new item is opened in the right type and the old one linked
-  `duplicate-of` it.
-- **Renaming an item** so its page agrees: `naima set <item> title="…"` changes
-  the field and leaves the title line of `README.md` as it was. **Today:** that
-  line is edited by hand.
+- **Code-quality metrics side by side with tests**: measures of the code
+  itself, read next to the test results, so a change that passes its tests
+  but makes the code harder to maintain is seen.
+- **Metrics measured on every commit without anyone asking**: a commit hook
+  that runs them and records the numbers, and a trend drawn as a chart on a
+  dashboard.
+- **Today:** `naima metrics run --record` runs the project's metrics when
+  asked, records them per commit, holds each to a budget, a floor or a
+  baseline, and `naima metrics trend` draws the trend as text
+  ([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ## Model checkers and the strength of evidence
 
@@ -57,15 +35,6 @@ closing have one. Missing today:
 - **Today:** properties, `naima verify` and expiring proofs work, with one
   example verifier, `naima/src/plugins/verifier/adapters/example-regex.ts`
   ([prove and close](guide/prove-and-close.md#properties-proven-by-a-tool)).
-
-## Metrics
-
-Metrics measured on every commit without anyone asking: a commit hook that
-runs them and records the numbers, and a trend drawn as a chart on a
-dashboard. **Today:** `naima metrics run --record` runs the project's
-metrics when asked, records them per commit, holds each to a budget, a floor
-or a baseline, and `naima metrics trend` draws the trend as text
-([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ## Structuring a project from the start
 
@@ -91,6 +60,16 @@ these choices in chat, and the owner's answers become
 instruction file (such as `AGENTS.md` or `CLAUDE.md`) pointing at the
 [skill](agents/skill.md). **Today:** the installer's instructions tell the
 agent to do it ([working with AI agents](guide/working-with-agents.md#get-an-agent-going)).
+
+## Item types for other work
+
+Naima is born for software; these are packs of item types for other work
+([beyond software](purpose.md#beyond-software-any-project)): experiments and
+analyses whose evidence is a reproducible run; sections and reviews of a
+paper.
+**Today:** bugs, todos, features and tests fit most of this already ("figure
+3 uses last year's data" is a bug), and a project can add its own types with
+a [plugin](guide/add-a-plugin.md).
 
 ## Roles
 

@@ -44,9 +44,9 @@ in verbatim only with their yes ([the rule](rules.md#the-owners-chat-stays-priva
 
 ```console
 $ naima triage
-  type         open    priority    impact    effortconfidence   derived
-  bugs            1           0         0         0         0   0
-  tests           1           0         0         0         0   0
+  type         open    priority     impact     effort confidence   derived
+  bugs            1           0          0          0          0   0
+  tests           1           0          0          0          0   0
 $ naima triage missing
 2 open items without effort — the field only a person can set:
   tests/looks-right-phone  Looks right on a phone
@@ -70,6 +70,41 @@ It never sets effort.
 `naima summary` show open items most urgent first: impact, priority, effort
 and the [gates](glossary.md#gate) an item is on, together. That order is
 worked out each time, never stored.
+
+## Deferring
+
+A [deferral](glossary.md#deferral) — `priority=parked`, or a bug `wontfix` or
+a todo `dropped` — is captured in full like any other item, then say what
+would make it worth re-arguing:
+
+```sh
+naima triage set export-drops priority=parked reopensWhen="when the format gains an alpha channel in its spec"
+```
+
+```console
+$ naima view parked
+  [open] bugs/export-drops  Export to PNG loses the alpha channel — reopens when: when the format gains an alpha channel in its spec
+```
+
+An item left without `reopensWhen` is reported by `naima check`
+(`deferred-says-why`): say why, and what would reopen it, before moving on.
+Read `naima view parked` before filing something that looks familiar — the
+answer may already be "I already told you".
+
+## Authoritative documents
+
+A project may declare which documents are authoritative for a kind of status,
+and which are retired, in `naima-data/naima.json`:
+
+```json
+{ "plugins": { "triage": { "options": { "documents": {
+  "naima/docs/planned.md": { "says": "what Naima does not do yet" },
+  "OLD-STATUS.md": { "says": "superseded by planned.md", "retired": true }
+} } } } }
+```
+
+`naima guide` prints the list first, so an agent reads which document to
+trust, and which one not to start competing with, before anything else.
 
 ## Next
 

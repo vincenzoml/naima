@@ -12,6 +12,7 @@ import gates from "./plugins/gates/index.ts"
 import loop from "./plugins/loop/index.ts"
 import metrics from "./plugins/metrics/index.ts"
 import planning from "./plugins/planning/index.ts"
+import privacy from "./plugins/privacy/index.ts"
 import rules from "./plugins/rules/index.ts"
 import trackers from "./plugins/trackers/index.ts"
 import triage from "./plugins/triage/index.ts"
@@ -30,6 +31,7 @@ export const firstParty: readonly FirstParty[] = [
   { name: "verifier", factory: verifier },
   { name: "metrics", factory: metrics },
   { name: "rules", factory: rules },
+  { name: "privacy", factory: privacy },
   { name: "docs", factory: docs },
 ]
 

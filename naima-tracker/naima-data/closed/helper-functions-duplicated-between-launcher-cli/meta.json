@@ -1,0 +1,14 @@
+{
+  "id": "364d8aba-1c40-4209-bbe4-6cf2082d7940",
+  "title": "Helper functions are duplicated between the launcher and the CLI",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "diagnosed",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
+}

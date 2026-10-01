@@ -61,8 +61,10 @@ add the project's own data folders. `naima init` writes its own
 - **Small commits, one idea each, with a message that says why.** Any single
   change can then be found and undone.
 - **Look before committing.** `git status` and `git diff --cached`: nothing
-  from step 3 is staged, no secret appears in the diff. A secret already
-  committed is a problem for the owner to know about at once, not to hide.
+  from step 3 is staged, no secret appears in the diff; `naima check` (the
+  check `secrets`) reads every file for the common key shapes. A secret
+  already committed is a problem for the owner to know about at once, not to
+  hide.
 - **Never force-push, never rewrite history.** No `git push --force`, no
   `git rebase` of shared branches, no `git reset --hard` over someone's work,
   no `git commit --amend` of a commit already shared. To undo, add a commit:
@@ -83,3 +85,17 @@ the git commands that did it. A git problem the agent cannot solve alone —
 a credential to push, a conflict between two people's work that needs a
 choice — is brought as one question in plain words
 ([asking the human](asking-the-human.md#when-you-do-ask)).
+
+What a commit message itself must say is
+[its own contract](commit-messages.md).
+
+## Safety rules
+
+- **Never force-push, never rewrite shared history.** Convention: no
+  `--force`, `rebase` of a shared branch, `reset --hard` over someone's work,
+  or `commit --amend` of a commit already shared; undo with `git revert`
+  instead.
+- **No secret is committed.** Enforced by the check `secrets`, which reads
+  every file and attachment for the common key shapes before it lands.
+- **Nothing is pushed where the owner set no remote.** Convention: with no
+  remote, work stays local, which is always safe.

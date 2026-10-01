@@ -1,0 +1,5 @@
+# Copy-on-install: the program is a plain copy of naima/ from a per-user cache, locked to a main commit; no dist branch
+
+The owner's decision (2026-10-01): replace the generated `dist` branch with copy-on-install. The runtime lives in one folder, `naima/`, so the installer and the program itself fetch the source's `main` at the locked commit, shallow, into a per-user cache keyed by source (a commit present there is offline), and copy only the contents of `naima/` into the project's `naima-tracker/naima/` as plain files. The lock names that `main` commit; `naima update` moves it to main's head and copies again; a new worktree copies from the cache.
+
+Carry: the default is a gitignored copy (`copy`, recorded by leaving `carry` out of naima.json); `vendored` is the same copy committed; `submodule` stays git's own. The gitignored clone mode goes: a clone of main would hold the whole repository. A lock naming a dist commit is mapped to the main commit of its `Source-Commit:` trailer and moves on the next `naima update`. `scripts/dist.ts`, the CI dist job and every dist-specific code path, test and page go; CI only tests.

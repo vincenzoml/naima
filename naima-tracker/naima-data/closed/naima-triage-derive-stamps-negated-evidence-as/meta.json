@@ -1,0 +1,14 @@
+{
+  "id": "1435a99a-0221-487d-a6b0-a6a153cf3b7e",
+  "title": "`naima triage derive` stamps negated evidence as `measured`",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

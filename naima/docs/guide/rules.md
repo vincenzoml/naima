@@ -18,6 +18,15 @@ Rules that apply only to developing Naima itself are in Naima's own
 `AGENTS.md`, not here; [a project's own rules](#a-projects-own-rules) are
 data in its tracker.
 
+**A rule's reason is not the same as documentation's history.** "Documentation
+states what is, never how it came to be" is about product pages: the guide,
+the reference, a feature's own page — none of them tell the story of why a
+decision was made. A rule is different on purpose: every rule on this page
+carries its reason, because the reason is part of what the rule *is* — it is
+how you judge whether the rule still applies when the situation changes. So a
+rule's reason stays here, on the rule; it is never repeated as history on a
+product page.
+
 ## The tracker
 
 ### Change the tracker only through the CLI
@@ -78,13 +87,24 @@ changed since), cannot be closed. **Enforced by** `naima close` and the check
 ### Evidence travels with the claim
 
 "It works" without a number, a log line or an attachment is not a proof.
-[Evidence](glossary.md#evidence) goes in the item's `attachments/`.
-**Convention**, except for properties, whose runs `naima verify` attaches.
+[Evidence](glossary.md#evidence) goes in the item's `attachments/`, through
+`naima attach`. **Convention**, except for properties, whose runs
+`naima verify` attaches.
 
 ### A partial item says what is left
 
 **Enforced by** the check `partial-says-what-is-left`: an item in status
 `partial` carries at least one unticked `- [ ]` line on its page.
+
+### A deferred item says why, and what would reopen it
+
+A [deferral](glossary.md#deferral) — `priority=parked`, or a bug `wontfix`
+or a todo `dropped` — is still an item someone may re-argue later, not a
+loss: say why it is deferred on its page, and set
+[`reopensWhen`](glossary.md#reopenswhen). `naima view parked` lists every
+one with its trigger, so a deferral is found before it is re-argued from
+scratch. **Enforced by** the check `deferred-says-why`: a deferred item left
+exactly as the unfilled template it was created with is a problem.
 
 ### Behaviour shipped without proof is marked
 
@@ -131,7 +151,11 @@ The conversation between the [owner](glossary.md#owner) and an agent is
 private. Nothing from it is copied into the repository verbatim: the agent
 writes the report, the description or the note in its own words. The owner's
 own words are quoted, and a file or screenshot the owner shared becomes an
-attachment, only after the owner's explicit yes. **Convention**:
+attachment, only after the owner's explicit yes. **Enforced by** `naima attach`,
+which records on the item whose each file is and the owner's yes, restated
+(`--consent`), and refuses a file without one of `--consent` and `--own`; and
+the check `attachment-consent`, which fails on an attachment a branch adds
+with no such record. Paraphrasing the chat in prose is **convention**:
 [reporting and triage](../agents/reporting-and-triage.md#3-what-a-report-carries).
 
 ### Git is the agent's job, done safely
@@ -140,7 +164,11 @@ The owner never has to learn git. Agents install it when it is missing,
 start a repository when there is none, keep secrets and private data out of
 it with a `.gitignore`, and save work in small commits; they never
 force-push, never rewrite history, and never commit a secret.
-**Convention**: [git, handled for the owner](../agents/git-for-the-owner.md).
+**Enforced by** the check `secrets` for secrets — a private key with its
+body, or an AWS, GitHub, Slack, API-secret or Google key, in any project file
+or attachment — whose exceptions each carry a reason and an item, and only
+shrink; and by `naima attach`, which refuses a file holding one. The rest is
+**convention**: [git, handled for the owner](../agents/git-for-the-owner.md).
 
 ## Branches and worktrees
 

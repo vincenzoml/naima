@@ -1,0 +1,13 @@
+{
+  "id": "db5c3c74-b165-43c1-891f-364259e3610c",
+  "title": "Piping naima's output into a reader that closes early ends quietly, on Deno, Node and Bun (test/core/epipe.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "532e69ba-26d7-4e23-8b07-f4d8b5255d43"
+    }
+  ]
+}

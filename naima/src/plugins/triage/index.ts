@@ -10,16 +10,21 @@
 // derived is stamped `triagedBy: "derived"` so a human value is never
 // overwritten and the share of inference stays visible.
 
+import { existsSync, readFileSync } from "node:fs"
+import { join } from "node:path"
 import {
   bool,
   byUrgency,
   cell,
+  type Check,
   type Command,
   type Context,
   CONTRACT,
   enumRank,
   type FieldDef,
   fieldValue,
+  type Finding,
+  type GuideSection,
   isOpen,
   type Item,
   label,
@@ -76,6 +81,11 @@ export const FIELDS: FieldDef[] = [
   },
   { name: "triagedBy", kind: "enum", says: "set to derived when a tool inferred the fields", values: { derived: "inferred by naima triage derive" } },
   { name: "triagedOn", kind: "date", says: "when a person last triaged the item" },
+  {
+    name: "reopensWhen",
+    kind: "string",
+    says: "on a parked, wontfix or dropped item: what would make it worth re-arguing — prose, or a link to the item or document that would",
+  },
 ]
 
 const TRIAGE = ["priority", "impact", "effort", "confidence"] as const
@@ -86,7 +96,34 @@ const EFFORT = enumRef("effort")
 const CONFIDENCE = enumRef("confidence")
 const TRIAGED_BY = enumRef("triagedBy")
 const TRIAGED_ON = { name: "triagedOn", kind: "date" } as const
+const REOPENS_WHEN = { name: "reopensWhen", kind: "string" } as const
 const field = (name: string) => FIELDS.find((f) => f.name === name)
+
+/** A parked, wontfix or dropped item: deliberately not being worked on now. */
+const DEFERRED_STATUSES = new Set(["wontfix", "dropped"])
+export const isDeferred = (item: Item): boolean => fieldValue(item, PRIORITY) === "parked" || DEFERRED_STATUSES.has(String(item.meta.status ?? ""))
+
+const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v)
+
+/** One authoritative or retired document, as `plugins.triage.options.documents` declares it. */
+export interface DocEntry {
+  path: string
+  says: string
+  retired: boolean
+}
+
+/** `options.documents`: path → { says, retired }. A project's own list of which status documents to trust. */
+export function readDocuments(options: Record<string, unknown>): DocEntry[] {
+  const raw = options["documents"] ?? {}
+  if (!isObject(raw)) throw new Error('triage: options.documents must be an object: path → { "says", "retired" }')
+  return Object.entries(raw).map(([path, v]) => {
+    if (!isObject(v) || typeof v["says"] !== "string") {
+      throw new Error(`triage: options.documents["${path}"] must be { "says": "a line about it", "retired"?: true }`)
+    }
+    if (v["retired"] !== undefined && typeof v["retired"] !== "boolean") throw new Error(`triage: options.documents["${path}"].retired must be true or false`)
+    return { path, says: v["says"], retired: v["retired"] === true }
+  })
+}
 
 const EVIDENCE = new Set(["measured", "verified", "reproduced", "confirmed"])
 /** Any form of an evidence verb: "unable to reproduce" negates evidence as surely as "not reproduced". */
@@ -152,11 +189,11 @@ const coverage: Subcommand = {
   usage: "triage",
   run(args, ctx) {
     if (args.length) throw usageError(this)
-    ctx.out(`  ${"type".padEnd(12)} open  ${TRIAGE.map((f) => f.padStart(10)).join("")}   derived`)
+    ctx.out(`  ${"type".padEnd(12)} open  ${TRIAGE.map((f) => f.padStart(10)).join(" ")}   derived`)
     for (const type of ctx.registry.types.values()) {
       const mine = openItems(ctx).filter((i) => i.type === type.id)
       if (!mine.length) continue
-      const cells = TRIAGE.map((f) => String(mine.filter((i) => i.meta[f] !== undefined).length).padStart(10)).join("")
+      const cells = TRIAGE.map((f) => String(mine.filter((i) => i.meta[f] !== undefined).length).padStart(10)).join(" ")
       ctx.out(`  ${type.id.padEnd(12)} ${String(mine.length).padStart(4)}  ${cells}   ${mine.filter((i) => fieldValue(i, TRIAGED_BY) === "derived").length}`)
     }
     return 0
@@ -280,6 +317,56 @@ const next: View = {
   },
 }
 
+const parked: View = {
+  name: "parked",
+  says: "every parked, wontfix or dropped item, with what would reopen it",
+  render(args, ctx) {
+    if (args.length) throw usageError({ usage: "view parked" })
+    const rows = ctx.repo.items.filter(isDeferred).map((i) => ({
+      ref: label(i),
+      title: i.meta.title,
+      status: String(i.meta.status ?? ""),
+      reopensWhen: fieldValue(i, REOPENS_WHEN) ?? null,
+    }))
+    return rendered(
+      rows,
+      (
+        rs,
+      ) => (rs.length
+        ? rs.map((r) => `  [${r.status}] ${r.ref}  ${r.title}${r.reopensWhen ? ` — reopens when: ${r.reopensWhen}` : " — reopensWhen not set"}`)
+        : [
+          "no parked, wontfix or dropped items",
+        ]),
+      (rs) =>
+        rs.length
+          ? [
+            "| Status | Item | Title | Reopens when |",
+            "|---|---|---|---|",
+            ...rs.map((r) => `| ${r.status} | ${r.ref} | ${cell(r.title)} | ${r.reopensWhen ? cell(r.reopensWhen) : ""} |`),
+          ]
+          : [],
+    )
+  },
+}
+
+/** A deferred item's page is still exactly the template it was created with: nobody has said why. No default to compare against, no finding. */
+const deferredSaysWhy: Check = {
+  name: "deferred-says-why",
+  says: "a parked, wontfix or dropped item's page says why — not left as the template it was created with",
+  run: (ctx) =>
+    ctx.repo.items
+      .filter(isDeferred)
+      .filter((i) => {
+        const template = ctx.registry.types.get(i.type)?.template
+        return !!template && readReadme(i).trim() === template(String(i.meta.title ?? "")).trim()
+      })
+      .map((i): Finding => ({
+        level: "problem",
+        message: `${label(i)} is parked, wontfix or dropped, and its page is still the unfilled template — say why, and set reopensWhen`,
+        item: i,
+      })),
+}
+
 const top: SummarySection = {
   name: "next up",
   render(ctx) {
@@ -298,20 +385,73 @@ const top: SummarySection = {
   },
 }
 
-export default function triagePlugin(): Plugin {
+/** `naima guide`: which documents are authoritative, and which are retired — so a status document never competes with the trackers. */
+function documentsGuide(options: Record<string, unknown>): GuideSection {
+  return {
+    name: "authoritative-documents",
+    says: "which documents are authoritative, and which are retired",
+    render: (_ctx) => {
+      const docs = readDocuments(options)
+      const current = docs.filter((d) => !d.retired)
+      const retired = docs.filter((d) => d.retired)
+      const line = (d: DocEntry) => `  ${d.path} — ${d.says}`
+      return rendered(
+        docs,
+        () =>
+          docs.length
+            ? [
+              "Authoritative documents (naima guide) — update these, never start a parallel status document:",
+              ...current.map(line),
+              ...(retired.length ? ["  retired:", ...retired.map(line)] : []),
+            ]
+            : [],
+      )
+    },
+  }
+}
+
+/** A retired document still named from a current one: the two keep competing instead of one replacing the other. */
+function retiredStillLinked(options: Record<string, unknown>): Check {
+  return {
+    name: "retired-document-still-linked",
+    says: "no current authoritative document still names a retired one",
+    run: (ctx) => {
+      const docs = readDocuments(options)
+      const current = docs.filter((d) => !d.retired)
+      const retired = docs.filter((d) => d.retired)
+      const out: Finding[] = []
+      for (const doc of current) {
+        const file = join(ctx.root, doc.path)
+        if (!existsSync(file)) continue
+        const text = readFileSync(file, "utf8")
+        for (const r of retired) {
+          if (text.includes(r.path)) out.push({ level: "note", message: `${doc.path} still names the retired document ${r.path}` })
+        }
+      }
+      return out
+    },
+  }
+}
+
+export default function triagePlugin(options: Record<string, unknown> = {}): Plugin {
+  readDocuments(options) // validated eagerly: a bad naima.json is caught when the plugin loads, not when guide or check happen to run
   return {
     name: "triage",
     contract: CONTRACT,
-    says: "priority, impact, effort, confidence; the urgency ranking built from them",
+    says: "priority, impact, effort, confidence; the urgency ranking built from them; parked, wontfix and dropped deferrals; authoritative documents",
     about:
       "Four fields rank an item, and no more. `effort` is never derived: nothing in a report says what a fix costs, and a size guessed from the wording is how an XL hides inside an S. " +
       '`triage derive` infers only `confidence`, from the page\'s own words — an evidence verb negated up to three words before it ("could not be reproduced") reads as `unclear`, never `measured` — and stamps `triagedBy: derived` so a value a person set is never overwritten. ' +
-      "Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks.",
+      "Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks. " +
+      "A parked priority, or a wontfix or dropped status, is a deferral: `reopensWhen` says what would make it worth re-arguing, `naima view parked` lists every one, and a page still left as its unfilled template is a problem. " +
+      '`options.documents` in naima.json (`plugins.triage.options.documents`) names which documents are authoritative and which are retired — path → { "says", "retired" }; `naima guide` prints the list, and a check notes a retired one still named from a current one.',
     fields: FIELDS,
     rank,
     commands: [triage],
-    views: [next],
+    views: [next, parked],
     summary: [top],
     hooks: [stampTriage],
+    checks: [deferredSaysWhy, retiredStillLinked(options)],
+    guide: [documentsGuide(options)],
   }
 }

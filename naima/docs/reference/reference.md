@@ -10,7 +10,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [core](#core) — items, fields, links and the invariants every project has
 - [trackers](#trackers) — bugs, todos, features, tests, and the archive of closed bugs
 - [coordination](#coordination) — claims and session notes, one file per session, recombined from every branch
-- [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them
+- [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them; parked, wontfix and dropped deferrals; authoritative documents
 - [gates](#gates) — named release conditions backed by items
 - [epics](#epics) — epics: bodies of work that group items, their status and progress derived from them
 - [planning](#planning) — requirements proven by tests, specifications versioned name-vN, and the owner's decisions recorded once
@@ -19,15 +19,16 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
 - [metrics](#metrics) — named measurements, each the command that measures it, recorded per commit and held to a budget, a floor or a baseline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
+- [privacy](#privacy) — the owner's material enters the repository only with their recorded yes, and no secret enters it at all
 - [docs](#docs) — every feature is documented as part of its implementation, and naima check holds it
 
 ## Commands at a glance
 
 | Command | Plugin | What it does |
 |---|---|---|
-| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given |
-| [`update`](#naima-update) | core | move the lock to the head of the source's dist branch — its main, when the source publishes no dist: fetch it, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
-| [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored clone, vendored as committed files, or a git submodule — staging the switch as one change |
+| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given |
+| [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
+| [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change |
 | [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files |
 | [`help`](#naima-help) | core | list every command the loaded plugins provide, with its usage |
 | [`new`](#naima-new) | core | open an item |
@@ -38,6 +39,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`describe`](#naima-describe) | core | replace an item's description, keeping its title line and its Notes section |
 | [`link`](#naima-link) | core | link two items; only this direction is stored, the inverse is derived |
 | [`unlink`](#naima-unlink) | core | remove a stored link |
+| [`move`](#naima-move) | core | move an item to another type, keeping its id and links; refuses a status or field the new type does not declare |
 | [`check`](#naima-check) | core | run every invariant; exit 1 on any problem |
 | [`board`](#naima-board) | core | print a type's board, grouped by section, most urgent first |
 | [`view`](#naima-view) | core | print a plugin view — as text, its data as JSON, or markdown; without a name, list them |
@@ -66,6 +68,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command that measures it — run, recorded per commit, held to a budget, a floor or a baseline, and shown as a trend; every number with the one it is compared to |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
+| [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused |
 | [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
 
 ## Extension points
@@ -74,15 +77,15 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, metrics, rules, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, metrics, rules, privacy, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
-| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, docs |
+| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, metrics, rules, docs |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, beta-markers, verifier, metrics, rules, privacy, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers |
-| `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | rules |
+| `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | triage, rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
 | `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to |  |
 | `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, planning, verifier |
@@ -102,7 +105,7 @@ An item is a directory under `<tracker>/<TYPE>/<slug>/`: `README.md` for the pro
 
 ### naima init
 
-Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given.
+Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given.
 
 ```sh
 naima init [--write-excludes]
@@ -121,7 +124,7 @@ naima init --write-excludes
 
 ### naima update
 
-Move the lock to the head of the source's dist branch — its main, when the source publishes no dist: fetch it, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything.
+Move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything.
 
 ```sh
 naima update [--check
@@ -130,7 +133,7 @@ naima --accept-source]
 
 | Option | Default | What it does |
 |---|---|---|
-| `--check` |  | only say whether the source's dist (or main) has moved past the locked commit; exit 1 when it has |
+| `--check` |  | only say whether the source's main has moved past the locked commit; exit 1 when it has |
 | `--accept-source` |  | trust the source naima.json now names, after reviewing why it changed: every other command refuses to run a program from a source it was not aligned from; aligns the program to the locked commit of the new source, and moves nothing else |
 
 Examples:
@@ -143,17 +146,17 @@ naima update --accept-source
 
 ### naima carry
 
-Switch how the program is carried — a gitignored clone, vendored as committed files, or a git submodule — staging the switch as one change.
+Switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change.
 
 ```sh
-naima carry <clone|vendored|submodule>
+naima carry <copy|vendored|submodule>
 ```
 
 Examples:
 
 ```sh
 naima carry vendored
-naima carry clone
+naima carry copy
 ```
 
 ### naima guide
@@ -189,19 +192,21 @@ naima help
 Open an item.
 
 ```sh
-naima new <type> "<title>" [--section <s>] [--set field=value]...
+naima new <type> "<title>" [--section <s>] [--set field=value]... [--dedupe]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--section` |  | the heading the item is grouped under on its board |
 | `--set` |  | a field=value pair to set on the new item; repeatable |
+| `--dedupe` |  | print items of the same type with a similar title before writing; never blocks |
 
 Examples:
 
 ```sh
 naima new bugs "Export drops the alpha channel"
 naima new tests "Export keeps the alpha channel" --set runBy=agent --section export
+naima new todos "Retry export on timeout" --dedupe
 ```
 
 ### naima show
@@ -321,6 +326,25 @@ Examples:
 
 ```sh
 naima unlink export-keeps verifies export-drops
+```
+
+### naima move
+
+Move an item to another type, keeping its id and links; refuses a status or field the new type does not declare.
+
+```sh
+naima move <item> <type> [--force]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--force` |  | move it even with a status or a field the new type does not declare, kept as they are |
+
+Examples:
+
+```sh
+naima move export-drops features
+naima move export-drops features --force
 ```
 
 ### naima check
@@ -788,11 +812,11 @@ naima pass --list 3
 
 ## triage
 
-Priority, impact, effort, confidence; the urgency ranking built from them.
+Priority, impact, effort, confidence; the urgency ranking built from them; parked, wontfix and dropped deferrals; authoritative documents.
 
 Its contributions' qualified ids are `triage/<name>`.
 
-Four fields rank an item, and no more. `effort` is never derived: nothing in a report says what a fix costs, and a size guessed from the wording is how an XL hides inside an S. `triage derive` infers only `confidence`, from the page's own words — an evidence verb negated up to three words before it ("could not be reproduced") reads as `unclear`, never `measured` — and stamps `triagedBy: derived` so a value a person set is never overwritten. Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks.
+Four fields rank an item, and no more. `effort` is never derived: nothing in a report says what a fix costs, and a size guessed from the wording is how an XL hides inside an S. `triage derive` infers only `confidence`, from the page's own words — an evidence verb negated up to three words before it ("could not be reproduced") reads as `unclear`, never `measured` — and stamps `triagedBy: derived` so a value a person set is never overwritten. Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks. A parked priority, or a wontfix or dropped status, is a deferral: `reopensWhen` says what would make it worth re-arguing, `naima view parked` lists every one, and a page still left as its unfilled template is a problem. `options.documents` in naima.json (`plugins.triage.options.documents`) names which documents are authoritative and which are retired — path → { "says", "retired" }; `naima guide` prints the list, and a check notes a retired one still named from a current one.
 
 ### naima triage
 
@@ -828,14 +852,29 @@ naima triage derive --write
 | `confidence` | enum | every type | do we understand the item | `measured` reproduced and measured; `diagnosed` the cause is known; `reported` as reported, not yet looked at; `unclear` nobody knows yet |
 | `triagedBy` | enum | every type | set to derived when a tool inferred the fields | `derived` inferred by naima triage derive |
 | `triagedOn` | date | every type | when a person last triaged the item |  |
+| `reopensWhen` | string | every type | on a parked, wontfix or dropped item: what would make it worth re-arguing — prose, or a link to the item or document that would |  |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `deferred-says-why` | a parked, wontfix or dropped item's page says why — not left as the template it was created with |
+| `retired-document-still-linked` | no current authoritative document still names a retired one |
 
 **Views**, printed by `naima view <name>`
 
 | View | What it shows |
 |---|---|
 | `next` | open items, most urgent first |
+| `parked` | every parked, wontfix or dropped item, with what would reopen it |
 
 **Summary sections**: `next up`.
+
+**Guide sections**, printed first by `naima guide`
+
+| Section | What it shows |
+|---|---|
+| `authoritative-documents` | which documents are authoritative, and which are retired |
 
 **Rank terms**, added to every item's urgency: `impact`, `priority`, `effort`.
 
@@ -1428,6 +1467,57 @@ Rules: a rule of this project, for agents, people or both: its page is the rule 
 | Section | What it shows |
 |---|---|
 | `rules` | the project's active rules for agents, read before anything else |
+
+## privacy
+
+The owner's material enters the repository only with their recorded yes, and no secret enters it at all.
+
+Its contributions' qualified ids are `privacy/<name>`.
+
+The conversation between the owner and an agent is private: nothing from it is copied into the repository without the owner's explicit yes. A file enters an item's `attachments/` through `naima attach`, which records on the item, in the field `attached`, whose it is: the owner's (`--consent`, their yes restated) or the writer's own (`--own`). The check `attachment-consent` flags an attachment with no record — one copied in by hand — unless the trunk already holds it, or a tool of the program writes it itself (a property's run records). The check `secrets` reads every project file and every attachment for six shapes of secret: a private key with its body (a header alone is not one), and AWS, GitHub, Slack, API-secret and Google keys; `naima attach` refuses a file holding one. A file that must keep one is an exception in the plugin's options, with a reason and the item that tracks it; an exception the trunk's configuration does not hold is refused, so the list only shrinks.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `exceptions` | `[]` | files allowed to hold a secret: a list of { path, reason, item }, path from the project root; one not on the trunk is refused |
+| `generated` | `["run-*.json","counterexample-*.txt"]` | attachment names a tool writes itself, which need no record: shell-style patterns |
+
+### naima attach
+
+Copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused.
+
+```sh
+naima attach <item> <file> (--consent "<the owner's yes, restated>"
+naima --own) [--as <name>] [--by <who>]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--consent` |  | the file is the owner's: their explicit yes to storing it, restated; recorded on the item |
+| `--own` |  | the file is the writer's own material: a log, a test's output, a measurement |
+| `--as` | `the file's own name` | the name it takes in attachments/ |
+| `--by` |  | who attaches it; without it, git's user.name |
+
+Examples:
+
+```sh
+naima attach export-drops ~/Desktop/alpha.png --consent "Yes, attach my screenshot of the export"
+naima attach export-drops test-run.out --own --as proof.out
+```
+
+**Fields**
+
+| Field | Kind | Applies to | Meaning | Values |
+|---|---|---|---|---|
+| `attached` | object | every type | whose each attachment is, as naima attach records it: file name → { from: owner or agent, consent: the owner's yes restated (for the owner's), by, on } |  |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `attachment-consent` | every attachment a branch adds has a record of whose it is (naima attach), every record names a file that is there, and the owner's carry their yes; what the trunk already holds, and what a tool writes itself, is not asked |
+| `secrets` | no project file or attachment holds a private key with its body, or an AWS, GitHub, Slack, API-secret or Google key; an exception names its file, a reason and an item, and the list of exceptions only shrinks |
 
 ## docs
 

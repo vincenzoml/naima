@@ -9,7 +9,20 @@ import { coreChecks, runChecks } from "./check.ts"
 import { groupBy } from "./collections.ts"
 import { appliesTo, fieldValue, parseFieldValue } from "./fields.ts"
 import { currentBranch, gitOrNull, isGitRepo } from "./git.ts"
-import { ATTACHMENTS, createItem, joinProse, NOTES_HEADING, readReadme, saveMeta, saveProse, splitProse, today, type WriteOptions } from "./item.ts"
+import {
+  ATTACHMENTS,
+  createItem,
+  joinProse,
+  moveItem,
+  NOTES_HEADING,
+  readReadme,
+  saveMeta,
+  saveProse,
+  significantWords,
+  splitProse,
+  today,
+  type WriteOptions,
+} from "./item.ts"
 import { byUrgency, isOpen, label } from "./lifecycle.ts"
 import { CONTRACT } from "./contract.ts"
 import { shortOrId } from "./names.ts"
@@ -60,7 +73,11 @@ export function withFields<M extends Record<string, unknown>>(ctx: Context, type
  */
 export function setFields(ctx: Context, item: Item, assignments: [string, string][], opts: WriteOptions = {}): void {
   const next: Item = { ...item, meta: withFields(ctx, item.type, item.meta, assignments) }
-  saveMeta(ctx, next, opts)
+  // A rename keeps the page's `# ` title line in step with meta.json's title, in the same write,
+  // so no agent has to remember to edit the page by hand (features/renaming-item-keeps-page-s-title-line).
+  const prose = next.meta.title !== item.meta.title ? splitProse(readReadme(item)) : null
+  if (prose?.title) saveProse(ctx, next, joinProse({ ...prose, title: `# ${next.meta.title}` }), opts)
+  else saveMeta(ctx, next, opts)
   item.meta = next.meta
 }
 
@@ -79,17 +96,40 @@ const SECTION = { name: "section", kind: "string" } as const
 
 const line = (item: Item): string => `  ${item.meta.status.padEnd(9)} ${item.meta.title}  — ${label(item)}`
 
+/**
+ * Items, of any type, whose title shares at least half of `title`'s
+ * significant words — a hint for a human or agent about to file a report,
+ * never a block: `new --dedupe` prints these before writing, and still
+ * writes (features/capture-now-act-later-top-level-behaviour,
+ * todos/deferral-reason-becomes-check-parked-wontfix-must).
+ */
+export function likelyDuplicatesOf(ctx: Context, type: string, title: string): Item[] {
+  const words = new Set(significantWords(title))
+  if (!words.size) return []
+  return ctx.repo.items
+    .filter((i) => i.type === type)
+    .filter((i) => {
+      const shared = significantWords(i.meta.title).filter((w) => words.has(w)).length
+      return shared > 0 && shared * 2 >= words.size
+    })
+}
+
 const newCommand: Command = {
   name: "new",
   says: "open an item",
-  usage: 'new <type> "<title>" [--section <s>] [--set field=value]...',
+  usage: 'new <type> "<title>" [--section <s>] [--set field=value]... [--dedupe]',
   options: [
     { name: "--section", says: "the heading the item is grouped under on its board" },
     { name: "--set", says: "a field=value pair to set on the new item; repeatable" },
+    { name: "--dedupe", says: "print items of the same type with a similar title before writing; never blocks" },
   ],
-  examples: ['new bugs "Export drops the alpha channel"', 'new tests "Export keeps the alpha channel" --set runBy=agent --section export'],
+  examples: [
+    'new bugs "Export drops the alpha channel"',
+    'new tests "Export keeps the alpha channel" --set runBy=agent --section export',
+    'new todos "Retry export on timeout" --dedupe',
+  ],
   run(args, ctx) {
-    const p = parse(args, { section: { type: "string" }, set: { type: "string", multiple: true } })
+    const p = parse(args, { section: { type: "string" }, set: { type: "string", multiple: true }, dedupe: { type: "boolean" } })
     const [typeId, title] = p.positionals
     const type = typeOrThrow(ctx, typeId)
     if (type.creatable === false) throw new Error(`${type.id} is an archive: items arrive by being moved there, not by being opened`)
@@ -97,6 +137,13 @@ const newCommand: Command = {
     const section = str(p, "section")
     // Every assignment is validated before the item exists: a typo leaves nothing behind.
     const fields = withFields(ctx, type.id, section ? { section } : {}, pairs(strs(p, "set")))
+    if (bool(p, "dedupe")) {
+      const likely = likelyDuplicatesOf(ctx, type.id, title.trim())
+      if (likely.length) {
+        ctx.out("possible duplicates — link instead of refiling, or file anyway:")
+        for (const item of likely) ctx.out(line(item))
+      }
+    }
     const item = createItem(ctx, type, title.trim(), fields)
     ctx.out(`${ctx.trackerDir}/${type.dir}/${item.slug}/  ${item.meta.id}`)
     return 0
@@ -265,6 +312,39 @@ const describe: Command = {
     const prose = splitProse(readReadme(item))
     saveProse(ctx, item, joinProse({ ...prose, title: prose.title || `# ${item.meta.title}`, description: text }))
     ctx.out(`${label(item)}: description replaced`)
+    return 0
+  },
+}
+
+const move: Command = {
+  name: "move",
+  says: "move an item to another type, keeping its id and links; refuses a status or field the new type does not declare",
+  usage: "move <item> <type> [--force]",
+  options: [{ name: "--force", says: "move it even with a status or a field the new type does not declare, kept as they are" }],
+  examples: ["move export-drops features", "move export-drops features --force"],
+  run(args, ctx) {
+    const p = parse(args, { force: { type: "boolean" } })
+    const [ref, typeId] = p.positionals
+    if (!ref?.trim() || !typeId?.trim()) throw usageError(this)
+    const item = ctx.repo.resolve(ref)
+    const to = typeOrThrow(ctx, typeId)
+    if (to.id === item.type) throw new Error(`${label(item)} is already a ${to.id} item`)
+    const force = bool(p, "force")
+    if (!force && !Object.hasOwn(to.statuses, item.meta.status)) {
+      throw new Error(`${to.id} does not have a status "${item.meta.status}" — statuses: ${Object.keys(to.statuses).join(", ")} (--force keeps it as it is)`)
+    }
+    // Unknown fields are kept and not checked, everywhere (the core's own rule); only a field the
+    // registry does know, and ties to other types, is a reason to refuse a move.
+    const { id: _id, title: _title, status: _status, created: _created, links: _links, ...rest } = item.meta
+    const strays = Object.keys(rest).filter((k) => {
+      const def = ctx.registry.fields.get(k)
+      return def !== undefined && !appliesTo(def, to.id)
+    })
+    if (!force && strays.length) {
+      throw new Error(`${to.id} does not declare field(s) ${strays.join(", ")} on ${label(item)} (--force keeps them as they are)`)
+    }
+    const moved = moveItem(ctx, item, to, { force })
+    ctx.out(`${ctx.trackerDir}/${to.dir}/${moved.slug}/  ${moved.meta.id}`)
     return 0
   },
 }
@@ -525,7 +605,7 @@ export const corePlugin: Plugin = {
     { name: "blocked-by", inverse: "blocks", says: "waits on" },
   ],
   checks: coreChecks,
-  commands: [newCommand, show, list, set, note, describe, link, unlink, check, board, view, summary, plugins, types, runs],
+  commands: [newCommand, show, list, set, note, describe, link, unlink, move, check, board, view, summary, plugins, types, runs],
   summary: [counts],
   hooks: [statusMoves, notesAppendOnly],
 }

@@ -1,0 +1,14 @@
+{
+  "id": "03c62802-51ac-4943-8a42-b29fb5223e6b",
+  "title": "Launcher coverage is lost, and several commands have no test at all",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
+}

@@ -1,12 +1,17 @@
 {
   "id": "83358273-9a8d-4805-ba1d-7e59255e87e2",
   "title": "naima move: an item to another type, keeping its id and links",
-  "status": "requested",
+  "status": "shipped",
   "created": "2026-10-01",
   "links": [
     {
       "rel": "relates-to",
       "id": "3ee04aab-cac6-449c-b841-2815c2d05bae"
     }
-  ]
+  ],
+  "docs": [
+    "naima/docs/agents/reporting-and-triage.md#4-triage-when-you-open-it"
+  ],
+  "effort": "S",
+  "triagedOn": "2026-10-01"
 }

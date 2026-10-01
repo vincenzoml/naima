@@ -25,6 +25,7 @@ import {
   uniqueSlug,
 } from "../../naima/src/core/internal.ts"
 import { corePlugin } from "../../naima/src/core/base.ts"
+import { withCarry } from "../../naima/src/core/config.ts"
 import { gitIn, tempProject } from "./testing.ts"
 
 const notes: Plugin = {
@@ -67,7 +68,7 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
     format: FORMAT,
     formats: {},
     ...LOCK,
-    carry: "clone",
+    carry: "copy",
     program: "../naima",
     plugins: {},
     rename: {},
@@ -85,6 +86,9 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
     },
   })
   assert.equal(c.carry, "vendored")
+  assert.equal(parseConfig({ format: FORMAT, ...LOCK, carry: "clone" }).carry, "copy", "clone is the copy's earlier name: the same gitignored place")
+  assert.deepEqual(withCarry({ format: FORMAT, carry: "clone" }, "copy"), { format: FORMAT }, "the default is recorded by leaving carry out")
+  assert.deepEqual(withCarry({ format: FORMAT }, "vendored"), { format: FORMAT, carry: "vendored" })
   assert.deepEqual(c.plugins, {
     gates: { enabled: true, options: { gates: { v1: { title: "One" } } }, checks: {} },
     "beta-markers": { enabled: false, options: {}, checks: {} },
@@ -94,7 +98,7 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
   assert.throws(() => parseConfig({ ...LOCK }), /has no format/)
   assert.throws(() => parseConfig({ format: FORMAT, source: "", commit: LOCK.commit }), /source must be/)
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, commit: "abc" }), /commit must be the full hash/)
-  assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, carry: "zip" }), /carry must be one of: clone, vendored, submodule/)
+  assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, carry: "zip" }), /carry must be one of: copy, vendored, submodule/)
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, naima: "^0.2.0" }), /unknown key "naima"/)
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, gates: {} }), /unknown key "gates"/, "gates are the gates plugin's options now")
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, plugins: ["plugins/a.ts"] }), /plugins maps a plugin's name/)
@@ -305,6 +309,86 @@ test("new validates every --set before it writes anything", async () => {
     assert.equal(await p.run("new", "notes", "Half made", "--set", "size=L", "--set", "status=done"), 0)
     const [item] = p.ctx.repo.items
     assert.deepEqual([item?.slug, item?.meta["size"], item?.meta.status], ["half-made", "L", "done"])
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("new --dedupe prints likely duplicates of the same type before writing, and still writes", async () => {
+  const p = tempProject([notes])
+  try {
+    createItem(p.ctx, p.ctx.registry.types.get("notes")!, "Export drops the alpha channel")
+    p.output.length = 0
+    assert.equal(await p.run("new", "notes", "Export drops alpha on save", "--dedupe"), 0)
+    assert.match(p.output[0] ?? "", /possible duplicates/)
+    assert.match(p.output.join("\n"), /Export drops the alpha channel/)
+    assert.equal(p.ctx.repo.items.length, 2)
+
+    // No --dedupe never looks, however similar the title: only the one line a plain `new` always prints.
+    p.output.length = 0
+    assert.equal(await p.run("new", "notes", "Export drops alpha again"), 0)
+    assert.equal(p.output.length, 1)
+    assert.match(p.output[0] ?? "", new RegExp(`^${p.ctx.trackerDir}/NOTES/export-drops-alpha-again/ {2}[0-9a-f-]{36}$`))
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("features/renaming-item-keeps-page-s-title-line: naima set of title rewrites the page's title line too, in one write", async () => {
+  const p = tempProject([notes])
+  try {
+    const item = createItem(p.ctx, p.ctx.registry.types.get("notes")!, "Export drops alpha")
+    const readme = () => readFileSync(join(item.dir, "README.md"), "utf8")
+    assert.match(readme(), /^# Export drops alpha\n/)
+    assert.equal(await p.run("set", item.slug, "title=Export drops the alpha channel"), 0)
+    assert.match(readme(), /^# Export drops the alpha channel\n/)
+    assert.equal(p.ctx.repo.resolve(item.meta.id).meta.title, "Export drops the alpha channel")
+    // A set that never touches title leaves the page's title line exactly as it was.
+    const before = readme()
+    assert.equal(await p.run("set", item.slug, "size=L"), 0)
+    assert.equal(readme(), before)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("features/naima-move-item-another-type-keeping-id: move keeps id and links, refuses a status or field the new type lacks", async () => {
+  const twoTypes: Plugin = {
+    name: "two-types",
+    says: "two types for testing move, with a field only one of them declares",
+    types: [
+      {
+        id: "notelike",
+        dir: "NOTELIKE",
+        title: "Notelike",
+        says: "",
+        statuses: { open: { category: "open", says: "" }, done: { category: "done", says: "" } },
+        initialStatus: "open",
+      },
+      { id: "requests", dir: "REQUESTS", title: "Requests", says: "", statuses: { open: { category: "open", says: "" } }, initialStatus: "open" },
+    ],
+    fields: [{ name: "size", kind: "enum", says: "size", values: { S: "small", L: "large" }, appliesTo: ["notelike"] }],
+  }
+  const p = tempProject([twoTypes])
+  try {
+    const { ctx } = p
+    const notesType = ctx.registry.types.get("notelike")!
+    const a = createItem(ctx, notesType, "Not really a note", { size: "L" })
+    const b = createItem(ctx, notesType, "Other")
+    addLink(ctx, a, "relates-to", b)
+    const id = a.meta.id
+    await assert.rejects(p.run("move", a.slug, "requests"), /requests does not declare field\(s\) size/)
+    assert.equal(await p.run("move", a.slug, "requests", "--force"), 0)
+    const moved = ctx.repo.resolve(id)
+    assert.equal(moved.type, "requests")
+    assert.equal(moved.meta.id, id)
+    assert.equal(moved.meta["size"], "L", "a field the new type does not declare is kept as it is, with --force")
+    assert.ok(ctx.repo.linksOf(moved).some((l) => l.rel === "relates-to" && l.id === b.meta.id), "links survive a move")
+    const c = createItem(ctx, notesType, "Finished note", { status: "done" })
+    await assert.rejects(p.run("move", c.slug, "requests"), /requests does not have a status "done"/)
+    assert.equal(await p.run("move", c.slug, "requests", "--force"), 0)
+    assert.equal(ctx.repo.resolve(c.meta.id).meta.status, "done", "a status the new type does not declare is kept as it is, with --force")
+    await assert.rejects(p.run("move", "", "notes"), /usage: naima move <item> <type>/)
   } finally {
     p.cleanup()
   }

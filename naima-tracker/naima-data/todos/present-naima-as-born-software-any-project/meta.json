@@ -1,0 +1,16 @@
+{
+  "id": "7779ea18-36e0-41bb-8b05-866ded7ac3a0",
+  "title": "Present Naima as born for software, any project second",
+  "status": "done",
+  "created": "2026-10-01",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "b276af50-8f52-42d4-abad-fc765c8ddc6b"
+    }
+  ]
+}

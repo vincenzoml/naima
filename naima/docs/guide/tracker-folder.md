@@ -6,7 +6,7 @@ and runs the Naima inside it. Installing Deno and bootstrapping the folder:
 
 ## Just add naima
 
-In any git repository, once Naima is cloned into `naima-tracker/naima/`:
+In any git repository, once Naima is installed ([installing](install.md#bootstrap-a-project)):
 
 ```sh
 naima init
@@ -35,7 +35,7 @@ repository: [the automatic principle](config.md#the-automatic-principle).
 naima-tracker/
   README.md            one line: what Naima is, and a link to it
   .gitignore           ignores naima/
-  naima/               the program: a clone of Naima's dist at the locked commit, never committed
+  naima/               the program: a copy of Naima's naima/ at the locked commit, never committed
   naima-data/
     naima.json         the format, the lock, and the few facts that cannot be inferred
     bugs/<slug>/       one directory per item: README.md, meta.json, attachments/
@@ -51,8 +51,9 @@ naima-tracker/
 directory holds only what runs Naima: no tests, no fixtures, no CI, no agent
 rules, and none of Naima's own [items](glossary.md#item). Everything the project tracks — its
 bugs, its todos, its features, its tests, its rules — is an item in its own
-`naima-data/`, in the directory of its type (milestones are
-[planned](../planned.md#epics-and-milestones));
+`naima-data/`, in the directory of its type (a milestone is a
+[gate](glossary.md#gate) with a date, kept with the other gates in
+`naima.json` rather than in its own directory);
 `naima/` is replaced whole on every update. Only the item directories that hold something exist. Commands work
 from any subdirectory: Naima walks up from the current directory to the first
 `naima-tracker/naima-data/naima.json`. Every file and field is specified in
@@ -83,5 +84,5 @@ mark of a branch that has not merged the [trunk](glossary.md#trunk)'s update yet
   say so in the tracker's README, so that the next person finds it.
 - **The program directory** is `program` in `naima.json`, relative to the data
   directory.
-- **How the program is carried** — an ignored clone, committed files, or a git
+- **How the program is carried** — an ignored copy, the copy committed, or a git
   submodule — is one command away: [how the program is carried](install.md#how-the-program-is-carried).

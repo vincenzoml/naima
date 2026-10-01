@@ -225,6 +225,18 @@ release or loses work), `high` (a newcomer would hit it and not come back),
 
 A triage field: when. `now`, `next`, `later`, `parked`.
 
+### Deferral
+
+An item with `priority=parked`, or a bug `wontfix` or a todo `dropped`:
+deliberately not being worked on now, with the reason on its page. See
+[reopensWhen](#reopenswhen) and [`naima view parked`](triage.md).
+
+### ReopensWhen
+
+A field on a deferral: what would make it worth re-arguing, as prose or a
+link to the item or document that would. Unset, a deferral is silently
+re-argued the next time someone notices it.
+
 ### Confidence
 
 A triage field: do we understand it? `measured`, `diagnosed`, `reported`,
@@ -429,14 +441,14 @@ project. Everyone who works on the project runs that one.
 ### Alignment
 
 What every run does first: make the program directory exactly the locked
-commit, cloning it when it is missing. It never overwrites work and never
+commit, copying it when it is missing. It never overwrites work and never
 pulls.
 
-### Dist branch
+### Copy
 
-The branch of Naima's repository a project clones: only the files that run
-Naima, without its tests or its own tracker
-([the dist branch](install.md#the-dist-branch)).
+What a project's program directory is: the files of Naima's `naima/` folder
+at the locked commit, without its tests or its own tracker, fetched through
+the per-user cache ([the copy](install.md#the-copy)).
 
 ### Update
 
@@ -455,8 +467,8 @@ The step that rewrites the data from one [format](#format) to the next, run by
 
 ### Carry
 
-How the program directory is kept: an ignored `clone` (the default),
-`vendored` (committed as plain files) or a git `submodule`
+How the program directory is kept: an ignored `copy` (the default),
+`vendored` (the copy, committed) or a git `submodule`
 ([how the program is carried](install.md#how-the-program-is-carried)).
 
 ### Fork

@@ -45,9 +45,11 @@ naima new tests "Export looks right on a phone" --set runBy=human --set humanBec
 ## 3. Perform it, keep the evidence
 
 Do what the page says. Put what you saw in the test's `attachments/` folder —
-the output, a screenshot, a number — then set the result:
+the output, a screenshot, a number — with `naima attach`, which records that
+the file is yours (`--own`), then set the result:
 
 ```sh
+naima attach export-keeps run.txt --own
 naima set export-keeps status=passed      # or failed, or partial
 ```
 

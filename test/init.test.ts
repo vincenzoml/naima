@@ -16,7 +16,7 @@ import { gitIn as git, removeTemp } from "./core/testing.ts"
 /** This checkout: the repository a project clones. */
 const NAIMA = dirname(dirname(fileURLToPath(import.meta.url)))
 
-/** A host project, and a Naima cloned into its naima-tracker/naima/ whose origin holds its HEAD. */
+/** A host project, and a clone of Naima beside it whose origin holds its HEAD: what runs init. */
 function world() {
   const base = mkdtempSync(join(tmpdir(), "naima-init-"))
   const root = join(base, "project")
@@ -25,10 +25,10 @@ function world() {
   git(root, "init", "-q", "-b", "main")
   git(root, "add", "-A")
   git(root, "commit", "-q", "-m", "init")
-  const program = join(root, "naima-tracker", "naima")
-  git(base, "clone", "-q", "--", NAIMA, program)
-  git(program, "update-ref", "refs/remotes/origin/pushed", "HEAD")
-  return { base, root, program, cleanup: () => removeTemp(base) }
+  const clone = join(base, "naima")
+  git(base, "clone", "-q", "--", NAIMA, clone)
+  git(clone, "update-ref", "refs/remotes/origin/pushed", "HEAD")
+  return { base, root, clone, program: join(clone, "naima"), cleanup: () => removeTemp(base) }
 }
 
 async function naima(cwd: string, argv: string[], programRoot: string, plugins: typeof firstParty = firstParty) {
@@ -41,7 +41,12 @@ async function naima(cwd: string, argv: string[], programRoot: string, plugins: 
 
 const lockFile = (root: string) => join(root, "naima-tracker", "naima-data", "naima.json")
 
-test("init refuses to lock a commit its origin lacks, or a Naima with uncommitted changes: nobody else could run it", async () => {
+// bugs/bun-s-5-second-default-test-timeout: `world()` clones this whole checkout, and this test
+// calls it and runs three `init`s besides — slow enough, under load, to graze Bun's 5 second
+// per-test default. Node's test runner honors the same option; Deno's test shim ignores it.
+const SLOW = { timeout: 30_000 }
+
+test("init refuses to lock a commit its origin lacks, or a Naima with uncommitted changes: nobody else could run it", SLOW, async () => {
   const w = world()
   try {
     writeFileSync(join(w.program, "NOTICE"), "changed\n")

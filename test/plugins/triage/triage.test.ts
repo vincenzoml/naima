@@ -122,6 +122,22 @@ test("view next takes a positive whole count", async () => {
   }
 })
 
+test("bugs/naima-triage-coverage-table-runs-effort-confidence: the coverage table's header keeps its columns apart", async () => {
+  const p = tempProject([things, triage()])
+  try {
+    const type = p.ctx.registry.types.get("things")!
+    createItem(p.ctx, type, "Crash", { effort: "S", confidence: "measured" })
+    await p.run("triage")
+    const header = p.output[0] ?? ""
+    assert.ok(!/effortconfidence/.test(header), header)
+    assert.match(header, /effort\s+confidence/)
+    const row = p.output[1] ?? ""
+    assert.equal(row.trim().split(/\s+/).length, 7, row) // type, open, priority, impact, effort, confidence, derived
+  } finally {
+    p.cleanup()
+  }
+})
+
 test("each triage subcommand answers a misuse with its own usage", async () => {
   const p = tempProject([things, triage()])
   try {

@@ -1,0 +1,13 @@
+{
+  "id": "230fb60b-6dd8-4752-9e3d-0b087b5bb2a3",
+  "title": "Renaming an item through naima set rewrites its page's title line in the same write (test/core/core.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "8ee7cace-748d-475c-a6d2-806cd04e49fb"
+    }
+  ]
+}

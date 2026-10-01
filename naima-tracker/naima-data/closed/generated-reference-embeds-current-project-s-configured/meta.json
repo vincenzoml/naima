@@ -1,0 +1,14 @@
+{
+  "id": "3669d28f-30d7-46c3-89ac-fa3c2fbc3948",
+  "title": "The generated reference embeds the current project's configured gates",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}
