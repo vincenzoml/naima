@@ -1,288 +1,374 @@
-# Purpose, requirements and principles
+# What Naima is for
 
-Why Naima exists, whom it serves, what it requires of itself, and the
-principles behind its design. Read this first: every other page explains how
-a piece works; this one says why it is shaped that way.
+Read this first. Every other page explains how a piece works; this one says
+what Naima is, what it manages for you, and what it does not do yet. Each
+term links, the first time it appears, to its one definition in the
+[glossary](guide/glossary.md). "[Planned](planned.md)" means Naima does not
+have it yet.
 
-## Why Naima exists
+## What Naima is
 
-Software is more and more often built by people and AI agents working in
-parallel on one repository. The code is held to rigorous standards: typed,
-tested, reviewed, refused by CI when it breaks. The state of the project
-around the code usually is not. Which defects are open, which are fixed,
-which fixes are actually proven, what a release waits on, who is working on
-what: these live in a hosted database, on boards edited by hand, and in the
-memory of whoever looked last.
+Naima is an enabling technology for people who are not technicians. It lets
+experts in their own field, who are not remotely programmers, get excellent
+results from AI agents. It works on anything that benefits from keeping
+every version: software, a scientific data analysis, a paper written with
+colleagues, a plan — or several of these at once in one project.
 
-With one person that is an inconvenience. With several agents writing at once
-it causes defects of its own: two sessions overwrite one shared status file;
-a board that says "fixed" is read as "done" although nothing proved the fix;
-a release is cut against a list that went stale an hour ago; "how many bugs
-are left" adds unfixed, unproven and archived items into one meaningless
-number.
+Used through an AI [agent](guide/glossary.md#agent), Naima is a decision
+support system: a tool for running long-lived work and making informed
+decisions about it. It is for the [owner](guide/glossary.md#owner), the
+person whose work it is. You say in plain words what you want or what is
+wrong. Agents do the machine work: they write it down, plan it, carry it out,
+check it and keep the proof.
 
-Naima holds the project state to the same standard as the code. Items are
-plain files in the repository, versioned with the code they talk about. Views
-are derived, never stored. "Fixed", "resolved" and "closed" are different,
-checked states. Parallel sessions coordinate through git alone. And a
-property proven by a formal-methods tool, a model checker say, is evidence
-exactly as a passed test is: it resolves what it verifies, it expires when
-its model changes, and gates wait on it. That puts a proof where engineering
-decisions are made, on the board and in the release gate, instead of in a
-separate world nobody reads.
+**Why so much of this sounds like software.** Naima's methods come from
+software engineering, because building software is the most demanding case of
+long-lived, shared, versioned work, and it is where the strongest tools
+exist: tests, version control, mathematical checking of designs. The same
+discipline applies to any versioned work, whether a data analysis, a paper
+with colleagues or a plan: work written down, evidence for every claim,
+decisions recorded, gates before anything goes out. So most examples below
+are software, and today's built-in item types (bugs, todos, features, tests)
+are shaped for software; `naima types` lists them. Packs of item types for
+other kinds of work are [planned](planned.md#item-types-for-other-work).
 
-## Whom it serves
+**A quiet way to manage decisions.** When the agents can go ahead on their
+own, they do, and you hear nothing. When something is yours to decide, Naima
+helps you understand it in your own terms and your own words, not a
+technician's. `naima queue --human` lists what is waiting for you, each item
+with the reason it is yours ([asking the human](agents/asking-the-human.md)).
 
-- **AI agents**, first. Most of the work Naima organises is done by agents,
-  often several at once, each in its own worktree. They need a tracker they
-  can read and write with plain file and git operations, rules that are
-  checked rather than remembered, and a way to coordinate that never makes
-  two of them edit one file.
-- **People**, who own the project. The owner decides what is built and
-  judges what only a person can judge; Naima keeps them from being asked what
-  an agent could answer itself, and shows them numbers that mean one thing.
-- **Projects using formal methods**, whose properties are tracked, proven and
-  gated on the same footing as their tests.
-- **Forks.** Naima is meant to be changed to fit a project. Every fork that
-  keeps the format works on the same data as every other.
+**The silent company that runs for you.** Behind the conversation there is a
+team of agents with separate jobs: engineering, testing, judging evidence,
+releasing, documenting, announcing, even the business side. The agents do the
+work; you only decide. The jobs are listed in
+[their own section](#the-company-and-its-roles) below.
 
-## Requirements
+**A first example: turning vibe coding into science.** Vibe coding means
+asking an AI to build software and hoping it worked. With Naima, the same
+request goes through industry-grade practices and tools, without you needing
+to know them, so that what gets built is robust, maintainable and solid. A
+domain expert who has never programmed can build serious software this way.
+[One example, start to finish](#one-example-start-to-finish) shows both.
 
-Each requirement has a short name, what it means, and what holds it: the
-code, check or test that fails when it is broken. Where nothing does yet, it
-says so.
+**An enabler for software engineering and formal methods.** Software
+engineering is the discipline of building software that lasts: written
+requirements, tests, reviews, releases. [Formal
+methods](guide/glossary.md#formal-methods) are tools that check a design
+mathematically. Both are usually out of reach for anyone who is not a
+specialist. Naima makes agents use them by default, and records what they
+did.
 
-### Functional
+**What you need, and how it stays out of your way.** You need no knowledge
+of git, code, Deno or Node (the programs Naima runs on), or professional
+project management. You need an AI agent. The agent installs what is missing:
+git, and Deno (the installer does it: [install](guide/install.md)). Naima
+lives inside the project's [repository](guide/glossary.md#repository), the
+folder in which git keeps every version of the work. It uses one folder
+there, `naima-tracker/`, and changes nothing outside it. It needs no server,
+no account and no internet connection. You never have to open one of its
+files or learn one of its commands; the agents do that, and git too
+([git, handled for you](agents/git-for-the-owner.md)). The commands below are
+what they type; `naima` is short for `deno run -A naima-tracker/naima/naima.ts`.
 
-**plain-files.** Every item is a directory of plain files in the repository:
-`README.md` for prose, `meta.json` for fields, `attachments/` for evidence.
-No database, no server. Held by: the [format](reference/format.md#items) and its
-[invariants](reference/format.md#invariants), which `naima check` runs (readable
-items, a `README.md` and a JSON `meta.json` in every item directory).
+## What Naima manages
 
-**permanent-ids.** An item's uuid never changes; its slug may. Links hold
-ids, and only one direction of a link is stored, the inverse derived.
-Held by: the core invariants of `naima check` (unique uuids, links naming an
-existing item, [architecture](https://github.com/vincenzoml/naima/blob/main/develop/architecture.md#checks)).
+How each of these runs, step by step, is on
+[how the project runs](guide/how-the-project-runs.md).
 
-**derived-views.** Boards, queues, gate states, urgency, claim tables and
-summaries are computed when read and never written, so no stored copy can go
-stale ([concepts](guide/concepts.md#derived-never-stored)). Held by: the plugin
-contract, in which a view or summary returns data and has no way to persist
-it ([views and summaries](reference/plugin-contract.md#views-and-summaries)). No check
-looks for a stored board: not yet enforced beyond that.
+### Reporting and issue management
 
-**three-completion-states.** Fixed (the code exists), resolved (fixed and
-proven by an item that `verifies` it and has passed) and closed (resolved and
-archived with its proof) are three states, never added into one number
-([concepts](guide/concepts.md#fixed-resolved-closed)). Held by: the checks
-`closed-carries-proof` (a closed item carries its proof) and
-`proven-but-open`, `naima close` refusing anything not resolved, and
-`test/lifecycle.test.ts`.
+Whatever you notice reaches the project, and nothing said is lost. You can
+report in chat ("figure 3 looks wrong"), correct a report later, or, if you
+are comfortable with files, write the [item](guide/glossary.md#item)
+yourself. The [flow](guide/glossary.md#flow) is always the same: report →
+file → triage → claim → work → prove → close.
 
-**proof-stays-current.** A proof counts only for what it was run on. A
-property that held on a model since changed, or with a different property,
-verifier or options, is no longer current, and `naima close` refuses it.
-Held by: the check `property-evidence`, the write hooks
-`property-reopens-when-changed` (a changed property goes back to open) and
-`holds-only-by-verify` (a property holds only with a run for what it is now),
-and the tests in `test/plugins/verifier/verifier.test.ts` and `test/lifecycle.test.ts`.
+- **Filed first.** The agent writes the report down before anyone works on
+  it: `naima new bugs "Figure 3 uses last year's data"` creates a folder for
+  it under `naima-tracker/naima-data/bugs/`.
+- **Routed by kind.** "This is broken" is a [bug](guide/glossary.md#bug),
+  "this needs doing" is a [todo](guide/glossary.md#todo), "I'd like it to do
+  X" is a [feature](guide/glossary.md#feature)
+  ([reporting and triage](agents/reporting-and-triage.md)).
+- **Triaged by an agent.** It rewrites the report in its own words as a clear
+  description (what happens, what should happen, how to see it), notes what
+  it checked, links duplicates (`naima link <new> duplicate-of <old>`) and
+  sets the fields (`naima triage set <item> impact=high priority=now
+  confidence=measured`). How long it will take (`effort`) is set only after
+  someone has looked at the work, never guessed.
 
-**verifiers-are-evidence.** A formal-methods tool plugs in as a verifier; its
-run is attached as evidence with the hash of the model it ran on, and
-resolves items like a passed test ([the verifier
-contract](reference/plugin-contract.md#the-verifier-contract)). Held by:
-`test/plugins/verifier/verifier.test.ts` and the check `property-evidence`.
+**Example (a paper).** A co-author says in chat "section 4 contradicts the
+abstract". The agent files a bug, writes which sentence contradicts which,
+links the earlier report of the same problem, and ranks it before the
+submission gate.
 
-**gates.** A release or a merge is a named condition backed by items; an item
-joins a gate by carrying `gate`, and may be on several. Held by: the `gates`
-plugin and its tests, `test/plugins/gates/gates.test.ts`; the check
-`gated-proof-is-gated`.
+**Today:** filing, routing, fields, links, boards (`naima board bugs`),
+`naima summary`. Commands to rewrite a description and to add a dated
+comment are [planned](planned.md#commands-for-every-action); today the agent
+edits the item's page.
 
-**no-shared-mutable-file.** Parallel sessions never edit one file. State that
-belongs to no single branch, claims and session notes, is one uuid-named file
-per session on its own branch, recombined when read from every local branch
-and every worktree's disk ([worktree
-isolation](agents/worktree-isolation.md#4-no-shared-mutable-file)). Held by:
-the `coordination` plugin and `test/plugins/coordination/coordination.test.ts`,
-and `test/core/git.test.ts` for reading across branches. That every merge to
-the trunk is a fast-forward is a flow, not code: not enforced by Naima.
+### Planning
 
-**checked-like-code.** The tracker has invariants, and `naima check` fails
-when one breaks, the way a test suite fails when the code breaks. Held by:
-`naima check` itself, run by `deno task verify` in this repository and by CI.
+Above single fixes sit the things that keep long work coherent:
+[epics](guide/glossary.md#epic) that group features and todos,
+[milestones](guide/glossary.md#milestone) (a gate with a date),
+[requirements](guide/glossary.md#requirement) that say what must hold, and
+[specifications](guide/glossary.md#specification) that say exactly how. Each
+is meant to be an item, so a requirement is tracked and proven like a test,
+not just implied by one.
 
-**documented-always.** Every feature is documented as part of its
-implementation ([the documentation rule](https://github.com/vincenzoml/naima/blob/main/develop/documentation.md)). Held by: the
-checks `documented` (every contribution carries its documentation),
-`features-documented` (a shipped feature names its page), `links-resolve`
-(every relative link in tracked markdown resolves) and `reference-current`
-(the generated reference matches the code).
+**Example (a data analysis).** Epic: "Replicate the 2024 study". Features:
+"load the new survey", "redo table 2". Requirement: "every number in table 2
+comes from the raw data by a script". Milestone: "draft results by 15
+November".
 
-**agent-rules-checked.** Where a rule for people and agents can be checked,
-it is ([the rules](guide/rules.md), each marked enforced or convention):
-a person is asked only for what is theirs, a fix names the gesture that
-proves it, a branch does not close what it claims on its own tests. Held by:
-the checks `human-says-why`, `fix-names-its-gesture` (a note) and
-`claims-resolve`, and the write hook `no-closing-own-claims`. The rules of
-[AGENTS.md](https://github.com/vincenzoml/naima/blob/main/AGENTS.md), the rules for working on Naima, that are judgement, such as when to ask the owner,
-are not enforced.
+**Today:** features (`requested`, `planned`, `shipped`, `withdrawn`) and
+todos are item types. Epics and milestones are
+[planned first](planned.md#epics-and-milestones); requirements and
+specifications [after them](planned.md#requirements-specifications-and-decisions).
 
-### Non-functional
+### Gates and the queue
 
-**no-dependencies.** The core imports only itself and the `node:` built-ins
-that Deno, Node and Bun all provide. Nothing is installed. Held by:
-`test/arch.test.ts` ("the core imports nothing outside itself but node
-built-ins"), and `deno.json`, which has no imports.
+A [gate](guide/glossary.md#gate) is what a release waits on. The
+[queue](guide/glossary.md#queue) is everything still blocking a gate, split
+by whose hands it needs: an agent's, yours, or a build machine's.
 
-**portable-runtime.** The same code runs on Deno, Node and Bun. Held by: CI
-(`.github/workflows/ci.yml`), which runs the tests on all three, on Linux and
-macOS.
+**Example.** Gate `v1` holds three items. `naima gates v1 --check` fails
+while any is open, so a release cannot slip through. `naima queue v1
+--human` shows the one that needs you: "looks right on a phone (judgement)".
 
-**small-fixed-core.** The core names no item type, field, relation, gate,
-verifier or plugin; everything above it is a plugin. Held by:
-`test/arch.test.ts` ("the core names no plugin's type, field, relation or
-plugin"), and the [dependency rule](https://github.com/vincenzoml/naima/blob/main/develop/architecture.md#the-dependency-rule).
+**Today:** gates declared in `naima-tracker/naima-data/naima.json`, waiting
+on code or on proof; `naima gates`, `naima queue`, `naima queue --human`
+([read the board, the queue and the gates](guide/read-the-board.md)). Gates
+with a date and gates on metrics are [planned](planned.md#epics-and-milestones).
 
-**extensible.** A project, or anyone, extends Naima through plugins: types,
-statuses, fields, relations, checks, commands, views, gates, verifiers,
-migrations ([extension points](reference/plugin-contract.md#extension-points)).
-Plugins never import each other; they cooperate through the registry. Held
-by: `test/arch.test.ts` (a plugin imports only the core's public API and its
-own files), `test/extending.test.ts`, and `test/external.test.ts` for plugins
-outside Naima.
+### Process management over the long run
 
-**stable-contract.** A plugin says the contract version it is written for; a
-newer one is refused rather than half run ([the contract
-version](reference/plugin-contract.md#the-contract-version)). Held by:
-`test/external.test.ts`.
+The work outlives any one session and any one agent. Each session leaves a
+note; each agent says what it is working on; each works in its own
+[worktree](guide/glossary.md#worktree). A new agent next month picks up where
+the last one stopped, from files, not from memory.
 
-**offline.** No run touches the network except through git, and only
-alignment and `naima update` ask git for it; a normal run never pulls. Held
-by: the launcher granting no network permission
-([the permissions](guide/install.md#the-permissions), `src/launcher.ts`), and
-`test/distribution.test.ts` ("a normal run never pulls").
+- **Session notes:** `naima pass "what changed, what is proven, what is
+  left"` writes `naima-data/passes/<date>-<id>.md`.
+- **Claim files:** `naima claim <item> --note "why"` writes
+  `naima-data/claims/<id>.json`; `naima release <item>` removes it; `naima
+  prune` finds [claim files](guide/glossary.md#claim-file) whose branch is gone.
+- **Worktrees:** one per piece of work, on its own branch
+  ([opening a worktree](agents/opening-a-worktree.md)).
 
-**contained.** Naima writes nothing in a project outside `naima-tracker/`
-(except `.gitmodules` when carried as a submodule), runs only git and the
-programs its verifiers declare, and hands the program only an allow-listed
-environment. Held by: the launcher's permissions, and the tests in
-`test/distribution.test.ts` and `test/launcher.test.ts`.
+**Example.** Two agents work at once, one on the analysis script, one on the
+paper's figures. `naima claims` shows who holds what. Neither can overwrite
+the other: they write in separate copies, and Naima never has two sessions
+edit the same file.
 
-**reproducible.** Every clone, worktree, colleague and CI run the same Naima:
-the one locked by commit in `naima.json`. Alignment never overwrites work and
-refuses a commit it cannot reach ([every run aligns the
-program](guide/install.md#every-run-aligns-the-program)). Held by:
-`test/distribution.test.ts` and `test/core/lock.test.ts`.
+**Today:** session notes, claim files, the worktree flows, a check that a
+claim file names items that exist. A naming policy for worktrees and
+branches with a check that every worktree carries a claim file, and a
+working method that keeps going until only your items are left, are
+[planned](planned.md#worktree-names-and-claim-files).
 
-**runtime-only-distribution.** A project receives only what runs Naima: no
-tests, no CI, no development agent rules, none of Naima's own tracker items
-([the dist branch](guide/install.md#the-dist-branch)). Held by: the runtime
-folder `naima/`, which the dist copies and nothing else, and
-`test/dist.test.ts`, which holds the dist to it.
+### Decisions
 
-**forward-migration.** The data has a format number; it moves only with a
-migration, forward only and deterministic; newer data is refused and left
-untouched ([migrations](reference/format.md#migrations)). Held by:
-`test/core/format.test.ts` and the check `one-format`.
+What only you can decide is asked once, with a recommendation, one question
+at a time, and recorded. A permission you gave stays given.
 
-**fork-friendly.** The format is the compatibility boundary: a fork that
-reads and writes it works on the same data as every other
-([the format](reference/format.md), [modifying Naima](guide/install.md#modifying-naima)).
-Held by: the format's invariants in `naima check`, and
-`test/distribution.test.ts` ("a fork source is honoured once accepted").
+**Example.** You decide "the paper targets the journal, not the conference".
+That is recorded with its reason; no agent asks it again, and a later agent
+reads it before planning.
 
-## Design principles
+**Today:** the rules for asking are written
+([asking the human](agents/asking-the-human.md): only for judgement, a
+decision, a credential such as a password, or a physical act; a settled
+permission stays settled), and work handed to you must say why
+(`humanBecause`, checked by `naima check`). Decisions as items, so "never
+asked twice" is checked rather than remembered, are
+[planned](planned.md#requirements-specifications-and-decisions).
 
-**The core does not move.** Like the pedal point in Coltrane's *Naima*, a
-bass note held while the harmony changes above it, the core stays small and
-still, and everything built on it is free to change. It serves
-**extensible** and **fork-friendly**: a project extends Naima without
-forking the core, and forks keep sharing the data. The rule is in
-[architecture](https://github.com/vincenzoml/naima/blob/main/develop/architecture.md#the-dependency-rule).
+### Rules
 
-**Plain files and git, nothing else.** Files can be read by every tool and
-every agent, diffed, reviewed and versioned with the code. Git already
-solves storage, history, branching and distribution; Naima adds no second
-system to keep in step with it. It serves **plain-files**, **offline** and
-**no-shared-mutable-file**.
+The project's own [rules](guide/glossary.md#rule) are data: each is an item
+with the rule and its reason, who it binds (agents, people, everyone) and how
+strongly (`must` or `should`). Where a program can enforce one, it names the
+[check](guide/glossary.md#check).
 
-**Derive, never store.** A stored copy of something computed is a second
-truth that will diverge. Computing it when read costs little and removes the
-question. It serves **derived-views**.
+**Example.** Your working style becomes a rule: `naima new rules "Ask before
+deleting" --set audience=agents --set strength=must`, with "what cannot be
+undone is the owner's decision" as its reason. Every agent reads it at the
+start: `naima rules --audience agents`.
 
-**A claim is not a proof.** "Fixed" is what someone says; "resolved" is what
-evidence shows. Keeping the two apart, and checking the difference, is what
-makes a board trustworthy. It serves **three-completion-states** and
-**proof-stays-current**.
+**Today:** rules as items, `naima rules`, `naima guide` printing them first,
+`enforcedBy` naming the check, `naima check` holding the tracker to its
+rules like a test suite ([write a project rule](guide/write-a-project-rule.md),
+[the rules every project holds to](guide/rules.md)).
 
-**Check what can be checked.** A rule written only in prose is forgotten,
-most of all by an agent in a new session. Where a rule can be a check, it is
-one. It serves **checked-like-code**, **documented-always** and
-**agent-rules-checked**.
+### Evidence, proof and formal methods
 
-**Automatic first.** Every first-party plugin is loaded and every default is
-inferred from the repository; `naima.json` holds only what cannot be
-inferred ([the automatic principle](guide/config.md#the-automatic-principle)).
-A project that needs nothing else configures nothing.
+Every [claim](guide/glossary.md#claim) carries
+[evidence](guide/glossary.md#evidence), kept in the item's `attachments/`.
+"Fixed" is not "done": an item closes only when something that proves it has
+passed, and a [proof](guide/glossary.md#proof) counts only for what it was
+run on.
 
-**Extension is data, not inheritance.** No object-oriented modelling: no
-classes to subclass, no type hierarchy. A type carries plain tags (such as
-`fixable`), a field applies to the types that carry a tag, and an extension
-adds statuses or values to another plugin's type or field but never
-redefines one ([extending](reference/plugin-contract.md#extending-another-plugins-types-and-fields)).
-Plain data can be merged, checked and documented; a hierarchy has to be
-understood. Held by: `test/extending.test.ts`. That the code has no classes of
-its own is a practice, not a check: the only ones are `NaimaError`, which
-extends `Error` as JavaScript requires, and the frozen collections of the
-registry.
+- **Red, then green.** A test must fail on the old work and pass on the new;
+  one that passes either way proves nothing.
+- **Proofs expire.** If what a proof was about changes, the proof stops
+  counting until it is run again.
+- **Formal properties are tracked like tests.** A
+  [model checker](guide/glossary.md#model-checker) is a tool that checks a
+  design over every possible order of events and, when the design is wrong,
+  prints the exact steps that break it. In Naima a
+  [property](guide/glossary.md#property) is an item, proven only by running a
+  [verifier](guide/glossary.md#verifier): `naima verify <property>` attaches
+  the run; `naima set <property> status=holds` is refused.
 
-**The fixed on-disk layout is the boundary between forks.** Anything may
-change except the files a project holds; that is what keeps every fork on the
-same data. It serves **fork-friendly**.
+**Example.** Two agents claim work at the same moment on two branches. Can
+one claim file wipe out the other when they merge? Naima's design says no:
+each claim is its own file. An mCRL2 model of this coordination protocol
+(claim, release, merge) states the property "no claim is ever lost". mCRL2
+is a toolset for modelling and verifying systems in which many things happen
+at once; its tools check the property for every order of steps. The property
+is an item, tracked like a test. If anyone edits the model, `naima check`
+reports the property as no longer proven and `naima close` will not rely on
+it until it is run again.
 
-**The installed program holds nothing but what runs Naima.** Test runners,
-type-checkers and agent harnesses that walk a project's files would pick up
-Naima's tests, CI or agent rules if they were there. So a project clones a
-runtime-only branch, and Naima's own development stays on `main`. It serves
-**runtime-only-distribution** and **contained**.
+**Today:** evidence in `attachments/`, `naima close` refusing without a
+passed proof, properties, `naima verify`, `naima verifiers`, expiry when the
+model changes ([prove and close](guide/prove-and-close.md)). Only an example
+verifier ships (`naima/src/plugins/verifier/adapters/example-regex.ts`), so
+the mCRL2 example above is [planned](planned.md#model-checkers-and-the-strength-of-evidence),
+as are a check for red-then-green and a written order of how strong each
+kind of evidence is.
 
-**A host's own material lives organised in its naima-data.** Everything a
-project keeps about its own work, items, claims, notes, evidence, is in its
-`naima-tracker/naima-data/`, in the layout the format fixes, never scattered
-through the host or mixed into the program.
+### Metrics (planned)
 
-**Nothing moves without a reviewable commit.** Updating Naima, changing its
-source, carrying it differently: each is an explicit commit in the project.
-That is the protection the permissions cannot give against a malicious
-update ([what this does not protect](guide/install.md#the-permissions)).
+Numbers measured on every commit (each saved change): speed, quality, test
+coverage, each compared with a baseline, shown as a trend, and usable as a
+gate. **Example:** "the analysis must still run in under ten minutes",
+measured on every commit, and a release waits if it gets slower. Today only
+`naima triage` counts how many items have each field set
+([planned](planned.md#metrics)).
 
-**Don't overthink; iterate version by version.** Choose the simplest design
-that fixes the problem at hand, ship it, and extend it in a later version
-when a real need appears. The contract version and the migrations exist so
-that a later step never breaks what an earlier one wrote.
+### Structuring a project from the start (planned)
 
-**Agents are a first audience.** The tool is designed for agents as much as
-for people: flows written as procedures, rules checked by the tracker, and a
-skill that teaches an agent the tool ([the Naima skill](agents/skill.md)). A
-person's time is the most expensive resource in the project, so it is
-spent only on what is genuinely theirs
-([asking the human](agents/asking-the-human.md)).
+An epic of its own for the first decisions that decide whether work can
+still grow in two years: which language or languages to use, splitting
+everything into small independent parts, keeping logic separate from data.
+**Example:** before the first script of an analysis, the agent proposes data
+in plain files, one script per table, no number typed by hand into the
+paper; you decide, and the choices become rules
+([planned](planned.md#structuring-a-project-from-the-start)).
 
-## Non-goals
+### Design, skills and a dashboard (planned)
 
-- **Not a hosted service.** There is no server, account or web board. Naima
-  runs in the repository, offline.
-- **Not a database.** The data is plain files under git; there is no query
-  engine, index or store to keep in step.
-- **Not a general project-management tool.** No time tracking, no
-  estimation charts, no resource planning, no people management. Naima
-  tracks the state of software and the evidence for it.
-- **Not a CI system.** It runs checks and records evidence; building and
-  deploying are left to the project's own pipeline.
-- **Not a formal-methods tool.** It runs model checkers through plugins and
-  records what they say; it does not prove anything itself.
-- **Not a package with releases.** No binaries, no versions to install:
-  a project runs one locked commit of Naima's source.
-- **Not closed to change.** Changing Naima to fit a project is encouraged; a
-  fork is a normal way to use it, not a failure of the design.
+Support for planning and checking what users see; items and flows that point
+to a [skill](guide/glossary.md#skill) published on GitHub instead of copying
+it; a visual page of the project's state
+([planned](planned.md#design-skills-and-a-dashboard)).
+
+### Commands for every action
+
+Every action an agent takes on an item has a command, so each is recorded
+the same way and can be checked. **Today:** `new`, `set`, `link`, `triage
+set`, `claim`, `release`, `pass`, `verify`, `close`, `check` (`naima help`
+lists them all; the [reference](reference/reference.md) documents each).
+Editing an item's description and adding a dated comment are
+[planned](planned.md#commands-for-every-action).
+
+## The company and its roles
+
+Each job refuses something, so no one marks their own homework. Who sorts,
+who builds, who tests and who judges are different agents
+([the coordinator and the workers](agents/coordinator-and-workers.md)).
+
+| Job | Who | Refuses | Today |
+|---|---|---|---|
+| **Owner** | you | any machine work; is asked only for judgement, a decision, a credential or a physical act | exists |
+| **Coordinator** — talks to you, starts workers, merges | agent | doing a worker's job; more than one question at a time | written practice |
+| **Filer** — turns what was said into the right item | agent | inventing scope; deciding if something is proven | written practice |
+| **Implementer** — does the work for one item (code, analysis, text) | agent | widening the task; touching the main branch | written practice |
+| **Lead developer** — ranks the queue, runs the gates, merges | agent | merging without the gates; closing its own items | exists; "never close your own" is a check |
+| **Tester** — performs the tests, writes down what happened | agent, or a person with a reason | fixing what it finds; testing what it wrote | written practice |
+| **Evidence owner** — judges whether evidence proves the claim | agent | performing the test it judges | written practice |
+| **Release manager** — proposes a release when the gates hold | agent | releasing on an open gate; deciding to release | [planned](planned.md#roles) |
+| **Documentarian** — writes the docs with the feature | agent | marking a feature shipped without its pages | [planned](planned.md#roles); the rule is already a check |
+| **Announcer** — release notes, changelog, site, announcements | agent | announcing anything not shipped and checked | [planned](planned.md#roles) |
+| **Business** — options for licence, funding, sponsorship, adoption | agent proposes, you decide | committing the project to anything | [planned](planned.md#roles) |
+
+"Written practice" means the job and its refusals are written in
+[the pages for agents](agents/README.md) and agents follow them, but no
+program stops a breach.
+
+## Principles
+
+- **Privacy.** Your chat with an agent is private. Nothing from it is copied
+  into the repository unless you say so explicitly. A screenshot or file you
+  shared becomes an attachment only after your explicit yes
+  ([the rule](guide/rules.md#the-owners-chat-stays-private)).
+- **Extensible forever, by data.** Everything beyond a small core is a
+  [plugin](guide/glossary.md#plugin): item types, fields, checks, gates,
+  verifiers ([add a plugin someone gave you](guide/add-a-plugin.md)).
+  Extension is plain data, not class hierarchies. The core does not move; the
+  rest is free to change.
+- **Iterate, don't overthink.** The simplest design that works now, improved
+  version by version
+  ([design principles](https://github.com/vincenzoml/naima/blob/main/develop/requirements.md#design-principles)).
+- **Plain language.** Every term is defined once, in the
+  [glossary](guide/glossary.md), and reports to you say what changed and what
+  is needed from you, nothing else.
+
+## One example, start to finish
+
+You type in chat: **"the export loses transparency"** (saved pictures get a
+solid background). The real commands for the same path, with their output,
+are in [the tutorial](guide/tutorial.md).
+
+1. **Filed.** `naima new bugs "Export drops the alpha channel"` creates the
+   item folder with `README.md`, `meta.json` and `attachments/`.
+2. **Triaged by an agent.** It writes the description in its own words,
+   checks for duplicates, and runs `naima triage set export-drops
+   impact=high priority=now confidence=measured`.
+3. **Claimed, in a worktree.** A worker agent runs `git worktree add -b
+   worker/export-alpha ../worktrees/export-alpha`, then `naima claim
+   export-drops`.
+4. **Fixed, with a proof.** It fixes the exporter and writes the test as its
+   own item: `naima new tests "Export keeps the alpha channel" --set
+   runBy=agent` and `naima link export-keeps verifies export-drops`. The test
+   fails on the old code and passes on the new.
+5. **Evidence attached.** The test's output goes to the test's
+   `attachments/run.txt`; `naima set export-keeps status=passed`.
+6. **Gate and handover.** The gates run; `naima release export-drops` and
+   `naima pass "..."` record the end of the session; the branch is merged
+   with `git merge --ff-only`, which refuses rather than overwrite anything.
+7. **Closed by someone else.** From the main branch, `naima close
+   export-drops` moves it to `naima-data/closed/` with its proof. It refuses
+   from the fixer's own branch, and refuses without a passed proof.
+
+**The same, vibe-coded.** The AI edits the exporter and says "Fixed!".
+Nothing is written down or run. The edit broke PDF export and no test
+noticed. The next session, with no memory, brings the bug back. A parallel
+session overwrites the same file. Weeks later you describe the bug again
+from scratch, and nobody can say what happened.
+
+## What exists today
+
+Checked against the commands of this version (`naima help`, `naima types`).
+
+- Items as folders (`README.md`, `meta.json`, `attachments/`) under
+  `naima-tracker/naima-data/`; types bugs, todos, features, tests,
+  properties, rules (`naima types`).
+- Reporting and triage: `naima new`, `link`, `triage set`, `board`, `summary`.
+- Fixed, proven and closed as three separate states; `naima close` refusing
+  without proof or from the fixer's branch.
+- Gates and the queue: `naima gates`, `naima gates <name> --check`, `naima
+  queue --human`.
+- Long-running work: claim files, session notes, worktree flows, `naima prune`.
+- Rules as items: `naima rules`, `naima guide`, `naima check`.
+- Properties and verifiers with expiring proofs; only an example verifier.
+- The roles from Owner to Evidence owner, written in
+  [the pages for agents](agents/README.md).
+- Plugins for everything beyond the core; an installer that installs Deno.
+- Naima tracks its own development the same way.
+
+What does not exist yet is on one page: [planned](planned.md).
