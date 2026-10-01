@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, join } from "node:path"
 import { test } from "node:test"
-import { createItem, DEFAULT_DATA, type Plugin, runChecks } from "../../../naima/src/core/api.ts"
+import { type CheckOptions, createItem, DEFAULT_DATA, type Plugin, runChecks } from "../../../naima/src/core/api.ts"
 import { createContext, DEFAULT_PROGRAM, gitIn, removeTemp, tempProject } from "../../core/testing.ts"
 import coordination, { readClaims } from "../../../naima/src/plugins/coordination/index.ts"
 
@@ -37,8 +37,8 @@ function at(p: ReturnType<typeof project>, root: string) {
   return { ctx, out, run, git: (...args: string[]) => gitIn(root, ...args) }
 }
 
-const messages = async (ctx: ReturnType<typeof project>["ctx"]) => {
-  const { problems, notes } = await runChecks(ctx)
+const messages = async (ctx: ReturnType<typeof project>["ctx"], options?: CheckOptions) => {
+  const { problems, notes } = await runChecks(ctx, options)
   return { problems: problems.map((f) => f.message).join("\n"), notes: notes.map((f) => f.message).join("\n") }
 }
 
@@ -106,8 +106,25 @@ test("the policy check fails a worktree or a branch off the scheme, and an uncla
     writeFileSync(join(p.dir, "right", "work.txt"), "x")
     right.git("add", "-A")
     right.git("commit", "-q", "-m", "work")
-    ;({ problems } = await messages(p.ctx))
-    assert.match(problems, /worktree .*right \(agent\/right\) carries no claim and has 1 commit not on main/)
+    ;({ problems, notes } = await messages(p.ctx))
+    assert.doesNotMatch(
+      problems,
+      /agent\/right/,
+      "a gate judges its own tree: another worktree's missing claim is never a problem on this one's check",
+    )
+    assert.match(
+      notes,
+      /worktree .*right \(agent\/right\) carries no claim and has 1 commit not on main/,
+      "reported as a note, naming the worktree, so a human still sees it",
+    )
+    // The worktree being checked judges itself: from inside "right", the same state is a problem.
+    assert.match((await messages(right.ctx)).problems, /worktree .*right \(agent\/right\) carries no claim and has 1 commit not on main/)
+    // The coordinator's view sees every worktree as the worktree itself would.
+    assert.match(
+      (await messages(p.ctx, { allWorktrees: true })).problems,
+      /worktree .*right \(agent\/right\) carries no claim and has 1 commit not on main/,
+    )
+
     await right.run("claim", "alpha")
     ;({ problems } = await messages(p.ctx))
     assert.doesNotMatch(problems, /agent\/right/, "an uncommitted claim on its disk is enough")
@@ -126,6 +143,25 @@ test("the policy check fails a worktree or a branch off the scheme, and an uncla
     } finally {
       exempt.cleanup()
     }
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("a worktree that only files items passes with a session note, no claim needed", async () => {
+  const p = project()
+  try {
+    await p.run("open", "alpha", "--as", "agent", "--name", "filer")
+    const filer = at(p, join(p.dir, "filer"))
+    await filer.run("release", "alpha") // filing, not working an item: nothing claimed, and nothing was yet committed to release
+    writeFileSync(join(p.dir, "filer", "new-bug.txt"), "x")
+    filer.git("add", "-A")
+    filer.git("commit", "-q", "-m", "file a bug")
+    assert.match((await messages(filer.ctx)).problems, /carries no claim/, "commits with no claim and no note are still a problem on its own check")
+
+    await filer.run("pass", "filed a bug, nothing claimed")
+    assert.equal((await messages(filer.ctx)).problems, "", "a session note alone is enough: no item was claimed because none was worked")
+    assert.equal((await messages(p.ctx)).problems, "")
   } finally {
     p.cleanup()
   }

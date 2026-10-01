@@ -65,6 +65,15 @@ Everything it needs to work without asking, because it cannot ask:
 | **Filer** | classification, [triage](../guide/glossary.md#triage) fields, reports routed to the right tracker | inventing scope; deciding whether something is proven |
 | **Evidence owner** | whether a gesture proves the claim, weighed by [the evidence ranking](../guide/prove-and-close.md#3-perform-it-keep-the-evidence) and red-then-green for a regression | performing the gesture it then judges |
 
+These jobs, and the outward ones — the release manager, the documentarian,
+the [announcer](announcer.md), the community steward, the business role, and
+the verification engineer — are data: `naima roles` lists each with what it
+owns and refuses, and `naima queue --role <role>` is one role's queue, most
+urgent first. An item is on a role's queue by its `role` field when set, else
+by its `kind` (`code` is the implementer's, `test` the tester's) or its type
+(every `tests` item is the tester's, every `releases` item the release
+manager's). Staff a worker for a role from that queue.
+
 Work passes between them in one direction:
 
 ```

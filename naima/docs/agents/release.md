@@ -83,6 +83,8 @@ what the stage's own runner claims happened.
    where a stranger would get it, not from the build directory.
 7. **Announce only what is true.** The changelog goes out once, after step 6
    passed — never before, on the assumption it will. Hand off to the
+   [announcer](announcer.md), who writes it from `naima announce --gate
+   <gate>`: only the features that are announceable, and the
    [documentarian](documentarian.md) for the page itself.
 8. **Rollback.** Available from any stage from publish onward: the tag is
    not force-moved, a fixed point is published instead (`vX.Y.Z+1`, never a

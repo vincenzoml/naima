@@ -352,14 +352,17 @@ const move: Command = {
 const check: Command = {
   name: "check",
   says: "run every invariant; exit 1 on any problem",
-  usage: "check [--staged]",
-  options: [{ name: "--staged", says: "run only the checks that read the change staged for the next commit: what the pre-commit hook runs" }],
-  examples: ["check", "check --staged"],
+  usage: "check [--staged] [--all-worktrees]",
+  options: [
+    { name: "--staged", says: "run only the checks that read the change staged for the next commit: what the pre-commit hook runs" },
+    { name: "--all-worktrees", says: "the coordinator's view: every worktree's missing claim is a problem, not only the one being checked" },
+  ],
+  examples: ["check", "check --staged", "check --all-worktrees"],
   async run(args, ctx) {
-    const p = parse(args, { staged: { type: "boolean" } })
+    const p = parse(args, { staged: { type: "boolean" }, "all-worktrees": { type: "boolean" } })
     if (p.positionals.length) throw usageError(this)
     const staged = bool(p, "staged")
-    const { problems, notes } = await runChecks(ctx, { staged })
+    const { problems, notes } = await runChecks(ctx, { staged, allWorktrees: bool(p, "all-worktrees") })
     const count = staged ? ctx.registry.checks.filter((c) => c.staged === true).length : ctx.registry.checks.length
     ctx.out(`${ctx.repo.items.length} items, ${count} ${staged ? "staged-change " : ""}checks`)
     if (notes.length) {

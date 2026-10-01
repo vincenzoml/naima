@@ -129,11 +129,19 @@ export interface Finding {
   item?: Item
 }
 
+/** What `naima check` is asked for, beyond the tracker itself. */
+export interface CheckOptions {
+  /** Report every worktree's state as the coordinator sees it, not only this one's: a sibling's missing claim is a problem too, not only a note. */
+  allWorktrees?: boolean
+  /** Only checks that read the change staged for the next commit (`check.staged === true`): what a pre-commit hook runs. */
+  staged?: boolean
+}
+
 export interface Check {
   name: string
   says: string
   /** May be async: a check that runs an external tool awaits it. */
-  run(ctx: Context): Finding[] | Promise<Finding[]>
+  run(ctx: Context, options?: CheckOptions): Finding[] | Promise<Finding[]>
   /** True for a check that reads only the change staged for the next commit: `naima check --staged`, what a pre-commit hook runs, runs these alone. */
   staged?: boolean
 }

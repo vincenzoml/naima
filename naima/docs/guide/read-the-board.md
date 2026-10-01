@@ -100,6 +100,28 @@ v1: 2 open — agent 0, human 2, build 0, unclassified 0
 [owner](glossary.md#owner). "Unclassified" counts items whose `runBy` nobody
 has set yet. Without a gate name, `naima queue` covers every gate.
 
+## A role's queue
+
+Each job in the team of agents is a [role](glossary.md#role): what it owns,
+and what it refuses. `naima roles` lists them, each with how many open
+items are on its queue; `naima queue --role <role>` lists one's, most urgent
+first:
+
+```console
+$ naima queue --role tester
+tester — Tester: 1 open
+  refuses: fixing what it finds; testing what it just wrote
+  tests/looks-right-phone  Looks right on a phone
+```
+
+An item is on a role's queue by its `role` field when set
+(`naima set <item> role=documentarian`), else by its
+[kind](glossary.md#kind) — `code` is the implementer's, `writing` the
+documentarian's, `decision` yours — or its type: every test item is the
+tester's. With a gate name, `naima queue v1 --role implementer` keeps only
+what is on that gate. A project adds its own roles, or replaces one, under
+`plugins.roles.options.roles` ([the reference](../reference/reference.md)).
+
 ## Other views
 
 `naima view` lists the named views the loaded plugins offer, such as `next`
