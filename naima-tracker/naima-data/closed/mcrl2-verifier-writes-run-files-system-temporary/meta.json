@@ -1,7 +1,7 @@
 {
   "id": "79b38ca9-901f-48a3-a6b9-c19de5ff4063",
   "title": "The mCRL2 verifier writes its run files in the system temporary directory, outside the launcher's write fence, so every real run ends in error",
-  "status": "open",
+  "status": "closed",
   "created": "2026-10-01",
   "links": [
     {
@@ -18,5 +18,10 @@
   "confidence": "measured",
   "triagedOn": "2026-10-01",
   "effort": "S",
-  "fixedOn": "2026-10-01"
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "2c3a166a61cb"
+  ],
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
 }
