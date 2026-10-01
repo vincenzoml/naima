@@ -1,0 +1,19 @@
+{
+  "id": "37cbd157-793c-4090-876b-ef0d8b19c617",
+  "title": "Timeline view: derived events, undated counted, records, ui tab",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "4d67d7fd-8410-420e-9310-34803f59eb1a"
+    }
+  ],
+  "redSeen": "2026-10-01",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
+}
