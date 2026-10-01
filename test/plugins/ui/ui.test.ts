@@ -214,13 +214,20 @@ test("the window is opened when it can be, and closing it stops the server", asy
     let url = ""
     const f = fake(() => Promise.resolve({ opened: true, how: "window", closed: new Promise<void>((done) => (close = done)), stop: () => close() }))
     const running = runUi(p.ctx, { browser: false, open: true }, { ...f.deps, window: (u) => ((url = u), f.deps.window(u)) })
-    for (let i = 0; i < 200 && !url; i++) await new Promise((r) => setTimeout(r, 10))
-    assert.equal((await fetch(url, { redirect: "manual" })).status, 200)
-    close()
-    assert.equal(await running, 0)
-    assert.deepEqual(f.asked.map((a) => a.split(" ")[0]), ["window"])
-    assert.deepEqual(p.output, ["naima ui: the Naima window is open — closing it stops the server"])
-    await assert.rejects(fetch(url), "the server stopped with the window")
+    try {
+      for (let i = 0; i < 200 && !url; i++) await new Promise((r) => setTimeout(r, 10))
+      assert.equal((await fetch(url, { redirect: "manual" })).status, 200)
+      close()
+      assert.equal(await running, 0)
+      assert.deepEqual(f.asked.map((a) => a.split(" ")[0]), ["window"])
+      assert.deepEqual(p.output, ["naima ui: the Naima window is open — closing it stops the server"])
+      await assert.rejects(fetch(url), "the server stopped with the window")
+    } finally {
+      // a server still listening keeps the test's process alive: stop it however the test ended
+      close()
+      f.stop()
+      await running.catch(() => {})
+    }
   } finally {
     p.cleanup()
   }

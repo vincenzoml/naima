@@ -3,13 +3,14 @@
 // the host files only `init --write-excludes` and `init --write-agent-pointer` may write (docs/guide/install.md#the-permissions).
 
 import assert from "node:assert/strict"
-import { spawn, spawnSync } from "node:child_process"
+import { spawnSync } from "node:child_process"
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 import { allowedEnv } from "../naima/src/launcher.ts"
+import { leftovers, type Running, startGroup, WAIT_MS } from "./core/processes.ts"
 import { gitIn as git, removeTemp } from "./core/testing.ts"
 
 /** The runtime folder of this checkout: what a program directory holds a copy of. */
@@ -152,9 +153,21 @@ test("init --write-agent-pointer may write the host's AGENTS.md through the laun
   }
 })
 
-test("through the launcher, ui may serve on the loopback interface and no other command may listen", {
-  skip: skip || (process.platform === "win32" && "a process group is POSIX"),
-}, async () => {
+/** `naima ui --no-open` through the launcher of `w`, handed to `body` once it serves; stopped, group and all, however `body` ends. */
+async function withUi(w: ReturnType<typeof world>, body: (ui: Running, url: string) => Promise<void>): Promise<void> {
+  const env = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined, NAIMA_CACHE: join(w.base, "cache") }
+  const ui = startGroup("deno", ["run", "-A", join(w.host, "naima-tracker", "naima", "naima.ts"), "ui", "--no-open"], { cwd: w.host, env })
+  try {
+    const [, url] = await ui.waitFor(/serving (http:\/\/127\.0\.0\.1:\d+\/\?token=[0-9a-f]+)/)
+    await body(ui, url!)
+  } finally {
+    await ui.stop()
+  }
+}
+
+const posixOnly = skip || (process.platform === "win32" && "a process group is POSIX")
+
+test("through the launcher, ui may serve on the loopback interface and no other command may listen", { skip: posixOnly, timeout: 120_000 }, async () => {
   const w = world()
   try {
     assert.equal(w.init().code, 0)
@@ -163,28 +176,36 @@ test("through the launcher, ui may serve on the loopback interface and no other 
     const probe = launch(w.host, ["probe-listen"])
     assert.equal(probe.code, 0, probe.err)
     assert.equal(probe.out, "listen=NotCapable")
-    const env = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined, NAIMA_CACHE: join(w.base, "cache") }
-    const child = spawn("deno", ["run", "-A", join(w.host, "naima-tracker", "naima", "naima.ts"), "ui", "--no-open"], { cwd: w.host, env, detached: true })
-    let out = ""
-    let err = ""
-    child.stderr.on("data", (b) => (err += String(b)))
-    const exited = new Promise<number | null>((done) => child.once("exit", (code) => done(code)))
-    const url = await new Promise<string>((done, fail) => {
-      child.stdout.on("data", (b) => {
-        out += String(b)
-        const m = out.match(/serving (http:\/\/127\.0\.0\.1:\d+\/\?token=[0-9a-f]+)/)
-        if (m) done(m[1]!)
-      })
-      void exited.then((code) => fail(new Error(`ui exited ${code}: ${err}`)))
+    await withUi(w, async (ui, url) => {
+      // the first screen, rendered under the launcher's grants
+      const r = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(WAIT_MS) })
+      assert.equal(r.status, 200)
+      assert.match(await r.text(), /aria-labelledby="panel-summary"/)
+      assert.equal((await fetch(url.replace(/\?token=.*/, ""), { signal: AbortSignal.timeout(WAIT_MS) })).status, 403)
+      // Ctrl-C in a terminal reaches the whole process group: the launcher and the program
+      process.kill(-ui.pid, "SIGINT")
+      assert.equal(await ui.exited(), 0, ui.err())
     })
-    // the first screen, rendered under the launcher's grants
-    const r = await fetch(url, { redirect: "manual" })
-    assert.equal(r.status, 200)
-    assert.match(await r.text(), /aria-labelledby="panel-summary"/)
-    assert.equal((await fetch(url.replace(/\?token=.*/, ""))).status, 403)
-    // Ctrl-C in a terminal reaches the whole process group: the launcher and the program
-    process.kill(-child.pid!, "SIGINT")
-    assert.equal(await exited, 0, err)
+    assert.deepEqual(leftovers(w.base), [])
+  } finally {
+    w.cleanup()
+  }
+})
+
+test("a ui a test starts is stopped, launcher and program, even when the test fails while it serves", { skip: posixOnly, timeout: 120_000 }, async () => {
+  const w = world()
+  try {
+    assert.equal(w.init().code, 0)
+    let seen: string[] = []
+    await assert.rejects(
+      withUi(w, () => {
+        seen = leftovers(w.base)
+        throw new Error("a failed assertion")
+      }),
+      /a failed assertion/,
+    )
+    assert.ok(seen.length >= 2, `the launcher and the program were running: ${seen.join("; ")}`)
+    assert.deepEqual(leftovers(w.base), [])
   } finally {
     w.cleanup()
   }

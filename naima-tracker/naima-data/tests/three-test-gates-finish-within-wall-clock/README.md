@@ -1,0 +1,3 @@
+# The three test gates finish within a wall-clock limit and leave no naima ui process behind
+
+Run deno task verify, node --test "test/**/*.test.ts" and bun test --timeout 30000 ./test/, each under a 900-second wall-clock limit (perl -e 'alarm 900; exec @ARGV'). Passes when each exits 0 before the limit and ps then lists no process from a naima-launcher-* temporary project. The unit guards are test/core/processes.test.ts (a wait that never answers fails in bounded time; stop() leaves nothing of the group) and the failure-path test in test/launcher.test.ts (a ui whose test throws while it serves is still stopped, launcher and program).
