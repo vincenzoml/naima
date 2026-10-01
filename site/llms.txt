@@ -1,12 +1,13 @@
 # Naima
 
 > Naima turns AI agents into a small team that works quietly for the person
-> who owns the repository: they say what they want; agents do the work (code,
+> who owns the project: they say what they want; agents do the work (code,
 > analyses, drafts), check it, prove it and document it, every claim with its
 > evidence, nothing done until shown to be; the person only decides. For any
-> project in a git repository: software, a data analysis, a paper written with
+> project: software, a data analysis, a paper written with
 > colleagues. The person needs no git, code or project management, only an AI
-> agent. It lives in one folder of the repository, naima-tracker/.
+> agent. Naima lives in a folder of the project and manages it with git, so
+> you never have to — naima-tracker/.
 
 The install procedure, for people and agents alike, is the repository's
 README, section "Install":

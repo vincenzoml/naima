@@ -2,8 +2,8 @@
 
 Naima turns your AI agents into a small team that works quietly for you. You say what you want. Agents do the work — code, analyses, drafts — check it, prove it and document it, and every claim comes with its evidence: nothing counts as done until it is shown to be. You only decide.
 
-Software, a data analysis, a paper written with colleagues — or all of them in one repository.
-It lives in one folder of your repository, and never gets in your way.
+Software, a data analysis, a paper written with colleagues — or all of them in one project.
+Naima lives in a folder of your project and manages it with git, so you never have to.
 
 **You don't need to know git, code or project management. You need an AI agent — Naima does the rest.**
 
