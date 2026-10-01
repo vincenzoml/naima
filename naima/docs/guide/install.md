@@ -240,7 +240,8 @@ on the loopback interface (`127.0.0.1`), for its server; reading and running
 the Deno that runs it, to open its window; and running the program that opens
 the default browser (`open`, `xdg-open` or `rundll32`), for its fallback.
 The window is a process of its own, `src/plugins/ui/window.ts`, which the
-program starts with only what the webview needs: native code from, and
+program starts with only what the webview needs — the embedded browser
+component that draws the window: native code from, and
 writing in, the webview's cache (`plug/` in Deno's directory), reading Deno's
 directory, the network to GitHub to fetch the webview's library on its first
 run, and the environment. The program itself never calls native code nor
