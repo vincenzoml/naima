@@ -41,7 +41,7 @@ a [plugin](guide/add-a-plugin.md).
 ## Commands for every action
 
 Every action an agent takes on an item has a command, so each is recorded
-the same way and can be checked. Opening, fields and title, triage, links,
+the same way and can be checked. Opening, fields, triage, links,
 the description (`naima describe`), notes (`naima note`), claims, proof and
 closing have one. Missing today:
 
@@ -51,6 +51,9 @@ closing have one. Missing today:
 - **Moving an item to another type** (a bug that turns out to be a request).
   **Today:** a new item is opened in the right type and the old one linked
   `duplicate-of` it.
+- **Renaming an item** so its page agrees: `naima set <item> title="…"` changes
+  the field and leaves the title line of `README.md` as it was. **Today:** that
+  line is edited by hand.
 
 ## Worktree names and claim files
 
