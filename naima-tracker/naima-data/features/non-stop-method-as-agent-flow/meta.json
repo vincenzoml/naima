@@ -16,5 +16,10 @@
       "rel": "blocked-by",
       "id": "2aa741bf-f899-47fe-9dfe-c3417e63bacb"
     }
+  ],
+  "fixedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/agents/the-non-stop-loop.md",
+    "naima/docs/guide/while-you-are-away.md"
   ]
 }
