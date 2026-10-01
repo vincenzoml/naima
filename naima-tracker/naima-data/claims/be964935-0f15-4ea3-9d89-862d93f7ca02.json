@@ -1,0 +1,16 @@
+{
+  "branch": "claude/u18-roles",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "ebf8063f-412b-40aa-8356-ea9af97c0845",
+      "ref": "features/announceability-computed-from-shipped-documented-verified",
+      "title": "Announceability computed from shipped, documented and verified"
+    },
+    {
+      "id": "ad82fbef-7401-4f0a-baac-231d358c09db",
+      "ref": "features/roles-plugin-declared-vocabulary-per-role-queue",
+      "title": "Roles plugin: declared vocabulary and a per-role queue view"
+    }
+  ]
+}
