@@ -498,7 +498,7 @@ function valueLines(ctx: Context, def: FieldDef): string[] {
     return title && says && title !== says ? `${title} — ${says}` : title || says
   }
   return [
-    `${def.name} — ${def.kind === "enum" ? "closed" : "open"} list`,
+    `${def.name} — ${def.kind === "enum" ? "fixed" : "open"} list`,
     ...listed.map(([v, says]) => row(v, meaning(v, says))),
     ...off.map((v) => row(v, "not on the list")),
   ]

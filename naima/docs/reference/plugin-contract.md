@@ -192,7 +192,7 @@ A field whose enum values are the names of a point's contributions says
 to the `gates` point, and with `multiple: true` an item may hold one value as
 a string or several as a list (`naima set <item> gate=v1,v2`).
 
-An enum's values are a closed list: any other value fails the `fields`
+An enum's values are a fixed list: any other value fails the `fields`
 check. A `string` or `strings` field with values — `area` and `kind`, once
 a project or a plugin lists them — has an open list: a value off it is a note
 from the core's `values` check, naming the items that hold it, and nothing is

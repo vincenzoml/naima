@@ -92,7 +92,7 @@ list. A new value is defined in `naima.json`'s `extends`, title and meaning,
 in the same commit that first uses it; an off-list value already in the
 tracker is a note from `naima check` (the check `values`) naming its items —
 report it, never rewrite those items to make the note go away. `gate` and
-`epic` are closed: a gate no plugin contributes, or `part-of` an item that is
+`epic` are fixed lists: a gate no plugin contributes, or `part-of` an item that is
 not an epic, fails the check.
 
 [Triage what you touch](../guide/rules.md#triage-what-you-touch): opening,

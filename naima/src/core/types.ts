@@ -73,7 +73,7 @@ export interface FieldDef {
   kind: FieldKind
   says: string
   /**
-   * Value -> meaning. For `enum`, the closed list: any other value is a
+   * Value -> meaning. For `enum`, the fixed list: any other value is a
    * problem; declaration order is rank order. For `string` and `strings`, an
    * open list: a value off it is a note, never refused.
    */

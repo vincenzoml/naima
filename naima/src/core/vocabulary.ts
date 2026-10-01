@@ -25,7 +25,7 @@ export interface Lookup {
 const union = (a: readonly string[] | undefined, b: readonly string[] | undefined): string[] | undefined =>
   a || b ? [...new Set([...(a ?? []), ...(b ?? [])])] : undefined
 
-/** The kinds a list of values applies to: an enum's is closed, a string's or strings' open. */
+/** The kinds a list of values applies to: an enum's is fixed, a string's or strings' open. */
 const LISTED: readonly string[] = ["enum", "string", "strings"]
 
 /** An extension's values as meanings and titles: each is what it means, or { title, says }. */

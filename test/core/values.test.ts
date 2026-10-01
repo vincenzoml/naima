@@ -1,7 +1,7 @@
 // Defined value lists for classifier fields: a project or a plugin declares
 // the values area and kind take, each with a title and what it means; the
 // check reports a value off the list — a note for an open list (area, kind),
-// a problem for a closed one (gate, epic) — and never rewrites the item;
+// a problem for a fixed one (gate, epic) — and never rewrites the item;
 // `naima types` prints each value with how many items hold it.
 
 import assert from "node:assert/strict"
@@ -69,7 +69,7 @@ test("a field with no list declared is not checked against one", async () => {
   }
 })
 
-test("gate and epic are closed lists: a value off them is a problem", async () => {
+test("gate and epic are fixed lists: a value off them is a problem", async () => {
   const p = tempProject([...firstPartyPlugins({ gates: { gates: { v1: { title: "First" } } } })])
   try {
     assert.equal(await p.run("new", "bugs", "Crash"), 0)
@@ -100,7 +100,7 @@ test("naima types prints each field's values, with their titles and how many ite
     assert.match(out, /^ {2}cli +2 +Command line — the naima command and its output$/m)
     assert.match(out, /^ {2}docs +0 +the guide and the reference$/m)
     assert.match(out, /^ {2}help +1 +not on the list$/m)
-    assert.match(out, /^gate — closed list$/m)
+    assert.match(out, /^gate — fixed list$/m)
     assert.match(out, /^ {2}v1 +1 +First$/m)
   } finally {
     p.cleanup()

@@ -66,10 +66,10 @@ export function parseFieldValue(def: FieldDef, raw: string): unknown {
   return value
 }
 
-/** Whether a field's list of values is open — a string's or strings', where an off-list value is a note — rather than an enum's, closed. */
+/** Whether a field's list of values is open — a string's or strings', where an off-list value is a note — rather than an enum's, fixed. */
 export const isOpenList = (def: FieldDef): boolean => (def.kind === "string" || def.kind === "strings") && !!def.values && Object.keys(def.values).length > 0
 
-/** The values a field of an open list holds that are not on its list; none when the list is closed, empty, or the value is of another kind. */
+/** The values a field of an open list holds that are not on its list; none when the list is fixed, empty, or the value is of another kind. */
 export function offList(def: FieldDef, value: unknown): string[] {
   if (!isOpenList(def)) return []
   const held = typeof value === "string" ? [value] : Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : []

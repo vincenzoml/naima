@@ -49,7 +49,7 @@ To make an off-list value fail the check, weigh the core's `values` check
 `problem` (below). `naima types` prints every list, each value with how many
 items hold it, values off the list marked.
 
-`gate` and `epic` are closed lists already: a gate's values are the gates
+`gate` and `epic` are fixed lists already: a gate's values are the gates
 contributed, an epic's the epics filed; anything else fails the check.
 
 Add a value in the commit that first uses it, with its meaning.
