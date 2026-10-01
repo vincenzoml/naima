@@ -1,7 +1,7 @@
 {
   "id": "da50cc74-1763-46ac-817c-2cd2c9cf0b86",
   "title": "Coordination protocol: a spec verified by the TLC adapter",
-  "status": "open",
+  "status": "dropped",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "later",
@@ -15,6 +15,10 @@
     {
       "rel": "blocked-by",
       "id": "ca9f8759-25ba-4779-84b3-dc0d67a4a04f"
+    },
+    {
+      "rel": "duplicate-of",
+      "id": "ab7610f9-3905-48c6-bb00-aabd936d6040"
     }
   ]
 }

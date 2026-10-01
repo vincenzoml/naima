@@ -9,3 +9,7 @@ Done: the spec covers releases, working-tree records and reader precedence; the 
 ### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
 
 U4 proof run: withdrawn as a duplicate of todos/tla-specification-coordination-protocol-verified-by-naima (now titled as an mCRL2 model). Leaving status as-is for the evidence owner to close.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/evidence-close-5
+
+Withdrawn as a duplicate of todos/tla-specification-coordination-protocol-verified-by-naima (the mCRL2-based item; project convention is mCRL2, not TLC/TLA+, per the item's own 2026-10-01 note from the U4 proof run).
