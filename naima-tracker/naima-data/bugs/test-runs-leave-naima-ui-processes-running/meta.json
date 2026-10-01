@@ -5,5 +5,10 @@
   "created": "2026-10-01",
   "impact": "high",
   "priority": "now",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "bd1715e"
+  ],
+  "confidence": "measured"
 }
