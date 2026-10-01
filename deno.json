@@ -22,6 +22,7 @@
   },
   "fmt": {
     "include": ["naima/naima.ts", "naima/src/", "test/", "scripts/"],
+    "exclude": ["test/plugins/adopt/fixtures/"],
     "lineWidth": 160,
     "indentWidth": 2,
     "semiColons": false

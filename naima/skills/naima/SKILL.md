@@ -78,6 +78,11 @@ rm -rf /tmp/naima
 `naima-tracker/` with the work; git never shows `naima-tracker/naima/`, which
 is ignored ([bootstrap a project](../../docs/guide/install.md#bootstrap-a-project)).
 
+When the project already keeps a TODO.md, a notes file or an issue list,
+bring it in with `naima adopt` (propose, split, audit, links), never by
+retyping it, and never delete the file
+([adopting an existing board](../../docs/agents/adopting-an-existing-board.md)).
+
 When a run refuses, it says why in one line and what to do: local changes in
 the program, a commit the source does not have, data in another format.
 

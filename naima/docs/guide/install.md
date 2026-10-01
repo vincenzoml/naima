@@ -62,7 +62,9 @@ ignores `naima/`) and `naima-tracker/naima-data/naima.json`, locked to the
 source and commit of the clone that ran it, and copies that commit's
 `naima/` into `naima-tracker/naima/` ([the copy](#the-copy)). Nothing else in
 the project is touched ([unless asked](#the-hosts-own-tools)). What goes in
-the folder: [using Naima in your project](tracker-folder.md).
+the folder: [using Naima in your project](tracker-folder.md). A project
+that already keeps a `TODO.md` or an issue list brings it in with
+`naima adopt` ([adopt an existing board](adopt-an-existing-board.md)).
 
 `init` locks only what everyone else can fetch: it refuses a clone with
 uncommitted changes, or with a commit its origin does not have, and it drops
