@@ -23,13 +23,14 @@ curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh     # macOS, Linux
 irm https://vincenzoml.github.io/naima/install.ps1 | iex          # Windows PowerShell
 ```
 
-Or ask your agent: *Please install https://github.com/vincenzoml/naima in this repository.*
+Or ask your agent: *Please install https://github.com/vincenzoml/naima in the root of this repository; create a repository at the root if missing.*
 
 ### If you are the agent asked to install it
 
-If git is not installed, install it (macOS: `xcode-select --install`, or `brew install git` with Homebrew; Linux: the package manager, e.g. `sudo apt install git`; Windows: `winget install Git.Git`), then work from the root of the git repository
-(`git rev-parse --show-toplevel`; `git init` makes one), and do these steps in
-order.
+If git is not installed, install it (macOS: `xcode-select --install`, or `brew install git` with Homebrew; Linux: the package manager, e.g. `sudo apt install git`; Windows: `winget install Git.Git`), then work in the
+root of this repository (if it is not a git repository yet, create one at the
+root with `git init`; `git rev-parse --show-toplevel` prints the root), and do
+these steps in order.
 
 1. Run the installer line above for this system. It copies Naima's `naima/`
    folder into `naima-tracker/naima/` (ignored by git), writes

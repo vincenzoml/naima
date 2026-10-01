@@ -97,7 +97,7 @@ EOF
 main() {
   need_git
   ROOT=$(git rev-parse --show-toplevel 2>/dev/null) ||
-    die "this is not a git repository. Run the installer from the root of the repository Naima should track (git init makes one)."
+    die "this is not a git repository. Is this the root of your project? If so, ask your agent to create a repository here and install Naima from https://vincenzoml.github.io/naima/"
   if [ "$(cd "$ROOT" && pwd -P)" != "$(pwd -P)" ]; then say "installing at the top of this repository: $ROOT"; fi
   cd "$ROOT"
   need_deno

@@ -48,6 +48,7 @@ then any project, with its own checks in place of tests.
 | add a gate, weigh a check, switch a plugin off | [Configure the project](configure-the-project.md) |
 | use a plugin a colleague gave me | [Add a plugin someone gave you](add-a-plugin.md) |
 | write a plugin, or adopt Naima outside software | [Extending Naima](extending-naima.md) |
+| track a paper's sections and a co-author's reviews | [Writing a paper: sections and reviews](paper-sections-and-reviews.md) |
 
 ## Look up
 

@@ -39,7 +39,7 @@ function Install-Naima {
   $Root = & git rev-parse --show-toplevel 2>$null
   $ErrorActionPreference = 'Stop'
   if ($LASTEXITCODE -ne 0 -or -not $Root) {
-    throw 'naima: this is not a git repository. Run the installer from the root of the repository Naima should track (git init makes one).'
+    throw 'naima: this is not a git repository. Is this the root of your project? If so, ask your agent to create a repository here and install Naima from https://vincenzoml.github.io/naima/'
   }
   $Root = (Resolve-Path $Root).Path
   if ($Root -ne (Get-Location).Path) { Say "installing at the top of this repository: $Root" }

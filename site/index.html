@@ -164,7 +164,7 @@
   <section class="sr" aria-label="For AI agents">
     <h2>For AI agents</h2>
     <p>Naima is born for software: a silent software house of AI agents that applies industry-grade practice (tests, metrics, reviews, gates) and formal methods for an owner who need not know them, and runs any other project with that work’s own checks. If you were asked to install Naima in a repository, the whole procedure is the README of <a href="https://github.com/vincenzoml/naima">https://github.com/vincenzoml/naima</a>, section Install (raw: https://raw.githubusercontent.com/vincenzoml/naima/main/README.md; also <a href="llms.txt">llms.txt</a>); read it and follow it.
-    In short: if git is not installed, install it (macOS: xcode-select --install or Homebrew; Linux: the package manager; Windows: winget install Git.Git); then, from the root of the git repository, run the installer one-liner for this system (below), run <code>deno run -A naima-tracker/naima/naima.ts check</code> until it passes,
+    In short: if git is not installed, install it (macOS: xcode-select --install or Homebrew; Linux: the package manager; Windows: winget install Git.Git); then, in the root of this repository (if it is not a git repository yet, create one at the root with git init), run the installer one-liner for this system (below), run <code>deno run -A naima-tracker/naima/naima.ts check</code> until it passes,
     read <code>naima-tracker/naima/skills/naima/SKILL.md</code> and work by it, and add this line, verbatim, to the repository’s agent instruction file (AGENTS.md, CLAUDE.md, or the one you read; if none, create AGENTS.md):</p>
     <p>This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them.</p>
   </section>
@@ -219,7 +219,7 @@
     <section aria-label="Or ask your agent">
       <p class="label">Or ask your agent:</p>
       <div class="box prompt">
-        <pre><code id="prompt">Please install https://github.com/vincenzoml/naima in this repository.</code></pre>
+        <pre><code id="prompt">Please install https://github.com/vincenzoml/naima in the root of this repository; create a repository at the root if missing.</code></pre>
         <button type="button" class="copy" data-copy="prompt">Copy</button>
       </div>
     </section>
