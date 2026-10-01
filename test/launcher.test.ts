@@ -1,6 +1,6 @@
 // The launcher's fence, through the real launcher under Deno: the environment
 // the program is handed, a path Deno's permission flags cannot express, and
-// the host files only `init --write-excludes` may write (docs/guide/install.md#the-permissions).
+// the host files only `init --write-excludes` and `init --write-agent-pointer` may write (docs/guide/install.md#the-permissions).
 
 import assert from "node:assert/strict"
 import { spawn, spawnSync } from "node:child_process"
@@ -131,6 +131,22 @@ test("init --write-excludes may write the host's deno.json through the launcher;
     const written = launch(w.host, ["init", "--write-excludes"])
     assert.equal(written.code, 0, written.err)
     assert.deepEqual(JSON.parse(readFileSync(join(w.host, "deno.json"), "utf8")), { exclude: ["naima-tracker/naima/"] })
+  } finally {
+    w.cleanup()
+  }
+})
+
+test("init --write-agent-pointer may write the host's AGENTS.md through the launcher; init alone may not touch it", { skip }, () => {
+  const w = world()
+  try {
+    writeFileSync(join(w.host, "AGENTS.md"), "# Working here\n")
+    const printed = w.init()
+    assert.equal(printed.code, 0, printed.err)
+    assert.match(printed.out, /entry pointer missing from AGENTS\.md/)
+    assert.equal(readFileSync(join(w.host, "AGENTS.md"), "utf8"), "# Working here\n")
+    const written = launch(w.host, ["init", "--write-agent-pointer"])
+    assert.equal(written.code, 0, written.err)
+    assert.match(readFileSync(join(w.host, "AGENTS.md"), "utf8"), /naima-tracker\/naima\/docs\/agents\/README\.md/)
   } finally {
     w.cleanup()
   }

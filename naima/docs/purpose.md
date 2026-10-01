@@ -232,9 +232,9 @@ it until it is run again.
 passed proof, properties, `naima verify`, `naima verifiers`, expiry when the
 model changes, the evidence ranking a test names in `evidenceKind`, and a
 regression test's red run recorded in `redSeen`, each with a check that notes
-its absence ([prove and close](guide/prove-and-close.md)). Only an example
-verifier ships (`naima/src/plugins/verifier/adapters/example-regex.ts`), so
-the mCRL2 example above is [planned](planned.md#model-checkers-and-the-strength-of-evidence).
+its absence ([prove and close](guide/prove-and-close.md)). The mCRL2 and
+VoxLogicA verifiers ship; the mCRL2 model of the claims above is
+[planned](planned.md#model-checkers-and-the-strength-of-evidence).
 
 ### Metrics
 

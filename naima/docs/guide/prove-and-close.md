@@ -151,3 +151,60 @@ and the tool's version. When any of them changes, or the model comes to
 read other files, `naima check` reports the property no longer current:
 run `naima verify` again. The example adapter reads `#include <path>` lines,
 so a model split across files shows it.
+
+### Two model checkers: mCRL2 and VoxLogicA
+
+Two verifiers ship, each its own plugin, each needing its tool on the
+machine. Install the tool first: Naima does not fetch it. Each is off until
+`naima.json` names it, since it starts a program — switch on the one you
+use, with its options:
+
+```json
+"plugins": {
+  "verifier-mcrl2": {},
+  "verifier-voxlogica": { "options": { "program": "/opt/VoxLogicA/VoxLogicA", "version": "1.3.3" } }
+}
+```
+
+**mCRL2** (`mcrl2`), for the behaviour of a protocol or a process. The model
+is an mCRL2 specification; the property is a modal mu-calculus formula,
+written in `property` itself or kept in an `.mcf` file whose path, from the
+project root, is the property:
+
+```sh
+naima new properties "the switch never deadlocks"
+naima set <property> verifier=mcrl2 model=models/switch.mcrl2 property=models/no-deadlock.mcf
+naima verify <property>
+```
+
+It holds when mCRL2 says `true`. When it says `false`, the evidence mCRL2
+found — the steps that break the formula — is attached as the
+counterexample. The tools (`mcrl22lps`, `lps2pbes`, `pbessolve`, `lps2lts`)
+are looked up on `PATH`, or in the directory given as
+`plugins.verifier-mcrl2.options.bin`.
+
+**VoxLogicA** (`voxlogica`), for properties of images: a region is inside
+another, a lesion is found, a structure is connected. The model is a
+VoxLogicA session (an `.imgql` file) that loads its images and prints a
+true-or-false value by name; the property is that name:
+
+```
+load img = "scan.png"
+let lesion = between(128, 255, intensity(img))
+print "lesion_found" volume(lesion) .>. 0
+```
+
+```sh
+naima set <property> verifier=voxlogica model=analysis/scan.imgql property=lesion_found
+```
+
+It holds when the session prints `true`; when it prints `false`, every value
+the session printed is the counterexample. The images the session loads are
+inputs of the run: change one and the property is no longer current. The
+`program` option points Naima at VoxLogicA, and `version` keeps its release
+with each run, since Naima cannot read it from outside the project.
+
+For both, a `verifierOptions` of `{ "timeoutSeconds": 600 }` stops a run that
+takes longer, as `error` (undecided). When the tool is not installed, the run
+is recorded as an error whose output begins `tool missing:` and says how to
+install it: the property is never reported as holding.

@@ -41,13 +41,25 @@ reads as if it did misleads the next reader into skipping the step. Those
 tokens appear only in a [decision](../guide/glossary.md#decision) item or a
 note attributed to the owner, never typed by an agent into a commit body.
 
-## The hook, when the project has one
+## The records that go with a change, in the same commit
 
-An optional pre-commit hook warns — it does not block — when a commit sets
-`fixedOn` on an item with no verified/not-verified line in its body: the one
-case where the gap above is cheapest to catch mechanically. Filed as its own
-item when a project wants it; this page states the contract the hook checks,
-not the hook itself.
+A record written "later" is never written: a fix with no test to prove it, a
+change with no note. A project's companion rules say which records a change
+must carry in the commit that makes it ([commit hooks](../guide/commit-hooks.md)).
+Before committing a tracker write:
+
+1. `naima hooks` lists the companion rules — the built-in one is
+   `fixed-has-test`: setting `fixedOn` comes with a linked verifying test.
+2. Stage the change, then `naima check --staged`: each problem names the item,
+   what it lacks, and the rule. Add the missing record to the same commit.
+
+When the project has run `naima hooks install`, the pre-commit hook runs that
+check by itself, on a commit that touches the tracker or a rule's paths and on
+no other. `git commit --no-verify` skips it; a commit that does so says why in
+its body.
+
+The hook reads the staged files, never the message: a commit setting `fixedOn`
+with no verified/not-verified line in its body is still caught only by reading.
 
 ## Safety rules
 
@@ -55,7 +67,9 @@ not the hook itself.
 - **No human-verdict token written by an agent.** Candidate property for a
   later model: nothing yet greps a commit body for a reserved token: that
   check is filed as its own item, not built here.
+- **The records a change requires are in its commit.** Enforced by the
+  `companions` check (`naima check --staged`, and the pre-commit hook once
+  installed): [commit hooks](../guide/commit-hooks.md).
 - **A `fixedOn` commit with no verified/not-verified line is caught.**
-  Candidate property for a later model until the optional hook above is
-  built and adopted by a project; until then, read the message, do not
-  assume the hook ran.
+  Candidate property for a later model: the pre-commit hook does not read the
+  message; until a check does, read it.

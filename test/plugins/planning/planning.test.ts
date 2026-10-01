@@ -1,10 +1,10 @@
-// Planning: requirements proven by tests, specifications versioned name-vN, decisions recorded once.
+// Planning: requirements proven by tests, specifications versioned name-vN, decisions recorded once, releases staged.
 
 import assert from "node:assert/strict"
 import { test } from "node:test"
 import { addLink, type Context, createItem, type Item, readReadme, runChecks, setFields, typeOrThrow } from "../../../naima/src/core/api.ts"
 import { tempProject } from "../../core/testing.ts"
-import planning from "../../../naima/src/plugins/planning/index.ts"
+import planning, { STAGES } from "../../../naima/src/plugins/planning/index.ts"
 import trackers from "../../../naima/src/plugins/trackers/index.ts"
 
 const project = () => tempProject([trackers(), planning()])
@@ -132,6 +132,37 @@ test("a decision is dated and settled on creation, found by a search before aski
     p.output.length = 0
     assert.equal(await p.run("decisions"), 0)
     assert.match(p.output.join("\n"), /standing permission/)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("a release is marked released only once every stage is recorded, or skipped and said by whom", async () => {
+  const p = project()
+  try {
+    const { ctx } = p
+    const rel = make(ctx, "releases", "Naima v0.9")
+    assert.equal(rel.meta.status, "staging")
+
+    await assert.rejects(p.run("set", `releases/${rel.slug}`, "status=released"), new RegExp(`cannot be released: record Stage: ${STAGES[0]}`))
+
+    for (const stage of STAGES.slice(0, -1)) {
+      assert.equal(await p.run("note", `releases/${rel.slug}`, "--by", "release agent", `Stage: ${stage}\nChecked, all green.`), 0)
+    }
+    await assert.rejects(p.run("set", `releases/${rel.slug}`, "status=released"), new RegExp(`record Stage: ${STAGES.at(-1)}`))
+    p.output.length = 0
+    assert.equal(await p.run("view", "releases"), 0)
+    assert.match(p.output.join("\n"), new RegExp(`✗ releases/naima-v0-9.*\\[staging\\].*owes: ${STAGES.at(-1)}`))
+
+    assert.equal(await p.run("note", `releases/${rel.slug}`, "--by", "release agent", "Stage: announce — skipped, decided by the owner"), 0)
+    assert.match(await messages(ctx, "notes"), /releases\/naima-v0-9.* every stage is recorded — naima set .* status=released/)
+    assert.equal(await p.run("set", `releases/${rel.slug}`, "status=released"), 0)
+    assert.equal(fresh(ctx, rel).meta.status, "released")
+    assert.doesNotMatch(await messages(ctx, "problems"), /releases\//)
+
+    p.output.length = 0
+    assert.equal(await p.run("view", "releases"), 0)
+    assert.match(p.output.join("\n"), /✓ releases\/naima-v0-9 .*\[released\]/)
   } finally {
     p.cleanup()
   }

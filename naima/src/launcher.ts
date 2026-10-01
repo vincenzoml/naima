@@ -27,12 +27,14 @@ import { fileURLToPath } from "node:url"
 import {
   cacheDir,
   DATA_FILE,
+  DEFAULT_ENTRY_FILES,
   EXCLUDE_FILES,
   findData,
   globalOptions,
   message,
   PROGRAM_DIR,
   programOf,
+  readConfig,
   real,
   RELAUNCH,
   runtimeOf,
@@ -167,11 +169,19 @@ function otherWorktrees(root: string, data: string | null): string[] {
   return worktrees(root).filter((w) => !w.self).map((w) => join(w.path, inside))
 }
 
+/** The first-party plugins loaded only when the project's plugins table names them: each starts a program. Kept equal to builtins.ts's `optIn` by a test. */
+export const OPT_IN: readonly string[] = ["verifier-mcrl2", "verifier-voxlogica"]
+
+/** An entry of the plugins table that switches its plugin on: present, and not `enabled: false`. */
+const isOn = (e: unknown): boolean => !!e && typeof e === "object" && (e as { enabled?: unknown }).enabled !== false
+
 /**
  * May the loaded contributions start a program besides git? Only when the
  * project loads code the program does not ship — a third-party plugin, or a
  * replacement for a first-party one — or declares metrics, each naming the
- * program that measures it: no other first-party contribution starts one.
+ * program that measures it, or switches on a first-party plugin that is off
+ * until asked for (`OPT_IN`), each starting a model checker: no other
+ * first-party contribution starts one.
  * Read in every format: a list of plugins (format 1), or a table whose entries
  * name a source or a replacement, or give the metrics plugin metrics.
  */
@@ -183,6 +193,8 @@ export function mayRun(data: string | null): boolean {
     if (!plugins || typeof plugins !== "object") return false
     const metrics = (plugins as { metrics?: { options?: { metrics?: unknown } } }).metrics?.options?.metrics
     if (metrics && typeof metrics === "object" && Object.keys(metrics).length) return true
+    const entries = plugins as Record<string, unknown>
+    if (OPT_IN.some((name) => isOn(entries[name]))) return true
     return Object.values(plugins).some((e) => !!e && typeof e === "object" && ("source" in e || "replacedBy" in e))
   } catch {
     return false
@@ -216,10 +228,24 @@ function declaredRuns(entry: string, cwd: string, read: string, env: Record<stri
   }
 }
 
-/** The host files the run may write outside the tracker folder: only `init --write-excludes` has any. */
-function hostFiles(rest: string[], root: string): string[] {
+/** The project's configured `entryFiles`, or the sensible defaults: `data` may hold no naima.json yet, or one this Naima cannot parse. */
+function entryFilesOf(data: string | null): readonly string[] {
+  if (!data || !existsSync(join(data, DATA_FILE))) return DEFAULT_ENTRY_FILES
+  try {
+    return readConfig(data).entryFiles
+  } catch {
+    return DEFAULT_ENTRY_FILES
+  }
+}
+
+/** The host files the run may write outside the tracker folder: only `init --write-excludes` and `init --write-agent-pointer` have any. */
+function hostFiles(rest: string[], root: string, data: string | null): string[] {
   const [command, ...args] = rest
-  return command === "init" && args.includes("--write-excludes") ? EXCLUDE_FILES.map((f) => join(root, f)) : []
+  if (command !== "init") return []
+  return [
+    ...(args.includes("--write-excludes") ? EXCLUDE_FILES.map((f) => join(root, f)) : []),
+    ...(args.includes("--write-agent-pointer") ? entryFilesOf(data).map((f) => join(root, f)) : []),
+  ]
 }
 
 /**
@@ -259,7 +285,7 @@ export async function launch(args: string[], cwd: string): Promise<number> {
   for (let run = 0; run < MAX_RUNS; run++) {
     let flags: string[]
     try {
-      const fence = { root, tracker, data, program, entry, cache, hostFiles: hostFiles(parsed.rest, root), worktrees: others }
+      const fence = { root, tracker, data, program, entry, cache, hostFiles: hostFiles(parsed.rest, root, data), worktrees: others }
       const read = permissions(fence)[0] ?? ""
       flags = permissions({ ...fence, runs: mayRun(data) ? declaredRuns(entry, cwd, read, env) : [], ui })
     } catch (e) {

@@ -136,3 +136,30 @@ test("init prints the exclude line for each host tool configuration it finds, an
     w.cleanup()
   }
 })
+
+test("init prints the agent pointer for each configured entry file it finds, and writes it only with --write-agent-pointer", SLOW, async () => {
+  const w = world()
+  try {
+    writeFileSync(join(w.root, "AGENTS.md"), "# Working here\n")
+    writeFileSync(join(w.root, "CLAUDE.md"), "# Claude\n")
+    const before = (f: string) => readFileSync(join(w.root, f), "utf8")
+    const agents = before("AGENTS.md")
+
+    const printed = await naima(w.root, ["init"], w.program)
+    assert.equal(printed.code, 0, printed.err)
+    assert.match(printed.out, /^entry pointer missing from AGENTS\.md: Read \[naima-tracker\/naima\/docs\/agents\/README\.md]/m)
+    assert.match(printed.out, /^entry pointer missing from CLAUDE\.md: /m)
+    assert.equal(before("AGENTS.md"), agents, "printing touches nothing")
+
+    const written = await naima(w.root, ["init", "--write-agent-pointer"], w.program)
+    assert.equal(written.code, 0, written.err)
+    assert.match(before("AGENTS.md"), /# Working here\n\nRead \[naima-tracker\/naima\/docs\/agents\/README\.md]/)
+    assert.match(written.out, /^wrote AGENTS\.md: /m)
+    assert.match(written.out, /^wrote CLAUDE\.md: /m)
+
+    const again = await naima(w.root, ["init"], w.program)
+    assert.doesNotMatch(again.out, /entry pointer missing/, "once there, nothing is printed")
+  } finally {
+    w.cleanup()
+  }
+})

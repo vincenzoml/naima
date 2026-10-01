@@ -133,6 +133,8 @@ export interface Finding {
 export interface CheckOptions {
   /** Report every worktree's state as the coordinator sees it, not only this one's: a sibling's missing claim is a problem too, not only a note. */
   allWorktrees?: boolean
+  /** Only checks that read the change staged for the next commit (`check.staged === true`): what a pre-commit hook runs. */
+  staged?: boolean
 }
 
 export interface Check {
@@ -140,6 +142,8 @@ export interface Check {
   says: string
   /** May be async: a check that runs an external tool awaits it. */
   run(ctx: Context, options?: CheckOptions): Finding[] | Promise<Finding[]>
+  /** True for a check that reads only the change staged for the next commit: `naima check --staged`, what a pre-commit hook runs, runs these alone. */
+  staged?: boolean
 }
 
 /** One documented option: a command's `--flag`, or a plugin's configuration key. */
@@ -345,6 +349,8 @@ export type PluginFactory = (options: PluginOptions, api: PluginApi) => Plugin
 export interface FirstParty {
   name: string
   factory: PluginFactory
+  /** Loaded only when the project's plugins table has an entry for it: a plugin that starts a program is not granted one by default. */
+  optIn?: boolean
 }
 
 /** How much a check's finding weighs in this project: off, a note, or a problem that fails `naima check`. */
@@ -395,6 +401,8 @@ export interface Config {
   rename: Record<string, Record<string, string>>
   /** The project's own additive changes to the loaded plugins' types and fields. */
   extends: Extension[]
+  /** The agent-harness entry files `check` and `init --write-agent-pointer` act on, project-root relative. Absent: sensible defaults (`DEFAULT_ENTRY_FILES`). */
+  entryFiles: string[]
 }
 
 /** One contribution as the registry holds it: whose it is, the name it goes by, and its qualified id. */

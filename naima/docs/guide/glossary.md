@@ -82,7 +82,8 @@ few a test tries.
 
 A formal-methods tool that checks a design over every possible order of
 events and, when the design is wrong, prints the exact steps that break it.
-mCRL2 is one. Naima runs one through a [verifier](#verifier).
+mCRL2 is one; VoxLogicA checks properties of images. Naima runs one through a
+[verifier](#verifier).
 
 ## The tracker
 

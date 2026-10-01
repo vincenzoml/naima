@@ -1,7 +1,7 @@
 {
   "id": "ca9f8759-25ba-4779-84b3-dc0d67a4a04f",
   "title": "A real verifier adapter (TLC) beyond the regex stand-in",
-  "status": "requested",
+  "status": "withdrawn",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "later",
