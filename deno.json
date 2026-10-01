@@ -15,7 +15,6 @@
     "typecheck": "deno check naima/naima.ts naima/src/ test/ scripts/",
     "test": "deno test -A test/",
     "docs": "deno run -A naima/src/cli.ts docs --write naima/docs/reference/reference.md",
-    "dist": "deno run -A scripts/dist.ts",
     "coverage": "deno run -A scripts/coverage.ts",
     "lint": "deno lint",
     "fmt": "deno fmt",

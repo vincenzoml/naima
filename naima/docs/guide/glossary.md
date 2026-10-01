@@ -456,14 +456,14 @@ project. Everyone who works on the project runs that one.
 ### Alignment
 
 What every run does first: make the program directory exactly the locked
-commit, cloning it when it is missing. It never overwrites work and never
+commit, copying it when it is missing. It never overwrites work and never
 pulls.
 
-### Dist branch
+### Copy
 
-The branch of Naima's repository a project clones: only the files that run
-Naima, without its tests or its own tracker
-([the dist branch](install.md#the-dist-branch)).
+What a project's program directory is: the files of Naima's `naima/` folder
+at the locked commit, without its tests or its own tracker, fetched through
+the per-user cache ([the copy](install.md#the-copy)).
 
 ### Update
 
@@ -482,8 +482,8 @@ The step that rewrites the data from one [format](#format) to the next, run by
 
 ### Carry
 
-How the program directory is kept: an ignored `clone` (the default),
-`vendored` (committed as plain files) or a git `submodule`
+How the program directory is kept: an ignored `copy` (the default),
+`vendored` (the copy, committed) or a git `submodule`
 ([how the program is carried](install.md#how-the-program-is-carried)).
 
 ### Fork

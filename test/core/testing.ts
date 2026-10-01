@@ -1,9 +1,9 @@
 // A throwaway project for tests: a temp directory, a naima.json, a context
 // whose output is captured and whose clock is fixed.
 
-import { mkdtempSync, rmSync } from "node:fs"
+import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readlinkSync, rmSync, symlinkSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import { corePlugin } from "../../naima/src/core/base.ts"
 import { createContext } from "../../naima/src/core/context.ts"
 import { FORMAT } from "../../naima/src/core/format.ts"
@@ -55,12 +55,35 @@ export const removeTemp = (dir: string): void => {
   if (process.env["NAIMA_KEEP_TEMP"] !== "1") rmSync(dir, { recursive: true, force: true })
 }
 
+/** Every file of `repo` that git tracks or would track, and that is on disk: what a commit of it would hold. */
+export function trackedFiles(repo: string): string[] {
+  return gitIn(repo, "ls-files", "-z", "--cached", "--others", "--exclude-standard").split("\0").filter((p) => p && existsSync(join(repo, p)))
+}
+
+/**
+ * A repository at `dir` with one commit on main holding `files` of `from` —
+ * by default every file of it: Naima's source as a project fetches it, with
+ * its tests, its tracker and its agent rules beside naima/.
+ */
+export function sourceRepo(from: string, dir: string, files: string[] = trackedFiles(from)): string {
+  for (const f of files) {
+    const to = join(dir, f)
+    mkdirSync(dirname(to), { recursive: true })
+    if (lstatSync(join(from, f)).isSymbolicLink()) symlinkSync(readlinkSync(join(from, f)), to)
+    else copyFileSync(join(from, f), to)
+  }
+  gitIn(dir, "init", "-q", "-b", "main")
+  gitIn(dir, "add", "-A")
+  gitIn(dir, "commit", "-q", "-m", "Naima")
+  return dir
+}
+
 export const FIXED_NOW = new Date("2026-01-15T10:00:00.000Z")
 
 export function tempProject(plugins: Plugin[], opts: { git?: boolean; now?: Date } & RegistryOptions = {}): TempProject {
   const root = mkdtempSync(join(tmpdir(), "naima-"))
   const data = join(root, DEFAULT_DATA)
-  const lock = { source: "https://example.invalid/naima.git", commit: "0".repeat(40), carry: "clone" as const, program: DEFAULT_PROGRAM }
+  const lock = { source: "https://example.invalid/naima.git", commit: "0".repeat(40), carry: "copy" as const, program: DEFAULT_PROGRAM }
   const config = { format: FORMAT, formats: {}, ...lock, plugins: {}, rename: opts.rename ?? {}, extends: [] }
   writeJson(join(data, DATA_FILE), { format: FORMAT, source: lock.source, commit: lock.commit, carry: lock.carry })
   const output: string[] = []

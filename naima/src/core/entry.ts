@@ -3,7 +3,7 @@
 // the reference lists them, and reserved: no plugin command may take one.
 
 import { CARRY_MODES } from "./config.ts"
-import { DATA_DIR, DATA_FILE, DIST_BRANCH, TRACKER_DIR } from "./layout.ts"
+import { DATA_DIR, DATA_FILE, PROGRAM_DIR, TRACKER_DIR } from "./layout.ts"
 import type { Command } from "./types.ts"
 
 /** The commands the entry point answers itself, before any plugin is loaded. Documented like any other. */
@@ -11,7 +11,7 @@ export const cliCommands: Omit<Command, "run">[] = [
   {
     name: "init",
     says:
-      `make this git repository a Naima project: create ${TRACKER_DIR}/ — its README.md, its .gitignore and ${DATA_DIR}/${DATA_FILE}, locked to the source and commit of the Naima that runs it, which must be committed and pushed; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside ${TRACKER_DIR}/ is touched unless --write-excludes is given`,
+      `make this git repository a Naima project: create ${TRACKER_DIR}/ — its README.md, its .gitignore and ${DATA_DIR}/${DATA_FILE}, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in ${TRACKER_DIR}/${PROGRAM_DIR}/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside ${TRACKER_DIR}/ is touched unless --write-excludes is given`,
     usage: "init [--write-excludes]",
     options: [{
       name: "--write-excludes",
@@ -23,10 +23,10 @@ export const cliCommands: Omit<Command, "run">[] = [
   {
     name: "update",
     says:
-      `move the lock to the head of the source's ${DIST_BRANCH} branch — its main, when the source publishes no ${DIST_BRANCH}: fetch it, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything`,
+      `move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything`,
     usage: "update [--check | --accept-source]",
     options: [
-      { name: "--check", says: `only say whether the source's ${DIST_BRANCH} (or main) has moved past the locked commit; exit 1 when it has` },
+      { name: "--check", says: "only say whether the source's main has moved past the locked commit; exit 1 when it has" },
       {
         name: "--accept-source",
         says:
@@ -37,9 +37,10 @@ export const cliCommands: Omit<Command, "run">[] = [
   },
   {
     name: "carry",
-    says: "switch how the program is carried — a gitignored clone, vendored as committed files, or a git submodule — staging the switch as one change",
+    says:
+      "switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change",
     usage: `carry <${CARRY_MODES.join("|")}>`,
-    examples: ["carry vendored", "carry clone"],
+    examples: ["carry vendored", "carry copy"],
   },
   {
     name: "guide",

@@ -1,6 +1,6 @@
 // The host's own tools, and the program directory. The program is ignored by
 // git, but some tools walk the file system without reading .gitignore: even
-// the runtime-only dist reaches `deno check`, `tsc` and `prettier` through
+// a copy of naima/, which holds only runtime files, reaches `deno check`, `tsc` and `prettier` through
 // its .ts files. None of them has a marker a directory could carry, so the
 // exclusion lives in the host's own configuration: `naima init` prints the
 // line for each such file it finds, and writes it only when asked

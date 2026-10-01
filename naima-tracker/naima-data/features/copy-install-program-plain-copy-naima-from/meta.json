@@ -1,0 +1,20 @@
+{
+  "id": "18a6662b-aab1-4833-80c0-63b109e48736",
+  "title": "Copy-on-install: the program is a plain copy of naima/ from a per-user cache, locked to a main commit; no dist branch",
+  "status": "planned",
+  "created": "2026-10-01",
+  "kind": "code",
+  "area": "distribution",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "effort": "L",
+  "triagedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/guide/install.md#the-copy",
+    "naima/docs/guide/install.md#how-the-program-is-carried",
+    "naima/docs/reference/format.md#how-the-program-is-carried",
+    "develop/bootstrap.md"
+  ],
+  "fixedOn": "2026-10-01"
+}

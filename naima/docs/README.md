@@ -1,8 +1,11 @@
 # Documentation
 
-Start with [what Naima is for](purpose.md): an enabling technology and a
-decision support system for any versioned work — software, a data analysis,
-a paper with colleagues — run by AI agents for an owner who only decides.
+Start with [what Naima is for](purpose.md): a silent software house of AI
+agents, born for software, that turns vibe coding into an exact science —
+tests, metrics, reviews, gates and formal methods applied for an owner who
+only decides and need not be a programmer. Then any project: a data
+analysis, a paper with colleagues, each with its own checks in place of
+tests.
 Then start from who you are.
 
 | You are… | Start at | Then |

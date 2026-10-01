@@ -12,14 +12,22 @@ import { fileURLToPath } from "node:url"
 import { allowedEnv } from "../naima/src/launcher.ts"
 import { gitIn as git, removeTemp } from "./core/testing.ts"
 
-/** The runtime folder of this checkout: what a dist commit, and so a program directory, holds. */
+/** The runtime folder of this checkout: what a program directory holds a copy of. */
 const NAIMA = join(dirname(dirname(fileURLToPath(import.meta.url))), "naima")
 const hasDeno = spawnSync("deno", ["--version"]).status === 0
 const skip = !hasDeno && "deno is not on PATH"
 
-function launch(cwd: string, args: string[], extraEnv: Record<string, string> = {}) {
-  const env: Record<string, string | undefined> = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined, ...extraEnv }
-  const r = spawnSync("deno", ["run", "-A", join(cwd, "naima-tracker", "naima", "naima.ts"), ...args], { cwd, encoding: "utf8", env })
+/** The launcher of the project at `cwd`, or `launcher`: the program's own once it is copied. */
+function launch(cwd: string, args: string[], extraEnv: Record<string, string> = {}, launcher = join(cwd, "naima-tracker", "naima", "naima.ts")) {
+  const env: Record<string, string | undefined> = {
+    ...process.env,
+    NO_COLOR: "1",
+    NAIMA_DATA: undefined,
+    NAIMA_LAUNCHED: undefined,
+    NAIMA_CACHE: join(dirname(cwd), "cache"),
+    ...extraEnv,
+  }
+  const r = spawnSync("deno", ["run", "-A", launcher, ...args], { cwd, encoding: "utf8", env })
   return { code: r.status, out: r.stdout.trim(), err: r.stderr.trim() }
 }
 
@@ -27,11 +35,11 @@ function launch(cwd: string, args: string[], extraEnv: Record<string, string> = 
 function world(name = "project") {
   const base = mkdtempSync(join(tmpdir(), "naima-launcher-"))
   const source = join(base, "naima")
-  cpSync(join(NAIMA, "src"), join(source, "src"), { recursive: true })
-  cpSync(join(NAIMA, "naima.ts"), join(source, "naima.ts"))
-  mkdirSync(join(source, "plugins"))
+  cpSync(join(NAIMA, "src"), join(source, "naima", "src"), { recursive: true })
+  cpSync(join(NAIMA, "naima.ts"), join(source, "naima", "naima.ts"))
+  mkdirSync(join(source, "naima", "plugins"))
   writeFileSync(
-    join(source, "plugins", "probe.ts"),
+    join(source, "naima", "plugins", "probe.ts"),
     `export default () => ({
   name: "probe",
   says: "reports the environment it is handed",
@@ -53,8 +61,11 @@ function world(name = "project") {
   git(host, "init", "-q", "-b", "main")
   git(host, "add", "-A")
   git(host, "commit", "-q", "-m", "init")
-  git(host, "clone", "-q", "--", source, "naima-tracker/naima")
-  return { base, source, host, cleanup: () => removeTemp(base) }
+  const installer = join(base, "installer")
+  git(base, "clone", "-q", "--", source, installer)
+  /** init as the installer runs it: from a clone of the source outside the project. */
+  const init = (...args: string[]) => launch(host, ["init", ...args], {}, join(installer, "naima", "naima.ts"))
+  return { base, source, host, init, cleanup: () => removeTemp(base) }
 }
 
 test("the environment allow-list keeps Naima's, git's, ssh's and the locale's variables, and nothing else", () => {
@@ -77,7 +88,7 @@ test("the environment allow-list keeps Naima's, git's, ssh's and the locale's va
 test("the program is handed only the allow-listed environment: an unrelated secret is not there, git's variables are", { skip }, () => {
   const w = world()
   try {
-    assert.equal(launch(w.host, ["init"]).code, 0)
+    assert.equal(w.init().code, 0)
     const file = join(w.host, "naima-tracker", "naima-data", "naima.json")
     writeFileSync(file, JSON.stringify({ ...JSON.parse(readFileSync(file, "utf8")), plugins: { probe: { source: "plugins/probe.ts" } } }, null, 2))
     const r = launch(w.host, ["probe"], { UNRELATED_SECRET: "s3cret", GIT_PROBE: "seen" })
@@ -91,7 +102,7 @@ test("the program is handed only the allow-listed environment: an unrelated secr
 test("a project path with a comma is refused in one named line, not with Deno's NotCapable", { skip }, () => {
   const w = world("my,project")
   try {
-    const r = launch(w.host, ["check"])
+    const r = w.init()
     assert.equal(r.code, 2)
     assert.equal(r.err.split("\n").length, 1, r.err)
     assert.match(r.err, /^naima: the path .*my,project.* holds a comma, which Deno's permission flags cannot express/)
@@ -105,7 +116,7 @@ test("init --write-excludes may write the host's deno.json through the launcher;
   const w = world()
   try {
     writeFileSync(join(w.host, "deno.json"), "{}\n")
-    const printed = launch(w.host, ["init"])
+    const printed = w.init()
     assert.equal(printed.code, 0, printed.err)
     assert.match(printed.out, /exclude from deno\.json/)
     assert.equal(readFileSync(join(w.host, "deno.json"), "utf8"), "{}\n")

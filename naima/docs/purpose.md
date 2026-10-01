@@ -8,56 +8,49 @@ have it yet.
 
 ## What Naima is
 
-Naima is an enabling technology for people who are not technicians. It lets
-experts in their own field, who are not remotely programmers, get excellent
-results from AI agents. It works on anything that benefits from keeping
-every version: software, a scientific data analysis, a paper written with
-colleagues, a plan — or several of these at once in one project.
+**Born for software.** Naima is a silent software house: a team of AI
+[agents](guide/glossary.md#agent) that builds software for you the way a
+good engineering company would. It turns vibe coding, asking an AI to build
+software and hoping it worked, into an exact science. The same request goes
+through industry-grade practice: written requirements, tests, metrics,
+reviews, and [gates](guide/glossary.md#gate) before anything ships. And it
+is built for [formal methods](guide/glossary.md#formal-methods), tools that
+check a design mathematically: a property of the design is tracked and
+proven like a test, and the model checkers mCRL2 and VoxLogicA as the tools
+that prove it are [planned](planned.md#model-checkers-and-the-strength-of-evidence).
+You do not need to know any of this: the agents apply it for you, and record
+what they did, so that what gets built is robust, maintainable and solid.
+[One example, start to finish](#one-example-start-to-finish) shows the
+difference.
 
-Used through an AI [agent](guide/glossary.md#agent), Naima is a decision
-support system: a tool for running long-lived work and making informed
-decisions about it. It is for the [owner](guide/glossary.md#owner), the
-person whose work it is. You say in plain words what you want or what is
-wrong. Agents do the machine work: they write it down, plan it, carry it out,
-check it and keep the proof.
+**An enabling technology for people who are not coders.** Software
+engineering and formal methods are usually out of reach for anyone who is
+not a specialist. Naima puts them in the hands of experts in their own
+field, who are not remotely programmers: a domain expert who has never
+programmed can build serious software this way, and get excellent results
+from AI agents.
 
-**Why so much of this sounds like software.** Naima's methods come from
-software engineering, because building software is the most demanding case of
-long-lived, shared, versioned work, and it is where the strongest tools
-exist: tests, version control, mathematical checking of designs. The same
-discipline applies to any versioned work, whether a data analysis, a paper
-with colleagues or a plan: work written down, evidence for every claim,
-decisions recorded, gates before anything goes out. So most examples below
-are software, and today's built-in item types (bugs, todos, features, tests)
-are shaped for software; `naima types` lists them. Packs of item types for
-other kinds of work are [planned](planned.md#item-types-for-other-work).
+**A decision support system.** Used through an AI agent, Naima is a tool for
+running long-lived work and making informed decisions about it. It is for
+the [owner](guide/glossary.md#owner), the person whose work it is. You say in
+plain words what you want or what is wrong. Agents do the machine work: they
+write it down, plan it, carry it out, check it and keep the proof. When the
+agents can go ahead on their own, they do, and you hear nothing. When
+something is yours to decide, Naima helps you understand it in your own
+terms and your own words, not a technician's. `naima queue --human` lists
+what is waiting for you, each item with the reason it is yours
+([asking the human](agents/asking-the-human.md)).
 
-**A quiet way to manage decisions.** When the agents can go ahead on their
-own, they do, and you hear nothing. When something is yours to decide, Naima
-helps you understand it in your own terms and your own words, not a
-technician's. `naima queue --human` lists what is waiting for you, each item
-with the reason it is yours ([asking the human](agents/asking-the-human.md)).
+**The company behind the conversation.** The agents have separate jobs:
+engineering, testing, judging evidence, releasing, documenting, announcing,
+even the business side. The agents do the work; you only decide. The jobs
+are listed in [their own section](#the-company-and-its-roles) below.
 
-**The silent company that runs for you.** Behind the conversation there is a
-team of agents with separate jobs: engineering, testing, judging evidence,
-releasing, documenting, announcing, even the business side. The agents do the
-work; you only decide. The jobs are listed in
-[their own section](#the-company-and-its-roles) below.
-
-**A first example: turning vibe coding into science.** Vibe coding means
-asking an AI to build software and hoping it worked. With Naima, the same
-request goes through industry-grade practices and tools, without you needing
-to know them, so that what gets built is robust, maintainable and solid. A
-domain expert who has never programmed can build serious software this way.
-[One example, start to finish](#one-example-start-to-finish) shows both.
-
-**An enabler for software engineering and formal methods.** Software
-engineering is the discipline of building software that lasts: written
-requirements, tests, reviews, releases. [Formal
-methods](guide/glossary.md#formal-methods) are tools that check a design
-mathematically. Both are usually out of reach for anyone who is not a
-specialist. Naima makes agents use them by default, and records what they
-did.
+**Then, any project.** The same discipline manages any long-lived work kept
+in versions, such as a scientific data analysis or a paper written with
+colleagues, by swapping software's practices for that work's own forms of
+testing and measurement: [beyond software](#beyond-software-any-project)
+below.
 
 **What you need, and how it stays out of your way.** You need no knowledge
 of git, code, Deno or Node (the programs Naima runs on), or professional
@@ -79,13 +72,13 @@ How each of these runs, step by step, is on
 ### Reporting and issue management
 
 Whatever you notice reaches the project, and nothing said is lost. You can
-report in chat ("figure 3 looks wrong"), correct a report later, or, if you
+report in chat ("the save button does nothing"), correct a report later, or, if you
 are comfortable with files, write the [item](guide/glossary.md#item)
 yourself. The [flow](guide/glossary.md#flow) is always the same: report →
 file → triage → claim → work → prove → close.
 
 - **Filed first.** The agent writes the report down before anyone works on
-  it: `naima new bugs "Figure 3 uses last year's data"` creates a folder for
+  it: `naima new bugs "Save button does nothing on a phone"` creates a folder for
   it under `naima-tracker/naima-data/bugs/`.
 - **Routed by kind.** "This is broken" is a [bug](guide/glossary.md#bug),
   "this needs doing" is a [todo](guide/glossary.md#todo), "I'd like it to do
@@ -98,10 +91,10 @@ file → triage → claim → work → prove → close.
   confidence=measured`). How long it will take (`effort`) is set only after
   someone has looked at the work, never guessed.
 
-**Example (a paper).** A co-author says in chat "section 4 contradicts the
-abstract". The agent files a bug, writes which sentence contradicts which,
-links the earlier report of the same problem, and ranks it before the
-submission gate.
+**Example.** A user says in chat "the app loses my settings after an
+update". The agent files a bug, writes which settings are lost and on which
+update, links the earlier report of the same problem, and ranks it before
+the release gate.
 
 **Today:** filing, routing, fields, links, boards (`naima board bugs`),
 `naima summary`, rewriting a description (`naima describe`) and adding a
@@ -117,10 +110,9 @@ Above single fixes sit the things that keep long work coherent:
 is meant to be an item, so a requirement is tracked and proven like a test,
 not just implied by one.
 
-**Example (a data analysis).** Epic: "Replicate the 2024 study". Features:
-"load the new survey", "redo table 2". Requirement: "every number in table 2
-comes from the raw data by a script". Milestone: "draft results by 15
-November".
+**Example.** Epic: "Offline mode". Features: "save drafts without a
+connection", "sync when back online". Requirement: "no edit made offline is
+ever lost". Milestone: "beta by 15 November".
 
 **Today:** features (`requested`, `planned`, `shipped`, `withdrawn`) and
 todos are item types, and so are requirements, specifications and the
@@ -159,8 +151,8 @@ the last one stopped, from files, not from memory.
 - **Worktrees:** one per piece of work, on its own branch
   ([opening a worktree](agents/opening-a-worktree.md)).
 
-**Example.** Two agents work at once, one on the analysis script, one on the
-paper's figures. `naima claims` shows who holds what. Neither can overwrite
+**Example.** Two agents work at once, one on the sync code, one on the
+settings screen. `naima claims` shows who holds what. Neither can overwrite
 the other: they write in separate copies, and Naima never has two sessions
 edit the same file.
 
@@ -176,7 +168,7 @@ claim. A working method keeps going until only your items are left
 What only you can decide is asked once, with a recommendation, one question
 at a time, and recorded. A permission you gave stays given.
 
-**Example.** You decide "the paper targets the journal, not the conference".
+**Example.** You decide "the app works offline first; the web version can wait".
 That is recorded with its reason; no agent asks it again, and a later agent
 reads it before planning.
 
@@ -249,22 +241,23 @@ the mCRL2 example above is [planned](planned.md#model-checkers-and-the-strength-
 Numbers measured per commit (each saved change): speed, quality, test
 coverage, each a name and the command that measures it, printed with the
 number it is compared to, shown as a trend, and usable as a gate.
-**Example:** "the analysis must still run in under ten minutes": a budget of
-600 seconds, and a release waits if it gets slower.
+**Example:** "the tests must still run in under ten minutes": a budget of
+600 seconds, and a release waits if they get slower.
 
 **Today:** `naima metrics run --record`, budgets, floors and baselines, a
 ratchet that only lets a number improve, and `naima metrics trend`
-([metrics and budgets](guide/metrics-and-budgets.md)). Measuring on every
-commit without being asked is [planned](planned.md#metrics).
+([metrics and budgets](guide/metrics-and-budgets.md)). Code-quality metrics
+side by side with tests, and measuring on every commit without being asked,
+are [planned](planned.md#metrics).
 
 ### Structuring a project from the start (planned)
 
 An epic of its own for the first decisions that decide whether work can
 still grow in two years: which language or languages to use, splitting
 everything into small independent parts, keeping logic separate from data.
-**Example:** before the first script of an analysis, the agent proposes data
-in plain files, one script per table, no number typed by hand into the
-paper; you decide, and the choices become rules
+**Example:** before the first line of an app, the agent proposes one
+language, small parts that can each be tested alone, and settings kept as
+data rather than in the code; you decide, and the choices become rules
 ([planned](planned.md#structuring-a-project-from-the-start)).
 
 ### Design, skills and a dashboard (planned)
@@ -356,6 +349,32 @@ Nothing is written down or run. The edit broke PDF export and no test
 noticed. The next session, with no memory, brings the bug back. A parallel
 session overwrites the same file. Weeks later you describe the bug again
 from scratch, and nobody can say what happened.
+
+## Beyond software: any project
+
+Naima was born for software, and today's built-in item types (bugs, todos,
+features, tests) are shaped for it; `naima types` lists them. The same
+discipline, work written down, evidence for every claim, decisions recorded,
+gates before anything goes out, fits any long-lived work kept in versions,
+or several kinds in one project. What changes is the practice that produces
+the evidence: software's tests and formal verification are swapped for the
+work's own forms of testing and measurement, and Naima can be evolved, or
+co-evolved with the project, to hold them.
+
+- **A scientific data analysis**, checked by reproducible runs. "Figure 3
+  uses last year's data" is a bug; "every number in table 2 comes from the
+  raw data by a script" is a requirement; "the analysis must still run in
+  under ten minutes" is a metric.
+- **A paper written with colleagues**, checked by reviews. A co-author's
+  "section 4 contradicts the abstract" is a bug, ranked before the
+  submission gate; "the paper targets the journal, not the conference" is a
+  decision, asked once.
+- **A plan**, checked by the decisions and gates it has to pass.
+
+**Today:** the built-in types fit most of this already, and a project can
+add its own types, checks and gates with a [plugin](guide/add-a-plugin.md)
+([extending Naima](guide/extending-naima.md)). Packs of item types for other
+kinds of work are [planned](planned.md#item-types-for-other-work).
 
 ## What exists today
 

@@ -16,7 +16,7 @@ report → file → triage → claim → work → prove → close
 | Step | Who | What happens | Command |
 |---|---|---|---|
 | **Report** | you, or anyone | you say what you noticed, in chat, in your own words; or you write the item yourself | — |
-| **File** | an agent | the report becomes an [item](glossary.md#item) at once, before anyone works on it | `naima new bugs "Figure 3 uses last year's data"` |
+| **File** | an agent | the report becomes an [item](glossary.md#item) at once, before anyone works on it | `naima new bugs "Save button does nothing on a phone"` |
 | **Triage** | an agent | it rewrites the report as a clear description in its own words, checks for duplicates and links them, and ranks it | `naima triage set <item> impact=high priority=now confidence=reported` |
 | **Claim** | the agent that takes the work | it opens its own [worktree](glossary.md#worktree) and records that it holds the item, so nobody else starts it unknowingly | `naima claim <item> --note "why"` |
 | **Work** | that agent | it does the work — code, an analysis script, a paragraph — in its own copy, in small [commits](glossary.md#commit) | git, handled by the agent |

@@ -1,8 +1,8 @@
 # Naima
 
-Naima turns your AI agents into a small team that works quietly for you. You say what you want. Agents do the work — code, analyses, drafts — check it, prove it and document it, and every claim comes with its evidence: nothing counts as done until it is shown to be. You only decide.
+Naima is a silent software house of AI agents: it turns vibe coding into an exact science. You say what you want. Agents build it with industry-grade practice — written requirements, tests, metrics, reviews, gates before anything ships — and with formal methods, properties of the design proven by tools, all applied for you without your needing to know them. Every claim comes with its evidence: nothing counts as done until it is shown to be. You only decide.
 
-Software, a data analysis, a paper written with colleagues — or all of them in one project.
+Born for software, it runs any other project too, with that work's own checks in place of tests: a data analysis checked by reproducible runs, a paper written with colleagues checked by reviews.
 Naima lives in a folder of your project and manages it with git, so you never have to.
 
 **You don't need to know git, code or project management. You need an AI agent — Naima does the rest.**
@@ -26,9 +26,10 @@ If git is not installed, install it (macOS: `xcode-select --install`, or `brew i
 (`git rev-parse --show-toplevel`; `git init` makes one), and do these steps in
 order.
 
-1. Run the installer line above for this system. It clones Naima into
-   `naima-tracker/naima/` (ignored by git), writes `naima-tracker/` and nothing
-   else, and checks it. Outside a git repository it refuses.
+1. Run the installer line above for this system. It copies Naima's `naima/`
+   folder into `naima-tracker/naima/` (ignored by git), writes
+   `naima-tracker/` and nothing else, and checks it. Outside a git repository
+   it refuses.
 2. Check it: `deno run -A naima-tracker/naima/naima.ts check` must end with
    `all invariants hold`.
 3. Commit it: `git add naima-tracker && git commit -m "Track this project with Naima"`.
@@ -46,8 +47,9 @@ order.
 By hand, without the installer:
 
 ```sh
-git clone --branch dist https://github.com/vincenzoml/naima.git naima-tracker/naima
-deno run -A naima-tracker/naima/naima.ts init
+git clone --depth 1 https://github.com/vincenzoml/naima.git /tmp/naima
+deno run -A /tmp/naima/naima/naima.ts init
+rm -rf /tmp/naima
 deno run -A naima-tracker/naima/naima.ts check
 ```
 
@@ -55,7 +57,7 @@ deno run -A naima-tracker/naima/naima.ts check
 
 **[The documentation map](naima/docs/README.md)** — where to start, by who you are:
 
-- **[purpose](naima/docs/purpose.md)**: why Naima exists and whom it serves;
+- **[purpose](naima/docs/purpose.md)**: why Naima exists and whom it serves: born for software, then any project;
 - **[the guide](naima/docs/guide/README.md)**, for people: a
   [tutorial](naima/docs/guide/tutorial.md), a page per everyday task,
   [installing and updating](naima/docs/guide/install.md), and
