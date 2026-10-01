@@ -21,3 +21,9 @@ command writes through `context.ts` `out`.
 
 Consequence: a person or agent reading a long listing through `head` sees a
 stack trace and may take it for a real failure.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u8-papercuts
+
+Fixed: naima/src/core/context.ts's consoleIO now catches a broken-reader write wherever it surfaces — a synchronous throw, or an async "error" event on process.stdout/stderr — for the codes EPIPE, ENOTCONN (seen from Bun when its stdout is a socket) and ECONNRESET, and exits 0 quietly instead of an uncaught stack trace. Regression test: test/core/epipe.test.ts, a real subprocess per runtime (Deno, Node, Bun) whose reader closes after the first line; red on the old code under Node and Bun, green now on all three.

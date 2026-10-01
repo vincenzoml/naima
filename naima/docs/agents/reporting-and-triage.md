@@ -96,7 +96,11 @@ naima note <item> "Reproduced on 16-bit PNGs only; 8-bit keeps alpha." --by "tri
 - `naima describe` replaces the description and keeps the title line and the
   Notes section. Rewrite a report an agent filed; never one a person wrote,
   which the triage adds to with a note instead. The title is a field:
-  `naima set <item> title="…"`.
+  `naima set <item> title="…"`, which rewrites the page's title line too, in
+  the same write.
+- An item filed under the wrong type (a bug that is really a request) moves
+  with `naima move <item> <type>`, keeping its id, links and notes; it refuses
+  a status or a field the new type does not declare, unless `--force`.
 - `naima note` appends a dated entry, with who wrote it (`--by`, else git's
   `user.name`) and the branch, to the Notes section. Notes are append-only:
   a write that changes an earlier one is refused. Record there what you

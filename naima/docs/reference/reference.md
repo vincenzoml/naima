@@ -38,6 +38,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`describe`](#naima-describe) | core | replace an item's description, keeping its title line and its Notes section |
 | [`link`](#naima-link) | core | link two items; only this direction is stored, the inverse is derived |
 | [`unlink`](#naima-unlink) | core | remove a stored link |
+| [`move`](#naima-move) | core | move an item to another type, keeping its id and links; refuses a status or field the new type does not declare |
 | [`check`](#naima-check) | core | run every invariant; exit 1 on any problem |
 | [`board`](#naima-board) | core | print a type's board, grouped by section, most urgent first |
 | [`view`](#naima-view) | core | print a plugin view — as text, its data as JSON, or markdown; without a name, list them |
@@ -321,6 +322,25 @@ Examples:
 
 ```sh
 naima unlink export-keeps verifies export-drops
+```
+
+### naima move
+
+Move an item to another type, keeping its id and links; refuses a status or field the new type does not declare.
+
+```sh
+naima move <item> <type> [--force]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--force` |  | move it even with a status or a field the new type does not declare, kept as they are |
+
+Examples:
+
+```sh
+naima move export-drops features
+naima move export-drops features --force
 ```
 
 ### naima check

@@ -121,7 +121,12 @@ function sourceRepo(base: string): string {
 
 const treeFiles = (repo: string, rev: string): string[] => git(repo, "ls-tree", "-r", "--name-only", rev).split("\n").filter(Boolean).sort()
 
-test("the dist commit: a copy of naima/ in a main commit, traced by its trailer, rebuilt identically, and only when the runtime moved", () => {
+// These spawn git and a Deno subprocess several times over: slow enough, under load, to graze
+// Bun's 5 second per-test default. An explicit timeout is the fix (bugs/bun-s-5-second-default-test-timeout);
+// Node's test runner honors the same option and Deno's test shim ignores what it does not need.
+const SLOW = { timeout: 30_000 }
+
+test("the dist commit: a copy of naima/ in a main commit, traced by its trailer, rebuilt identically, and only when the runtime moved", SLOW, () => {
   const base = mkdtempSync(join(tmpdir(), "naima-distbuild-"))
   try {
     const repo = sourceRepo(base)
@@ -195,6 +200,7 @@ function world() {
 
 test("a project clones the dist: its program holds exactly naima/, and init, check, new, guide, a new worktree and update all work on it", {
   skip: !hasDeno && "deno is not on PATH",
+  ...SLOW,
 }, () => {
   const w = world()
   try {
@@ -242,31 +248,36 @@ test("a project clones the dist: its program holds exactly naima/, and init, che
   }
 })
 
-test("a project locked to a commit of main keeps working, and naima update moves it onto the dist", { skip: !hasDeno && "deno is not on PATH" }, () => {
-  const w = world()
-  try {
-    git(w.host, "clone", "-q", "--branch", "main", "--", w.source, "naima-tracker/naima") // the install before the dist
-    // A commit of main holds the runtime in naima/: its launcher is there until the update moves the program onto the dist.
-    const naima = (cwd: string, ...args: string[]) => launch(join(runtimeOf(programOf(w.host)) ?? programOf(w.host), "naima.ts"), cwd, ...args)
-    assert.ok(existsSync(join(programOf(w.host), "naima", "naima.ts")), "a main commit's launcher is naima/naima.ts")
-    assert.equal(naima(w.host, "init").code, 0)
-    const main = git(w.source, "rev-parse", "main")
-    assert.equal(lockOf(w.host).commit, main)
-    assert.equal(naima(w.host, "check").code, 0, "a lock on main still aligns and runs")
-    const up = naima(w.host, "update")
-    assert.equal(up.code, 0, up.err)
-    const dist = git(w.source, "rev-parse", DIST_BRANCH)
-    assert.equal(lockOf(w.host).commit, dist)
-    assert.equal(sourceCommit(w.source, dist), main, "the same code, now without what does not run")
-    assert.equal(onDisk(programOf(w.host)).filter((f) => f.endsWith(".test.ts")).length, 0)
-    assert.deepEqual(onDisk(programOf(w.host)), shipped, "after the update, the program is naima/ exactly")
-  } finally {
-    w.cleanup()
-  }
-})
+test(
+  "a project locked to a commit of main keeps working, and naima update moves it onto the dist",
+  { skip: !hasDeno && "deno is not on PATH", ...SLOW },
+  () => {
+    const w = world()
+    try {
+      git(w.host, "clone", "-q", "--branch", "main", "--", w.source, "naima-tracker/naima") // the install before the dist
+      // A commit of main holds the runtime in naima/: its launcher is there until the update moves the program onto the dist.
+      const naima = (cwd: string, ...args: string[]) => launch(join(runtimeOf(programOf(w.host)) ?? programOf(w.host), "naima.ts"), cwd, ...args)
+      assert.ok(existsSync(join(programOf(w.host), "naima", "naima.ts")), "a main commit's launcher is naima/naima.ts")
+      assert.equal(naima(w.host, "init").code, 0)
+      const main = git(w.source, "rev-parse", "main")
+      assert.equal(lockOf(w.host).commit, main)
+      assert.equal(naima(w.host, "check").code, 0, "a lock on main still aligns and runs")
+      const up = naima(w.host, "update")
+      assert.equal(up.code, 0, up.err)
+      const dist = git(w.source, "rev-parse", DIST_BRANCH)
+      assert.equal(lockOf(w.host).commit, dist)
+      assert.equal(sourceCommit(w.source, dist), main, "the same code, now without what does not run")
+      assert.equal(onDisk(programOf(w.host)).filter((f) => f.endsWith(".test.ts")).length, 0)
+      assert.deepEqual(onDisk(programOf(w.host)), shipped, "after the update, the program is naima/ exactly")
+    } finally {
+      w.cleanup()
+    }
+  },
+)
 
 test("a program is cloned from this disk even when the dist commit is only a remote-tracking ref there, as in Naima's own repository", {
   skip: !hasDeno && "deno is not on PATH",
+  ...SLOW,
 }, () => {
   const w = world()
   try {

@@ -1,0 +1,6 @@
+# bugs/bun-s-5-second-default-test-timeout: Bun's own default is 5 seconds per test, which several
+# tests graze under load — they spawn git, a Deno subprocess or install.sh, more than once each.
+# A project-wide default, instead of chasing every slow test one at a time, is the robust fix: deno task test
+# and node --test need no equivalent (neither has a default this low). Dev-only: naima/ ships none of this.
+[test]
+timeout = 30000

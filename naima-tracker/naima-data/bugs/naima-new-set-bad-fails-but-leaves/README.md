@@ -26,3 +26,9 @@ Repro: `r1.ts`, attached in `attachments/`.
 ## Done
 
 regression test: `naima new bugs "X" --set badfield=1` leaves no item directory behind and exits non-zero, named after core-repro/r1.ts section 2
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u8-papercuts
+
+Already fixed and proven: src/core/base.ts validates every --set assignment before createItem runs (withFields called first), confirmed by the regression test test/core/core.test.ts "new validates every --set before it writes anything", linked verifies and status=passed on tests/new-validates-every-set-before-writes-anything. Nothing left for this branch; releasing the claim for the evidence owner to close.

@@ -124,42 +124,56 @@ function localSource(base: string): string {
 const walk = (dir: string): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.name === ".git" ? [] : e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]))
 
-test("install.sh installs Naima in a git repository, says so when run again, and refuses outside one", { skip: process.platform === "win32" }, () => {
-  const base = mkdtempSync(join(tmpdir(), "naima-site-"))
-  try {
-    const source = localSource(base)
-    const run = (cwd: string) =>
-      spawnSync("sh", [join(SITE, "install.sh")], {
-        cwd,
-        encoding: "utf8",
-        env: { ...process.env, NAIMA_SOURCE: source, NAIMA_NO_DENO_INSTALL: "1", GIT_CEILING_DIRECTORIES: base, GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t" },
-      })
-    const project = join(base, "project")
-    mkdirSync(project)
-    git(project, "init", "-q", "-b", "main")
+// bugs/bun-s-5-second-default-test-timeout: three spawns of install.sh, each a clone and a full
+// `naima check`, graze Bun's 5 second per-test default under load. Node's test runner honors the
+// same option; Deno's test shim ignores what it does not need.
+test(
+  "install.sh installs Naima in a git repository, says so when run again, and refuses outside one",
+  { skip: process.platform === "win32", timeout: 30_000 },
+  () => {
+    const base = mkdtempSync(join(tmpdir(), "naima-site-"))
+    try {
+      const source = localSource(base)
+      const run = (cwd: string) =>
+        spawnSync("sh", [join(SITE, "install.sh")], {
+          cwd,
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            NAIMA_SOURCE: source,
+            NAIMA_NO_DENO_INSTALL: "1",
+            GIT_CEILING_DIRECTORIES: base,
+            GIT_AUTHOR_NAME: "t",
+            GIT_AUTHOR_EMAIL: "t@t",
+          },
+        })
+      const project = join(base, "project")
+      mkdirSync(project)
+      git(project, "init", "-q", "-b", "main")
 
-    const fresh = run(project)
-    assert.equal(fresh.status, 0, fresh.stdout + fresh.stderr)
-    assert.match(fresh.stdout, /all invariants hold/)
-    assert.ok(existsSync(join(project, "naima-tracker", "naima-data", "naima.json")))
-    const program = walk(join(project, "naima-tracker", "naima"))
-    assert.ok(program.some((f) => f.endsWith("naima.ts")))
-    assert.deepEqual(program.filter((f) => f.endsWith(".test.ts")), [], "no test reaches the project")
-    assert.deepEqual(program.filter((f) => f.includes(join("naima", "naima-tracker"))), [], "none of Naima's own items reaches the project")
-    assert.equal(git(join(project, "naima-tracker", "naima"), "rev-parse", "--abbrev-ref", "HEAD"), "dist")
+      const fresh = run(project)
+      assert.equal(fresh.status, 0, fresh.stdout + fresh.stderr)
+      assert.match(fresh.stdout, /all invariants hold/)
+      assert.ok(existsSync(join(project, "naima-tracker", "naima-data", "naima.json")))
+      const program = walk(join(project, "naima-tracker", "naima"))
+      assert.ok(program.some((f) => f.endsWith("naima.ts")))
+      assert.deepEqual(program.filter((f) => f.endsWith(".test.ts")), [], "no test reaches the project")
+      assert.deepEqual(program.filter((f) => f.includes(join("naima", "naima-tracker"))), [], "none of Naima's own items reaches the project")
+      assert.equal(git(join(project, "naima-tracker", "naima"), "rev-parse", "--abbrev-ref", "HEAD"), "dist")
 
-    const again = run(project)
-    assert.equal(again.status, 0, again.stdout + again.stderr)
-    assert.match(again.stdout, /already installed/)
-    assert.match(again.stdout, /all invariants hold/)
+      const again = run(project)
+      assert.equal(again.status, 0, again.stdout + again.stderr)
+      assert.match(again.stdout, /already installed/)
+      assert.match(again.stdout, /all invariants hold/)
 
-    const outside = join(base, "outside")
-    mkdirSync(outside)
-    const refused = run(outside)
-    assert.equal(refused.status, 1)
-    assert.match(refused.stderr, /not a git repository/)
-    assert.ok(!existsSync(join(outside, "naima-tracker")))
-  } finally {
-    removeTemp(base)
-  }
-})
+      const outside = join(base, "outside")
+      mkdirSync(outside)
+      const refused = run(outside)
+      assert.equal(refused.status, 1)
+      assert.match(refused.stderr, /not a git repository/)
+      assert.ok(!existsSync(join(outside, "naima-tracker")))
+    } finally {
+      removeTemp(base)
+    }
+  },
+)
