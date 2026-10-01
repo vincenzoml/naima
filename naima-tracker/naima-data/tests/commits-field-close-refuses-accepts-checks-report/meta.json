@@ -1,0 +1,13 @@
+{
+  "id": "1dbf0f8b-7433-4704-873e-6ebf6e18e987",
+  "title": "commits field: close refuses/accepts, checks report bad or missing commits",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "aac5a3ee-d323-4919-a394-1b50fdc98746"
+    }
+  ]
+}
