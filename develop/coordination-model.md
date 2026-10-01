@@ -47,9 +47,7 @@ content of a claim file to the set of items it holds.
 
 The run needs the mCRL2 toolset (`mcrl22lps`, `lps2pbes`, `pbessolve`,
 `lps2lts`) on `PATH`, or in `plugins.verifier-mcrl2.options.bin`; the plugin is
-opted in in `naima-tracker/naima-data/naima.json`. Installing the toolset is a
-download the owner approves, so until it is installed both properties stay
-open, and their run is the owner's action:
+opted in in `naima-tracker/naima-data/naima.json`. The run:
 
 ```sh
 deno task naima verify no-claim-ever-lost-mcrl2-model-coordination released-claim-never-reappears-mcrl2-model-coordination
@@ -58,11 +56,17 @@ deno task naima verify no-claim-ever-lost-mcrl2-model-coordination released-clai
 Each run is attached to its item; a change to the model or a formula makes a
 holding verdict stale, and `naima check` says so.
 
+Measured on 2026-10-01 with mCRL2 202607.0: both properties hold; the two
+runs take 135 s of wall-clock together.
+
 ## The negative experiment
 
 Set `ff_only` or `own_files_only` to `false` in the model's equations and run
 the same pipeline. Without `ff_only`, a branch that has not taken the trunk in
 overwrites the trunk's copy of a retired branch's claim: both properties fail.
 Without `own_files_only`, a branch empties another's claim file and merges it:
-"no claim is ever lost" fails. `pbessolve`'s evidence is the counterexample.
+"no claim is ever lost" fails. `pbessolve`'s evidence is the counterexample. Measured on 2026-10-01 with mCRL2 202607.0: without `ff_only`, both
+formulas are false; without `own_files_only`, "no claim is ever lost" is false
+and "a released claim never reappears" still holds. The traces are attached to
+the todo below.
 This is tracked by `todos/mcrl2-model-coordination-protocol-complete-checked-negative`.

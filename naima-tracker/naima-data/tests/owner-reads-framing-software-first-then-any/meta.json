@@ -15,7 +15,7 @@
       "id": "b276af50-8f52-42d4-abad-fc765c8ddc6b"
     }
   ],
-  "gate": "first-public",
   "effort": "S",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "gate": "release-1.1"
 }

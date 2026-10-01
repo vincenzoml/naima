@@ -1,0 +1,22 @@
+{
+  "verifier": "mcrl2",
+  "model": "develop/models/coordination/claims.mcrl2",
+  "modelSha256": "3e1f7bdbd5dfe53cb34a8ce1ba3e24657febad1606e274a294b27d028b83d6ec",
+  "property": "develop/models/coordination/released-claim-never-reappears.mcf",
+  "optionsSha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "inputs": [
+    {
+      "path": "develop/models/coordination/claims.mcrl2",
+      "sha256": "3e1f7bdbd5dfe53cb34a8ce1ba3e24657febad1606e274a294b27d028b83d6ec"
+    },
+    {
+      "path": "develop/models/coordination/released-claim-never-reappears.mcf",
+      "sha256": "9a85494e82d38fed810cb875ef02ece57ccf3226e73b069f3350b141a592bf28"
+    }
+  ],
+  "toolVersion": "mcrl22lps mCRL2 toolset 202607.0 (Release)",
+  "inputsSha256": "3c8778adc74abef306f8af8891b5c8c90d0c3ef31361f675625251a8f2e8dc2c",
+  "verdict": "error",
+  "output": "Requires write access to \"/var/folders/fy/30_kjq150gj50k_4jsnyzzcm0000gn/T/naima-mcrl2-QY3Afg\", run again with the --allow-write flag",
+  "at": "2026-10-01T20:17:03.998Z"
+}

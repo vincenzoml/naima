@@ -22,5 +22,5 @@
   "confidence": "diagnosed",
   "effort": "M",
   "triagedOn": "2026-10-01",
-  "gate": "first-public"
+  "gate": "release-1.1"
 }

@@ -1,7 +1,7 @@
 {
   "id": "4b08ada1-730a-49a6-9bab-9fb401d2ab1e",
   "title": "A released claim never reappears, in the mCRL2 model of the coordination protocol",
-  "status": "open",
+  "status": "holds",
   "created": "2026-10-01",
   "verifier": "mcrl2",
   "model": "develop/models/coordination/claims.mcrl2",
@@ -16,5 +16,6 @@
       "rel": "verifies",
       "id": "92552bf4-de93-402e-933d-233e41f21228"
     }
-  ]
+  ],
+  "lastRun": "run-2026-10-01T20-36-44-688Z.json"
 }

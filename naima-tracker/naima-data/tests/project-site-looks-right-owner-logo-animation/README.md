@@ -30,3 +30,7 @@ stalls for lack of frames; the page ends on the logo anyway after 6 s.
 ### 2026-10-01 — triage agent, on claude/effort-triage
 
 Read the item: a single owner visual-judgement gesture on the already-built site, same shape as the other site look-right test.
+
+### 2026-10-01 — owner, on main
+
+The owner looked at the published site on 2026-10-01 and judged it right ("perfect").

@@ -18,8 +18,8 @@ through industry-grade practice: written requirements, tests, metrics,
 reviews, and [gates](guide/glossary.md#gate) before anything ships. And it
 is built for [formal methods](guide/glossary.md#formal-methods), tools that
 check a design mathematically: a property of the design is tracked and
-proven like a test, and the model checkers mCRL2 and VoxLogicA as the tools
-that prove it are [planned](planned.md#model-checkers-and-the-strength-of-evidence).
+proven like a test, and state-of-the-art model checkers (such as mCRL2) as
+the tools that prove it are [planned](planned.md#model-checkers-and-the-strength-of-evidence).
 You do not need to know any of this: the agents apply it for you, and record
 what they did, so that what gets built is robust, maintainable and solid.
 [One example, start to finish](#one-example-start-to-finish) shows the

@@ -7,9 +7,8 @@ its formula, and `naima verify` has run it and it holds.
 - [x] "no claim is ever lost": `properties/no-claim-ever-lost-mcrl2-model-coordination`
 - [x] "a released claim never reappears": `properties/released-claim-never-reappears-mcrl2-model-coordination`
 - [x] the `verifier-mcrl2` plugin opted in, in `naima-tracker/naima-data/naima.json`
-- [ ] both verified, and holding — needs mCRL2 installed, owner action: the
-  toolset is a download the owner approves; with it on PATH, run
-  `naima verify no-claim-ever-lost-mcrl2-model-coordination released-claim-never-reappears-mcrl2-model-coordination`
+- [x] both verified, and holding: `naima verify no-claim-ever-lost-mcrl2-model-coordination released-claim-never-reappears-mcrl2-model-coordination`
+  with mCRL2 202607.0, 2026-10-01
 
 ## Notes
 
@@ -20,3 +19,7 @@ Read naima-paper/sections/protocol.tex and naima/src/plugins/verifier-mcrl2/inde
 ### 2026-10-01 — Vincenzo Ciancia, on claude/big-mcrl2-model
 
 Model and properties written; running them needs mCRL2 installed - owner action: installing the toolset is a download the owner approves, so the run is the owner's gesture (runBy human, humanBecause decision).
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/mcrl2-coordination-check
+
+Both properties verified with mCRL2 202607.0 through naima verify: holds and holds; run records attached to each property.
