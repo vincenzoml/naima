@@ -1,0 +1,17 @@
+{
+  "id": "3d3e13d4-c25f-4c37-91fe-88a69e15f526",
+  "title": "list, unlink, view, types and help each do what their usage says (src/cli.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "03c62802-51ac-4943-8a42-b29fb5223e6b"
+    }
+  ]
+}

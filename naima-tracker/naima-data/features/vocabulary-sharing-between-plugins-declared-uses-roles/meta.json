@@ -1,0 +1,21 @@
+{
+  "id": "b619848c-cceb-44b9-9d9c-7bcbda589ba8",
+  "title": "Vocabulary sharing between plugins: declared `uses`, with roles as the target",
+  "status": "requested",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "diagnosed",
+  "links": [
+    {
+      "rel": "blocked-by",
+      "id": "54d44ffe-efdd-4ae7-ab4c-038ab42e393d"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "65165bd9-2eab-4da2-989e-5b306f17ec96"
+    }
+  ],
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

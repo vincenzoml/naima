@@ -1,0 +1,22 @@
+{
+  "id": "8bede172-5173-403a-882b-12ee242e2605",
+  "title": "Just add naima: init, new, check in a repository outside Naima leave only naima/",
+  "status": "withdrawn",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "area": "release",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "ca825fa4-f0b5-46d7-b422-84fc3fb6ad3e"
+    },
+    {
+      "rel": "relates-to",
+      "id": "e2b1f0a8-e948-4269-b28c-95020913ec32"
+    }
+  ],
+  "impact": "high",
+  "priority": "next",
+  "confidence": "measured",
+  "triagedOn": "2026-09-30"
+}

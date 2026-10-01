@@ -1,0 +1,3 @@
+✔ skills/naima/SKILL.md loads, and its links resolve (2.187458ms)
+ℹ pass 1
+ℹ fail 0

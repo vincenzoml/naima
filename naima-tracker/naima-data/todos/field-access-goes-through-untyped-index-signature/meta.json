@@ -1,0 +1,12 @@
+{
+  "id": "7a408ccd-645e-4fd2-8eb4-697ee0ff4b56",
+  "title": "Field access goes through an untyped index signature",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30"
+}

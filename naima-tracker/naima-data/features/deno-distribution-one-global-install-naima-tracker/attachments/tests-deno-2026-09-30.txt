@@ -1,0 +1,75 @@
+# deno task test at 5755de4ed2e6, deno 2.9.7 (stable, release, aarch64-apple-darwin)
+running 3 tests from ./src/arch.test.ts
+the core imports nothing outside itself but node built-ins ... ok (2ms)
+a plugin imports only the core's public API and its own files ... ok (1ms)
+the scanner sees an import it must refuse ... ok (244µs)
+running 8 tests from ./src/cli.test.ts
+init writes naima-tracker/ and nothing else, locked to the Naima that runs it; again, it changes nothing ... ok (123ms)
+the tracker's README and Naima's own share one sentence ... ok (146µs)
+init refuses outside a git repository ... ok (9ms)
+every first-party plugin is loaded with nothing but the lock; new, link, show, board, from a subdirectory ... ok (239ms)
+--data names a data directory that has moved ... ok (83ms)
+newer data is refused in one line, and nothing is written ... ok (85ms)
+a third-party plugin runs only from inside the program; a first-party name is refused ... ok (102ms)
+update and carry move the program, so they run only through the launcher; guide points at files that exist ... ok (107ms)
+running 8 tests from ./src/core/core.test.ts
+slugs are readable, bounded and unique ... ok (422µs)
+the registry refuses a name declared twice ... ok (376µs)
+naima.json: the format, the lock, gates and third-party plugins; nothing to switch on ... ok (400µs)
+the data directory: --data or NAIMA_DATA, else the first naima-tracker/naima-data/ walking up ... ok (1ms)
+an item is a directory with a uuid, and links are resolved in both directions ... ok (2ms)
+check reports every broken invariant instead of crashing ... ok (2ms)
+set validates against the field's declaration ... ok (1ms)
+board and summary are derived from the items ... ok (6ms)
+running 4 tests from ./src/core/format.test.ts
+this Naima reads format 1 + the number of migrations it carries ... ok (306µs)
+migration is forward only and deterministic: the same input gives byte-identical output, and again changes nothing ... ok (3ms)
+newer data is refused and left as it was; a migration that throws writes nothing ... ok (1ms)
+check fails on a tracker that mixes formats ... ok (2ms)
+running 1 test from ./src/core/git.test.ts
+records are recombined from every unmerged branch, with the working tree winning ... ok (295ms)
+running 7 tests from ./src/distribution.test.ts
+bootstrap, init, new, check: the only addition is naima-tracker/, and git sees naima-data/, README.md and .gitignore but not naima/ ... ok (597ms)
+a second clone of the host aligns naima-tracker/naima/ to the recorded source and commit; a new worktree clones it from the local one ... ok (1s)
+naima update pulls, migrates and records the new commit; a normal run never pulls ... ok (1s)
+alignment refuses rather than destroy or guess: local changes, an unreachable commit, no network on the first run ... ok (625ms)
+a fork source is honoured: the whole project runs that fork at that commit ... ok (648ms)
+under the launcher's permissions Naima writes only under naima-tracker/ and runs only git: Deno refuses the rest ... ok (841ms)
+naima carry round-trips clone → vendored → submodule → clone, the checks passing and the same commit running in each mode ... ok (1s)
+running 2 tests from ./src/plugins/beta-markers/beta-markers.test.ts
+a marker must name an open item and dies with its proof ... ok (4ms)
+with nothing configured, every source file of the project is scanned, and nothing git ignores ... ok (85ms)
+running 3 tests from ./src/plugins/coordination/coordination.test.ts
+a claim is one file on the claimer's branch, visible from every other ... ok (695ms)
+prune finds claims whose branch is gone ... ok (341ms)
+session notes are one file each, newest first by instant ... ok (233ms)
+running 8 tests from ./src/plugins/docs/docs.test.ts
+a contribution without its documentation fails check, named ... ok (13ms)
+the core and the docs plugin document themselves ... ok (756µs)
+the reference is generated, written, and checked for drift ... ok (35ms)
+every internal link of the generated reference resolves ... ok (646µs)
+a shipped feature names documentation that exists ... ok (31ms)
+relative links in the configured markdown resolve ... ok (1ms)
+anchors follow GitHub's rule, duplicates numbered ... ok (97µs)
+with nothing configured, every markdown file of the project is link-checked, and nothing git ignores ... ok (84ms)
+running 3 tests from ./src/plugins/gates/gates.test.ts
+a code gate waits for code, a proof gate for everything ... ok (5ms)
+an unknown gate is refused, and a proof of a gated item must be gated ... ok (2ms)
+gates are configured, never hard-coded ... ok (430µs)
+running 4 tests from ./src/plugins/trackers/trackers.test.ts
+fixed, resolved, closed are three states, and closing needs the proof ... ok (5ms)
+an archived item without proof fails the check; archives cannot be opened ... ok (1ms)
+bugs counts unfixed apart from fixed-but-unproven; partial must say what is left ... ok (1ms)
+an item handed to a person says why, or check fails ... ok (1ms)
+running 3 tests from ./src/plugins/triage/triage.test.ts
+set stamps a human decision; derive never touches effort or a decided item ... ok (4ms)
+urgency: impact before priority, effort breaks ties, done sinks ... ok (2ms)
+confidence is read off the page's own words ... ok (63µs)
+running 2 tests from ./src/plugins/verifier/verifier.test.ts
+a run is attached as evidence, with the counterexample and the model's hash ... ok (4ms)
+adapters come from any plugin; a missing verifier or model is a problem ... ok (2ms)
+running 1 test from ./src/skill.test.ts
+skills/naima/SKILL.md loads, and its links resolve ... ok (2ms)
+
+ok | 57 passed | 0 failed (10s)
+

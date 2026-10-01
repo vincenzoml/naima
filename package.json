@@ -1,0 +1,10 @@
+{
+  "name": "naima",
+  "description": "A file-based project tracker for software built by people and AI agents together.",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "node --test \"src/**/*.test.ts\""
+  }
+}

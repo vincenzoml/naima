@@ -1,0 +1,12 @@
+{
+  "id": "b68ca412-6430-4e42-9128-3a199b0c99a6",
+  "title": "Grouping items by array spread is quadratic",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

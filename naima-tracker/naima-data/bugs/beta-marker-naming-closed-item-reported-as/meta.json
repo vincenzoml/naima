@@ -1,0 +1,12 @@
+{
+  "id": "86e9e40c-359e-4fb3-a97e-6af2ed8635c9",
+  "title": "A beta marker naming a closed item is reported as \"no such item\"",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

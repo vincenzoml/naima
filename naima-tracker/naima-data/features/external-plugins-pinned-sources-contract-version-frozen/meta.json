@@ -1,0 +1,21 @@
+{
+  "id": "7bb274b4-7d8a-485d-80c9-c64cd122e83c",
+  "title": "External plugins: pinned sources, a CONTRACT version, and a frozen registry",
+  "status": "requested",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "diagnosed",
+  "links": [
+    {
+      "rel": "blocked-by",
+      "id": "2cc1b23e-cb49-4f2f-9b73-292a67fb3009"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "e9d84b14-b398-490e-9dcb-87d7252c9302"
+    }
+  ],
+  "effort": "L",
+  "triagedOn": "2026-09-30"
+}

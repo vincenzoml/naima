@@ -1,0 +1,17 @@
+{
+  "id": "d3537604-9172-4850-9257-fa7b185f9c9c",
+  "title": "an adapter outside the contract gives a property in error with a readable output, never a status-less one (src/plugins/verifier/verifier.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "c851d69d-7039-419a-aab6-2d7fee8c6111"
+    }
+  ]
+}

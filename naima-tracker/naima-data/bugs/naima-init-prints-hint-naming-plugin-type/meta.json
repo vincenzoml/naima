@@ -1,0 +1,12 @@
+{
+  "id": "32f4928c-2fb6-4ec0-a3f1-d8b2a0674a69",
+  "title": "`naima init` prints a hint naming a plugin type instead of a real command",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "diagnosed",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

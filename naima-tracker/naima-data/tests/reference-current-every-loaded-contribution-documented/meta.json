@@ -1,0 +1,24 @@
+{
+  "id": "12da5004-85d2-4d93-a2fa-4949d4051c89",
+  "title": "The reference is current and every loaded contribution is documented",
+  "status": "open",
+  "created": "2026-09-29",
+  "runBy": "agent",
+  "gate": "first-public",
+  "area": "docs",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "04a14c05-79b9-45d3-a680-e144c4ed14b3"
+    },
+    {
+      "rel": "verifies",
+      "id": "39744f6f-5e8d-40c1-bbb6-8322fefddb59"
+    }
+  ],
+  "impact": "high",
+  "priority": "next",
+  "effort": "S",
+  "confidence": "measured",
+  "triagedOn": "2026-09-29"
+}

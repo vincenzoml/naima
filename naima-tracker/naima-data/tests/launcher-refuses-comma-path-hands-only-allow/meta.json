@@ -1,0 +1,26 @@
+{
+  "id": "91ba3a32-9785-45aa-801e-3b3f375e684e",
+  "title": "The launcher refuses a comma path, hands only allow-listed env, parses --data once",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "diagnosed",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "0020a5d3-bd97-4dc7-89d2-44bc74c9ad72"
+    },
+    {
+      "rel": "verifies",
+      "id": "c44c2dcc-368d-4064-a967-6ea55e608c3f"
+    },
+    {
+      "rel": "verifies",
+      "id": "364d8aba-1c40-4209-bbe4-6cf2082d7940"
+    }
+  ],
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

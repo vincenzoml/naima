@@ -1,0 +1,12 @@
+{
+  "id": "afda49eb-f8c6-4f09-967f-a5ed269dec5b",
+  "title": "Some stray item directories are invisible to `naima check`, or only get a note",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

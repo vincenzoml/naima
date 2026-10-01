@@ -1,0 +1,12 @@
+{
+  "id": "27aa36f5-90ef-437e-b2c4-3ee28bfba713",
+  "title": "No lint or formatter wired into the toolchain",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30"
+}

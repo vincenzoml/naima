@@ -1,0 +1,17 @@
+{
+  "id": "3c4168e6-8ac2-459a-8427-d639819eb9bc",
+  "title": "A plugin adds a type, a status, a value and a field by trait to another's vocabulary",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "65165bd9-2eab-4da2-989e-5b306f17ec96"
+    }
+  ]
+}

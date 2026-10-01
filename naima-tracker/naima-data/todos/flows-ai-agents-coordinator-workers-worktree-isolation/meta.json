@@ -1,0 +1,15 @@
+{
+  "id": "88077fc5-535f-44aa-9f89-97d74d984dc0",
+  "title": "Flows for AI agents: coordinator and workers, worktree isolation, ff-only merges",
+  "status": "done",
+  "created": "2026-09-29",
+  "kind": "writing",
+  "area": "flows",
+  "impact": "high",
+  "priority": "next",
+  "effort": "M",
+  "confidence": "diagnosed",
+  "gate": "first-public",
+  "triagedOn": "2026-09-29",
+  "fixedOn": "2026-09-29"
+}

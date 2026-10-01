@@ -1,0 +1,11 @@
+{
+  "id": "cc9640bb-453e-4cfd-9013-285cf3458506",
+  "title": "Triage fallbacks: middle for impact/priority, worst for effort",
+  "status": "requested",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "diagnosed",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

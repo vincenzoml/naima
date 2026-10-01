@@ -1,0 +1,20 @@
+{
+  "id": "880b24c7-dbec-4faa-b9bc-f2c7d432d58b",
+  "title": "The launcher's permissions confine Naima to naima-tracker/ and git",
+  "status": "open",
+  "created": "2026-09-30",
+  "section": "distribution",
+  "runBy": "agent",
+  "area": "distribution",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "e2b1f0a8-e948-4269-b28c-95020913ec32"
+    }
+  ],
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

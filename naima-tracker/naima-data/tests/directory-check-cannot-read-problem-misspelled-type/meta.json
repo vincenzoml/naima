@@ -1,0 +1,17 @@
+{
+  "id": "470ee27f-0e1d-4610-a2e6-ef636a42034e",
+  "title": "a directory check cannot read is a problem: a misspelled type, an _underscored or a symlinked item (src/core/core.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "afda49eb-f8c6-4f09-967f-a5ed269dec5b"
+    }
+  ]
+}

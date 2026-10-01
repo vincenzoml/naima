@@ -1,0 +1,17 @@
+{
+  "id": "394485b0-ad50-4bcb-9f99-0bfa65798a5c",
+  "title": "each triage subcommand answers a misuse with its own usage (src/plugins/triage/triage.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "0de6562e-2e84-4074-a3bf-eebe33eb446e"
+    }
+  ]
+}

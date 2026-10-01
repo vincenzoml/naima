@@ -1,0 +1,17 @@
+{
+  "id": "bca9404f-33d9-4d80-934e-74034339d544",
+  "title": "gated-proof-is-gated says what it decides: an ungated proof of a gated item is a problem, whatever it ranks (src/plugins/gates/gates.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "3c07928f-3d90-4bb8-8556-813757430f9a"
+    }
+  ]
+}

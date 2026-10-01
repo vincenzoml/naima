@@ -1,0 +1,20 @@
+{
+  "id": "36554755-15e5-4cde-90ed-8ec4efe4d459",
+  "title": "naima carry round-trips clone, vendored, submodule, clone",
+  "status": "open",
+  "created": "2026-09-30",
+  "section": "distribution",
+  "runBy": "agent",
+  "area": "distribution",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "e2b1f0a8-e948-4269-b28c-95020913ec32"
+    }
+  ],
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

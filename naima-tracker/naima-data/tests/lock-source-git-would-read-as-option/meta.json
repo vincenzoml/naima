@@ -1,0 +1,22 @@
+{
+  "id": "f64d06be-8e78-4945-a10d-50b639a1870e",
+  "title": "A lock source git would read as an option, or a relative path, is refused",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "f13285f3-0718-4a4a-80fc-16d297e11533"
+    },
+    {
+      "rel": "verifies",
+      "id": "046a1e8a-3168-4165-b793-e9a36a49f925"
+    }
+  ],
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

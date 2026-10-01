@@ -1,0 +1,17 @@
+{
+  "id": "8e414e91-e852-44fc-b51e-ebb51ab0c893",
+  "title": "a property's inputs are checked: its options are a declared field, its paths stay inside, its run record is read with care (src/plugins/verifier/verifier.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "9846d0a4-d4f7-4784-9726-eb8261a770ee"
+    }
+  ]
+}

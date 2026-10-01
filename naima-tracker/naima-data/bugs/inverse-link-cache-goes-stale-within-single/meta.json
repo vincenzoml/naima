@@ -1,0 +1,12 @@
+{
+  "id": "7104c1bf-0df4-470b-a5ee-9a8fe57a6269",
+  "title": "The inverse-link cache goes stale within a single run",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "c084327f-37b7-442c-97f5-37b696c64440",
+  "title": "Two plugins declaring one name coexist by qualified id or a rename",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "e9d84b14-b398-490e-9dcb-87d7252c9302"
+    }
+  ]
+}

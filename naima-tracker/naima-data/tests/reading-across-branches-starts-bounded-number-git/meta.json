@@ -1,0 +1,17 @@
+{
+  "id": "3b8c86e8-a6a3-4e1d-aeca-46ccd2b36b4b",
+  "title": "reading across branches starts a bounded number of git processes, however many branches and files (src/core/git.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "5bcaa514-0643-4e61-a49e-b9ce20a1ddae"
+    }
+  ]
+}

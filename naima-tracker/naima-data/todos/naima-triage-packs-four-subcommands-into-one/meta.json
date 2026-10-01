@@ -1,0 +1,12 @@
+{
+  "id": "0de6562e-2e84-4074-a3bf-eebe33eb446e",
+  "title": "`naima triage` packs four subcommands into one hand-rolled dispatcher",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30"
+}

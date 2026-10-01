@@ -1,0 +1,17 @@
+{
+  "id": "ca825fa4-f0b5-46d7-b422-84fc3fb6ad3e",
+  "title": "Adopting Naima: automatic, branded, installable anywhere, and an agent skill",
+  "status": "shipped",
+  "created": "2026-09-29",
+  "impact": "high",
+  "priority": "now",
+  "effort": "L",
+  "triagedOn": "2026-09-30",
+  "docs": [
+    "docs/install.md",
+    "docs/using-naima.md",
+    "docs/skill.md",
+    "docs/config.md#the-automatic-principle"
+  ],
+  "confidence": "measured"
+}

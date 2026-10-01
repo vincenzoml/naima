@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "noPropertyAccessFromIndexSignature": true
+  },
+  "tasks": {
+    "naima": "deno run -A naima.ts",
+    "dev": "deno run -A src/cli.ts",
+    "typecheck": "deno check naima.ts src/ scripts/",
+    "test": "deno test -A src/",
+    "docs": "deno run -A src/cli.ts docs --write docs/reference.md",
+    "dist": "deno run -A scripts/dist.ts",
+    "coverage": "deno run -A scripts/coverage.ts",
+    "lint": "deno lint",
+    "fmt": "deno fmt",
+    "verify": "deno task typecheck && deno task lint && deno fmt --check && deno task test && deno run -A src/cli.ts check && deno run -A src/cli.ts docs --check docs/reference.md && deno run -A naima.ts check"
+  },
+  "fmt": {
+    "include": ["naima.ts", "src/", "scripts/"],
+    "lineWidth": 160,
+    "indentWidth": 2,
+    "semiColons": false
+  },
+  "lint": {
+    "include": ["naima.ts", "src/", "scripts/"],
+    "rules": { "tags": ["recommended"] }
+  },
+  "lock": false,
+  "nodeModulesDir": "none"
+}

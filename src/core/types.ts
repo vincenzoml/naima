@@ -1,0 +1,435 @@
+// The contract. Everything a plugin can contribute, and everything the core
+// hands back to it, is declared here and nowhere else.
+
+import type { PluginApi } from "./api.ts"
+
+/** A typed cross-reference. `id` is always a permanent item id, never a slug. */
+export interface Link {
+  rel: string
+  id: string
+}
+
+/** A link as read: stored on the item, or implied by the inverse of one stored elsewhere. */
+export interface ResolvedLink extends Link {
+  implied: boolean
+}
+
+/** The fields of an item (`meta.json`). `id`, `title` and `status` are checked on read; unknown fields are preserved untouched. */
+export interface Meta {
+  id: string
+  title: string
+  status: string
+  links?: Link[]
+  [field: string]: unknown
+}
+
+/** An item is a directory: `README.md` (prose), `meta.json` (fields), `attachments/`. */
+export interface Item {
+  type: string
+  slug: string
+  dir: string
+  meta: Meta
+}
+
+export type StatusCategory = "open" | "done"
+
+export interface StatusDef {
+  category: StatusCategory
+  /** A status that counts as evidence for whatever this item `verifies`: the flag `proves`, said as a key. */
+  proves?: boolean
+  /** A status that counts as evidence against it — a failed test, a violated property: it blocks a gate and a close. The flag `refutes`, said as a key. */
+  refutes?: boolean
+  /**
+   * Plain tags on the status, open-ended: any plugin may give one meaning and
+   * any plugin may read it (`hasFlag`). `proves` and `refutes` are two, which
+   * the keys above say too.
+   */
+  flags?: string[]
+  says: string
+}
+
+export interface TypeDef {
+  id: string
+  /** Directory under the tracker root that holds this type's items. */
+  dir: string
+  title: string
+  says: string
+  statuses: Record<string, StatusDef>
+  initialStatus: string
+  /** False for archives: items arrive by being moved, never by being opened. */
+  creatable?: boolean
+  /** The README a new item starts with. */
+  template?: (title: string) => string
+  /** Plain tags, no hierarchy: a field declared for a tag (`fixable`, say) applies to every type that carries it. */
+  traits?: string[]
+  /** The statuses each status may move to; a status it does not name may move to any. Absent: every move is allowed. */
+  transitions?: Record<string, string[]>
+}
+
+export type FieldKind = "string" | "strings" | "date" | "enum" | "boolean" | "number" | "object"
+
+export interface FieldDef {
+  name: string
+  kind: FieldKind
+  says: string
+  /** For `enum`: value -> meaning. Declaration order is rank order. */
+  values?: Record<string, string>
+  /** Type ids the field belongs to. With `traits`, the field belongs to both; with neither, to every type. */
+  appliesTo?: string[]
+  /** Traits the field belongs to: every type carrying one of them, whoever declares the type. */
+  traits?: string[]
+  /** Its enum `values` come from the project's configuration, not the program: the program's reference does not list them. */
+  configured?: boolean
+  /** For `enum`: its values are the names of every contribution to this extension point (`gates`, say), each meaning its title or says. */
+  valuesFrom?: string
+  /** For `enum`: an item may hold several of its values — one as a string, several as a list. */
+  multiple?: boolean
+}
+
+/**
+ * An additive change to another plugin's type or field — never a
+ * redefinition of what it is. On a type: new statuses (an existing one only
+ * with the category it has), traits, allowed transitions. On a field: new enum
+ * values, and more types or traits it applies to.
+ */
+export interface Extension {
+  /** The type it extends: a short name or a qualified id. */
+  type?: string
+  /** The field it extends: a short name or a qualified id. */
+  field?: string
+  statuses?: Record<string, StatusDef>
+  traits?: string[]
+  transitions?: Record<string, string[]>
+  values?: Record<string, string>
+  appliesTo?: string[]
+}
+
+export interface RelationDef {
+  name: string
+  inverse: string
+  says: string
+}
+
+export interface Finding {
+  level: "problem" | "note"
+  message: string
+  item?: Item
+}
+
+export interface Check {
+  name: string
+  says: string
+  /** May be async: a check that runs an external tool awaits it. */
+  run(ctx: Context): Finding[] | Promise<Finding[]>
+}
+
+/** One documented option: a command's `--flag`, or a plugin's configuration key. */
+export interface OptionDoc {
+  /** `--flag` for a command; the key under `options` for a plugin. */
+  name: string
+  says: string
+  /** The value used when the option is absent, as written in the config or on the command line. */
+  default?: string
+}
+
+export interface Command {
+  name: string
+  says: string
+  usage: string
+  /** Every `--flag` the usage names. */
+  options?: OptionDoc[]
+  /** Complete invocations, without the leading `naima`. */
+  examples?: string[]
+  run(args: string[], ctx: Context): number | Promise<number>
+}
+
+/**
+ * What a view or a summary section renders: its data, once, and how that data
+ * reads — as lines of text, and optionally as markdown. `naima view --json`
+ * and `naima summary --json` print the data itself, so no renderer derives it
+ * again. `rendered(data, text, markdown?)` makes one.
+ */
+export interface Rendered<D = unknown> {
+  readonly data: D
+  text(): string[]
+  markdown?(): string[]
+}
+
+/** A named rendering of derived state, printed by `naima view <name>`. May be async. */
+export interface View {
+  name: string
+  says: string
+  render(args: string[], ctx: Context): Rendered | Promise<Rendered>
+}
+
+/** A block of `naima summary`. May be async; one with nothing to say renders no lines. */
+export interface SummarySection {
+  name: string
+  render(ctx: Context): Rendered | Promise<Rendered>
+}
+
+/** One additive term of an item's urgency. Lower is more urgent. */
+export interface RankTerm {
+  name: string
+  score(item: Item, ctx: Context): number
+}
+
+/**
+ * A kind of contribution, declared as data: the core declares its own —
+ * types, fields, relations, directories, checks, commands, views, summary
+ * sections, rank terms, migrations — and any plugin may declare one more the
+ * same way, which every plugin can then contribute to.
+ */
+// deno-lint-ignore no-explicit-any
+export interface ExtensionPoint<T = any> {
+  /** The key contributions go under, in a manifest's `contributes`; also the kind of their qualified ids, and of `rename`. */
+  id: string
+  says: string
+  /** One contribution, in words: "gate", "verifier". */
+  noun: string
+  /** The name a contribution goes by within the point. */
+  key(c: T): string
+  /** Its names are written into the data: two contributions may not share one, and a project renames one of them instead. */
+  stored?: boolean
+  /** A copy of `c` going by `name`, for a rename; without it the point's contributions cannot be renamed. */
+  renamed?(c: T, name: string): T
+  /** Why a contribution is not one, or null: checked when the project loads, so a malformed one never runs. */
+  validate?(c: unknown): string | null
+  /** What a contribution lacks of its documentation, each said after its name: the `docs` plugin's `documented` check reports them. */
+  gaps?(c: T): string[]
+  /** True for a contribution the project's configuration makes, not the program: the program's reference leaves it out. */
+  configured?(c: T): boolean
+  /** The reference's markdown for one plugin's contributions to this point, those the configuration makes left out. */
+  document?(cs: readonly T[], plugin: string): string[]
+}
+
+/**
+ * One write of one item, as the write hooks see it (docs/plugin-contract.md#write-hooks).
+ * `create` opens an item, `update` rewrites its fields, `move` archives or moves it to another type's directory.
+ */
+export interface Write {
+  kind: "create" | "update" | "move"
+  /**
+   * The item as it is about to be written. A `beforeWrite` hook may change its `meta`; what it leaves is what is written.
+   * On a create its directory does not exist yet, and its slug is the one asked for.
+   */
+  item: Item
+  /** Its fields as they are on disk; null for a create, or for an item whose meta.json is unreadable. */
+  before: Meta | null
+  /** For a move: the type it moves to. */
+  to?: TypeDef
+  /** The command's `--force`: whoever gave it takes on what a hook would otherwise refuse. A hook decides whether it lets it through. */
+  force: boolean
+}
+
+/** A hook on every item write the core's helpers make, run in plugin load order. */
+export interface WriteHook {
+  name: string
+  says: string
+  /**
+   * Before anything is on disk. Return a refusal — a sentence saying what to do instead — to stop the write, or
+   * nothing to let it through; it may change `write.item.meta`. The first refusal stops the write and every later hook.
+   */
+  beforeWrite?(write: Write, ctx: Context): string | undefined | void
+  /** After the write, with the item as written (for a move, where it now is). */
+  afterWrite?(write: Write, ctx: Context): void
+}
+
+/** What a plugin declares. Every contribution is optional. */
+export interface Plugin {
+  name: string
+  says: string
+  /** The contract it is written for (`CONTRACT` in core/api.ts). Absent: contract 1, the shape before it was said. */
+  contract?: number
+  /** Longer documentation, in markdown: the concepts a reader needs before the reference. */
+  about?: string
+  /** The keys the plugin reads from its `options`, each with the default it infers. */
+  options?: OptionDoc[]
+  types?: TypeDef[]
+  fields?: FieldDef[]
+  relations?: RelationDef[]
+  /** Directories under the tracker root the plugin owns that are not item types. */
+  dirs?: string[]
+  checks?: Check[]
+  commands?: Command[]
+  views?: View[]
+  summary?: SummarySection[]
+  rank?: RankTerm[]
+  /** Hooks on every item write, in load order. */
+  hooks?: WriteHook[]
+  /** Additive changes to other plugins' types and fields. */
+  extends?: Extension[]
+  /** Its own data migrations, in order from its format 1: its format is 1 + their number (docs/format.md#migrations). */
+  migrations?: Migration[]
+  /** Extension points it declares: new kinds of contribution any plugin can make. */
+  points?: ExtensionPoint[]
+  /** Contributions to any point, by point id. A typed key above is the same as its point's entry here. */
+  contributes?: Record<string, readonly unknown[]>
+  /** Points it contributes to only when a loaded plugin declares them: without one, those contributions are dropped rather than refused. */
+  optional?: string[]
+  /**
+   * What it reads that another plugin declares, by point id: `{ fields: ["fixedOn"], relations: ["verifies"] }`.
+   * Each name must resolve when the project loads, or loading fails naming it — so replacing or switching off the
+   * plugin that declares it is an error, never a silent no-op.
+   */
+  uses?: Record<string, readonly string[]>
+}
+
+type Json = Record<string, unknown>
+
+/** One step of a data format: the core's, or one plugin's own. Pure, deterministic, forward only. */
+export interface Migration {
+  /** The format it reads; it writes `from + 1`. */
+  from: number
+  says: string
+  /** The new naima.json from the old one, without `format` or `formats`. Pure. */
+  config?(raw: Json): Json
+  /** The new meta.json of one item from the old one. Pure. */
+  item?(meta: Json): Json
+  /** True when an item still has the shape this migration replaces: `check` reports it. */
+  stale?(meta: Json): boolean
+}
+
+export type PluginOptions = Record<string, unknown>
+/** What a plugin's factory is told of the project it runs in: the name the project gives it, and the names its contributions go by. */
+export interface PluginScope {
+  readonly plugin: string
+  /**
+   * The short name this plugin's contribution of `kind`, declared as
+   * `declared`, goes by: the project's rename of it, else `declared`. A plugin
+   * whose names may be renamed reads its own fields, types and relations by
+   * these names, never by the literal it declared.
+   */
+  name(kind: string, declared: string): string
+}
+
+/** A plugin module's default export: its manifest, made from the options the project gives it and the API the core hands it. */
+export type PluginFactory = (options: PluginOptions, api: PluginApi) => Plugin
+
+/** A first-party plugin: its name and its factory, loaded unless the project switches it off or replaces it. */
+export interface FirstParty {
+  name: string
+  factory: PluginFactory
+}
+
+/** How much a check's finding weighs in this project: off, a note, or a problem that fails `naima check`. */
+export type Severity = "off" | "note" | "problem"
+
+/**
+ * Where a plugin's code is, pinned: a path inside the program (locked with
+ * it); a file of the project, pinned by its sha256; or a module of a git
+ * repository, pinned by commit and fetched into the tracker folder.
+ */
+export type PluginSource = string | { path: string; sha256: string } | { git: string; commit: string; path: string }
+
+/** One entry of naima.json's `plugins` table: how the project configures the plugin of that name. */
+export interface PluginConfig {
+  /** False switches the plugin off: it is not loaded. */
+  enabled: boolean
+  /** The plugin's own options, as it documents them. */
+  options: PluginOptions
+  /** A third-party plugin's code. */
+  source?: PluginSource
+  /** A first-party plugin's replacement: the code that runs under its name instead. */
+  replacedBy?: PluginSource
+  /** The severity of the plugin's checks, by check name, as the project weighs them. */
+  checks: Record<string, Severity>
+}
+
+/** How a project carries its program: a gitignored clone, plain committed files, or a git submodule. */
+export type Carry = "clone" | "vendored" | "submodule"
+
+/** `naima-data/naima.json`: the data format, the lock, and only what the tool cannot infer. */
+export interface Config {
+  /** The data format (docs/format.md). */
+  format: number
+  /** Each plugin's own data format, by plugin name; a plugin absent from it is at format 1. */
+  formats: Record<string, number>
+  /** The git URL (or path) of the Naima this project runs: Naima's own, or a fork. */
+  source: string
+  /** The commit of `source` this project runs: the lock. */
+  commit: string
+  carry: Carry
+  /** `"signed"`: run a locked commit only when git verifies its signature. Absent: no signature is asked for. */
+  verify?: "signed"
+  /** The program directory, relative to the data directory. */
+  program: string
+  /** Every plugin the project configures, first-party or third-party, by name. A first-party plugin it does not name is loaded as it is. */
+  plugins: Record<string, PluginConfig>
+  /** The project's renames: kind → qualified id → the short name that contribution goes by, for names two plugins would both store. */
+  rename: Record<string, Record<string, string>>
+  /** The project's own additive changes to the loaded plugins' types and fields. */
+  extends: Extension[]
+}
+
+/** One contribution as the registry holds it: whose it is, the name it goes by, and its qualified id. */
+export interface Contribution<T = unknown> {
+  /** `<plugin>/<declared name>`: unique among its kind, whatever other plugins declare. */
+  readonly id: string
+  /** The short name it goes by: its declared name, or the project's rename of it. */
+  readonly name: string
+  readonly plugin: string
+  readonly value: T
+}
+
+/**
+ * Every loaded contribution, merged. Read-only: frozen once built, so no
+ * plugin can change another's. A kind whose names are stored in the data is a
+ * map by name; commands and views, which only run, may share a short name,
+ * and are then keyed by qualified id — `find` takes either.
+ */
+export interface Registry {
+  readonly plugins: readonly Plugin[]
+  readonly types: ReadonlyMap<string, TypeDef>
+  readonly fields: ReadonlyMap<string, FieldDef>
+  readonly relations: ReadonlyMap<string, RelationDef>
+  readonly dirs: ReadonlySet<string>
+  readonly checks: readonly Check[]
+  /** By the name it is invoked by: its short name, or its qualified id while another plugin's command shares the short name. */
+  readonly commands: ReadonlyMap<string, Command>
+  /** By the name it is invoked by, as commands are. */
+  readonly views: ReadonlyMap<string, View>
+  readonly summary: readonly SummarySection[]
+  readonly rank: readonly RankTerm[]
+  /** Every plugin's write hooks, in load order. */
+  readonly hooks: readonly WriteHook[]
+  /** Every extension point, the core's and the plugins', by id, in the order the reference documents them. */
+  readonly points: ReadonlyMap<string, ExtensionPoint>
+  /** Every contribution of a kind (`types`, `fields`, `commands`, …), in load order, with its qualified id. */
+  contributions(kind: string): readonly Contribution[]
+  /** The contribution of `kind` that `ref` names — its qualified id, or its short name while no other shares it; undefined when none does. Throws when `ref` is ambiguous, naming each qualified id. */
+  find<T = unknown>(kind: string, ref: string): Contribution<T> | undefined
+}
+
+export interface Repo {
+  /** Every readable item: a meta.json that is a JSON object whose id, title and status are strings. */
+  items: Item[]
+  /** Items that could not be read, as findings. */
+  unreadable: Finding[]
+  byId: Map<string, Item>
+  /** Find one item by id, `type/slug`, slug, or a unique slug fragment. Throws when none or several match. */
+  resolve(ref: string): Item
+  /** Stored links plus the inverses of links pointing here. */
+  linksOf(item: Item): ResolvedLink[]
+}
+
+export interface Context {
+  /** Absolute project root: the git repository that holds the data. */
+  root: string
+  /** Absolute data directory: `<root>/naima-tracker/naima-data` unless moved. */
+  trackerRoot: string
+  /** The data directory from the project root, with forward slashes: what paths are printed from. */
+  trackerDir: string
+  /** Absolute program directory: the Naima that runs. Never part of the project's own files. */
+  program: string
+  /** Frozen, like the registry. */
+  readonly config: Config
+  readonly registry: Registry
+  /** The items, read on first access, again after any write through the core's helpers, and after `reload()`. */
+  readonly repo: Repo
+  /** Forget the items read, for a change made on disk without the helpers (by hand, by git). */
+  reload(): void
+  out(line?: string): void
+  err(line: string): void
+  now(): Date
+}

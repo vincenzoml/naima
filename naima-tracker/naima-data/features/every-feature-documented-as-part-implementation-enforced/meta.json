@@ -1,0 +1,17 @@
+{
+  "id": "39744f6f-5e8d-40c1-bbb6-8322fefddb59",
+  "title": "Every feature is documented as part of its implementation, enforced by naima check",
+  "status": "shipped",
+  "created": "2026-09-29",
+  "area": "docs",
+  "kind": "code",
+  "impact": "high",
+  "priority": "now",
+  "effort": "M",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-09-29",
+  "docs": [
+    "docs/documentation.md",
+    "docs/reference.md#docs"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "1ed8e645-0e66-4e5f-b610-8b23ed4648d2",
+  "title": "deno task verify runs deno lint and deno fmt --check, and both pass",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "27aa36f5-90ef-437e-b2c4-3ee28bfba713"
+    }
+  ]
+}

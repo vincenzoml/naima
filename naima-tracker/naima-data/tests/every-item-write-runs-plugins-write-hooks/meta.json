@@ -1,0 +1,17 @@
+{
+  "id": "6a7fceb5-2ff5-4989-b048-1b26c84cc83f",
+  "title": "Every item write runs the plugins' write hooks in load order; a refusal writes nothing and names its hook; a blank refusal is an internal error (src/core/core.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "8e24da79-06ab-4ebb-a344-37131dd75fab"
+    }
+  ]
+}

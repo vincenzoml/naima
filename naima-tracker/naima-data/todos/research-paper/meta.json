@@ -1,0 +1,18 @@
+{
+  "id": "6745e159-810e-4bfb-83f0-a53ffb421d7f",
+  "title": "Research paper",
+  "status": "open",
+  "created": "2026-09-29",
+  "kind": "research",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "ab7610f9-3905-48c6-bb00-aabd936d6040"
+    }
+  ],
+  "impact": "medium",
+  "priority": "later",
+  "effort": "XL",
+  "confidence": "reported",
+  "triagedOn": "2026-09-29"
+}

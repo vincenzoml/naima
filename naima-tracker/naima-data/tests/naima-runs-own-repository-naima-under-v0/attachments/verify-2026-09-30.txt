@@ -1,0 +1,18 @@
+$ npm run stable:which
+^0.2.0 v0.2.0 48c83c99c08d62d8288ce53c465f51d5436d0a46 /Users/vincenzo/Library/Caches/naima/stable/v0.2.0-48c83c99c08d
+$ npm run verify
+> naima@0.2.0 verify
+> npm run typecheck && npm test && node src/cli.ts check && node src/cli.ts docs --check docs/reference.md && node scripts/stable.mjs check
+> naima@0.2.0 typecheck
+> tsc -p tsconfig.json
+> naima@0.2.0 test
+> node --test "src/**/*.test.ts"
+ℹ tests 44
+ℹ pass 44
+ℹ fail 0
+18 items, 19 checks
+all invariants hold
+docs/reference.md is current, and everything loaded is documented
+18 items, 19 checks
+all invariants hold
+exit 0

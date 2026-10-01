@@ -1,0 +1,16 @@
+---
+description: Staff the session · one coordinator, workers in their own worktrees
+---
+Flow: [the coordinator and the workers](../../../../docs/flows/coordinator-and-workers.md).
+
+- **You talk to the owner** — one question at a time, only what is theirs
+  ([asking the human](../../../../docs/flows/asking-the-human.md)) — and hold any
+  locked resource. You do not do the work.
+- **Each worker gets**: its own worktree and branch, the item already filed,
+  what is already measured, the gates, the constraints, and no sub-agents.
+- **Model by the job**: strongest for diagnosis and design, cheaper for
+  filing, triage, merges and gates. Two workers standing, four only for short
+  cheap work.
+- **Set a timer**; the owner is never the reason work resumes.
+- **Merge** only `--ff-only`, after the gates over the combined result.
+- **After each merge**: what changed, then `naima queue`, then one question or none.

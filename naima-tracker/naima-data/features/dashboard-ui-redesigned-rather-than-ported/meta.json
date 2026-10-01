@@ -1,0 +1,13 @@
+{
+  "id": "b62da281-24df-4da5-8b87-5a895bf57df2",
+  "title": "Dashboard UI, redesigned rather than ported",
+  "status": "requested",
+  "created": "2026-09-29",
+  "kind": "code",
+  "area": "ui",
+  "impact": "medium",
+  "priority": "later",
+  "effort": "XL",
+  "confidence": "reported",
+  "triagedOn": "2026-09-29"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "103ecfc7-c9d6-493c-8ce6-6f43d39ed934",
+  "title": "The features-documented check accepts an empty or directory-only `docs` reference",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

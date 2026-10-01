@@ -1,0 +1,17 @@
+{
+  "id": "3dc6b0cb-a0f8-4dcc-985f-aa61f48b43dc",
+  "title": "a count that is not a positive whole number is a usage error, not an empty listing (src/plugins/coordination/coordination.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "134bcbe2-bf9f-4e61-a230-d9463fe66370"
+    }
+  ]
+}

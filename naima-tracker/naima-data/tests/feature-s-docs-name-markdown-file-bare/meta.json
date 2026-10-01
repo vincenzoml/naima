@@ -1,0 +1,17 @@
+{
+  "id": "b0b803ef-53e6-4ee7-8320-8d180437474a",
+  "title": "a feature's docs name a markdown file: a bare #heading, an empty entry or a directory is no documentation (src/plugins/docs/docs.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "103ecfc7-c9d6-493c-8ce6-6f43d39ed934"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "d4962b4f-1dcb-43ba-a952-e1bb77aeadf6",
+  "title": "A plugin pinned by hash or commit runs with the injected API, a newer contract is refused",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "7bb274b4-7d8a-485d-80c9-c64cd122e83c"
+    }
+  ]
+}

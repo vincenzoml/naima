@@ -1,0 +1,12 @@
+{
+  "id": "7a8f18c7-0296-4023-a658-6e1a9de3c2de",
+  "title": "Non-atomic writes, and a vendored program update deletes the program before the new checkout lands",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30"
+}

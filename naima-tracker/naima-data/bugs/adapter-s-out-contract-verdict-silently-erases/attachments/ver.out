@@ -1,0 +1,10 @@
+R4 status: holds problems: []
+R5 problems before close: ["properties/has-alpha: holds on a model that has changed since — run naima verify again"]
+R5 close rc 0 ["closed → closed/no-alpha"]
+R6 rc 1 out ["naima-tracker/naima-data/properties/p/  612cb14c-cc92-400d-b726-d096ea328568","pass      properties/p  P"] status in meta: undefined
+R10 never ^$: {"verdict":"violated","output":"line 3 matches","counterexample":"3: "}
+R10 some ^$: {"verdict":"holds","output":"line 3 matches"}
+R8 gates: ["v1 — V1: HOLDS, 2 owed","  · bugs/crash  Crash","  · tests/no-crash  No crash"]
+R12 close on own branch rc 0 ["closed → closed/x-broken"]
+R11: ["a.ts:1: beta marker names \"bugs/x-broken\", which is no item"]
+R12b claims check: []

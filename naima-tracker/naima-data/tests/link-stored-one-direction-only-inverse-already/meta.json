@@ -1,0 +1,17 @@
+{
+  "id": "6ae000f4-4ecb-4fd2-8c26-61dc364935e7",
+  "title": "a link is stored in one direction only: its inverse is already the link (src/core/core.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "3177b18e-dac7-48be-a89c-29e912021d4d"
+    }
+  ]
+}

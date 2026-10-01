@@ -1,0 +1,10 @@
+$ npm run stable:which
+v0.1.0 7405111c5600bca22f9b7f07e718a03500423ef3 .naima/stable/v0.1.0-7405111c5600
+
+$ git rev-parse v0.1.0^{commit}
+7405111c5600bca22f9b7f07e718a03500423ef3
+
+$ node --test src/stable.test.ts
+✔ npm run naima runs the pinned tag, not the working tree; a bump is checked first (718.9025ms)
+ℹ pass 1
+ℹ fail 0

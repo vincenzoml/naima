@@ -1,0 +1,12 @@
+{
+  "id": "0020a5d3-bd97-4dc7-89d2-44bc74c9ad72",
+  "title": "Launcher permissions break when a project path contains a comma",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

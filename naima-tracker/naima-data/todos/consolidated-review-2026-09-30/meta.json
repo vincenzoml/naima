@@ -1,0 +1,267 @@
+{
+  "id": "5936041e-5603-4a87-9e7a-1da29ff0feca",
+  "title": "Consolidated review 2026-09-30",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "diagnosed",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "f13285f3-0718-4a4a-80fc-16d297e11533"
+    },
+    {
+      "rel": "relates-to",
+      "id": "1c60ddc2-9d73-4a07-880f-ca1c05ab9c00"
+    },
+    {
+      "rel": "relates-to",
+      "id": "e81e8ca5-bad8-478f-8133-7f684bd446c6"
+    },
+    {
+      "rel": "relates-to",
+      "id": "a9e9dae1-ae97-4583-9900-3d23fa27ee28"
+    },
+    {
+      "rel": "relates-to",
+      "id": "b7a3cd53-d395-4daa-b942-e1efbf45932e"
+    },
+    {
+      "rel": "relates-to",
+      "id": "c851d69d-7039-419a-aab6-2d7fee8c6111"
+    },
+    {
+      "rel": "relates-to",
+      "id": "872a5b0c-1250-4199-82ea-ab23da1b0e13"
+    },
+    {
+      "rel": "relates-to",
+      "id": "64d6537b-f8a7-4ffc-b0de-ca92cff7081a"
+    },
+    {
+      "rel": "relates-to",
+      "id": "c199261c-6478-4ffd-9d07-aa318685fab7"
+    },
+    {
+      "rel": "relates-to",
+      "id": "0cefc94f-17ff-465c-b4a2-b8400ea79ff0"
+    },
+    {
+      "rel": "relates-to",
+      "id": "0020a5d3-bd97-4dc7-89d2-44bc74c9ad72"
+    },
+    {
+      "rel": "relates-to",
+      "id": "1435a99a-0221-487d-a6b0-a6a153cf3b7e"
+    },
+    {
+      "rel": "relates-to",
+      "id": "addae3f8-b0d2-41b1-b1b7-1dc5ac41bf21"
+    },
+    {
+      "rel": "relates-to",
+      "id": "8d2a65b2-3e3f-492e-b030-fc02f30350d7"
+    },
+    {
+      "rel": "relates-to",
+      "id": "5bcaa514-0643-4e61-a49e-b9ce20a1ddae"
+    },
+    {
+      "rel": "relates-to",
+      "id": "9f618089-062f-466a-99cf-eb5e6d43fac5"
+    },
+    {
+      "rel": "relates-to",
+      "id": "27aa36f5-90ef-437e-b2c4-3ee28bfba713"
+    },
+    {
+      "rel": "relates-to",
+      "id": "08cef7da-7fae-45bc-b006-ff580fa4ab9a"
+    },
+    {
+      "rel": "relates-to",
+      "id": "03c62802-51ac-4943-8a42-b29fb5223e6b"
+    },
+    {
+      "rel": "relates-to",
+      "id": "38c0c5d1-62fe-404c-bde6-066165f4431d"
+    },
+    {
+      "rel": "relates-to",
+      "id": "121119fa-f771-46f2-9c0f-fcd83ba04c02"
+    },
+    {
+      "rel": "relates-to",
+      "id": "196449bc-a5fc-46f8-9d5b-d41689b498d3"
+    },
+    {
+      "rel": "relates-to",
+      "id": "7a8f18c7-0296-4023-a658-6e1a9de3c2de"
+    },
+    {
+      "rel": "relates-to",
+      "id": "3177b18e-dac7-48be-a89c-29e912021d4d"
+    },
+    {
+      "rel": "relates-to",
+      "id": "88c81671-742d-4246-99cd-62b297d8193a"
+    },
+    {
+      "rel": "relates-to",
+      "id": "b1cf3371-0723-4b7b-b3ad-e80746419089"
+    },
+    {
+      "rel": "relates-to",
+      "id": "ced65f08-456a-4188-998f-a78caad91e27"
+    },
+    {
+      "rel": "relates-to",
+      "id": "afda49eb-f8c6-4f09-967f-a5ed269dec5b"
+    },
+    {
+      "rel": "relates-to",
+      "id": "046a1e8a-3168-4165-b793-e9a36a49f925"
+    },
+    {
+      "rel": "relates-to",
+      "id": "a2e86c72-9310-4aec-8fff-aa822fb7635f"
+    },
+    {
+      "rel": "relates-to",
+      "id": "86e9e40c-359e-4fb3-a97e-6af2ed8635c9"
+    },
+    {
+      "rel": "relates-to",
+      "id": "49de2ba2-255c-4365-bf11-af535f03c74e"
+    },
+    {
+      "rel": "relates-to",
+      "id": "103ecfc7-c9d6-493c-8ce6-6f43d39ed934"
+    },
+    {
+      "rel": "relates-to",
+      "id": "1065fa98-48e1-4212-890f-222227736769"
+    },
+    {
+      "rel": "relates-to",
+      "id": "3c07928f-3d90-4bb8-8556-813757430f9a"
+    },
+    {
+      "rel": "relates-to",
+      "id": "134bcbe2-bf9f-4e61-a230-d9463fe66370"
+    },
+    {
+      "rel": "relates-to",
+      "id": "d379679a-9067-4338-85a4-4d6a6f126e13"
+    },
+    {
+      "rel": "relates-to",
+      "id": "f70d8c49-cf8f-4542-b854-11b181d5d163"
+    },
+    {
+      "rel": "relates-to",
+      "id": "3669d28f-30d7-46c3-89ac-fa3c2fbc3948"
+    },
+    {
+      "rel": "relates-to",
+      "id": "c44c2dcc-368d-4064-a967-6ea55e608c3f"
+    },
+    {
+      "rel": "relates-to",
+      "id": "7104c1bf-0df4-470b-a5ee-9a8fe57a6269"
+    },
+    {
+      "rel": "relates-to",
+      "id": "7a408ccd-645e-4fd2-8eb4-697ee0ff4b56"
+    },
+    {
+      "rel": "relates-to",
+      "id": "364d8aba-1c40-4209-bbe4-6cf2082d7940"
+    },
+    {
+      "rel": "relates-to",
+      "id": "9846d0a4-d4f7-4784-9726-eb8261a770ee"
+    },
+    {
+      "rel": "relates-to",
+      "id": "0de6562e-2e84-4074-a3bf-eebe33eb446e"
+    },
+    {
+      "rel": "relates-to",
+      "id": "b68ca412-6430-4e42-9128-3a199b0c99a6"
+    },
+    {
+      "rel": "relates-to",
+      "id": "32f4928c-2fb6-4ec0-a3f1-d8b2a0674a69"
+    },
+    {
+      "rel": "relates-to",
+      "id": "0825de9e-4e9b-471b-8837-0e682a31bfeb"
+    },
+    {
+      "rel": "relates-to",
+      "id": "2cc1b23e-cb49-4f2f-9b73-292a67fb3009"
+    },
+    {
+      "rel": "relates-to",
+      "id": "e9d84b14-b398-490e-9dcb-87d7252c9302"
+    },
+    {
+      "rel": "relates-to",
+      "id": "54d44ffe-efdd-4ae7-ab4c-038ab42e393d"
+    },
+    {
+      "rel": "relates-to",
+      "id": "65165bd9-2eab-4da2-989e-5b306f17ec96"
+    },
+    {
+      "rel": "relates-to",
+      "id": "b619848c-cceb-44b9-9d9c-7bcbda589ba8"
+    },
+    {
+      "rel": "relates-to",
+      "id": "f98b26f8-1916-4e8f-9d71-e00cecf8fd11"
+    },
+    {
+      "rel": "relates-to",
+      "id": "8e24da79-06ab-4ebb-a344-37131dd75fab"
+    },
+    {
+      "rel": "relates-to",
+      "id": "71d95318-e270-4b69-8f2e-1d6949aed78f"
+    },
+    {
+      "rel": "relates-to",
+      "id": "5837f47a-0d9c-49c9-b084-427937174ff2"
+    },
+    {
+      "rel": "relates-to",
+      "id": "7bb274b4-7d8a-485d-80c9-c64cd122e83c"
+    },
+    {
+      "rel": "relates-to",
+      "id": "36c3a45d-fe64-40c7-83fe-d6d62128ef5e"
+    },
+    {
+      "rel": "relates-to",
+      "id": "40bb24e5-5b18-4ab9-b15a-5063d196963f"
+    },
+    {
+      "rel": "relates-to",
+      "id": "7f45bcd1-71c2-4a7d-b1dd-5ec190b4014d"
+    },
+    {
+      "rel": "relates-to",
+      "id": "cc9640bb-453e-4cfd-9013-285cf3458506"
+    },
+    {
+      "rel": "relates-to",
+      "id": "6eb94426-09df-4a11-a0dd-36fce97a398b"
+    },
+    {
+      "rel": "relates-to",
+      "id": "9e080b53-47d9-4417-9102-2b0d0fed061a"
+    }
+  ]
+}

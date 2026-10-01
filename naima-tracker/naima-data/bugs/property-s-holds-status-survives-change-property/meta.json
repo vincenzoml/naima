@@ -1,0 +1,12 @@
+{
+  "id": "a9e9dae1-ae97-4583-9900-3d23fa27ee28",
+  "title": "A property's `holds` status survives a change to the property, verifier, model path or options",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30"
+}

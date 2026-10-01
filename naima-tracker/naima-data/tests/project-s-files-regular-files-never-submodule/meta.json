@@ -1,0 +1,17 @@
+{
+  "id": "6eeb8e8d-3428-4867-994c-a169ffb91536",
+  "title": "a project's files are regular files: never a submodule's directory, never through a symbolic link (src/core/git.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "a2e86c72-9310-4aec-8fff-aa822fb7635f"
+    }
+  ]
+}

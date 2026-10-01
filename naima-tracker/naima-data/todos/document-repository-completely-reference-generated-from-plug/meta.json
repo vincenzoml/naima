@@ -1,0 +1,15 @@
+{
+  "id": "04a14c05-79b9-45d3-a680-e144c4ed14b3",
+  "title": "Document the repository completely, reference generated from the plugin manifests",
+  "status": "done",
+  "created": "2026-09-29",
+  "area": "docs",
+  "kind": "writing",
+  "impact": "high",
+  "priority": "now",
+  "effort": "M",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-09-29",
+  "gate": "first-public",
+  "fixedOn": "2026-09-29"
+}

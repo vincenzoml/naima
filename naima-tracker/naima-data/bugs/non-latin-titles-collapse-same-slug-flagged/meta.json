@@ -1,0 +1,12 @@
+{
+  "id": "88c81671-742d-4246-99cd-62b297d8193a",
+  "title": "Non-Latin titles collapse to the same slug, and are flagged as false duplicates",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

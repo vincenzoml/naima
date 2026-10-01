@@ -1,0 +1,17 @@
+{
+  "id": "852a62b3-5a16-4864-9fa0-979d4b241a76",
+  "title": "a meta.json whose id, title or status is not a string is unreadable, not a crash (src/core/core.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "addae3f8-b0d2-41b1-b1b7-1dc5ac41bf21"
+    }
+  ]
+}

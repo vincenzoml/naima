@@ -1,0 +1,12 @@
+{
+  "id": "1065fa98-48e1-4212-890f-222227736769",
+  "title": "Setext-style markdown headings produce no anchors for the links-resolve check",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

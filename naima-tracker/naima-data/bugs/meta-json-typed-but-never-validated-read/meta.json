@@ -1,0 +1,12 @@
+{
+  "id": "addae3f8-b0d2-41b1-b1b7-1dc5ac41bf21",
+  "title": "`meta.json` is typed but never validated on read, and a malformed field crashes commands",
+  "status": "open",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30"
+}

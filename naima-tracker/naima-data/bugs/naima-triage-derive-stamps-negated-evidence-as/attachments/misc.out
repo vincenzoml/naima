@@ -1,0 +1,8 @@
+R7 "Could not be reproduced on macOS" -> measured
+R7 "Not verified yet" -> measured
+R7 "cannot be confirmed" -> measured
+R7 "not yet reproduced" -> measured
+R7 "It crashes because of X? unknown" -> diagnosed
+R13 '#nope': null  'docs/': null
+R14 setext anchors: []
+R15 pass --list all: ["no session notes"]

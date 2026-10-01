@@ -1,0 +1,17 @@
+{
+  "id": "7a3292f3-d180-4877-8294-03a5410a3857",
+  "title": "A plugin declares an extension point another contributes to, with no core edit",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "54d44ffe-efdd-4ae7-ab4c-038ab42e393d"
+    }
+  ]
+}

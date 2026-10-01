@@ -1,0 +1,10 @@
+✔ just add naima: init, new, check in a repository outside Naima; the only addition is naima/ (486.205041ms)
+✔ init refuses outside a git repository (70.507125ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 623.373875

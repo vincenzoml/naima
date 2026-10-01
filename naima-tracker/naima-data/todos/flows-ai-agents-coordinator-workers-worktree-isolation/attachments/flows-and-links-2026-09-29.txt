@@ -1,0 +1,21 @@
+$ ls docs/flows .claude/commands/flow
+.claude/commands/flow:
+close.md
+coordinate.md
+open.md
+report.md
+where.md
+
+docs/flows:
+README.md
+asking-the-human.md
+closing-a-worktree.md
+coordinator-and-workers.md
+opening-a-worktree.md
+reporting-and-triage.md
+worktree-isolation.md
+
+$ npm run naima -- check   (stable v0.1.0; includes links-resolve over README.md, AGENTS.md, CLAUDE.md, docs, .claude/commands, tracker/README.md)
+13 items, 19 checks
+
+all invariants hold

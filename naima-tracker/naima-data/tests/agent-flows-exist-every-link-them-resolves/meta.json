@@ -1,0 +1,20 @@
+{
+  "id": "41417ec5-4c6b-4a4d-a8d7-76a13244a752",
+  "title": "The agent flows exist and every link to them resolves",
+  "status": "open",
+  "created": "2026-09-29",
+  "runBy": "agent",
+  "gate": "first-public",
+  "area": "flows",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "88077fc5-535f-44aa-9f89-97d74d984dc0"
+    }
+  ],
+  "impact": "high",
+  "priority": "next",
+  "effort": "S",
+  "confidence": "measured",
+  "triagedOn": "2026-09-29"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "4e9412d6-03c2-4ce0-a1b5-d57ec63c5b09",
+  "title": "A project on the dist holds only what runs Naima, in every worktree",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "6eb94426-09df-4a11-a0dd-36fce97a398b"
+    }
+  ],
+  "effort": "M",
+  "triagedOn": "2026-09-30"
+}

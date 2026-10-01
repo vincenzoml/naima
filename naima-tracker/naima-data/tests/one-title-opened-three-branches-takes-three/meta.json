@@ -1,0 +1,17 @@
+{
+  "id": "90b5a3ba-2562-429e-992c-5be3ea22ab2c",
+  "title": "One title opened on three branches takes three slugs and merges without a conflict; a shallow clone suffixes the uuid (src/core/core.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "5837f47a-0d9c-49c9-b084-427937174ff2"
+    }
+  ]
+}

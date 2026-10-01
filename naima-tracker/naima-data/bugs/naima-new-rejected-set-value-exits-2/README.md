@@ -1,0 +1,25 @@
+# naima new with a rejected --set value exits 2 but leaves the item it refused on disk
+
+## Seen
+
+On 2026-09-30, on branch claude/purpose-doc:
+
+```sh
+naima new tests "<title>" --set runBy=human --set "humanBecause=<free text>"
+```
+
+exits 2 with `humanBecause: "<free text>" is not one of: judgement, decision,
+credential, physical`, yet `tests/<slug>/` was written (README.md, meta.json
+with id, title, status, created; none of the --set fields). Rerunning the
+corrected command created `tests/<slug>-2/`, and `naima check` then noted the
+two as possible duplicates.
+
+## Expected
+
+A refused `new` writes nothing: validate every `--set` before creating the
+directory, or remove it on failure.
+
+## Proving gesture
+
+A test: `naima new` with an invalid `--set` value exits 2 and the tracker's
+item count is unchanged.

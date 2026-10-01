@@ -1,0 +1,5 @@
+R1 w2 claim output: ["claimed bugs/alpha","wrote naima-tracker/naima-data/claims/edb7002a-7dd9-4bee-96bd-f9c010bf274b.json — commit it on w2 with your work"]
+R1 trunk claims: ["no claims"]
+R2 trunk claims (w committed alpha+beta): ["w  (working tree)","  bugs/alpha  Alpha"]
+R3 w after release: ["released 2 on w","removed naima-tracker/naima-data/claims/d3a8b1ed-07f3-44ed-b67d-3c53a440faf2.json — commit the deletion on w","w  ← here","  bugs/alpha  Alpha","THROW nothing to release: w holds no claim here","claimed bugs/alpha","wrote naima-tracker/naima-data/claims/35f34abc-2577-4764-8312-4c3062bdc980.json — commit it on w with your work"]
+R3 files in w claims/: [ "35f34abc-2577-4764-8312-4c3062bdc980.json" ]

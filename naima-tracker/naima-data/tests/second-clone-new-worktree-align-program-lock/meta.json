@@ -1,0 +1,20 @@
+{
+  "id": "9cd405ee-722d-4efb-ad17-7eba19a027a8",
+  "title": "A second clone and a new worktree align the program to the lock",
+  "status": "open",
+  "created": "2026-09-30",
+  "section": "distribution",
+  "runBy": "agent",
+  "area": "distribution",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "e2b1f0a8-e948-4269-b28c-95020913ec32"
+    }
+  ],
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

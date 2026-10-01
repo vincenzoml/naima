@@ -1,0 +1,22 @@
+{
+  "id": "a70ffafd-f355-4845-858c-7e27c001454e",
+  "title": "CI runs pinned on Linux and macOS and pushes the dist from main",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "diagnosed",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "08cef7da-7fae-45bc-b006-ff580fa4ab9a"
+    },
+    {
+      "rel": "verifies",
+      "id": "6eb94426-09df-4a11-a0dd-36fce97a398b"
+    }
+  ],
+  "effort": "S",
+  "triagedOn": "2026-09-30"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "4e647dd2-e00b-417e-9f32-b84c5213cc10",
+  "title": "a branch's own claim is read from its branch, not from a stale copy the reader's disk carries (src/plugins/coordination/coordination.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-09-30",
+  "runBy": "agent",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "e81e8ca5-bad8-478f-8133-7f684bd446c6"
+    }
+  ]
+}
