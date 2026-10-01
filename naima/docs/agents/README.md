@@ -41,6 +41,7 @@ them, and Naima's own repository does.
 | [Opening a worktree](opening-a-worktree.md) | starting a piece of work |
 | [Closing a worktree](closing-a-worktree.md) | before a branch is merged |
 | [Reporting and triage](reporting-and-triage.md) | when something is said, seen or found |
+| [Planning: epics, milestones and gates](plan-with-epics-and-gates.md) | when the owner names a body of work, a release or a date |
 
 Two words used throughout: the [owner](../guide/glossary.md#owner), the person
 the project answers to, and the [trunk](../guide/glossary.md#trunk), the

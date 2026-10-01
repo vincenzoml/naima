@@ -22,6 +22,7 @@ you do not know is in the [glossary](glossary.md).
 | set a rule only this project has | [Write a project rule](write-a-project-rule.md) |
 | rank what is open | [Triage](triage.md) |
 | see where things stand | [Read the board, the queue and the gates](read-the-board.md) |
+| group work, declare a release, give it a date | [Plan with epics, milestones and gates](plan-with-epics-milestones-and-gates.md) |
 | prove a fix and close it | [Prove and close](prove-and-close.md) |
 | work on several things at once | [Work on several branches at once](several-branches.md) |
 | move to a newer Naima | [Update Naima](update-naima.md) |

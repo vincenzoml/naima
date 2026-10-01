@@ -4,5 +4,9 @@
   "status": "requested",
   "created": "2026-10-01",
   "priority": "now",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/guide/plan-with-epics-milestones-and-gates.md"
+  ]
 }

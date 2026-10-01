@@ -1,0 +1,13 @@
+{
+  "id": "6e8b379c-1cbf-4c49-b556-3e8f6e3caefa",
+  "title": "Epics, milestones and gate commands pass on Deno, Node and Bun",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "855809eb-d47a-420b-8012-c5d36f4751ab"
+    }
+  ]
+}
