@@ -631,7 +631,7 @@ Traits: `fixable`.
 | `humanBecause` | enum | tests, bugs, todos | why only a person can perform the proof, when runBy is human | `judgement` how it looks, sounds or feels: no instrument can settle it; `decision` a decision reserved to the owner; `credential` a secret, an account or a signature only a person holds; `physical` a physical act or a machine only a person has at hand |
 | `area` | string | every type | where it lives: the surface somebody would have open while working on it |  |
 | `kind` | string | every type | the mode of work it demands: code, decision, research, writing… |  |
-| `commits` | strings | any type tagged `fixable` | the git commit hashes that fixed it, each reachable from the trunk — never retrofitted by guessing on an item fixed before this existed |  |
+| `commits` | strings | any type tagged `fixable` | the git commit hashes that fixed it, each reachable from the trunk — or "legacy" on an item closed before this field existed, set once by migration, never retrofitted by guessing |  |
 
 **Link relations** — only the direction written is stored; the inverse is derived when read.
 
