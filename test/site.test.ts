@@ -60,7 +60,12 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
     assert.match(text, /If git is not installed, install it[\s\S]*winget install Git\.Git/, where)
   }
   assert.match(page, /<p class="need">You don’t need to know git, code or project management\./)
-  assert.match(page, /<p class="about">Naima turns your AI agents into a small team/, "the page says what Naima is, for people")
+  assert.match(
+    page,
+    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">Software, a data analysis, a paper written with colleagues/,
+    "the line under the tagline says what it is for",
+  )
+  assert.doesNotMatch(page, /small team/, "the long passage is the README's, not the page's")
   assert.ok(existsSync(join(NAIMA, RUNTIME_DIR, "skills", "naima", "SKILL.md")), "the skill the prompt names ships")
 })
 
