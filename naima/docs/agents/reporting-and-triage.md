@@ -4,10 +4,15 @@ How something said, seen or found becomes an [item](../guide/glossary.md#item) s
 later, and how that item earns its place in the ranking.
 
 **Who and when.** Whoever hears or finds it — usually the coordinator, in
-the [owner](../guide/glossary.md#owner)'s chat — files it at once, before investigating (step 2). The
-filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–7): it rewrites the
-description in its own words, records what it checked, links duplicates and
-sets the fields (`naima describe`, `naima note`, `naima triage set`; step 4). The owner may also write an item directly as a file; it is
+the [owner](../guide/glossary.md#owner)'s chat — files it at once, before investigating (step 2). This
+holds every time the owner asks for a feature, reports a problem, decides or
+defers something, not only when a flow is explicitly invoked: it is a
+standing behaviour, in the background, so the work underway is not derailed.
+The filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–7): it rewrites the
+description in its own words, searches duplicates first (`naima list`, or
+`naima new --dedupe`, which prints likely duplicates of the same type before
+writing and still writes) and links rather than refiles, records what it
+checked, and sets the fields (`naima describe`, `naima note`, `naima triage set`; step 4). The owner may also write an item directly as a file; it is
 triaged the same way. A report written by the owner is never overwritten:
 the triage adds to it.
 

@@ -40,6 +40,7 @@ What Naima is for: [the purpose](../purpose.md).
 | move to a newer Naima | [Update Naima](update-naima.md) |
 | add a gate, weigh a check, switch a plugin off | [Configure the project](configure-the-project.md) |
 | use a plugin a colleague gave me | [Add a plugin someone gave you](add-a-plugin.md) |
+| write a plugin, or adopt Naima outside software | [Extending Naima](extending-naima.md) |
 
 ## Look up
 

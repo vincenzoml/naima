@@ -1,7 +1,7 @@
 {
   "id": "3e57f079-4879-4aec-8203-76180cd3c8a7",
   "title": "Deferral-with-reason becomes a check (`parked`/`wontfix` must say why)",
-  "status": "open",
+  "status": "partial",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
@@ -15,6 +15,10 @@
     {
       "rel": "relates-to",
       "id": "bc0964bc-f4f3-4438-9565-40e33a326239"
+    },
+    {
+      "rel": "relates-to",
+      "id": "fec55bbe-d7b1-4831-8420-4ee77e525a29"
     }
   ],
   "fixedOn": "2026-10-01",

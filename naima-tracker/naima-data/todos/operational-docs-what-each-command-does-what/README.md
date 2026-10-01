@@ -3,3 +3,9 @@
 Documentation of how Naima operates is requested, not just how to invoke it.
 
 Done: a docs page maps every command to what it does and the policy or invariant it enforces, if any; generated where possible from the manifests (`naima docs`) so it cannot drift; linked from the docs map.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/d2-people-docs
+
+Partially met already: naima --help and naima docs (the generated reference) state what each command does and, for many, the invariant or policy it enforces (close: 'fixed, and proven by an item that has passed'; carry, update, etc.). A full command-to-policy map, generated so it cannot drift, belongs in naima/docs/reference/reference.md — outside this worktree's scope (naima/docs/guide/, README.md, planned.md only). Left open for whoever owns the reference generator (naima/src/plugins/docs).
