@@ -11,6 +11,7 @@ Flow: [the coordinator and the workers](../../../../docs/agents/coordinator-and-
 - **Model by the job**: strongest for diagnosis and design, cheaper for
   filing, triage, merges and gates. Two workers standing, four only for short
   cheap work.
-- **Set a timer**; the owner is never the reason work resumes.
+- **Set a timer**; the owner is never the reason work resumes (the fuller
+  non-stop method is [planned](../../../../docs/planned.md#the-non-stop-method)).
 - **Merge** only `--ff-only`, after the gates over the combined result.
 - **After each merge**: what changed, then `naima queue`, then one question or none.

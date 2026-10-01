@@ -7,6 +7,13 @@ when to use it.
 
 ## What it teaches
 
+- **Git, for the owner.** Install git if it is missing, `git init` when
+  there is no repository, a `.gitignore` that keeps secrets and private data
+  out, and safe commits, so the owner never learns git
+  ([git, handled for the owner](git-for-the-owner.md)).
+- **Privacy.** The owner's chat is never copied into the repository
+  verbatim; their files are attached only with an explicit yes
+  ([the rule](../guide/rules.md#the-owners-chat-stays-private)).
 - **Bootstrap.** In a project without `naima-tracker/`: install Deno if it is
   missing, with its official installer, clone Naima into
   `naima-tracker/naima/`, and run `naima init`
