@@ -352,10 +352,15 @@ const move: Command = {
 const check: Command = {
   name: "check",
   says: "run every invariant; exit 1 on any problem",
-  usage: "check",
-  examples: ["check"],
-  async run(_args, ctx) {
-    const { problems, notes } = await runChecks(ctx)
+  usage: "check [--all-worktrees]",
+  options: [{
+    name: "--all-worktrees",
+    says: "the coordinator's view: every worktree's missing claim is a problem, not only the one being checked",
+  }],
+  examples: ["check", "check --all-worktrees"],
+  async run(args, ctx) {
+    const p = parse(args, { "all-worktrees": { type: "boolean" } })
+    const { problems, notes } = await runChecks(ctx, { allWorktrees: bool(p, "all-worktrees") })
     ctx.out(`${ctx.repo.items.length} items, ${ctx.registry.checks.length} checks`)
     if (notes.length) {
       ctx.out("\nnotes (not failures):")

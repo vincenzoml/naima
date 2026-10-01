@@ -129,11 +129,17 @@ export interface Finding {
   item?: Item
 }
 
+/** What `naima check` is asked for, beyond the tracker itself. */
+export interface CheckOptions {
+  /** Report every worktree's state as the coordinator sees it, not only this one's: a sibling's missing claim is a problem too, not only a note. */
+  allWorktrees?: boolean
+}
+
 export interface Check {
   name: string
   says: string
   /** May be async: a check that runs an external tool awaits it. */
-  run(ctx: Context): Finding[] | Promise<Finding[]>
+  run(ctx: Context, options?: CheckOptions): Finding[] | Promise<Finding[]>
 }
 
 /** One documented option: a command's `--flag`, or a plugin's configuration key. */

@@ -10,7 +10,7 @@ import { appliesTo, fieldError, fieldsOf, isOpenList, offList } from "./fields.t
 import { isUuid, README, titleWords } from "./item.ts"
 import { label } from "./lifecycle.ts"
 import { storedLinks } from "./repo.ts"
-import type { Check, Context, Finding, Item } from "./types.ts"
+import type { Check, CheckOptions, Context, Finding, Item } from "./types.ts"
 
 const problem = (message: string, item?: Finding["item"]): Finding => (item ? { level: "problem", message, item } : { level: "problem", message })
 const note = (message: string): Finding => ({ level: "note", message })
@@ -162,11 +162,11 @@ export interface CheckReport {
 }
 
 /** Run every check, in load order, awaiting the ones that are async. A check that throws or rejects is itself a problem, never a crash. */
-export async function runChecks(ctx: Context): Promise<CheckReport> {
+export async function runChecks(ctx: Context, options: CheckOptions = {}): Promise<CheckReport> {
   const findings: Finding[] = []
   for (const check of ctx.registry.checks) {
     try {
-      findings.push(...await check.run(ctx))
+      findings.push(...await check.run(ctx, options))
     } catch (e) {
       findings.push(problem(`check "${check.name}" failed to run: ${message(e)}`))
     }

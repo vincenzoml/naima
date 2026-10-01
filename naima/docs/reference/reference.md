@@ -357,13 +357,18 @@ naima move export-drops features --force
 Run every invariant; exit 1 on any problem.
 
 ```sh
-naima check
+naima check [--all-worktrees]
 ```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--all-worktrees` |  | the coordinator's view: every worktree's missing claim is a problem, not only the one being checked |
 
 Examples:
 
 ```sh
 naima check
+naima check --all-worktrees
 ```
 
 ### naima board
@@ -833,7 +838,7 @@ naima pass --list 3
 | Check | What it holds |
 |---|---|
 | `claims-resolve` | a claim written in this worktree names items that exist |
-| `worktree-policy` | every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem |
+| `worktree-policy` | every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem for the worktree being checked, and (unless naima check --all-worktrees) a note naming any other worktree in the same state |
 | `trunk-moved-while-preparing` | a branch whose claim is marked preparing is told every commit the trunk took that it lacks, and which of them the trunk's reflog records as committed on the trunk directly |
 | `closed-not-claimed` | no archived item (one in a type that is not creatable, where naima close moves it) is claimed by the branch you stand on: what no-closing-own-claims refuses on a write, asserted on the tracker as it is, hand edits included |
 
