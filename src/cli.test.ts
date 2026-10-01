@@ -200,6 +200,24 @@ test("update and carry move the program, so they run only through the launcher; 
   }
 })
 
+test("guide, inside a project, prints the project's active rules for agents first, then the documentation", async () => {
+  const h = host()
+  try {
+    assert.equal((await naima(h.root, ["init"])).code, 0)
+    const made = await naima(h.root, ["new", "rules", "Ask before deleting", "--set", "audience=agents", "--set", "strength=must"])
+    assert.equal(made.code, 0, made.err)
+    writeFileSync(join(h.root, "naima-tracker", "naima-data", "rules", "ask-before-deleting", "README.md"), "# Ask before deleting\n\nAsk first.\n")
+    assert.equal((await naima(h.root, ["new", "rules", "Sign the release", "--set", "audience=people", "--set", "strength=must"])).code, 0)
+    const guide = await naima(h.root, ["guide"])
+    assert.equal(guide.code, 0, guide.err)
+    assert.match(guide.out, /^Read first — the project's rules for agents[^\n]*\n\nMUST · agents · Ask before deleting[^\n]*\n {4}Ask first\.\n\nNaima /)
+    assert.doesNotMatch(guide.out, /Sign the release/)
+    assert.equal((await naima(h.base, ["guide"])).out.split("\n")[0]?.startsWith("Naima "), true, "outside a project: the documentation only")
+  } finally {
+    h.cleanup()
+  }
+})
+
 test("the reference is the program's: a project's own gates do not change it", async () => {
   const h = host()
   try {

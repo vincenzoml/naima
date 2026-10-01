@@ -15,6 +15,9 @@ when to use it.
 - **Update at the start of a session.** `naima update --check`; when the
   source's dist has moved, `naima update`, the checks, and one commit
   ([updating](../guide/install.md#updating)). Running it is the agent's job.
+- **Read the project's rules.** `naima rules --audience agents`, before
+  anything else: the project's own rules, kept as items of its tracker
+  ([read the project's rules](read-the-project-rules.md)).
 - **Work by the rules and the flows.** Read [the rules](../guide/rules.md),
   then the [flow](README.md#the-flows) that applies.
 - **Read the corpus as files.** The flows, the rules, the format and the docs

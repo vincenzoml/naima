@@ -14,9 +14,12 @@ Start from who you are.
 
 - **[guide/](guide/README.md)** — for people. No code assumed. The tutorial,
   a page per everyday task, concepts, the [rules](guide/rules.md) (the only
-  page that states them), installing, configuration, questions, glossary.
+  page that states them), a project's own rules
+  ([write one](guide/write-a-project-rule.md)), installing, configuration,
+  questions, glossary.
 - **[agents/](agents/README.md)** — for agents. How an agent learns a
-  project, the skill, and the flows: the procedures an agent follows.
+  project, the skill, [the project's own rules](agents/read-the-project-rules.md),
+  and the flows: the procedures an agent follows.
 - **[reference/](reference/)** — [the format](reference/format.md), the open
   specification of every file; [the reference](reference/reference.md),
   generated from the plugins' manifests, so it cannot drift from the code.

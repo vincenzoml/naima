@@ -19,6 +19,7 @@ you do not know is in the [glossary](glossary.md).
 |---|---|
 | say something is broken | [File a bug](file-a-bug.md) |
 | ask for something new | [File a feature](file-a-feature.md) |
+| set a rule only this project has | [Write a project rule](write-a-project-rule.md) |
 | rank what is open | [Triage](triage.md) |
 | see where things stand | [Read the board, the queue and the gates](read-the-board.md) |
 | prove a fix and close it | [Prove and close](prove-and-close.md) |

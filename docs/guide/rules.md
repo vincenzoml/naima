@@ -201,3 +201,6 @@ How to set `docs` on a feature: [file a feature](file-a-feature.md#when-it-ships
 
 A project's own rules — the ones only it holds to — are not pages of Naima's
 documentation: they are data in its own `naima-tracker/naima-data/`.
+`naima rules` lists them, and `naima guide` shows those for agents first:
+[write a project rule](write-a-project-rule.md),
+[read the project's rules](../agents/read-the-project-rules.md).

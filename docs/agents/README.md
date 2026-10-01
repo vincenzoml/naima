@@ -14,8 +14,9 @@ should know about working with agents is
 2. **Read [the rules](../guide/rules.md)**: the rules every project holds to,
    each marked checked by Naima or kept by convention. They are written there
    and nowhere else; the flows below apply them.
-3. **Read the project's own rules**, which are data in its
-   `naima-tracker/naima-data/` ([a project's own rules](../guide/rules.md#a-projects-own-rules)).
+3. **Read the project's own rules**: `naima rules --audience agents`. They
+   are data in its `naima-tracker/naima-data/`
+   ([read the project's rules](read-the-project-rules.md)).
 4. **See where the project stands**: `naima summary`, `naima queue`,
    `naima claims` ([read the board](../guide/read-the-board.md)).
 5. **Before acting, read the flow that applies**, below.

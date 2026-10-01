@@ -325,7 +325,7 @@ Read these as files; they are the documentation of the Naima that runs:
   skill    naima-tracker/naima/skills/naima/SKILL.md
   index    naima-tracker/naima/docs/README.md
   guide    naima-tracker/naima/docs/guide/README.md
-  rules    naima-tracker/naima/docs/guide/rules.md
+  rulebook naima-tracker/naima/docs/guide/rules.md
   agents   naima-tracker/naima/docs/agents/README.md
   format   naima-tracker/naima/docs/reference/format.md
   install  naima-tracker/naima/docs/guide/install.md
