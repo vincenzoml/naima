@@ -7,8 +7,11 @@ $ARGUMENTS
 Flow: [reporting and triage](../../../../docs/agents/reporting-and-triage.md) —
 it owns the routing table.
 
-1. **Write it before you understand it**: `naima new <type> "<what happened>"`.
-   Broken → `bugs`; work → `todos`; wanted → `features`; to be tried → `tests`.
+1. **Write it before you understand it**: `naima new <type> "<what happened>"`
+   — add `--dedupe` to see likely duplicates of the same type before it
+   writes (it still writes; link, don't refile). Broken → `bugs`; work →
+   `todos`; wanted → `features`; to be tried → `tests`; a decision → `decisions`;
+   a deferral → say why.
 2. **The page carries**: what happened, in your own words (the owner's words or
    files only with their yes), the evidence, measured apart from
    inferred, the consequence. Write it with `naima describe <item> "<text>"`

@@ -163,3 +163,18 @@ deleted in one go), tag where it starts: `git tag checkpoint/<date>-<what>`.
   else has checked the proof. `naima close --force` is for the one who owns
   the [evidence](../guide/glossary.md#evidence) — a proof someone else performed, recorded here.
 - **Deleting the scratchpad.** It was never tracked.
+
+## Safety rules
+
+- **Whoever fixes does not also close.** Enforced: `naima close` refuses an
+  item the branch you stand on claims, and `naima close --force` is reserved
+  for the evidence owner recording a proof someone else performed
+  ([not part of closing](#not-part-of-closing)).
+- **A branch not fast-forwardable is never forced in.** Convention: `git
+  merge --ff-only` is the only merge command used here, and its refusal is
+  read as information, not worked around
+  ([worktree isolation](worktree-isolation.md#3-every-merge-to-the-trunk-is-a-fast-forward)).
+- **No branch is deleted while it still holds work the trunk lacks.**
+  Enforced by `naima prune`, which refuses without an `archive/<branch>` tag.
+- **A fix is not resolved until a gesture proves it.** Enforced by `naima
+  close`, which refuses anything not [resolved](../guide/glossary.md#resolved).

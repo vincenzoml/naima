@@ -124,8 +124,9 @@ November".
 
 **Today:** features (`requested`, `planned`, `shipped`, `withdrawn`) and
 todos are item types, and so are requirements, specifications and the
-owner's decisions ([planning with them](guide/plan-with-requirements-specs-and-decisions.md)). Epics and
-milestones are [planned](planned.md#epics-and-milestones).
+owner's decisions ([planning with them](guide/plan-with-requirements-specs-and-decisions.md)).
+Epics group items, and a milestone is a gate with a date
+([plan with epics, milestones and gates](guide/plan-with-epics-milestones-and-gates.md)).
 
 ### Gates and the queue
 

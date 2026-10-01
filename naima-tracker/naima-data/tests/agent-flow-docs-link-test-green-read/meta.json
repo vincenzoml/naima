@@ -1,0 +1,29 @@
+{
+  "id": "e2bdaec6-98d1-437b-a3d2-f103a922c5f3",
+  "title": "Agent flow docs: link test green, read-through checklist covers report shape, commit contract, stash hazard, role refusals, safety-rule statements",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "bf710ef8-85e1-4c3c-b06a-c448d966e85f"
+    },
+    {
+      "rel": "verifies",
+      "id": "7b6c8a02-e370-4eb9-a6b1-333d7b197122"
+    },
+    {
+      "rel": "verifies",
+      "id": "613cc72e-bcb3-4312-85e4-13dae3b48a66"
+    },
+    {
+      "rel": "verifies",
+      "id": "ce3f8e19-9ec5-4e02-a879-a8c81e971d57"
+    },
+    {
+      "rel": "verifies",
+      "id": "6ebc8158-c0e6-42d2-b502-462369a70b47"
+    }
+  ]
+}

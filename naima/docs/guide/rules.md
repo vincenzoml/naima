@@ -18,6 +18,15 @@ Rules that apply only to developing Naima itself are in Naima's own
 `AGENTS.md`, not here; [a project's own rules](#a-projects-own-rules) are
 data in its tracker.
 
+**A rule's reason is not the same as documentation's history.** "Documentation
+states what is, never how it came to be" is about product pages: the guide,
+the reference, a feature's own page — none of them tell the story of why a
+decision was made. A rule is different on purpose: every rule on this page
+carries its reason, because the reason is part of what the rule *is* — it is
+how you judge whether the rule still applies when the situation changes. So a
+rule's reason stays here, on the rule; it is never repeated as history on a
+product page.
+
 ## The tracker
 
 ### Change the tracker only through the CLI

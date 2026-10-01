@@ -8,16 +8,6 @@ what does, and [what Naima is for](purpose.md#what-exists-today) sums it up.
 Each entry says what it is, what you can do today instead, and an example.
 The order is the order of the work: the first entries come first.
 
-## Epics and milestones
-
-- **[Epics](guide/glossary.md#epic)** as an item type: a large goal grouping
-  features and todos. Example: "Replicate the 2024 study".
-- **[Milestones](guide/glossary.md#milestone)**: a [gate](guide/glossary.md#gate)
-  with a date, so `naima queue` can say what is late. Example: "draft results
-  by 15 November".
-- **Today:** a gate declared in `naima.json`, and a [todo](guide/glossary.md#todo)
-  whose page lists its parts and the date in prose.
-
 ## Item types for other work
 
 Packs of item types for work that is not software: experiments and analyses
