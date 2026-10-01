@@ -1,0 +1,13 @@
+{
+  "id": "4926098d-c8f8-4b3e-925f-6c429f356467",
+  "title": "naima triage coverage table runs the effort and confidence headers together",
+  "status": "open",
+  "created": "2026-10-01",
+  "area": "triage",
+  "kind": "code",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
+}
