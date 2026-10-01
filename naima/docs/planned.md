@@ -80,12 +80,12 @@ closing have one. Missing today:
 
 ## Metrics
 
-A metric is a named measurement and the command that measures it: test time,
-coverage, warnings, size, how long an analysis runs. It is recorded on every
-commit as evidence, compared with its baseline (no number without a
-comparison), shown as a trend, and usable as a gate ("coverage must not
-drop"). **Today:** `naima triage` counts how many items have each triage
-field set; nothing measures the work itself.
+Metrics measured on every commit without anyone asking: a commit hook that
+runs them and records the numbers, and a trend drawn as a chart on a
+dashboard. **Today:** `naima metrics run --record` runs the project's
+metrics when asked, records them per commit, holds each to a budget, a floor
+or a baseline, and `naima metrics trend` draws the trend as text
+([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ## Structuring a project from the start
 

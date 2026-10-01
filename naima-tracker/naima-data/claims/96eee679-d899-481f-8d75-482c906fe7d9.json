@@ -1,0 +1,12 @@
+{
+  "branch": "claude/u5-metrics",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "11c2a358-46cf-4136-b4ce-e4d9480a9755",
+      "ref": "features/project-declared-gate-set-ratcheting-budgets-covers",
+      "title": "Project-declared gate set with ratcheting budgets (covers the metrics request)"
+    }
+  ],
+  "note": "u5-metrics"
+}

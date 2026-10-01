@@ -322,6 +322,12 @@ carrying `gate: <name>`. A gate **holds** when nothing on it blocks.
 `holdsOn: "code"` waits for code, not proof; `holdsOn: "proof"` waits for
 every open item ([read the board, the queue and the gates](read-the-board.md)).
 
+### Metric
+
+A name and the command that measures it — test time, coverage, warnings,
+how long an analysis runs — recorded per commit and held to a budget, a
+floor or a baseline: `naima metrics` ([metrics and budgets](metrics-and-budgets.md)).
+
 ### Queue
 
 The open items on a gate, split by whose hands their proof needs:
