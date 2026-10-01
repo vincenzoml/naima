@@ -1,0 +1,27 @@
+{
+  "branch": "claude/u10-proof-integrity",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "40187932-f3aa-4d20-a09e-4e4412af7be2",
+      "ref": "bugs/hand-edits-bypass-write-hook-invariants-naima",
+      "title": "Hand edits bypass write-hook invariants; `naima check` must re-assert them"
+    },
+    {
+      "id": "5bcb2cd6-b487-43d1-a6ef-b099c99e4fe4",
+      "ref": "bugs/evidence-digest-covers-one-file-included-file",
+      "title": "Evidence digest covers one file; included-file changes and tool version go unnoticed"
+    },
+    {
+      "id": "772ad4d7-6084-4372-a661-eaf30481805e",
+      "ref": "bugs/naima-new-exits-2-invalid-set-value",
+      "title": "naima new exits 2 on an invalid --set value, yet leaves the item it refused behind"
+    },
+    {
+      "id": "2d1d6b7d-5a9f-4aeb-a53c-c4250cf6d199",
+      "ref": "bugs/naima-new-rejected-set-value-exits-2",
+      "title": "naima new with a rejected --set value exits 2 but leaves the item it refused on disk"
+    }
+  ],
+  "note": "U10 proof integrity"
+}
