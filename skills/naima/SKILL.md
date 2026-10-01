@@ -54,7 +54,17 @@ When it says the source's dist moved, run `naima update`, then `naima check`,
 then commit `naima-tracker/` as one change. Updating is your job, not a
 person's: [updating](../../docs/install.md#updating).
 
-## 4. Work by the flows
+## 4. Read the project's rules
+
+```sh
+naima rules --audience agents
+```
+
+The project's own rules for agents — how to work and report here — kept as
+items of its tracker. Obey them for the whole session; `naima guide` prints
+them first too ([rules as data](../../docs/rules-as-data.md)).
+
+## 5. Work by the flows
 
 Every change to the tracker goes through the CLI (`naima new`, `set`, `link`,
 `claim`, `close`); `naima check` must pass before a commit. What to do, and

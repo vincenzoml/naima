@@ -14,6 +14,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [gates](#gates) — named release conditions backed by items
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
+- [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
 - [docs](#docs) — every feature is documented as part of its implementation, and naima check holds it
 
 ## Commands at a glance
@@ -23,7 +24,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given |
 | [`update`](#naima-update) | core | move the lock to the head of the source's dist branch — its main, when the source publishes no dist: fetch it, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
 | [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored clone, vendored as committed files, or a git submodule — staging the switch as one change |
-| [`guide`](#naima-guide) | core | print where the running Naima's documentation is: the skill, the docs index, the flows, the format, installing; read them as files |
+| [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs index, the flows, the format, installing; read them as files |
 | [`help`](#naima-help) | core | list every command the loaded plugins provide, with its usage |
 | [`new`](#naima-new) | core | open an item |
 | [`show`](#naima-show) | core | print one item: fields, links in both directions, attachments, prose |
@@ -51,6 +52,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
+| [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
 | [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
 
 ## Extension points
@@ -59,14 +61,15 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, beta-markers, verifier, docs |
-| `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, verifier |
-| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, verifier, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, beta-markers, verifier, rules, docs |
+| `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, verifier, rules |
+| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, verifier, rules, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, beta-markers, verifier, docs |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, beta-markers, verifier, rules, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, beta-markers |
+| `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
 | `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to |  |
 | `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, verifier |
@@ -140,7 +143,7 @@ naima carry clone
 
 ### naima guide
 
-Print where the running Naima's documentation is: the skill, the docs index, the flows, the format, installing; read them as files.
+Inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs index, the flows, the format, installing; read them as files.
 
 ```sh
 naima guide
@@ -953,6 +956,64 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 | Verifier | What it checks |
 |---|---|
 | `example-regex` | line-regex properties over a text file: "some <re>" or "never <re>" |
+
+## rules
+
+The project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules.
+
+Its contributions' qualified ids are `rules/<name>`.
+
+A project's rules — how an agent works here (quiet, simple, fast), how it reports, what it asks before doing — are tracker data, one `rules` item each, so every project carries its own. A rule's page is the rule and its reason; `audience` says whom it binds (`agents`, `people`, `everyone`), `strength` how much (`must`, `should`), and `enforcedBy`, when set, the check or gate that holds it. An active rule is shown; a retired one is kept as history. `naima rules --audience agents` is what an agent reads at the start of work, and `naima guide` prints it first. 
+
+### naima rules
+
+Print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work.
+
+```sh
+naima rules [--audience <agents|people|everyone>] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--audience` |  | only the rules for that audience, and those for everyone |
+| `--json` |  | print the rules as JSON: item, title, audience, strength, enforcedBy, text |
+
+Examples:
+
+```sh
+naima rules
+naima rules --audience agents
+naima rules --audience people --json
+```
+
+### type: rules
+
+Rules: a rule of this project, for agents, people or both: its page is the rule and its reason; a rule is not work, so neither status is open and no board of open work lists it. Items live in `naima-tracker/naima-data/rules/`; a new one starts as `active`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `active` | done |  | in force: `naima rules` and `naima guide` show it |
+| `retired` | done |  | no longer in force; the page says what replaced it, if anything |
+
+**Fields**
+
+| Field | Kind | Applies to | Meaning | Values |
+|---|---|---|---|---|
+| `audience` | enum | rules | who the rule binds | `agents` an agent working in the project; `people` a person working in the project; `everyone` agents and people alike |
+| `strength` | enum | rules | how binding the rule is | `must` always; breaking it is a defect; `should` unless there is a reason, said where the work is recorded |
+| `enforcedBy` | string | rules | the check or gate that enforces the rule, when one does; unset, the rule is kept by whoever reads it |  |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `rules` | every active rule has its text and a valid audience, and names as enforcedBy only a check or gate that exists |
+
+**Guide sections**, printed first by `naima guide`
+
+| Section | What it shows |
+|---|---|
+| `rules` | the project's active rules for agents, read before anything else |
 
 ## docs
 

@@ -184,8 +184,7 @@ export default function rules(): Plugin {
     about:
       "A project's rules — how an agent works here (quiet, simple, fast), how it reports, what it asks before doing — are tracker data, one `rules` item each, so every project carries its own. " +
       "A rule's page is the rule and its reason; `audience` says whom it binds (`agents`, `people`, `everyone`), `strength` how much (`must`, `should`), and `enforcedBy`, when set, the check or gate that holds it. " +
-      "An active rule is shown; a retired one is kept as history. `naima rules --audience agents` is what an agent reads at the start of work, and `naima guide` prints it first. " +
-      "How to write one: [rules as data](rules-as-data.md).",
+      "An active rule is shown; a retired one is kept as history. `naima rules --audience agents` is what an agent reads at the start of work, and `naima guide` prints it first. ",
     types: [rulesType],
     fields: [AUDIENCE, STRENGTH, ENFORCED_BY],
     commands: [command],
