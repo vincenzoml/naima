@@ -62,8 +62,12 @@ running the checklist on its own, unprompted, at a project's first commit.
   [the Naima skill](agents/skill.md) from the copy in `naima-tracker/naima/`,
   rather than from a second copy kept in the project.
 - **A dashboard**: a visual page of the project's state — boards, gates, the
-  ranked queue, claims and notes. **Today:** `naima ui` opens a window with
-  one view, the project's metrics, which plugins can add views beside; and
+  ranked queue, claims and notes across branches, the evidence attached to
+  each item, in a look of its own. **Today:** `naima ui` opens a window whose
+  first screen shows the summary, the gates and what is next, with the
+  metrics, the timeline and the coverage as tabs, and plugins can add panels
+  and tabs beside them; the boards, the claims and notes across branches and
+  the evidence have no view of their own yet, and the look is plain; and
   `naima summary --markdown` prints the state as text you can paste anywhere.
 
 ## A pointer in the agent's instruction file

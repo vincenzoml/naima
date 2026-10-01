@@ -1,0 +1,21 @@
+{
+  "id": "b0350c4c-1226-4ece-be37-fca5a85e0508",
+  "title": "naima ui's first screen looks right to the owner",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "human",
+  "humanBecause": "judgement",
+  "area": "ui",
+  "kind": "code",
+  "impact": "medium",
+  "priority": "later",
+  "effort": "S",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "b62da281-24df-4da5-8b87-5a895bf57df2"
+    }
+  ]
+}

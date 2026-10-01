@@ -1,0 +1,20 @@
+{
+  "id": "83e8a196-f01f-40e2-bc75-05adcd58ffc0",
+  "title": "naima ui's first screen shows summary, gates and next up, each panel's data equal to the CLI's --json",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "area": "ui",
+  "kind": "code",
+  "impact": "medium",
+  "priority": "now",
+  "effort": "S",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "b62da281-24df-4da5-8b87-5a895bf57df2"
+    }
+  ]
+}

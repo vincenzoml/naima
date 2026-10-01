@@ -256,25 +256,102 @@ function printGate(ctx: Context, gate: GateDef, r: GateResult, hands = false): v
   for (const i of r.owed) ctx.out(`  · ${label(i)}  ${i.meta.title}${who(i)}`)
 }
 
+/** An item a gate waits for, as `naima gates --json` and the window give it. */
+interface GateItemRow {
+  ref: string
+  title: string
+  /** Whose hands its proof needs: its `runBy`, or "" when unclassified. */
+  runBy: string
+}
+
+/** A gate and whether it holds, as `naima gates --json` prints it and the window's gates panel shows it. */
+interface GateRow {
+  gate: string
+  title: string
+  /** Its version and due date in words, or "". */
+  when: string
+  holds: boolean
+  reasons: string[]
+  blocking: GateItemRow[]
+  owed: GateItemRow[]
+}
+
+/** The gates named — every one when none is — each evaluated now: what `naima gates` prints and the gates panel shows. */
+async function gateRows(ctx: Context, names: string[] = []): Promise<{ def: GateDef; result: GateResult; row: GateRow }[]> {
+  const all = gatesOf(ctx).map((g) => g.name)
+  return await Promise.all((names.length ? names : all).map(async (name) => {
+    const def = ctx.registry.find<GateDef>("gates", name)?.value
+    if (!def) throw new Error(`no gate "${name}" — gates: ${all.join(", ") || "none configured"}`)
+    const result = await def.evaluate(ctx)
+    const item = (i: Item): GateItemRow => ({ ref: label(i), title: i.meta.title, runBy: runByOf(ctx, i) })
+    return {
+      def,
+      result,
+      row: {
+        gate: def.name,
+        title: def.title,
+        when: timing(ctx, def),
+        holds: result.holds,
+        reasons: result.reasons ?? [],
+        blocking: result.blocking.map(item),
+        owed: result.owed.map(item),
+      },
+    }
+  }))
+}
+
 const gatesCommand: Command = {
   name: "gates",
   says: "every gate, whoever declared it, and whether it holds; --check exits 1 if one does not",
-  usage: "gates [name...] [--check]",
-  options: [{ name: "--check", says: "exit 1 when a listed gate does not hold" }],
-  examples: ["gates", "gates first-public --check"],
+  usage: "gates [name...] [--check] [--json]",
+  options: [
+    { name: "--check", says: "exit 1 when a listed gate does not hold" },
+    { name: "--json", says: "print the gates as JSON: each one's name, title, timing, whether it holds, and the items blocking it or owed" },
+  ],
+  examples: ["gates", "gates first-public --check", "gates --json"],
   async run(args, ctx) {
-    const p = parse(args, { check: { type: "boolean" } })
-    const names = gatesOf(ctx).map((g) => g.name)
-    const wanted = p.positionals.length ? p.positionals : names
-    let failed = 0
-    for (const name of wanted) {
-      const gate = ctx.registry.find<GateDef>("gates", name)?.value
-      if (!gate) throw new Error(`no gate "${name}" — gates: ${names.join(", ") || "none configured"}`)
-      const r = await gate.evaluate(ctx)
-      if (!r.holds) failed++
-      printGate(ctx, gate, r)
+    const p = parse(args, { check: { type: "boolean" }, json: { type: "boolean" } })
+    const gates = await gateRows(ctx, p.positionals)
+    if (bool(p, "json")) ctx.out(JSON.stringify(gates.map((g) => g.row), null, 2))
+    else for (const g of gates) printGate(ctx, g.def, g.result)
+    return bool(p, "check") && gates.some((g) => !g.result.holds) ? 1 : 0
+  },
+}
+
+const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+
+/** The gates as a panel of the first screen of `naima ui`: the shape the `ui-views` point takes, declared here since plugins never import each other. */
+const gatesUiView = {
+  name: "gates",
+  title: "Gates",
+  says:
+    "every gate and whether it holds, with the items blocking it and those owing only proof, as `naima gates` reports them; its data is `naima gates --json`",
+  order: 0,
+  panel: true,
+  async render(_params: Record<string, string[]>, ctx: Context) {
+    const rows = (await gateRows(ctx)).map((g) => g.row)
+    const items = (what: string, list: GateItemRow[]) =>
+      list.length
+        ? `<details><summary>${list.length} ${what}</summary><ul>${
+          list.map((i) => `<li><code>${esc(i.ref)}</code> ${esc(i.title)}${i.runBy ? ` <span class="by">(${esc(i.runBy)})</span>` : ""}</li>`).join("")
+        }</ul></details>`
+        : ""
+    const html = rows.map((g) =>
+      [
+        `<h3>${esc(g.gate)} — ${esc(g.title)}</h3>`,
+        `<p><strong class="${g.holds ? "holds" : "blocked"}">${g.holds ? "Holds" : `Blocked by ${g.blocking.length}`}</strong>${
+          g.owed.length ? `, ${g.owed.length} owed` : ""
+        }${g.when ? ` · ${esc(g.when)}` : ""}</p>`,
+        ...(g.reasons.length ? [`<ul>${g.reasons.map((w) => `<li>${esc(w)}</li>`).join("")}</ul>`] : []),
+        items("blocking", g.blocking),
+        items("owing only proof", g.owed),
+      ].join("\n")
+    )
+    return {
+      data: rows,
+      html: html.length ? html.join("\n") : "<p>No gate is configured: <code>naima gate new</code> declares one.</p>",
+      css: ".holds{color:#1a7f37}.blocked{color:#cf222e}.by{opacity:.75}details{margin:0 0 6px}h3{margin:12px 0 4px;font-size:1em}",
     }
-    return bool(p, "check") && failed ? 1 : 0
   },
 }
 
@@ -606,8 +683,8 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
     points: [gatesPoint],
     // What it reads of the trackers' vocabulary: without it loaded, gates would decide on nothing.
     uses: { fields: [FIXED_ON.name, RUN_BY.name, HUMAN_BECAUSE.name], relations: ["verifies", "verified-by"] },
-    contributes: { gates: defs, "ui-views": [coverageUiView(lists)] },
-    // Coverage is a tab of naima ui when the ui plugin is loaded; without it, still a command.
+    contributes: { gates: defs, "ui-views": [gatesUiView, coverageUiView(lists)] },
+    // The gates are a panel of naima ui, coverage a tab, when the ui plugin is loaded; without it, still a command.
     optional: ["ui-views"],
     migrations: [moveGates],
     rank: [{ name: "gate", score: (i) => (onGates(i).length ? 0 : 4) }],

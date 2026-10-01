@@ -1,0 +1,26 @@
+{
+  "id": "63c71890-8814-45f5-8756-bcbaa3ec9fec",
+  "title": "Jargon audit log shows before/after per page and the link checks still pass",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "220395ba-ce18-4df3-9720-74b333e5dc77"
+    }
+  ],
+  "attached": {
+    "verify.log": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  },
+  "evidenceKind": "observation",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
+}

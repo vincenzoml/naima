@@ -2,7 +2,9 @@
 // token, and nothing without it, on the loopback interface only; the window
 // is chosen when it can open, the browser when it cannot or when asked; the
 // metrics view picks metrics and a commit range; a plugin's view appears as a
-// tab without the ui plugin knowing it.
+// tab without the ui plugin knowing it; the first screen holds the summary,
+// the gates and what is next, each panel's data what the command prints with
+// --json for the same tree.
 
 import assert from "node:assert/strict"
 import { networkInterfaces } from "node:os"
@@ -24,7 +26,8 @@ const helloPlugin = (): Plugin => ({ name: "hello", says: "a test view", contrib
 
 test("the server answers a view and its data with the token, a cookie after it, and refuses every request without it", async () => {
   const p = tempProject([ui(), helloPlugin()])
-  const served = await serve(p.ctx, viewsOf(p.ctx))
+  // no panel among the views: / is the first tab
+  const served = await serve(p.ctx, [hello])
   try {
     const base = `http://${served.host}:${served.port}`
     assert.equal(served.url, `${base}/?token=${served.token}`)
@@ -41,7 +44,7 @@ test("the server answers a view and its data with the token, a cookie after it, 
     assert.equal(page.status, 200)
     const html = await page.text()
     assert.match(html, /<p id="hello">hello a,b<\/p>/)
-    assert.match(html, /<nav><a href="\/view\/hello" aria-current="page"/)
+    assert.match(html, /<nav aria-label="Views"><a href="\/view\/hello" aria-current="page"/)
     const data = await fetch(`${base}/data/hello?token=${served.token}&who=c`)
     assert.equal(data.headers.get("content-type"), "application/json; charset=utf-8")
     assert.deepEqual(await data.json(), { params: { who: ["c"] } })
@@ -71,7 +74,13 @@ test("the server binds the loopback interface only: another interface of this ma
 test("a view a plugin contributes is a tab, without the ui plugin knowing that plugin; the metrics view is first among the first-party ones", () => {
   const p = tempProject([...firstPartyPlugins(), helloPlugin()])
   try {
-    assert.deepEqual(viewsOf(p.ctx).map((v) => v.name), ["metrics", "hello", "timeline", "coverage"], "a later order puts a tab after, whatever the load order")
+    const views = viewsOf(p.ctx)
+    assert.deepEqual(
+      views.filter((v) => !v.panel).map((v) => v.name),
+      ["metrics", "hello", "timeline", "coverage"],
+      "a later order puts a tab after, whatever the load order",
+    )
+    assert.deepEqual(views.filter((v) => v.panel).map((v) => v.name), ["summary", "gates", "next"], "the first screen: summary, gates, next up")
   } finally {
     p.cleanup()
   }
@@ -116,6 +125,66 @@ test("the metrics view picks metrics and a range of commits, from the records on
   }
 })
 
+test("the first screen shows the summary, the gates and what is next; each panel's data is what the command prints with --json for the same tree", async () => {
+  const p = tempProject([...firstPartyPlugins({ gates: { gates: { beta: { title: "Public beta" } } } }), helloPlugin()])
+  const served = await serve(p.ctx, viewsOf(p.ctx))
+  try {
+    for (const t of ["Export drops rows", "Crash on <empty> input", "Slow board"]) assert.equal(await p.run("new", "bugs", t), 0)
+    const titled = (t: string) => p.ctx.repo.items.find((i) => i.meta.title === t)!
+    const [a, b] = [titled("Export drops rows"), titled("Crash on <empty> input")]
+    assert.equal(await p.run("set", a!.meta.id, "priority=now", "impact=high"), 0)
+    assert.equal(await p.run("gate", "add", "beta", a!.meta.id, b!.meta.id), 0)
+    p.ctx.reload()
+    const cli = async (command: string, ...args: string[]) => {
+      p.output.length = 0
+      assert.equal(await p.run(command, ...args), 0)
+      return JSON.parse(p.output.join("\n"))
+    }
+    const base = `http://${served.host}:${served.port}`
+    const data = async (name: string) => await (await fetch(`${base}/data/${name}?token=${served.token}`)).json()
+    // items written after the server started: every request reads them now
+    assert.deepEqual(await data("summary"), await cli("summary", "--json"))
+    assert.deepEqual(await data("gates"), await cli("gates", "--json"))
+    assert.deepEqual(await data("next"), await cli("view", "--json", "next"))
+    const gates = await data("gates") as { gate: string; holds: boolean; blocking: { title: string }[] }[]
+    assert.deepEqual(gates.filter((g) => g.gate === "beta").map((g) => [g.holds, g.blocking.length]), [[false, 2]])
+    const next = await data("next") as { title: string }[]
+    assert.equal(next[0]?.title, "Export drops rows", "the most urgent first, as the CLI ranks it")
+
+    const home = await fetch(served.url)
+    assert.equal(home.status, 200)
+    const html = await home.text()
+    assert.match(html, /<nav aria-label="Views"><a href="\/" aria-current="page" [^>]*>Home<\/a><a href="\/view\/metrics"/, "Home is the first tab")
+    assert.doesNotMatch(html, /<nav[^\n]*href="\/view\/(summary|gates|next)"/, "a panel is not a tab")
+    const order = ["panel-summary", "panel-gates", "panel-next"].map((id) => html.indexOf(`<section class="panel" aria-labelledby="${id}">`))
+    assert.ok(order.every((at, i) => at > 0 && (i === 0 || at > order[i - 1]!)), "summary, then gates, then next up")
+    assert.match(html, /Blocked by 2/)
+    assert.match(html, /Crash on &lt;empty&gt; input/, "titles are escaped")
+    assert.match(html, /<th scope="col">Priority<\/th>/)
+    assert.doesNotMatch(html, /This panel failed/)
+    // a panel is a page of its own too, under the Home tab
+    const one = await (await fetch(`${base}/view/gates?token=${served.token}`)).text()
+    assert.match(one, /<a href="\/" aria-current="page"/)
+  } finally {
+    await served.close()
+    p.cleanup()
+  }
+})
+
+test("a panel that fails says so in its place; the rest of the first screen is shown", async () => {
+  const broken: UiView = { name: "broken", title: "Broken", says: "fails", panel: true, render: () => Promise.reject(new Error("no <data>")) }
+  const p = tempProject([ui(), helloPlugin()])
+  const served = await serve(p.ctx, [...viewsOf(p.ctx), broken])
+  try {
+    const html = await (await fetch(served.url)).text()
+    assert.match(html, /<p role="alert">This panel failed: no &lt;data&gt;<\/p>/)
+    assert.match(html, /aria-labelledby="panel-summary"/)
+  } finally {
+    await served.close()
+    p.cleanup()
+  }
+})
+
 /** Deps that record what `naima ui` asked for; `stop()` plays Ctrl-C. */
 function fake(window: () => Promise<Opened>, unavailable: string | null = null) {
   const asked: string[] = []
@@ -146,7 +215,7 @@ test("the window is opened when it can be, and closing it stops the server", asy
     const f = fake(() => Promise.resolve({ opened: true, how: "window", closed: new Promise<void>((done) => (close = done)), stop: () => close() }))
     const running = runUi(p.ctx, { browser: false, open: true }, { ...f.deps, window: (u) => ((url = u), f.deps.window(u)) })
     for (let i = 0; i < 200 && !url; i++) await new Promise((r) => setTimeout(r, 10))
-    assert.equal((await fetch(url, { redirect: "manual" })).status, 302)
+    assert.equal((await fetch(url, { redirect: "manual" })).status, 200)
     close()
     assert.equal(await running, 0)
     assert.deepEqual(f.asked.map((a) => a.split(" ")[0]), ["window"])
