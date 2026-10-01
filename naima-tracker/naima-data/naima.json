@@ -1,13 +1,22 @@
 {
-  "format": 1,
+  "format": 2,
+  "formats": {
+    "gates": 2
+  },
   "source": "https://github.com/vincenzoml/naima.git",
-  "commit": "068ace6e207e661d647e9c495c934b40cb90a4df",
+  "commit": "e81607e63484f54b2428ad2eac57d0d5a52a1073",
   "carry": "clone",
-  "gates": {
-    "first-public": {
-      "title": "First public release",
-      "says": "The repository opens to the public: licence chosen, Naima tracking itself through its own lock, the agent flows written.",
-      "holdsOn": "code"
+  "plugins": {
+    "gates": {
+      "options": {
+        "gates": {
+          "first-public": {
+            "title": "First public release",
+            "says": "The repository opens to the public: licence chosen, Naima tracking itself through its own lock, the agent flows written.",
+            "holdsOn": "code"
+          }
+        }
+      }
     }
   }
 }
