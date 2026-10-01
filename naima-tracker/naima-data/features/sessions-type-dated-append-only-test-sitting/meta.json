@@ -1,0 +1,16 @@
+{
+  "id": "952f6693-d056-46e9-a98d-1ce2c2878e3a",
+  "title": "`sessions` type: dated, append-only test-sitting records",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

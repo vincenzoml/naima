@@ -1,0 +1,16 @@
+{
+  "id": "4d67d7fd-8410-420e-9310-34803f59eb1a",
+  "title": "Derived timeline view (`naima view timeline`)",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

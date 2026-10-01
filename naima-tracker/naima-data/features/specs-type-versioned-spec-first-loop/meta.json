@@ -1,0 +1,16 @@
+{
+  "id": "3827e991-e675-4aac-87b8-e47352a8c151",
+  "title": "`specs` type, versioned, with a spec-first loop",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

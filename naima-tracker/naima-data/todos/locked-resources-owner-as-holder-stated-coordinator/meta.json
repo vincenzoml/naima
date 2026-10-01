@@ -1,12 +1,12 @@
 {
-  "id": "9e080b53-47d9-4417-9102-2b0d0fed061a",
-  "title": "Document Naima's purpose, requirements and philosophy",
+  "id": "f1d68726-7476-40cd-a4f4-91fa68f45ec6",
+  "title": "Locked resources and the owner as a holder, stated in the coordinator flow",
   "status": "open",
-  "created": "2026-09-30",
+  "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
   "confidence": "diagnosed",
-  "fixedOn": "2026-09-30",
+  "triagedOn": "2026-10-01",
   "links": [
     {
       "rel": "relates-to",

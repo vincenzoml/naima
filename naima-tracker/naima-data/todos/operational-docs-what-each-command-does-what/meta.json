@@ -1,0 +1,16 @@
+{
+  "id": "464a6b4b-0eda-4942-adb0-c4e1a6082152",
+  "title": "Operational docs: what each command does, what policies exist, how each is enforced",
+  "status": "open",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

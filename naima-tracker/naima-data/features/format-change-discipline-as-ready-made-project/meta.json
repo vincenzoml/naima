@@ -1,0 +1,16 @@
+{
+  "id": "c32d1de4-671d-4e9d-9963-2c6d89dbd17b",
+  "title": "Format-change discipline as a ready-made project-rule template",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "8fc0d415-f372-4f56-80da-e1adba03e8db",
+  "title": "Review the reporting-to-triage sequence against industry practice",
+  "status": "open",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "unclear",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

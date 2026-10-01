@@ -1,0 +1,16 @@
+{
+  "id": "96a1f1fc-92d4-430d-9628-9285f6075724",
+  "title": "Recovery tags before destructive git operations",
+  "status": "open",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

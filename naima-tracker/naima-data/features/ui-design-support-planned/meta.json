@@ -1,0 +1,16 @@
+{
+  "id": "dccdfeae-14e3-4658-b75a-ec7f4c3ae3ef",
+  "title": "UI design support (planned)",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "unclear",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}
