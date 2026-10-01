@@ -1,11 +1,16 @@
 # Naima
 
-Naima is a silent software house of AI agents: it turns vibe coding into an exact science. You say what you want. Agents build it with industry-grade practice — written requirements, tests, metrics, reviews, gates before anything ships — and with formal methods, properties of the design proven by tools, all applied for you without your needing to know them. Every claim comes with its evidence: nothing counts as done until it is shown to be. You only decide.
+Naima is a silent software house of AI agents: it turns vibe coding into an exact science. You say what you want. Agents build it with industry-grade practice — written [requirements](naima/docs/guide/glossary.md#requirement), tests, [metrics](naima/docs/guide/glossary.md#metric), reviews, [gates](naima/docs/guide/glossary.md#gate) before anything ships — and with [formal methods](naima/docs/guide/glossary.md#formal-methods), properties of the design proven by tools, all applied for you without your needing to know them. Every [claim](naima/docs/guide/glossary.md#claim) comes with its [evidence](naima/docs/guide/glossary.md#evidence): nothing counts as done until it is shown to be. You only decide.
 
 Born for software, it runs any other project too, with that work's own checks in place of tests: a data analysis checked by reproducible runs, a paper written with colleagues checked by reviews.
 Naima lives in a folder of your project and manages it with git, so you never have to.
 
 **You don't need to know git, code or project management. You need an AI agent — Naima does the rest.**
+
+Code-quality metrics — complexity, duplication, coverage and more — are
+measured per commit and shown beside the tests; see your project's in a
+native window with `naima ui`
+([metrics and budgets](naima/docs/guide/metrics-and-budgets.md)).
 
 ## Install
 

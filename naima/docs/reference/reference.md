@@ -1100,7 +1100,7 @@ Requirements proven by tests, specifications versioned name-vN, and the owner's 
 
 Its contributions' qualified ids are `planning/<name>`.
 
-Planning as items, so each is proven or checked rather than implied by a test. A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again.
+Planning as items, so each is proven or checked rather than implied by a test. A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again. A **release** opens at its first stage (`naima new releases "<name>"`); each stage's output is recorded with `naima note`, headed `Stage: <name>` (or `Stage: <name> — skipped, decided by <who>`), and the hook refuses `status=released` while a stage is unrecorded — `naima view releases` shows what each one still owes.
 
 **Uses**, declared by other plugins: fields `runBy`, `humanBecause`; relations `verified-by`.
 
@@ -1176,6 +1176,16 @@ Decisions: a choice or a standing permission of the owner's, recorded once: date
 | `reopened` | open |  | the owner reopened it: the question may be asked again, and the answer is a new decision that supersedes this one |
 | `superseded` | done |  | replaced by a later decision, kept as history |
 
+### type: releases
+
+Releases: a release in progress, staged from pre-release checks to announcing: each stage's output recorded before the next, a skipped stage naming who decided. Items live in `naima-tracker/naima-data/releases/`; a new one starts as `staging`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `staging` | open |  | in progress: opened at its first stage, not every stage is recorded yet |
+| `released` | done |  | every stage is recorded, or skipped and said by whom; published and announced |
+| `rolled-back` | done |  | a stage found an issue serious enough to stop the release; the page says why |
+
 **Fields**
 
 | Field | Kind | Applies to | Meaning | Values |
@@ -1205,18 +1215,21 @@ Decisions: a choice or a standing permission of the owner's, recorded once: date
 | `requirements-proven` | a requirement marked met has a proof that passed and none that refutes it; one proven but still stated is noted; one that nothing satisfies or verifies is noted |
 | `specs-versioned` | one version of a specification is current; a version superseded by a current one is marked superseded; a spec supersedes only an earlier version of itself; an open item following a superseded version is noted |
 | `decisions-settled` | an open item waiting on the owner's decision (runBy human, humanBecause decision) that a settled decision settles is noted, to be acted on rather than asked; a decision superseded by a settled one is marked superseded |
+| `release-stages` | a release marked released has every stage recorded or skipped with who decided; one hand-edited past the hook is a problem |
 
 **Views**, printed by `naima view <name>`
 
 | View | What it shows |
 |---|---|
 | `requirements` | every requirement that is not dropped: its status, whether it is proven, what satisfies it and what proves it |
+| `releases` | every release in progress or done: its status and which stages it still owes |
 
 **Write hooks**, run on every item write
 
 | Hook | What it does |
 |---|---|
 | `planning-stamps` | a new spec takes its name and version from its title (`Export format v2` is export-format, version 2) unless given; a new decision is dated today unless given |
+| `release-stages` | a release is marked released only once every stage is recorded, or skipped and said by whom |
 
 ## loop
 

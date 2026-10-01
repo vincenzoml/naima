@@ -1,0 +1,28 @@
+{
+  "id": "d500536b-8b51-4d73-bc8d-a6b40c113e9f",
+  "title": "Privacy rule, enforced: no owner-chat verbatim in items; attachments need explicit consent",
+  "status": "closed",
+  "created": "2026-10-01",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    },
+    {
+      "rel": "relates-to",
+      "id": "0d464e71-e558-428b-a74d-f569758f47e6"
+    }
+  ],
+  "effort": "S",
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "98408a3",
+    "9bcd268"
+  ],
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
+}

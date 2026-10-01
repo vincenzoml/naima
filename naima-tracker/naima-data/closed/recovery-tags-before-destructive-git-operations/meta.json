@@ -1,7 +1,7 @@
 {
-  "id": "90f25e70-b3de-41a2-bf46-48bafd66ca4d",
-  "title": "Release runbook flow",
-  "status": "shipped",
+  "id": "96a1f1fc-92d4-430d-9628-9285f6075724",
+  "title": "Recovery tags before destructive git operations",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
@@ -13,9 +13,11 @@
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
     }
   ],
+  "fixedOn": "2026-10-01",
   "effort": "M",
-  "docs": [
-    "naima/docs/agents/release.md"
+  "commits": [
+    "fd399a2"
   ],
-  "fixedOn": "2026-10-01"
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
 }

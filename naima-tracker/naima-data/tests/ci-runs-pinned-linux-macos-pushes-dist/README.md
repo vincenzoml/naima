@@ -20,3 +20,9 @@ Pass: all hold.
 
 Step 1 performed by the author on 2026-09-30 (read): pass. Steps 2–4 not
 performed: the workflow has not run; nothing is pushed.
+
+## Notes
+
+### 2026-10-01 — Claude, on claude/evidence-close-2
+
+Evidence-close-2: not run. .github/workflows/ now holds only pages.yml — no ci.yml exists to inspect or push to, and the dist branch this test checks for is being replaced by copy-on-install (features/copy-install-program-plain-copy-naima-from). The gesture as written no longer applies; left open for whoever updates or retires it alongside the dist removal.

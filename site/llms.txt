@@ -39,3 +39,5 @@ root of the git repository (`git init` makes one):
 
 - Source and README: https://github.com/vincenzoml/naima
 - The documentation: https://github.com/vincenzoml/naima/tree/main/naima/docs
+- Code-quality metrics (complexity, duplication, coverage and more), per
+  commit, in a native window: `naima ui`
