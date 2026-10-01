@@ -298,6 +298,21 @@ a regression is recognised when it comes back.
 
 What backs a claim: a log line, a number, a screenshot, a command's output,
 kept in the item's `attachments/`. "It works" without it is not a proof.
+Ranked, strongest first: the owner's own gesture; a screenshot, log line or
+number; the live state read by tooling; a before-and-after comparison; and
+"the code looks right", which proves nothing. No number without its
+comparison.
+
+### Evidence kind
+
+The field `evidenceKind` on a test: which rank of [evidence](#evidence) it
+carries — `owner-gesture`, `observation`, `live-read`, `diff` or `inspection`.
+
+### Red, then green
+
+A regression test proves a fix only if it was seen failing on the code before
+the fix, then passing on the fix. The field `redSeen` records the day it was
+seen red.
 
 ### Run by
 

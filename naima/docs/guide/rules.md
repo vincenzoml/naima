@@ -99,6 +99,29 @@ be closed. **Enforced by** `naima close` and the check
 `naima attach`. **Convention**, except for properties, whose runs
 `naima verify` attaches.
 
+### Evidence is ranked, and no number stands without its comparison
+
+Strongest first: the owner performing the gesture; a screenshot, a log line or
+a number; the live state read by tooling; a before-and-after comparison; "the
+code looks right", which proves nothing. A test names its rank in
+`evidenceKind`. A number proves something only beside the value it is
+compared with. **Enforced by** the check `inspection-proves-nothing`, as a
+note; the rest is **convention**: [prove and close](prove-and-close.md#3-perform-it-keep-the-evidence).
+
+### A regression test is seen red before it is green
+
+A test that verifies a bug was run on the code before the fix and failed,
+then on the fix and passed; `redSeen` records the day it failed.
+**Enforced by** the check `regression-test-saw-red`, as a note.
+
+### A page does not outlive its answer
+
+An open item's unticked clause does not name a test that has passed, and an
+agent's test does not excuse itself because something was held.
+**Enforced by** the checks `unticked-clause-names-passed-test` and
+`test-excuses-itself`, as notes; the excuse phrases are the `trackers` option
+`excusePhrases`.
+
 ### A partial item says what is left
 
 **Enforced by** the check `partial-says-what-is-left`: an item in status

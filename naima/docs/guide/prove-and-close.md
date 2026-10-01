@@ -59,6 +59,45 @@ naima set export-keeps status=passed      # or failed, or partial
 | `failed` | it does not hold — this [refutes](glossary.md#refutes), and blocks closing |
 | `partial` | performed in part; the page lists what is left as `- [ ]` lines |
 
+Say what kind of evidence you kept, from the ranking, strongest first:
+
+| Rank | `evidenceKind` | The evidence |
+|---|---|---|
+| 1 | `owner-gesture` | the owner performed the gesture and saw the result |
+| 2 | `observation` | a screenshot, a log line or a number, kept with the item |
+| 3 | `live-read` | the live state, read by tooling: a query, an API call, the running program's own answer |
+| 4 | `diff` | a before-and-after comparison: counts, sizes, outputs |
+| 5 | `inspection` | "the code looks right" — which proves nothing |
+
+```sh
+naima set export-keeps evidenceKind=observation
+```
+
+A number is evidence only beside its comparison: before and after, expected
+and seen. "The code looks right" is not evidence at all: `naima check` notes a
+passed test whose `evidenceKind` is `inspection`.
+
+**Red, then green.** A test that verifies a bug is a regression test. Run it on
+the code before the fix and see it fail; then on the fix, and see it pass. Write
+down the day it failed, and keep the failing run with the passing one:
+
+```sh
+naima set export-keeps redSeen=2026-01-13
+```
+
+`naima check` notes a passed regression test with no `redSeen`
+(`regression-test-saw-red`).
+
+Keep the pages current. `naima check` notes an open item whose unticked
+`- [ ]` clause names a test — as `tests/<slug>`, or as "the linked test" — that
+has passed (`unticked-clause-names-passed-test`): tick the clause, or reopen
+the test. It also notes an open test marked `runBy: agent` whose page says it
+could not run because something was held (`test-excuses-itself`): an agent's
+gesture waits on no one, so run it now, or say who must. The phrases it looks
+for are the option `excusePhrases` of the `trackers` plugin; any of these notes
+can be raised to a problem, or switched off, under `plugins.trackers.checks` in
+`naima.json`.
+
 ## 4. Close it
 
 ```sh
