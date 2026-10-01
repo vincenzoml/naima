@@ -1,60 +1,37 @@
 # Naima
 
-> Naima turns AI agents into a small software company that works for the
-> person who owns the repository: they say what they want; agents write the
-> code, test it, prove it works and document it, every claim with its
-> evidence, nothing done until shown to be; the person only decides. It lives
-> in one folder, naima-tracker/, as files in the git repository, and runs
-> from a clone of Naima's dist branch, locked to one commit; Deno runs it.
+> Naima turns AI agents into a small team that works quietly for the person
+> who owns the repository: they say what they want; agents do the work (code,
+> analyses, drafts), check it, prove it and document it, every claim with its
+> evidence, nothing done until shown to be; the person only decides. For any
+> project in a git repository: software, a data analysis, a paper written with
+> colleagues. The person needs no git, code or project management, only an AI
+> agent. It lives in one folder of the repository, naima-tracker/.
 
-If you were asked to "install https://vincenzoml.github.io/naima/" in a
-repository, this file is the whole procedure: do steps 1 to 5 below, in order.
+The install procedure, for people and agents alike, is the repository's
+README, section "Install":
+https://raw.githubusercontent.com/vincenzoml/naima/main/README.md
 
-## Install it in a repository
-
-Work from the root of the git repository to track (`git rev-parse --show-toplevel`).
+In short. If git is not installed, install it (macOS: `xcode-select --install`,
+or `brew install git` with Homebrew; Linux: the package manager, e.g.
+`sudo apt install git`; Windows: `winget install Git.Git`). Then, from the
+root of the git repository (`git init` makes one):
 
 1. Run the installer for this system:
    - macOS, Linux: `curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh`
    - Windows (PowerShell): `irm https://vincenzoml.github.io/naima/install.ps1 | iex`
-
-   It needs git. It installs Deno with Deno's official installer when Deno is
-   missing (set `NAIMA_NO_DENO_INSTALL=1` to be told how instead). It clones
-   https://github.com/vincenzoml/naima.git, branch `dist`, into
-   `naima-tracker/naima/` (ignored by git), runs `naima init`, which writes
-   `naima-tracker/` and nothing else, and runs `naima check`. Run again, it
-   only checks. It refuses, in one line, outside a git repository.
-
-2. Check it: `deno run -A naima-tracker/naima/naima.ts check` must end with
-   `all invariants hold`.
-
-3. Commit it: `git add naima-tracker && git commit -m "Track this project with Naima"`.
-
-4. Learn the workflow: read `naima-tracker/naima/skills/naima/SKILL.md` and
-   follow it, and the project's rules, `naima rules --audience agents`; every
-   tracker change goes through the CLI. In it, `naima` means
+2. `deno run -A naima-tracker/naima/naima.ts check` must end with `all invariants hold`.
+3. `git add naima-tracker && git commit -m "Track this project with Naima"`.
+4. Read `naima-tracker/naima/skills/naima/SKILL.md` and work by it, and the
+   project's rules, `naima rules --audience agents`; `naima` means
    `deno run -A naima-tracker/naima/naima.ts`.
-
-5. Make every later session know it: add this line, verbatim, to the agent
-   instruction file this repository has — AGENTS.md, CLAUDE.md, or whichever
-   file your agent reads; if there is none, create AGENTS.md — and commit it:
+5. Add this line, verbatim, to the repository's agent instruction file
+   (AGENTS.md, CLAUDE.md, or the one your agent reads; if none, create
+   AGENTS.md), and commit it:
 
    This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them.
 
-## By hand, without the installer
-
-```sh
-git clone --branch dist https://github.com/vincenzoml/naima.git naima-tracker/naima
-deno run -A naima-tracker/naima/naima.ts init
-deno run -A naima-tracker/naima/naima.ts check
-```
-
 ## More
 
-- The documentation, rendered: https://vincenzoml.github.io/naima/docs/
-
-- For agents, how to learn a project and the flows: https://vincenzoml.github.io/naima/docs/agents/
-- The rules every project holds to: https://vincenzoml.github.io/naima/docs/guide/rules.html
-- Installing and updating: https://vincenzoml.github.io/naima/docs/guide/install.html
-- The guide for people, with a tutorial: https://vincenzoml.github.io/naima/docs/guide/
-- Source: https://github.com/vincenzoml/naima
+- Source and README: https://github.com/vincenzoml/naima
+- The documentation: https://github.com/vincenzoml/naima/tree/main/naima/docs

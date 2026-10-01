@@ -1,16 +1,70 @@
 # Naima
 
-Naima is a project tracker for software built by people and AI agents together: bugs, work, features, tests and the proofs that close them, kept as plain files in the repository and checked like code.
+Naima turns your AI agents into a small team that works quietly for you. You say what you want. Agents do the work — code, analyses, drafts — check it, prove it and document it, and every claim comes with its evidence: nothing counts as done until it is shown to be. You only decide.
 
-Formal-methods tools such as model checkers plug in, so that a property of
-the software is tracked and proven the same way a test is.
+Software, a data analysis, a paper written with colleagues — or all of them in one repository.
+It lives in one folder of your repository, and never gets in your way.
 
-Status: research project, open source, still taking shape. Open by design:
-the file format is an open specification, and changing Naima to fit a project
-is encouraged.
+**You don't need to know git, code or project management. You need an AI agent — Naima does the rest.**
 
-Why Naima exists, what it requires of itself and the principles behind it:
-[purpose, requirements and principles](naima/docs/purpose.md). Read it first.
+## Install
+
+In the root of a git repository, one line. It sets up everything it needs:
+it installs [Deno](https://deno.com) when it is missing, and says how to
+install git if that is missing.
+
+```sh
+curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh     # macOS, Linux
+irm https://vincenzoml.github.io/naima/install.ps1 | iex          # Windows PowerShell
+```
+
+Or ask your agent: *Please install https://github.com/vincenzoml/naima in this repository.*
+
+### If you are the agent asked to install it
+
+If git is not installed, install it (macOS: `xcode-select --install`, or `brew install git` with Homebrew; Linux: the package manager, e.g. `sudo apt install git`; Windows: `winget install Git.Git`), then work from the root of the git repository
+(`git rev-parse --show-toplevel`; `git init` makes one), and do these steps in
+order.
+
+1. Run the installer line above for this system. It clones Naima into
+   `naima-tracker/naima/` (ignored by git), writes `naima-tracker/` and nothing
+   else, and checks it. Outside a git repository it refuses.
+2. Check it: `deno run -A naima-tracker/naima/naima.ts check` must end with
+   `all invariants hold`.
+3. Commit it: `git add naima-tracker && git commit -m "Track this project with Naima"`.
+4. Read `naima-tracker/naima/skills/naima/SKILL.md` and work by it, and read
+   the project's rules: `naima rules --audience agents`. Here `naima` means
+   `deno run -A naima-tracker/naima/naima.ts`.
+5. Add this line, verbatim, to the agent instruction file this repository
+   has — `AGENTS.md`, `CLAUDE.md`, or whichever file you read; if there is none,
+   create `AGENTS.md` — and commit it:
+
+   ```text
+   This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them.
+   ```
+
+By hand, without the installer:
+
+```sh
+git clone --branch dist https://github.com/vincenzoml/naima.git naima-tracker/naima
+deno run -A naima-tracker/naima/naima.ts init
+deno run -A naima-tracker/naima/naima.ts check
+```
+
+## Documentation
+
+**[The documentation map](naima/docs/README.md)** — where to start, by who you are:
+
+- **[purpose](naima/docs/purpose.md)**: why Naima exists and whom it serves;
+- **[the guide](naima/docs/guide/README.md)**, for people: a
+  [tutorial](naima/docs/guide/tutorial.md), a page per everyday task,
+  [installing and updating](naima/docs/guide/install.md), and
+  **[the rules](naima/docs/guide/rules.md)** every project holds to;
+- **[for agents](naima/docs/agents/README.md)**: the skill and the flows;
+- **reference**: [the format](naima/docs/reference/format.md) of every file,
+  and [every command and field](naima/docs/reference/reference.md);
+- **[developing Naima](develop/README.md)**, and the rules for working on this
+  repository: [AGENTS.md](AGENTS.md).
 
 ## Why the name
 
@@ -30,73 +84,6 @@ more by agents, and the tool is designed for them as much as for people.
 
 **The word.** In Arabic, *naʿīma* means grace and calm. Five letters, said the
 same way in every language, nothing to explain.
-
-## What it is
-
-Every item — a bug, a task, a feature, a test, a property — is a directory:
-`README.md` for the prose, `meta.json` for the fields, `attachments/` for the
-evidence. Items have permanent ids and typed links. Boards, queues and gates
-are derived when read and never stored, and `naima check` holds the tracker to
-its invariants the way a test suite holds the code. A small core loads
-plugins; everything else — item types, triage, gates, coordination across
-branches, formal verifiers, the documentation rule — is a plugin.
-
-## Quick start
-
-Requires [Deno](https://deno.com) and git. No dependencies, no releases, no
-binaries: a project carries one folder, `naima-tracker/`, and runs a clone of
-Naima's `dist` branch inside it — only the files that run Naima — locked to
-one commit. In the root of any git repository, one line does it all
-(it installs Deno too, when it is missing):
-
-```sh
-curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh     # macOS, Linux
-irm https://vincenzoml.github.io/naima/install.ps1 | iex          # Windows PowerShell
-```
-
-Those lines, and a prompt that has an agent do it, are on [the site](https://vincenzoml.github.io/naima/)
-(its source is `site/`). By hand, the same:
-
-```sh
-git clone --branch dist https://github.com/vincenzoml/naima.git naima-tracker/naima
-deno run -A naima-tracker/naima/naima.ts init
-deno run -A naima-tracker/naima/naima.ts new bugs "Export drops the alpha channel"
-deno run -A naima-tracker/naima/naima.ts check
-```
-
-The whole path, from an empty repository to a closed bug, every command with
-its real output: [the tutorial](naima/docs/guide/tutorial.md). Details:
-[installing and updating](naima/docs/guide/install.md),
-[the tracker folder](naima/docs/guide/tracker-folder.md),
-[the format](naima/docs/reference/format.md). An agent can do all of this itself:
-[the Naima skill](naima/docs/agents/skill.md).
-
-## Documentation
-
-**[Purpose, requirements and principles](naima/docs/purpose.md)** — read first:
-why Naima exists, whom it serves, what it requires of itself and what holds
-each requirement, its design principles and its non-goals.
-
-**[The documentation map](naima/docs/README.md)** — where to start, by who you are:
-
-- **[the guide](naima/docs/guide/README.md)**, for people using Naima, no code
-  assumed: a tutorial, a page per everyday task, concepts, configuration,
-  questions, a glossary, and **[the rules](naima/docs/guide/rules.md)** every
-  project holds to, each marked enforced or convention;
-- **[for agents](naima/docs/agents/README.md)**: how an agent learns a project, the
-  skill, and the flows;
-- **reference**: [the format](naima/docs/reference/format.md) of every file, and
-  [the reference](naima/docs/reference/reference.md) of every command, type, field,
-  check, gate and plugin, generated from the code;
-- **[developing Naima](develop/README.md)**: architecture, the plugin
-  contract, the documentation rule, how Naima tracks itself.
-
-Rules only for working on this repository: [AGENTS.md](https://github.com/vincenzoml/naima/blob/main/AGENTS.md).
-
-Naima tracks itself, in `naima-tracker/`, managed by a clone of its own
-`dist`, locked by commit, as every project is (`deno task naima`);
-`deno task verify` runs the typecheck, the tests, and `check` with both the
-lock and the working tree: [Naima tracking itself](develop/bootstrap.md).
 
 ## Licence
 

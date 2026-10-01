@@ -29,8 +29,8 @@ die() {
 need_git() {
   command -v git >/dev/null 2>&1 && return 0
   case "$(uname -s)" in
-    Darwin) die "git is missing: install it with 'xcode-select --install', then run this again" ;;
-    *) die "git is missing: install it with your package manager (apt install git, dnf install git, ...), then run this again" ;;
+    Darwin) die "git is missing: install it with 'xcode-select --install' (or 'brew install git' with Homebrew), then run this again" ;;
+    *) die "git is missing: install it with your package manager (sudo apt install git, sudo dnf install git, sudo pacman -S git, ...), then run this again" ;;
   esac
 }
 

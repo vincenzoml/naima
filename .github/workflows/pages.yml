@@ -1,7 +1,6 @@
 # The project site, published to GitHub Pages (https://vincenzoml.github.io/naima/):
-# site/ as it is on main, the documentation rendered into site-styled HTML
-# under docs/, and the repository's star count, all by scripts/site.ts at
-# build time; the page fetches nothing at runtime. Pages must be enabled in
+# site/ as it is on main, with the repository's star count written in by
+# scripts/site.ts at build time; the page fetches nothing at runtime. Pages must be enabled in
 # the repository settings, with GitHub Actions as its source.
 #
 # Pinned by major version: the official Pages actions, whose majors GitHub
@@ -11,7 +10,7 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: ["site/**", "docs/**", "naima/docs/**", "scripts/site.ts", ".github/workflows/pages.yml"]
+    paths: ["site/**", "scripts/site.ts", ".github/workflows/pages.yml"]
   workflow_dispatch:
 permissions:
   contents: read
