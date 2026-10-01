@@ -101,7 +101,10 @@ never number yours.
 
 ## 5. Run the gates, and read what breaks
 
-The project's full [gate](../guide/glossary.md#gate) set, including `naima check`. A red result that
+The project's full [gate](../guide/glossary.md#gate) set, including `naima check`; where the project
+declares [metrics](../guide/metrics-and-budgets.md), `naima metrics run --record` too, and commit the
+record with the work. Report each number with the one it is compared to, as the command prints it; a
+bound loosened to make the work fit is refused unless an item says why (`--because`). A red result that
 arrives with the trunk is not yours to absorb silently: prove where it comes
 from (a detached worktree at the trunk settles it in one command), and if it
 is the trunk's, open an item and say so in the [session note](../guide/glossary.md#session-note).

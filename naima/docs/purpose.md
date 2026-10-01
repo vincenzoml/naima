@@ -140,8 +140,9 @@ while any is open, so a release cannot slip through. `naima queue v1
 
 **Today:** gates declared in `naima-tracker/naima-data/naima.json`, waiting
 on code or on proof; `naima gates`, `naima queue`, `naima queue --human`
-([read the board, the queue and the gates](guide/read-the-board.md)). Gates
-with a date and gates on metrics are [planned](planned.md#epics-and-milestones).
+([read the board, the queue and the gates](guide/read-the-board.md)). A gate
+on the project's metrics is the `metrics` gate
+([metrics and budgets](guide/metrics-and-budgets.md#as-a-gate)).
 
 ### Process management over the long run
 
@@ -243,14 +244,18 @@ the mCRL2 example above is [planned](planned.md#model-checkers-and-the-strength-
 as are a check for red-then-green and a written order of how strong each
 kind of evidence is.
 
-### Metrics (planned)
+### Metrics
 
-Numbers measured on every commit (each saved change): speed, quality, test
-coverage, each compared with a baseline, shown as a trend, and usable as a
-gate. **Example:** "the analysis must still run in under ten minutes",
-measured on every commit, and a release waits if it gets slower. Today only
-`naima triage` counts how many items have each field set
-([planned](planned.md#metrics)).
+Numbers measured per commit (each saved change): speed, quality, test
+coverage, each a name and the command that measures it, printed with the
+number it is compared to, shown as a trend, and usable as a gate.
+**Example:** "the analysis must still run in under ten minutes": a budget of
+600 seconds, and a release waits if it gets slower.
+
+**Today:** `naima metrics run --record`, budgets, floors and baselines, a
+ratchet that only lets a number improve, and `naima metrics trend`
+([metrics and budgets](guide/metrics-and-budgets.md)). Measuring on every
+commit without being asked is [planned](planned.md#metrics).
 
 ### Structuring a project from the start (planned)
 

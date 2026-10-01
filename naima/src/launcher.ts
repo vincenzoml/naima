@@ -4,7 +4,7 @@
 //
 //   read    the repository, the program wherever it is, and the data directory of every other worktree
 //   write   the tracker folder (naima-tracker/), and the data and program if moved out of it
-//   run     git, and the programs the loaded verifiers declare (Verifier.runs), nothing else
+//   run     git, and the programs the loaded contributions declare (`runs`: a verifier's tool, a metric's command), nothing else
 //   env     an allow-list of the environment (ENV below): what git needs, and Naima's own
 //   net     none: the network is git's, for alignment and update
 //
@@ -101,7 +101,7 @@ export function permissions(
     entry: string
     hostFiles?: string[]
     worktrees?: string[]
-    /** The programs the loaded verifiers start, besides git (Verifier.runs). */
+    /** The programs the loaded contributions start, besides git: a verifier's `runs`, a metric's program. */
     runs?: string[]
   },
 ): string[] {
@@ -135,18 +135,21 @@ function otherWorktrees(root: string, data: string | null): string[] {
 }
 
 /**
- * Does the project load code the program does not ship — a third-party
- * plugin, or a replacement for a first-party one? Only such code can declare
- * programs to run: no first-party contribution starts one. Read in every
- * format: a list of plugins (format 1), or a table whose entries name a
- * source or a replacement.
+ * May the loaded contributions start a program besides git? Only when the
+ * project loads code the program does not ship — a third-party plugin, or a
+ * replacement for a first-party one — or declares metrics, each naming the
+ * program that measures it: no other first-party contribution starts one.
+ * Read in every format: a list of plugins (format 1), or a table whose entries
+ * name a source or a replacement, or give the metrics plugin metrics.
  */
-function loadsPlugins(data: string | null): boolean {
+export function mayRun(data: string | null): boolean {
   if (!data) return false
   try {
     const plugins = (JSON.parse(readFileSync(join(data, DATA_FILE), "utf8")) as { plugins?: unknown }).plugins
     if (Array.isArray(plugins)) return plugins.length > 0
     if (!plugins || typeof plugins !== "object") return false
+    const metrics = (plugins as { metrics?: { options?: { metrics?: unknown } } }).metrics?.options?.metrics
+    if (metrics && typeof metrics === "object" && Object.keys(metrics).length) return true
     return Object.values(plugins).some((e) => !!e && typeof e === "object" && ("source" in e || "replacedBy" in e))
   } catch {
     return false
@@ -206,7 +209,7 @@ export async function launch(args: string[], cwd: string): Promise<number> {
     try {
       const fence = { root, tracker, data, program, entry, hostFiles: hostFiles(parsed.rest, root), worktrees: others }
       const read = permissions(fence)[0] ?? ""
-      flags = permissions({ ...fence, runs: loadsPlugins(data) ? declaredRuns(entry, cwd, read, env) : [] })
+      flags = permissions({ ...fence, runs: mayRun(data) ? declaredRuns(entry, cwd, read, env) : [] })
     } catch (e) {
       console.error(`naima: ${message(e)}`)
       return 2

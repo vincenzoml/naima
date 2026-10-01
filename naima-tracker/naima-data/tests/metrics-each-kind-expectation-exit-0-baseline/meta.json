@@ -1,0 +1,18 @@
+{
+  "id": "8078400d-d577-40e5-a442-57121443b1bc",
+  "title": "metrics: each kind of expectation (exit 0, baseline, budget, floor, ratchet), recording with baselines, trend, loosening needs an item, launcher runs (test/plugins/metrics/metrics.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "11c2a358-46cf-4136-b4ce-e4d9480a9755"
+    }
+  ]
+}

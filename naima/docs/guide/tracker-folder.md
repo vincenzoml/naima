@@ -41,6 +41,7 @@ naima-tracker/
     bugs/<slug>/       one directory per item: README.md, meta.json, attachments/
     todos/  features/  tests/  properties/  rules/  closed/
     claims/  passes/   coordination across branches: one file per session
+    metrics/           the numbers naima metrics run --record measured, one file per run
 ```
 
 `git status` shows `naima-data/`, `README.md` and `.gitignore`, never

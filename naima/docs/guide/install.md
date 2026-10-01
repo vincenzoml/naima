@@ -228,7 +228,7 @@ under Deno with only these:
 |---|---|---|
 | read | the repository, the program wherever it is, and the data directory of every other worktree of the project | items, the project's markdown and source (the docs and beta-marker checks read them), git's view of branches, and the uncommitted claims and notes of the other worktrees |
 | write | `naima-tracker/` only, and the data or program directory if moved out of it | items, claims, notes, the program's own alignment; nothing else in the project |
-| run | `git`, and the programs the loaded contributions declare | alignment, update and carry, and reading claims and notes across branches; a [verifier](glossary.md#verifier)'s model checker (its `runs`, [the contract](../reference/plugin-contract.md#the-verifier-contract)) |
+| run | `git`, and the programs the loaded contributions declare | alignment, update and carry, and reading claims and notes across branches; a [verifier](glossary.md#verifier)'s model checker (its `runs`, [the contract](../reference/plugin-contract.md#the-verifier-contract)); a declared [metric](metrics-and-budgets.md)'s program, the first word of its `run` |
 | env | an allow-list: `HOME`, `PATH`, the user, shell, terminal, locale and temporary-directory variables, the proxy variables, Windows' system ones, and every `NAIMA_*`, `GIT_*`, `SSH_*`, `LC_*` and `DENO_*` | what git needs to reach a source, and Naima's own; nothing else of the environment reaches the program, nor the git it runs |
 | net | none | the network is git's, in alignment and update |
 

@@ -17,6 +17,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
+- [metrics](#metrics) — named measurements, each the command that measures it, recorded per commit and held to a budget, a floor or a baseline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
 - [docs](#docs) — every feature is documented as part of its implementation, and naima check holds it
 
@@ -63,6 +64,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
+| [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command that measures it — run, recorded per commit, held to a budget, a floor or a baseline, and shown as a trend; every number with the one it is compared to |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
 | [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
 
@@ -72,13 +74,13 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, rules, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, metrics, rules, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, rules, docs |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, metrics, rules, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
-| `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination |
+| `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
@@ -87,6 +89,8 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }` | verifier |
+| `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
+| `metrics` | metrics | a named measurement: `run` (a program and its arguments), `kind`, and a bound — `atMost`, `atLeast` or `equals` |  |
 
 ## core
 
@@ -1304,6 +1308,65 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 | Verifier | What it checks |
 |---|---|
 | `example-regex` | line-regex properties over a text file: "some <re>" or "never <re>" |
+
+## metrics
+
+Named measurements, each the command that measures it, recorded per commit and held to a budget, a floor or a baseline.
+
+Its contributions' qualified ids are `metrics/<name>`.
+
+A metric is a name and the command that measures it — test time, coverage, lint warnings, size, how long an analysis runs. The project declares its metrics as data in its configuration; this plugin brings none. `naima metrics run` runs them and prints every number with the one it is compared to: the last recorded on an earlier commit of this line of history, and the bound. A bound is a budget (`atMost`), a floor (`atLeast`) or a baseline (`equals`); a `ratchet` makes a gain fail until the bound follows it, so a budget only goes down and a floor only up; loosening a bound names the item that says why. `--record` writes the numbers, with the commit they measure, as evidence; `naima metrics trend` draws them along history. How a number is read is a kind, and any plugin may contribute one to the `metric-kinds` point. Naima may start the programs the metrics name, and only those: the launcher grants each one.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `metrics` | `{}` | `plugins.metrics.options.metrics` in `naima-tracker/naima-data/naima.json`: metric name → { "run": [program, ...args], "kind", "pattern", "unit", "says", one of "atMost" \| "atLeast" \| "equals", "ratchet", "tolerance", "because" }. kind defaults to exit, which with no bound must equal 0. |
+
+**Extension points** it declares: `metric-kinds`, `metrics`.
+
+### naima metrics
+
+The project's metrics — each a name and the command that measures it — run, recorded per commit, held to a budget, a floor or a baseline, and shown as a trend; every number with the one it is compared to.
+
+```sh
+naima metrics [list]
+naima metrics run [name...] [--record]
+naima metrics bound <name> <value> [--because <item>]
+naima metrics trend <name>
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--record` |  | run: write the numbers, with the commit they measure, to metrics/ in the data directory |
+| `--because` |  | bound: the item that says why a bound is loosened — a budget raised, a floor lowered; refused without it |
+
+Examples:
+
+```sh
+naima metrics
+naima metrics run --record
+naima metrics run tests coverage
+naima metrics bound test-time 140 --because bugs/slow-ci
+naima metrics trend tests
+```
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `metric-bound-because` | a metric's `because` names an item of the tracker |
+
+**Directories** it owns under the tracker root: `metrics/`.
+
+**Metric kinds**, how `naima metrics` reads a number
+
+| Kind | What it reads |
+|---|---|
+| `exit` | the command's exit code: 0 is a pass; with no bound it must equal 0 |
+| `number` | the first group of `pattern` in the output, stdout then stderr — with no pattern, the first number |
+| `count` | how many lines of the output match `pattern` (every non-blank line, with none): warnings, findings, files |
+| `duration` | how many seconds the command took, wall clock |
 
 ## rules
 
