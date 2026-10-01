@@ -10,9 +10,10 @@ export { EXCLUDE_FILES, type Exclusion, exclusions } from "./excludes.ts"
 export { FORMAT, formatCheck, formatOf, formatRefusal, migrate, MIGRATIONS, type Migrations, type Step } from "./format.ts"
 export {
   ABOUT,
+  cacheDir,
+  COPY_FILE,
   DATA_DIR,
   DEFAULT_PROGRAM,
-  DIST_BRANCH,
   findData,
   globalOptions,
   HOME,

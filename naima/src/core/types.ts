@@ -350,8 +350,8 @@ export interface PluginConfig {
   checks: Record<string, Severity>
 }
 
-/** How a project carries its program: a gitignored clone, plain committed files, or a git submodule. */
-export type Carry = "clone" | "vendored" | "submodule"
+/** How a project carries its program: a gitignored copy of naima/, the same copy committed, or a git submodule. */
+export type Carry = "copy" | "vendored" | "submodule"
 
 /** `naima-data/naima.json`: the data format, the lock, and only what the tool cannot infer. */
 export interface Config {

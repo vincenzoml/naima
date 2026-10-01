@@ -2,8 +2,8 @@
 //
 //   naima-tracker/              the one folder Naima owns in a project
 //     README.md                 one line: what Naima is, and a link
-//     .gitignore                ignores naima/ when the program is a clone
-//     naima/                    the program: a clone of Naima, locked by commit
+//     .gitignore                ignores naima/ when the program is a gitignored copy
+//     naima/                    the program: a copy of Naima's naima/, locked by commit
 //     naima-data/               the data: the items, and naima.json
 //       naima.json              the anchor: the data format, the lock, the project's facts
 //
@@ -22,24 +22,37 @@ export const DEFAULT_DATA = `${TRACKER_DIR}/${DATA_DIR}`
 /** The program directory, from the data directory, unless `program` moves it. */
 export const DEFAULT_PROGRAM = `../${PROGRAM_DIR}`
 
-/**
- * The branch of Naima's repository that holds only what runs Naima, built by
- * CI from every commit of main: what a project clones and locks, and what
- * `naima update` follows when the source has it (docs/guide/install.md#the-dist-branch).
- */
-export const DIST_BRANCH = "dist"
-
-/** The runtime folder of Naima's repository: a dist commit, and so a program directory cloned from one, is exactly its contents. */
+/** The runtime folder of Naima's repository: what a program directory holds a copy of. */
 export const RUNTIME_DIR = "naima"
+
+/** The file a copied program holds besides the runtime files: the source, the commit and each file's git blob id it is a copy of. */
+export const COPY_FILE = ".naima-copy.json"
 
 /**
  * Where a program directory's code is: the directory itself when it holds a
- * dist commit, its naima/ when it holds a commit of Naima's main (a fork or a
- * local source without a dist). Null when it holds neither.
+ * copy of naima/ (or a clone of a commit that held the runtime at its top),
+ * its naima/ when it holds a whole commit of Naima's main (a submodule). Null
+ * when it holds neither.
  */
 export function runtimeOf(program: string): string | null {
   for (const dir of [program, join(program, RUNTIME_DIR)]) if (existsSync(join(dir, "src", "cli.ts"))) return dir
   return null
+}
+
+/**
+ * The per-user cache commits are fetched into, shared by every project and
+ * worktree of the user: NAIMA_CACHE when set, else the platform's cache
+ * directory. Null when the environment names no home.
+ */
+export function cacheDir(env: Record<string, string | undefined>, os: string): string | null {
+  if (env["NAIMA_CACHE"]) return resolve(env["NAIMA_CACHE"])
+  if (os === "windows") {
+    const base = env["LOCALAPPDATA"] ?? env["APPDATA"]
+    return base ? join(base, "naima", "cache") : null
+  }
+  if (os === "darwin") return env["HOME"] ? join(env["HOME"], "Library", "Caches", "naima") : null
+  if (env["XDG_CACHE_HOME"]) return join(env["XDG_CACHE_HOME"], "naima")
+  return env["HOME"] ? join(env["HOME"], ".cache", "naima") : null
 }
 
 /** Naima's home, linked from every tracker's README. */

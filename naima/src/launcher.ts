@@ -2,8 +2,8 @@
 // all it does is work out where things are, then run the program under Deno
 // with only these (docs/guide/install.md says why each one exists):
 //
-//   read    the repository, the program wherever it is, and the data directory of every other worktree
-//   write   the tracker folder (naima-tracker/), and the data and program if moved out of it
+//   read    the repository, the program wherever it is, the per-user cache, and the data directory of every other worktree
+//   write   the tracker folder (naima-tracker/), the data and program if moved out of it, and the per-user cache
 //   run     git, and the programs the loaded contributions declare (`runs`: a verifier's tool, a metric's command), nothing else
 //   env     an allow-list of the environment (ENV below): what git needs, and Naima's own
 //   net     none: the network is git's, for alignment and update
@@ -11,11 +11,16 @@
 // When the program exits with RELAUNCH it has just aligned the program
 // directory, so the code on disk is not the code that ran: the launcher runs
 // the program directory's own code, which is the locked commit.
+//
+// The per-user cache is where the locked commits are fetched before they are
+// copied into the program (src/core/program.ts): the launcher names it to the
+// program as NAIMA_CACHE.
 
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import {
+  cacheDir,
   DATA_FILE,
   EXCLUDE_FILES,
   findData,
@@ -99,6 +104,8 @@ export function permissions(
     data: string | null
     program: string
     entry: string
+    /** The per-user cache, read and written: null when there is none. */
+    cache?: string | null
     hostFiles?: string[]
     worktrees?: string[]
     /** The programs the loaded contributions start, besides git: a verifier's `runs`, a metric's program. */
@@ -116,8 +123,8 @@ export function permissions(
     return all.join(",")
   }
   return [
-    `--allow-read=${list([p.root, p.data, p.program, p.entry, ...(p.worktrees ?? []).map(real).filter((x) => !x.includes(","))])}`,
-    `--allow-write=${list([p.tracker, p.data, p.program, ...(p.hostFiles ?? [])])}`,
+    `--allow-read=${list([p.root, p.data, p.program, p.entry, p.cache ?? null, ...(p.worktrees ?? []).map(real).filter((x) => !x.includes(","))])}`,
+    `--allow-write=${list([p.tracker, p.data, p.program, p.cache ?? null, ...(p.hostFiles ?? [])])}`,
     `--allow-run=${["git", ...(p.runs ?? [])].join(",")}`,
     "--allow-env",
   ]
@@ -189,6 +196,22 @@ function hostFiles(rest: string[], root: string): string[] {
   return command === "init" && args.includes("--write-excludes") ? EXCLUDE_FILES.map((f) => join(root, f)) : []
 }
 
+/**
+ * The per-user cache, made when it does not exist yet; null when the
+ * environment names none, it cannot be made, or its path holds a comma —
+ * then the program fetches into a scratch repository in the tracker folder.
+ */
+function userCache(): string | null {
+  const dir = cacheDir(Deno.env.toObject(), Deno.build.os)
+  if (!dir || dir.includes(",")) return null
+  try {
+    mkdirSync(dir, { recursive: true })
+    return real(dir)
+  } catch {
+    return null
+  }
+}
+
 export async function launch(args: string[], cwd: string): Promise<number> {
   let parsed: ReturnType<typeof globalOptions>
   try {
@@ -196,18 +219,20 @@ export async function launch(args: string[], cwd: string): Promise<number> {
   } catch {
     parsed = { rest: args } // the program says what is wrong with the arguments
   }
-  const own = dirname(dirname(fileURLToPath(import.meta.url)))
+  // Resolved: Deno grants real paths, and the program reads its own directory, which may not be the project's.
+  const own = real(dirname(dirname(fileURLToPath(import.meta.url))))
   const data = findData(cwd, parsed.data ?? Deno.env.get("NAIMA_DATA"))
   const root = toplevel(data ?? cwd) ?? resolve(cwd)
   const tracker = data ? trackerOf(data) : join(root, TRACKER_DIR)
   const program = data && existsSync(join(data, DATA_FILE)) ? programOf(data) : join(tracker, PROGRAM_DIR)
-  const env = { ...allowedEnv(Deno.env.toObject()), NAIMA_LAUNCHED: "1", ...(data ? { NAIMA_DATA: data } : {}) }
+  const cache = userCache()
+  const env = { ...allowedEnv(Deno.env.toObject()), NAIMA_LAUNCHED: "1", ...(data ? { NAIMA_DATA: data } : {}), ...(cache ? { NAIMA_CACHE: cache } : {}) }
   const others = otherWorktrees(root, data)
   let entry = runtimeOf(program) ?? own
   for (let run = 0; run < MAX_RUNS; run++) {
     let flags: string[]
     try {
-      const fence = { root, tracker, data, program, entry, hostFiles: hostFiles(parsed.rest, root), worktrees: others }
+      const fence = { root, tracker, data, program, entry, cache, hostFiles: hostFiles(parsed.rest, root), worktrees: others }
       const read = permissions(fence)[0] ?? ""
       flags = permissions({ ...fence, runs: mayRun(data) ? declaredRuns(entry, cwd, read, env) : [] })
     } catch (e) {

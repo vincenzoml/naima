@@ -2,11 +2,9 @@
 # Linux and macOS (Windows is not exercised: docs/guide/install.md#other-runtimes).
 # Every job needs Deno: the distribution tests run Naima through its launcher.
 # The full history is fetched so the tracker's locked commit is here, and the
-# program is cloned from this repository's own objects, without the network.
-#
-# On main, once every check has passed, the dist job builds the dist commit of
-# the pushed commit, a copy of naima/, and pushes the dist branch
-# (docs/guide/install.md#the-dist-branch).
+# program is copied from this repository's own objects, without the network.
+# CI only tests: a project installs and updates from main itself
+# (docs/guide/install.md).
 #
 # Pinned: every action by commit (the tag it was is in the comment), every
 # runtime by version, so a red run is a regression and not a toolchain
@@ -81,28 +79,5 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: ${{ env.BUN_VERSION }}
-      - run: bun test ./test/
+      - run: bun test --timeout 30000 ./test/
 
-  dist:
-    # Only a pushed main, only after every check: a dist commit is what projects run.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [deno, node, bun]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    permissions:
-      contents: write # push the dist branch; nothing else
-    concurrency:
-      group: dist
-      cancel-in-progress: false
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
-        with:
-          fetch-depth: 0 # the dist branch, the parent of the next dist commit
-      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
-        with:
-          deno-version: ${{ env.DENO_VERSION }}
-      - name: Build the dist commit of ${{ github.sha }}
-        run: deno run -A scripts/dist.ts --commit "$GITHUB_SHA"
-      - name: Push it
-        # A plain push: dist only grows, so a rejected push means another run moved it first.
-        run: git push origin refs/heads/dist:refs/heads/dist

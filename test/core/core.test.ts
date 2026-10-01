@@ -25,6 +25,7 @@ import {
   uniqueSlug,
 } from "../../naima/src/core/internal.ts"
 import { corePlugin } from "../../naima/src/core/base.ts"
+import { withCarry } from "../../naima/src/core/config.ts"
 import { gitIn, tempProject } from "./testing.ts"
 
 const notes: Plugin = {
@@ -67,7 +68,7 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
     format: FORMAT,
     formats: {},
     ...LOCK,
-    carry: "clone",
+    carry: "copy",
     program: "../naima",
     plugins: {},
     rename: {},
@@ -85,6 +86,9 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
     },
   })
   assert.equal(c.carry, "vendored")
+  assert.equal(parseConfig({ format: FORMAT, ...LOCK, carry: "clone" }).carry, "copy", "clone is the copy's earlier name: the same gitignored place")
+  assert.deepEqual(withCarry({ format: FORMAT, carry: "clone" }, "copy"), { format: FORMAT }, "the default is recorded by leaving carry out")
+  assert.deepEqual(withCarry({ format: FORMAT }, "vendored"), { format: FORMAT, carry: "vendored" })
   assert.deepEqual(c.plugins, {
     gates: { enabled: true, options: { gates: { v1: { title: "One" } } }, checks: {} },
     "beta-markers": { enabled: false, options: {}, checks: {} },
@@ -94,7 +98,7 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
   assert.throws(() => parseConfig({ ...LOCK }), /has no format/)
   assert.throws(() => parseConfig({ format: FORMAT, source: "", commit: LOCK.commit }), /source must be/)
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, commit: "abc" }), /commit must be the full hash/)
-  assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, carry: "zip" }), /carry must be one of: clone, vendored, submodule/)
+  assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, carry: "zip" }), /carry must be one of: copy, vendored, submodule/)
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, naima: "^0.2.0" }), /unknown key "naima"/)
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, gates: {} }), /unknown key "gates"/, "gates are the gates plugin's options now")
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, plugins: ["plugins/a.ts"] }), /plugins maps a plugin's name/)
