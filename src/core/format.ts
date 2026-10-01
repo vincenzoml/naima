@@ -60,7 +60,9 @@ const formatName = (plugin: string | null): string => (plugin === null ? "format
 export function formatRefusal(format: unknown, reads = FORMAT, plugin: string | null = null): string | null {
   const name = formatName(plugin)
   if (!isFormat(format)) {
-    return plugin === null ? "has no format: it is not Naima data (docs/reference/format.md)" : `has ${name} ${JSON.stringify(format)}, which is not an integer from 1`
+    return plugin === null
+      ? "has no format: it is not Naima data (docs/reference/format.md)"
+      : `has ${name} ${JSON.stringify(format)}, which is not an integer from 1`
   }
   const whose = plugin === null ? "this Naima reads" : `this Naima's ${plugin} reads`
   if (format > reads) {
