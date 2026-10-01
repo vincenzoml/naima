@@ -1,15 +1,95 @@
 # Glossary
 
-Every term Naima uses, defined once. Every other page links its terms here.
-Terms are grouped by subject; within a group, the order is the order you meet
-them in.
+Every term Naima uses, defined once, in plain words. Every other page links
+its terms here the first time it uses them. Terms are grouped by subject;
+within a group, the order is the order you meet them in. Where an everyday
+example helps, a renovation stands in for any long piece of work. A term
+marked *planned* names something Naima does not have yet
+([planned](../planned.md)).
+
+## The work
+
+### Owner
+
+The person whose work it is and whom the project answers to: the one who
+decides what is built and judges what only a person can judge. The owner
+needs no technical knowledge; agents do the machine work
+([what Naima is for](../purpose.md)).
+
+### Repository
+
+The folder in which git keeps every version of the work, with its whole
+history. Software, a data analysis, a paper with colleagues: anything kept
+in one is a project Naima can track.
+
+### Commit
+
+One saved change in the [repository](#repository), with a message saying why.
+Agents make small commits, so any single change can be found and undone
+([git, handled for you](../agents/git-for-the-owner.md)).
+
+### Claim
+
+A statement that something is true, such as "this bug is fixed". On its own
+it proves nothing; [evidence](#evidence) and a [proof](#proof) back it.
+*Everyday example:* a plumber saying "the leak is fixed".
+
+### Proof
+
+A repeatable way to check a [claim](#claim), written so someone else can do
+it: a [test item](#test-item), or a [property](#property) a tool checks.
+*Everyday example:* "run the tap for a minute; the floor must stay dry".
+
+### Epic
+
+*Planned.* A large goal made of many features and todos, kept as one item.
+*Everyday example:* "renovate the kitchen".
+
+### Milestone
+
+*Planned.* A [gate](#gate) with a date. Naima's own items do not use them
+yet. *Everyday example:* "kitchen usable by 1 March".
+
+### Requirement
+
+*Planned as an item type.* Something the result must satisfy, stated so it
+can be checked. *Everyday example:* "the counter holds 50 kg".
+
+### Specification
+
+*Planned as an item type.* The precise description of how something must
+behave. *Everyday example:* the plumber's drawing with every pipe size.
+
+### Decision
+
+A choice that is the [owner](#owner)'s, recorded with its reason so it is
+never asked again. Today it is a todo with `kind=decision`; *planned* as an
+item type of its own. *Everyday example:* "white tiles, not grey".
+
+### Role
+
+A job in the team of agents, defined mainly by what it refuses to do, so no
+one marks their own homework
+([the company and its roles](../purpose.md#the-company-and-its-roles)).
+*Everyday example:* the inspector who signs off wiring never installs it.
+
+### Formal methods
+
+Tools that check a design mathematically, over every case rather than the
+few a test tries.
+
+### Model checker
+
+A formal-methods tool that checks a design over every possible order of
+events and, when the design is wrong, prints the exact steps that break it.
+mCRL2 is one. Naima runs one through a [verifier](#verifier).
 
 ## The tracker
 
 ### Project
 
-The git repository Naima tracks: your software, with one folder,
-`naima-tracker/`, added at its root.
+The [repository](#repository) Naima tracks — software, an analysis, a paper,
+or several at once — with one folder, `naima-tracker/`, added at its root.
 
 ### Tracker
 
@@ -20,7 +100,7 @@ records: every [item](#item) and its [links](#link).
 ### Data directory
 
 `naima-tracker/naima-data/`: everything the project records — its items,
-[claims](#claim), [session notes](#session-note) and `naima.json` (the
+[claim files](#claim-file), [session notes](#session-note) and `naima.json` (the
 [lock](#lock) and the [configuration](config.md)). It is committed with the
 project. Its layout is fixed by [the format](../reference/format.md).
 
@@ -32,8 +112,8 @@ files that run Naima, is ignored by git, and is replaced whole on every
 
 ### Item
 
-One thing the project tracks: a bug, a todo, a feature, a test, a property.
-An item is a directory under the data directory, `<type>/<slug>/`, holding
+One piece of the work written down: a bug, a todo, a feature, a test, a
+property, a rule. An item is a directory under the data directory, `<type>/<slug>/`, holding
 `README.md` (its page: the prose), `meta.json` (its [fields](#field)) and
 `attachments/` (its [evidence](#evidence)).
 
@@ -43,6 +123,22 @@ The kind of an item, and the directory it lives in: `bugs`, `todos`,
 `features`, `tests`, `properties`, and `closed` (the archive). Each type has
 its own [statuses](#status). Plugins can add types; `naima types` lists those
 in use.
+
+### Bug
+
+An item of type `bugs`: something that is broken. "Figure 3 uses last year's
+data" is a bug as much as a crash is.
+
+### Todo
+
+An item of type `todos`: work that is not a defect — a task, a decision, a
+tidy-up. *Everyday example:* "order the tiles".
+
+### Feature
+
+An item of type `features`: something the work should be able to do, from
+`requested` to `shipped`. *Everyday example:* "a dishwasher under the
+counter".
 
 ### Status
 
@@ -77,8 +173,8 @@ A heading an item is grouped under on its [board](#board). Free text, set with
 
 ### Area
 
-A field: where an item lives — the part of the software somebody would have
-open while working on it ("export", "login screen").
+A field: where an item lives — the part of the work somebody would have open
+while working on it ("export", "chapter 3", "the cleaning script").
 
 ### Kind
 
@@ -105,19 +201,17 @@ proves. Its reverse is `verified-by`, read "is proven by".
 
 ## From report to close
 
-### Owner
-
-The person the project answers to: the one who decides what is built and
-judges what only a person can judge.
-
 ### Report
 
-What someone says, sees or finds, written as an item: the words verbatim, the
-evidence, the consequence ([file a bug](file-a-bug.md)).
+What someone says, sees or finds, written as an item: what happened, the
+evidence, the consequence ([file a bug](file-a-bug.md)). An agent writes it
+in its own words; the owner's own words are copied only with the owner's
+yes ([the rule](rules.md#the-owners-chat-stays-private)).
 
 ### Triage
 
-Setting the four fields that rank an item: [impact](#impact),
+What an agent does to a report once it is filed: rewrites it as a clear
+description, links duplicates, and sets the four fields that rank it: [impact](#impact),
 [priority](#priority), [confidence](#confidence) and [effort](#effort)
 ([triage](triage.md)).
 
@@ -140,7 +234,7 @@ A triage field: do we understand it? `measured`, `diagnosed`, `reported`,
 
 A triage field: what it costs, `S` (under an hour), `M` (half a day), `L` (a
 day or two), `XL` (more, or unknown). Set only by someone who has looked at
-the code, never guessed.
+the work to be done, never guessed.
 
 ### Urgency
 
@@ -149,8 +243,8 @@ fields and the [gates](#gate) an item is on. Never stored.
 
 ### Fixed
 
-The code change exists: the item's `fixedOn` field is set. Nothing is proven
-yet.
+The change exists — the code, the corrected table, the rewritten paragraph:
+the item's `fixedOn` field is set. Nothing is proven yet.
 
 ### Gesture
 
@@ -165,8 +259,8 @@ An item of type `tests`: a [gesture](#gesture) and its result. Linked
 
 ### Property
 
-An item of type `properties`: a statement about the software checked by a
-[verifier](#verifier). `holds` proves, `violated` refutes.
+An item of type `properties`: a statement about the work, or about a model
+of it, checked by a [verifier](#verifier). `holds` proves, `violated` refutes.
 
 ### Proves
 
@@ -221,7 +315,9 @@ A type's items grouped by [section](#section), most urgent first:
 
 ### Gate
 
-A named condition — a release, a merge — backed by items: an item joins it by
+A condition a release waits on: a named list of items that must be done
+first. *Everyday example:* "we move in only when water and power are signed
+off". It is backed by items: an item joins it by
 carrying `gate: <name>`. A gate **holds** when nothing on it blocks.
 `holdsOn: "code"` waits for code, not proof; `holdsOn: "proof"` waits for
 every open item ([read the board, the queue and the gates](read-the-board.md)).
@@ -237,7 +333,9 @@ Where the project stands, in one screen: `naima summary`.
 
 ### Check
 
-One rule `naima check` holds the tracker to. A check reports a **problem**,
+A [rule](#rule) a program enforces, so nobody has to remember it: one rule
+`naima check` holds the tracker to. *Everyday example:* a till that will not
+print the bill until the job is marked "seen working". A check reports a **problem**,
 which fails `naima check`, or a **note**, which does not. A project can weigh
 each check `problem`, `note` or `off` ([configuration](config.md#check-severity)).
 
@@ -268,8 +366,10 @@ The branch releases come from, usually `main`.
 
 ### Worktree
 
-A second checkout of the same repository, in its own folder, standing on its
-own branch. One worktree per piece of work, so parallel sessions never write
+A private copy of the project in which one agent works, so it cannot disturb
+anyone else: a second checkout of the same repository, in its own folder,
+standing on its own branch. *Everyday example:* a draft on your own desk, not
+on the shared one. One worktree per piece of work, so parallel sessions never write
 to one another's files ([work on several branches at once](several-branches.md)).
 
 ### Fast-forward
@@ -278,11 +378,13 @@ A merge that only moves the trunk forward onto the branch, adding no merge
 commit: `git merge --ff-only <branch>`. It succeeds only when the branch
 already contains the trunk.
 
-### Claim
+### Claim file
 
 A note that a branch is working on some items, written by `naima claim` as one
-file of its own in `claims/`, and dropped by `naima release`. Claims are
-read from every local branch, so everyone sees who holds what.
+file of its own in `claims/`, and dropped by `naima release`. Claim files are
+read from every local branch, so everyone sees who holds what (`naima
+claims`). Not to be confused with a [claim](#claim), a statement that
+something is true.
 
 ### Session note
 
@@ -402,8 +504,11 @@ A page an agent tool loads to learn how to work with Naima:
 
 ### Flow
 
-A written procedure an agent, or a person, follows: opening a worktree,
-reporting, closing. The flows are [the pages for agents](../agents/README.md).
+A written procedure an agent, or a person, follows step by step for one kind
+of work: reporting, opening a worktree, closing. *Everyday example:* the
+checklist a pilot runs before take-off. How they fit together:
+[how the project runs](how-the-project-runs.md); the procedures:
+[the pages for agents](../agents/README.md).
 
 ### Coordinator
 
@@ -414,7 +519,16 @@ work to the workers; it does not do the work itself.
 
 An agent doing one piece of work, in its own worktree, on its own branch.
 
+### Session
+
+One stretch of work by one agent, from when it starts to when it stops. A
+session leaves a [session note](#session-note); the next one starts from the
+files, not from memory.
+
 ### Rule
 
-Something every project that uses Naima holds to, written once on
-[the rules page](rules.md), marked as checked by Naima or kept by convention.
+Something the project always holds to, with its reason. The rules every
+project holds to are written once on [the rules page](rules.md), each marked
+checked by Naima or kept by convention; a project's own rules are items of
+type `rules` ([write a project rule](write-a-project-rule.md)). *Everyday
+example:* "no job is paid until the owner has seen it work".

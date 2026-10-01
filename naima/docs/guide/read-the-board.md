@@ -15,7 +15,7 @@ naima show <item>      # one item: fields, links both ways, attachments, page
 ```
 
 `naima summary` has a block per plugin: item counts, bugs, what is next,
-the gates, who is working on what ([claims](glossary.md#claim)) and where
+the gates, who is working on what ([claims](glossary.md#claim-file)) and where
 the last sessions left off ([session notes](glossary.md#session-note)). With
 `--markdown` it prints the same as markdown, to paste into a report.
 

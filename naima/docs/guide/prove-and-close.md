@@ -69,7 +69,7 @@ It moves to `closed/`, carrying its proof. Naima refuses when:
 - something that verifies it refutes it — a failed test;
 - its proof is no longer current (a property whose model changed since its
   run: run `naima verify` again);
-- the branch you stand on [claims](glossary.md#claim) it. Close it from the
+- the branch you stand on [claims](glossary.md#claim-file) it. Close it from the
   trunk, after the merge, once someone other than the fixer has checked the
   proof ([the rule](rules.md#whoever-fixes-does-not-also-close)).
 
