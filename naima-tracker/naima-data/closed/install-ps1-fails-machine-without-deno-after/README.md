@@ -19,3 +19,9 @@ One lookup, `Find-Deno` (the session path, then `$DENO_INSTALL\bin` or `~\.deno\
 ## Done
 
 Regression test in `test/site.test.ts` (reads the script, since no test runs PowerShell); a real Windows run of the fixed script with Deno removed from the session path finds it in `~\.deno\bin` and installs Naima.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on main
+
+Reviewed by the coordinator, not the fixer: Find-Deno looks on the path, then in DENO_INSTALL or ~/.deno/bin, before and after installing, matching install.sh; the regression test passed and the Windows run log is attached.
