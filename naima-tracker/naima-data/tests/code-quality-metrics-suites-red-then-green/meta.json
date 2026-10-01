@@ -1,0 +1,18 @@
+{
+  "id": "8a8833d6-5317-4152-821c-bbce6bd79c31",
+  "title": "Code-quality metrics: suites red then green on Deno, Node and Bun; Naima's own 30-commit backfill plotted",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "c88c99db-62c4-4229-9c37-ea2a79c9a543"
+    }
+  ],
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
+}

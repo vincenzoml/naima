@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Naima: code quality over the last 30 commits</title>
+<style>
+:root{--bg:#ffffff;--fg:#1f2328;--muted:#656d76;--rule:#d8dee4;--good:#1a7f37;--bad:#cf222e}
+@media (prefers-color-scheme: dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--rule:#30363d;--good:#3fb950;--bad:#f85149}}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0 auto;max-width:800px;padding:16px}
+svg{max-width:100%;height:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule)}
+th{color:var(--muted);font-weight:600}.better{color:var(--good)}.worse{color:var(--bad)}.wrap{overflow-x:auto}
+</style></head><body>
+<h1>Naima: code quality over the last 30 commits</h1>
+<div class="wrap"><table><thead><tr><th>Metric</th><th>What it measures</th><th>First</th><th>Now</th><th>Change</th><th>Commits</th></tr></thead><tbody>
+<tr><td>complexity</td><td>mean cyclomatic complexity per function, estimated</td><td>2.68</td><td>3.01</td><td class="worse">worse (+0.33)</td><td>30</td></tr>
+<tr><td>complexity-max</td><td>the most complex function's cyclomatic complexity, estimated</td><td>50</td><td>137</td><td class="worse">worse (+87)</td><td>30</td></tr>
+<tr><td>duplication</td><td>code lines in a block of six or more repeated elsewhere</td><td>0.66 %</td><td>1.32 %</td><td class="worse">worse (+0.66)</td><td>30</td></tr>
+<tr><td>loc</td><td>lines of code, comments and blank lines left out</td><td>6391 lines</td><td>9999 lines</td><td class="up">up (+3608)</td><td>30</td></tr>
+<tr><td>functions</td><td>functions, methods and arrow functions (TypeScript, JavaScript)</td><td>946 functions</td><td>1371 functions</td><td class="up">up (+425)</td><td>30</td></tr>
+<tr><td>test-loc</td><td>lines of test code</td><td>4740 lines</td><td>6211 lines</td><td class="up">up (+1471)</td><td>30</td></tr>
+<tr><td>lint</td><td>deno lint warnings</td><td>0 warnings</td><td>0 warnings</td><td class="unchanged">unchanged</td><td>30</td></tr>
+<tr><td>tests</td><td>tests that pass</td><td>207 tests</td><td>220 tests</td><td class="better">better (+13)</td><td>2</td></tr>
+</tbody></table></div>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1388" width="760" height="1388" role="img" aria-label="Naima: code quality over the last 30 commits">
+<style>
+svg{--bg:#ffffff;--fg:#1f2328;--muted:#656d76;--grid:#d8dee4;--line:#0969da;--bound:#cf222e;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+@media (prefers-color-scheme: dark){svg{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--grid:#30363d;--line:#4493f8;--bound:#f85149}}
+.bg{fill:var(--bg)}.t{fill:var(--fg);font-size:13px;font-weight:600}.s{fill:var(--muted);font-size:11px}.g{stroke:var(--grid);stroke-width:1}
+.l{fill:none;stroke:var(--line);stroke-width:2;stroke-linejoin:round}.p{fill:var(--line)}.b{stroke:var(--bound);stroke-width:1.5;stroke-dasharray:6 4}.bt{fill:var(--bound);font-size:11px}
+</style>
+<rect class="bg" width="760" height="1388"/>
+<text class="t" x="64" y="18">Naima: code quality over the last 30 commits</text>
+<g aria-label="complexity">
+<text class="t" x="64" y="50">complexity</text>
+<text class="s" x="740" y="50" text-anchor="end">mean cyclomatic complexity per function, estimated — lower is better</text>
+<line class="g" x1="64" x2="740" y1="122.6" y2="122.6"/>
+<text class="s" x="58" y="126.6" text-anchor="end">2.8</text>
+<line class="g" x1="64" x2="740" y1="71.8" y2="71.8"/>
+<text class="s" x="58" y="75.8" text-anchor="end">3</text>
+<polyline class="l" points="64.0,153.1 78.1,160.7 91.9,160.7 121.7,160.7 127.8,160.7 133.4,160.7 142.8,158.2 149.9,158.2 155.5,158.2 155.8,158.2 455.4,158.2 468.4,158.2 472.6,158.2 476.8,153.1 486.1,153.1 494.1,153.1 512.2,153.1 512.7,153.1 515.1,153.1 515.6,153.1 521.6,153.1 526.0,135.3 585.9,135.3 588.7,122.6 601.1,122.6 649.2,122.6 672.9,125.2 691.1,125.2 705.5,125.2 740.0,69.3"/>
+<circle class="p" cx="64.0" cy="153.1" r="2.5"><title>b892d11c1fe9 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="78.1" cy="160.7" r="2.5"><title>4ce326bf5474 2026-10-01: 2.65</title></circle>
+<circle class="p" cx="91.9" cy="160.7" r="2.5"><title>c4bf5c792848 2026-10-01: 2.65</title></circle>
+<circle class="p" cx="121.7" cy="160.7" r="2.5"><title>5cdcb40f476f 2026-10-01: 2.65</title></circle>
+<circle class="p" cx="127.8" cy="160.7" r="2.5"><title>0834f0102575 2026-10-01: 2.65</title></circle>
+<circle class="p" cx="133.4" cy="160.7" r="2.5"><title>e11374b60e00 2026-10-01: 2.65</title></circle>
+<circle class="p" cx="142.8" cy="158.2" r="2.5"><title>f7227144d9ed 2026-10-01: 2.66</title></circle>
+<circle class="p" cx="149.9" cy="158.2" r="2.5"><title>8cf6d2f12d9c 2026-10-01: 2.66</title></circle>
+<circle class="p" cx="155.5" cy="158.2" r="2.5"><title>98d3e33a27f4 2026-10-01: 2.66</title></circle>
+<circle class="p" cx="155.8" cy="158.2" r="2.5"><title>54ca2fe4d4a8 2026-10-01: 2.66</title></circle>
+<circle class="p" cx="455.4" cy="158.2" r="2.5"><title>b4230e545cac 2026-10-01: 2.66</title></circle>
+<circle class="p" cx="468.4" cy="158.2" r="2.5"><title>79362f0f948b 2026-10-01: 2.66</title></circle>
+<circle class="p" cx="472.6" cy="158.2" r="2.5"><title>728514e68d24 2026-10-01: 2.66</title></circle>
+<circle class="p" cx="476.8" cy="153.1" r="2.5"><title>623fd87af552 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="486.1" cy="153.1" r="2.5"><title>fae0623bf28b 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="494.1" cy="153.1" r="2.5"><title>d4d8fade2693 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="512.2" cy="153.1" r="2.5"><title>83f9f2675d4a 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="512.7" cy="153.1" r="2.5"><title>41cd26204f10 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="515.1" cy="153.1" r="2.5"><title>bf2c9c5a1862 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="515.6" cy="153.1" r="2.5"><title>e87898dfc8de 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="521.6" cy="153.1" r="2.5"><title>fa860d154e4a 2026-10-01: 2.68</title></circle>
+<circle class="p" cx="526.0" cy="135.3" r="2.5"><title>e7fa6dd80353 2026-10-01: 2.75</title></circle>
+<circle class="p" cx="585.9" cy="135.3" r="2.5"><title>624af8dd9728 2026-10-01: 2.75</title></circle>
+<circle class="p" cx="588.7" cy="122.6" r="2.5"><title>85d8b0fc1bd3 2026-10-01: 2.8</title></circle>
+<circle class="p" cx="601.1" cy="122.6" r="2.5"><title>902fb93c17bd 2026-10-01: 2.8</title></circle>
+<circle class="p" cx="649.2" cy="122.6" r="2.5"><title>f51c2d1669e7 2026-10-01: 2.8</title></circle>
+<circle class="p" cx="672.9" cy="125.2" r="2.5"><title>54fcfc330ae6 2026-10-01: 2.79</title></circle>
+<circle class="p" cx="691.1" cy="125.2" r="2.5"><title>a9407222d32b 2026-10-01: 2.79</title></circle>
+<circle class="p" cx="705.5" cy="125.2" r="2.5"><title>115d483a4dae 2026-10-01: 2.79</title></circle>
+<circle class="p" cx="740.0" cy="69.3" r="2.5"><title>8b5127e7c8c4 2026-10-01: 3.01</title></circle>
+<text class="s" x="64.0" y="184" text-anchor="middle">2026-10-01</text>
+<text class="s" x="233.0" y="184" text-anchor="middle">2026-10-01</text>
+<text class="s" x="402.0" y="184" text-anchor="middle">2026-10-01</text>
+<text class="s" x="571.0" y="184" text-anchor="middle">2026-10-01</text>
+<text class="s" x="740.0" y="184" text-anchor="middle">2026-10-01</text>
+</g>
+<g aria-label="complexity-max">
+<text class="t" x="64" y="220">complexity-max</text>
+<text class="s" x="740" y="220" text-anchor="end">the most complex function's cyclomatic complexity, estimated — lower is better</text>
+<line class="g" x1="64" x2="740" y1="318.0" y2="318.0"/>
+<text class="s" x="58" y="322.0" text-anchor="end">50</text>
+<line class="g" x1="64" x2="740" y1="272.8" y2="272.8"/>
+<text class="s" x="58" y="276.8" text-anchor="end">100</text>
+<polyline class="l" points="64.0,318.0 78.1,330.7 91.9,330.7 121.7,330.7 127.8,330.7 133.4,330.7 142.8,330.7 149.9,330.7 155.5,330.7 155.8,330.7 455.4,330.7 468.4,330.7 472.6,330.7 476.8,330.7 486.1,330.7 494.1,330.7 512.2,330.7 512.7,330.7 515.1,330.7 515.6,330.7 521.6,330.7 526.0,330.7 585.9,330.7 588.7,330.7 601.1,330.7 649.2,330.7 672.9,330.7 691.1,330.7 705.5,330.7 740.0,239.3"/>
+<circle class="p" cx="64.0" cy="318.0" r="2.5"><title>b892d11c1fe9 2026-10-01: 50</title></circle>
+<circle class="p" cx="78.1" cy="330.7" r="2.5"><title>4ce326bf5474 2026-10-01: 36</title></circle>
+<circle class="p" cx="91.9" cy="330.7" r="2.5"><title>c4bf5c792848 2026-10-01: 36</title></circle>
+<circle class="p" cx="121.7" cy="330.7" r="2.5"><title>5cdcb40f476f 2026-10-01: 36</title></circle>
+<circle class="p" cx="127.8" cy="330.7" r="2.5"><title>0834f0102575 2026-10-01: 36</title></circle>
+<circle class="p" cx="133.4" cy="330.7" r="2.5"><title>e11374b60e00 2026-10-01: 36</title></circle>
+<circle class="p" cx="142.8" cy="330.7" r="2.5"><title>f7227144d9ed 2026-10-01: 36</title></circle>
+<circle class="p" cx="149.9" cy="330.7" r="2.5"><title>8cf6d2f12d9c 2026-10-01: 36</title></circle>
+<circle class="p" cx="155.5" cy="330.7" r="2.5"><title>98d3e33a27f4 2026-10-01: 36</title></circle>
+<circle class="p" cx="155.8" cy="330.7" r="2.5"><title>54ca2fe4d4a8 2026-10-01: 36</title></circle>
+<circle class="p" cx="455.4" cy="330.7" r="2.5"><title>b4230e545cac 2026-10-01: 36</title></circle>
+<circle class="p" cx="468.4" cy="330.7" r="2.5"><title>79362f0f948b 2026-10-01: 36</title></circle>
+<circle class="p" cx="472.6" cy="330.7" r="2.5"><title>728514e68d24 2026-10-01: 36</title></circle>
+<circle class="p" cx="476.8" cy="330.7" r="2.5"><title>623fd87af552 2026-10-01: 36</title></circle>
+<circle class="p" cx="486.1" cy="330.7" r="2.5"><title>fae0623bf28b 2026-10-01: 36</title></circle>
+<circle class="p" cx="494.1" cy="330.7" r="2.5"><title>d4d8fade2693 2026-10-01: 36</title></circle>
+<circle class="p" cx="512.2" cy="330.7" r="2.5"><title>83f9f2675d4a 2026-10-01: 36</title></circle>
+<circle class="p" cx="512.7" cy="330.7" r="2.5"><title>41cd26204f10 2026-10-01: 36</title></circle>
+<circle class="p" cx="515.1" cy="330.7" r="2.5"><title>bf2c9c5a1862 2026-10-01: 36</title></circle>
+<circle class="p" cx="515.6" cy="330.7" r="2.5"><title>e87898dfc8de 2026-10-01: 36</title></circle>
+<circle class="p" cx="521.6" cy="330.7" r="2.5"><title>fa860d154e4a 2026-10-01: 36</title></circle>
+<circle class="p" cx="526.0" cy="330.7" r="2.5"><title>e7fa6dd80353 2026-10-01: 36</title></circle>
+<circle class="p" cx="585.9" cy="330.7" r="2.5"><title>624af8dd9728 2026-10-01: 36</title></circle>
+<circle class="p" cx="588.7" cy="330.7" r="2.5"><title>85d8b0fc1bd3 2026-10-01: 36</title></circle>
+<circle class="p" cx="601.1" cy="330.7" r="2.5"><title>902fb93c17bd 2026-10-01: 36</title></circle>
+<circle class="p" cx="649.2" cy="330.7" r="2.5"><title>f51c2d1669e7 2026-10-01: 36</title></circle>
+<circle class="p" cx="672.9" cy="330.7" r="2.5"><title>54fcfc330ae6 2026-10-01: 36</title></circle>
+<circle class="p" cx="691.1" cy="330.7" r="2.5"><title>a9407222d32b 2026-10-01: 36</title></circle>
+<circle class="p" cx="705.5" cy="330.7" r="2.5"><title>115d483a4dae 2026-10-01: 36</title></circle>
+<circle class="p" cx="740.0" cy="239.3" r="2.5"><title>8b5127e7c8c4 2026-10-01: 137</title></circle>
+<text class="s" x="64.0" y="354" text-anchor="middle">2026-10-01</text>
+<text class="s" x="233.0" y="354" text-anchor="middle">2026-10-01</text>
+<text class="s" x="402.0" y="354" text-anchor="middle">2026-10-01</text>
+<text class="s" x="571.0" y="354" text-anchor="middle">2026-10-01</text>
+<text class="s" x="740.0" y="354" text-anchor="middle">2026-10-01</text>
+</g>
+<g aria-label="duplication">
+<text class="t" x="64" y="390">duplication (%)</text>
+<text class="s" x="740" y="390" text-anchor="end">code lines in a block of six or more repeated elsewhere — lower is better</text>
+<line class="g" x1="64" x2="740" y1="468.3" y2="468.3"/>
+<text class="s" x="58" y="472.3" text-anchor="end">1</text>
+<line class="g" x1="64" x2="740" y1="420.7" y2="420.7"/>
+<text class="s" x="58" y="424.7" text-anchor="end">1.5</text>
+<polyline class="l" points="64.0,500.7 78.1,497.8 91.9,497.8 121.7,497.8 127.8,497.8 133.4,497.8 142.8,491.2 149.9,491.2 155.5,491.2 155.8,491.2 455.4,491.2 468.4,491.2 472.6,491.2 476.8,461.7 486.1,461.7 494.1,461.7 512.2,461.7 512.7,461.7 515.1,461.7 515.6,461.7 521.6,461.7 526.0,418.8 585.9,418.8 588.7,409.3 601.1,409.3 649.2,409.3 672.9,410.3 691.1,410.3 705.5,410.3 740.0,437.9"/>
+<circle class="p" cx="64.0" cy="500.7" r="2.5"><title>b892d11c1fe9 2026-10-01: 0.66 %</title></circle>
+<circle class="p" cx="78.1" cy="497.8" r="2.5"><title>4ce326bf5474 2026-10-01: 0.69 %</title></circle>
+<circle class="p" cx="91.9" cy="497.8" r="2.5"><title>c4bf5c792848 2026-10-01: 0.69 %</title></circle>
+<circle class="p" cx="121.7" cy="497.8" r="2.5"><title>5cdcb40f476f 2026-10-01: 0.69 %</title></circle>
+<circle class="p" cx="127.8" cy="497.8" r="2.5"><title>0834f0102575 2026-10-01: 0.69 %</title></circle>
+<circle class="p" cx="133.4" cy="497.8" r="2.5"><title>e11374b60e00 2026-10-01: 0.69 %</title></circle>
+<circle class="p" cx="142.8" cy="491.2" r="2.5"><title>f7227144d9ed 2026-10-01: 0.76 %</title></circle>
+<circle class="p" cx="149.9" cy="491.2" r="2.5"><title>8cf6d2f12d9c 2026-10-01: 0.76 %</title></circle>
+<circle class="p" cx="155.5" cy="491.2" r="2.5"><title>98d3e33a27f4 2026-10-01: 0.76 %</title></circle>
+<circle class="p" cx="155.8" cy="491.2" r="2.5"><title>54ca2fe4d4a8 2026-10-01: 0.76 %</title></circle>
+<circle class="p" cx="455.4" cy="491.2" r="2.5"><title>b4230e545cac 2026-10-01: 0.76 %</title></circle>
+<circle class="p" cx="468.4" cy="491.2" r="2.5"><title>79362f0f948b 2026-10-01: 0.76 %</title></circle>
+<circle class="p" cx="472.6" cy="491.2" r="2.5"><title>728514e68d24 2026-10-01: 0.76 %</title></circle>
+<circle class="p" cx="476.8" cy="461.7" r="2.5"><title>623fd87af552 2026-10-01: 1.07 %</title></circle>
+<circle class="p" cx="486.1" cy="461.7" r="2.5"><title>fae0623bf28b 2026-10-01: 1.07 %</title></circle>
+<circle class="p" cx="494.1" cy="461.7" r="2.5"><title>d4d8fade2693 2026-10-01: 1.07 %</title></circle>
+<circle class="p" cx="512.2" cy="461.7" r="2.5"><title>83f9f2675d4a 2026-10-01: 1.07 %</title></circle>
+<circle class="p" cx="512.7" cy="461.7" r="2.5"><title>41cd26204f10 2026-10-01: 1.07 %</title></circle>
+<circle class="p" cx="515.1" cy="461.7" r="2.5"><title>bf2c9c5a1862 2026-10-01: 1.07 %</title></circle>
+<circle class="p" cx="515.6" cy="461.7" r="2.5"><title>e87898dfc8de 2026-10-01: 1.07 %</title></circle>
+<circle class="p" cx="521.6" cy="461.7" r="2.5"><title>fa860d154e4a 2026-10-01: 1.07 %</title></circle>
+<circle class="p" cx="526.0" cy="418.8" r="2.5"><title>e7fa6dd80353 2026-10-01: 1.52 %</title></circle>
+<circle class="p" cx="585.9" cy="418.8" r="2.5"><title>624af8dd9728 2026-10-01: 1.52 %</title></circle>
+<circle class="p" cx="588.7" cy="409.3" r="2.5"><title>85d8b0fc1bd3 2026-10-01: 1.62 %</title></circle>
+<circle class="p" cx="601.1" cy="409.3" r="2.5"><title>902fb93c17bd 2026-10-01: 1.62 %</title></circle>
+<circle class="p" cx="649.2" cy="409.3" r="2.5"><title>f51c2d1669e7 2026-10-01: 1.62 %</title></circle>
+<circle class="p" cx="672.9" cy="410.3" r="2.5"><title>54fcfc330ae6 2026-10-01: 1.61 %</title></circle>
+<circle class="p" cx="691.1" cy="410.3" r="2.5"><title>a9407222d32b 2026-10-01: 1.61 %</title></circle>
+<circle class="p" cx="705.5" cy="410.3" r="2.5"><title>115d483a4dae 2026-10-01: 1.61 %</title></circle>
+<circle class="p" cx="740.0" cy="437.9" r="2.5"><title>8b5127e7c8c4 2026-10-01: 1.32 %</title></circle>
+<text class="s" x="64.0" y="524" text-anchor="middle">2026-10-01</text>
+<text class="s" x="233.0" y="524" text-anchor="middle">2026-10-01</text>
+<text class="s" x="402.0" y="524" text-anchor="middle">2026-10-01</text>
+<text class="s" x="571.0" y="524" text-anchor="middle">2026-10-01</text>
+<text class="s" x="740.0" y="524" text-anchor="middle">2026-10-01</text>
+</g>
+<g aria-label="loc">
+<text class="t" x="64" y="560">loc (lines)</text>
+<text class="s" x="740" y="560" text-anchor="end">lines of code, comments and blank lines left out</text>
+<line class="g" x1="64" x2="740" y1="672.3" y2="672.3"/>
+<text class="s" x="58" y="676.3" text-anchor="end">6000</text>
+<line class="g" x1="64" x2="740" y1="625.8" y2="625.8"/>
+<text class="s" x="58" y="629.8" text-anchor="end">8000</text>
+<line class="g" x1="64" x2="740" y1="579.3" y2="579.3"/>
+<text class="s" x="58" y="583.3" text-anchor="end">10000</text>
+<polyline class="l" points="64.0,663.2 78.1,670.7 91.9,670.7 121.7,670.7 127.8,670.7 133.4,670.7 142.8,661.3 149.9,661.3 155.5,661.3 155.8,661.3 455.4,661.3 468.4,661.3 472.6,661.3 476.8,652.8 486.1,652.8 494.1,652.8 512.2,652.8 512.7,652.8 515.1,652.8 515.6,652.8 521.6,652.8 526.0,625.5 585.9,624.4 588.7,616.9 601.1,616.9 649.2,616.9 672.9,616.0 691.1,616.0 705.5,616.0 740.0,579.3"/>
+<circle class="p" cx="64.0" cy="663.2" r="2.5"><title>b892d11c1fe9 2026-10-01: 6391 lines</title></circle>
+<circle class="p" cx="78.1" cy="670.7" r="2.5"><title>4ce326bf5474 2026-10-01: 6069 lines</title></circle>
+<circle class="p" cx="91.9" cy="670.7" r="2.5"><title>c4bf5c792848 2026-10-01: 6069 lines</title></circle>
+<circle class="p" cx="121.7" cy="670.7" r="2.5"><title>5cdcb40f476f 2026-10-01: 6069 lines</title></circle>
+<circle class="p" cx="127.8" cy="670.7" r="2.5"><title>0834f0102575 2026-10-01: 6069 lines</title></circle>
+<circle class="p" cx="133.4" cy="670.7" r="2.5"><title>e11374b60e00 2026-10-01: 6069 lines</title></circle>
+<circle class="p" cx="142.8" cy="661.3" r="2.5"><title>f7227144d9ed 2026-10-01: 6472 lines</title></circle>
+<circle class="p" cx="149.9" cy="661.3" r="2.5"><title>8cf6d2f12d9c 2026-10-01: 6472 lines</title></circle>
+<circle class="p" cx="155.5" cy="661.3" r="2.5"><title>98d3e33a27f4 2026-10-01: 6472 lines</title></circle>
+<circle class="p" cx="155.8" cy="661.3" r="2.5"><title>54ca2fe4d4a8 2026-10-01: 6472 lines</title></circle>
+<circle class="p" cx="455.4" cy="661.3" r="2.5"><title>b4230e545cac 2026-10-01: 6474 lines</title></circle>
+<circle class="p" cx="468.4" cy="661.3" r="2.5"><title>79362f0f948b 2026-10-01: 6474 lines</title></circle>
+<circle class="p" cx="472.6" cy="661.3" r="2.5"><title>728514e68d24 2026-10-01: 6474 lines</title></circle>
+<circle class="p" cx="476.8" cy="652.8" r="2.5"><title>623fd87af552 2026-10-01: 6838 lines</title></circle>
+<circle class="p" cx="486.1" cy="652.8" r="2.5"><title>fae0623bf28b 2026-10-01: 6838 lines</title></circle>
+<circle class="p" cx="494.1" cy="652.8" r="2.5"><title>d4d8fade2693 2026-10-01: 6838 lines</title></circle>
+<circle class="p" cx="512.2" cy="652.8" r="2.5"><title>83f9f2675d4a 2026-10-01: 6838 lines</title></circle>
+<circle class="p" cx="512.7" cy="652.8" r="2.5"><title>41cd26204f10 2026-10-01: 6838 lines</title></circle>
+<circle class="p" cx="515.1" cy="652.8" r="2.5"><title>bf2c9c5a1862 2026-10-01: 6838 lines</title></circle>
+<circle class="p" cx="515.6" cy="652.8" r="2.5"><title>e87898dfc8de 2026-10-01: 6838 lines</title></circle>
+<circle class="p" cx="521.6" cy="652.8" r="2.5"><title>fa860d154e4a 2026-10-01: 6838 lines</title></circle>
+<circle class="p" cx="526.0" cy="625.5" r="2.5"><title>e7fa6dd80353 2026-10-01: 8011 lines</title></circle>
+<circle class="p" cx="585.9" cy="624.4" r="2.5"><title>624af8dd9728 2026-10-01: 8061 lines</title></circle>
+<circle class="p" cx="588.7" cy="616.9" r="2.5"><title>85d8b0fc1bd3 2026-10-01: 8382 lines</title></circle>
+<circle class="p" cx="601.1" cy="616.9" r="2.5"><title>902fb93c17bd 2026-10-01: 8382 lines</title></circle>
+<circle class="p" cx="649.2" cy="616.9" r="2.5"><title>f51c2d1669e7 2026-10-01: 8382 lines</title></circle>
+<circle class="p" cx="672.9" cy="616.0" r="2.5"><title>54fcfc330ae6 2026-10-01: 8420 lines</title></circle>
+<circle class="p" cx="691.1" cy="616.0" r="2.5"><title>a9407222d32b 2026-10-01: 8420 lines</title></circle>
+<circle class="p" cx="705.5" cy="616.0" r="2.5"><title>115d483a4dae 2026-10-01: 8420 lines</title></circle>
+<circle class="p" cx="740.0" cy="579.3" r="2.5"><title>8b5127e7c8c4 2026-10-01: 9999 lines</title></circle>
+<text class="s" x="64.0" y="694" text-anchor="middle">2026-10-01</text>
+<text class="s" x="233.0" y="694" text-anchor="middle">2026-10-01</text>
+<text class="s" x="402.0" y="694" text-anchor="middle">2026-10-01</text>
+<text class="s" x="571.0" y="694" text-anchor="middle">2026-10-01</text>
+<text class="s" x="740.0" y="694" text-anchor="middle">2026-10-01</text>
+</g>
+<g aria-label="functions">
+<text class="t" x="64" y="730">functions (functions)</text>
+<text class="s" x="740" y="730" text-anchor="end">functions, methods and arrow functions (TypeScript, JavaScript)</text>
+<line class="g" x1="64" x2="740" y1="822.2" y2="822.2"/>
+<text class="s" x="58" y="826.2" text-anchor="end">1000</text>
+<line class="g" x1="64" x2="740" y1="782.9" y2="782.9"/>
+<text class="s" x="58" y="786.9" text-anchor="end">1200</text>
+<line class="g" x1="64" x2="740" y1="743.6" y2="743.6"/>
+<text class="s" x="58" y="747.6" text-anchor="end">1400</text>
+<polyline class="l" points="64.0,832.8 78.1,840.7 91.9,840.7 121.7,840.7 127.8,840.7 133.4,840.7 142.8,828.3 149.9,828.3 155.5,828.3 155.8,828.3 455.4,828.1 468.4,828.1 472.6,828.1 476.8,818.5 486.1,818.5 494.1,818.5 512.2,818.5 512.7,818.5 515.1,818.5 515.6,818.5 521.6,818.5 526.0,789.2 585.9,788.2 588.7,783.3 601.1,783.3 649.2,783.3 672.9,782.3 691.1,782.3 705.5,782.3 740.0,749.3"/>
+<circle class="p" cx="64.0" cy="832.8" r="2.5"><title>b892d11c1fe9 2026-10-01: 946 functions</title></circle>
+<circle class="p" cx="78.1" cy="840.7" r="2.5"><title>4ce326bf5474 2026-10-01: 906 functions</title></circle>
+<circle class="p" cx="91.9" cy="840.7" r="2.5"><title>c4bf5c792848 2026-10-01: 906 functions</title></circle>
+<circle class="p" cx="121.7" cy="840.7" r="2.5"><title>5cdcb40f476f 2026-10-01: 906 functions</title></circle>
+<circle class="p" cx="127.8" cy="840.7" r="2.5"><title>0834f0102575 2026-10-01: 906 functions</title></circle>
+<circle class="p" cx="133.4" cy="840.7" r="2.5"><title>e11374b60e00 2026-10-01: 906 functions</title></circle>
+<circle class="p" cx="142.8" cy="828.3" r="2.5"><title>f7227144d9ed 2026-10-01: 969 functions</title></circle>
+<circle class="p" cx="149.9" cy="828.3" r="2.5"><title>8cf6d2f12d9c 2026-10-01: 969 functions</title></circle>
+<circle class="p" cx="155.5" cy="828.3" r="2.5"><title>98d3e33a27f4 2026-10-01: 969 functions</title></circle>
+<circle class="p" cx="155.8" cy="828.3" r="2.5"><title>54ca2fe4d4a8 2026-10-01: 969 functions</title></circle>
+<circle class="p" cx="455.4" cy="828.1" r="2.5"><title>b4230e545cac 2026-10-01: 970 functions</title></circle>
+<circle class="p" cx="468.4" cy="828.1" r="2.5"><title>79362f0f948b 2026-10-01: 970 functions</title></circle>
+<circle class="p" cx="472.6" cy="828.1" r="2.5"><title>728514e68d24 2026-10-01: 970 functions</title></circle>
+<circle class="p" cx="476.8" cy="818.5" r="2.5"><title>623fd87af552 2026-10-01: 1019 functions</title></circle>
+<circle class="p" cx="486.1" cy="818.5" r="2.5"><title>fae0623bf28b 2026-10-01: 1019 functions</title></circle>
+<circle class="p" cx="494.1" cy="818.5" r="2.5"><title>d4d8fade2693 2026-10-01: 1019 functions</title></circle>
+<circle class="p" cx="512.2" cy="818.5" r="2.5"><title>83f9f2675d4a 2026-10-01: 1019 functions</title></circle>
+<circle class="p" cx="512.7" cy="818.5" r="2.5"><title>41cd26204f10 2026-10-01: 1019 functions</title></circle>
+<circle class="p" cx="515.1" cy="818.5" r="2.5"><title>bf2c9c5a1862 2026-10-01: 1019 functions</title></circle>
+<circle class="p" cx="515.6" cy="818.5" r="2.5"><title>e87898dfc8de 2026-10-01: 1019 functions</title></circle>
+<circle class="p" cx="521.6" cy="818.5" r="2.5"><title>fa860d154e4a 2026-10-01: 1019 functions</title></circle>
+<circle class="p" cx="526.0" cy="789.2" r="2.5"><title>e7fa6dd80353 2026-10-01: 1168 functions</title></circle>
+<circle class="p" cx="585.9" cy="788.2" r="2.5"><title>624af8dd9728 2026-10-01: 1173 functions</title></circle>
+<circle class="p" cx="588.7" cy="783.3" r="2.5"><title>85d8b0fc1bd3 2026-10-01: 1198 functions</title></circle>
+<circle class="p" cx="601.1" cy="783.3" r="2.5"><title>902fb93c17bd 2026-10-01: 1198 functions</title></circle>
+<circle class="p" cx="649.2" cy="783.3" r="2.5"><title>f51c2d1669e7 2026-10-01: 1198 functions</title></circle>
+<circle class="p" cx="672.9" cy="782.3" r="2.5"><title>54fcfc330ae6 2026-10-01: 1203 functions</title></circle>
+<circle class="p" cx="691.1" cy="782.3" r="2.5"><title>a9407222d32b 2026-10-01: 1203 functions</title></circle>
+<circle class="p" cx="705.5" cy="782.3" r="2.5"><title>115d483a4dae 2026-10-01: 1203 functions</title></circle>
+<circle class="p" cx="740.0" cy="749.3" r="2.5"><title>8b5127e7c8c4 2026-10-01: 1371 functions</title></circle>
+<text class="s" x="64.0" y="864" text-anchor="middle">2026-10-01</text>
+<text class="s" x="233.0" y="864" text-anchor="middle">2026-10-01</text>
+<text class="s" x="402.0" y="864" text-anchor="middle">2026-10-01</text>
+<text class="s" x="571.0" y="864" text-anchor="middle">2026-10-01</text>
+<text class="s" x="740.0" y="864" text-anchor="middle">2026-10-01</text>
+</g>
+<g aria-label="test-loc">
+<text class="t" x="64" y="900">test-loc (lines)</text>
+<text class="s" x="740" y="900" text-anchor="end">lines of test code</text>
+<line class="g" x1="64" x2="740" y1="991.6" y2="991.6"/>
+<text class="s" x="58" y="995.6" text-anchor="end">5000</text>
+<line class="g" x1="64" x2="740" y1="961.8" y2="961.8"/>
+<text class="s" x="58" y="965.8" text-anchor="end">5500</text>
+<line class="g" x1="64" x2="740" y1="931.9" y2="931.9"/>
+<text class="s" x="58" y="935.9" text-anchor="end">6000</text>
+<polyline class="l" points="64.0,1007.2 78.1,1010.7 91.9,1010.4 121.7,1010.2 127.8,1010.2 133.4,1010.2 142.8,995.6 149.9,995.6 155.5,995.6 155.8,995.6 455.4,994.5 468.4,994.5 472.6,994.5 476.8,978.3 486.1,978.3 494.1,978.3 512.2,978.3 512.7,978.3 515.1,978.3 515.6,978.3 521.6,978.3 526.0,951.5 585.9,944.3 588.7,935.8 601.1,935.8 649.2,935.8 672.9,934.8 691.1,934.8 705.5,934.8 740.0,919.3"/>
+<circle class="p" cx="64.0" cy="1007.2" r="2.5"><title>b892d11c1fe9 2026-10-01: 4740 lines</title></circle>
+<circle class="p" cx="78.1" cy="1010.7" r="2.5"><title>4ce326bf5474 2026-10-01: 4681 lines</title></circle>
+<circle class="p" cx="91.9" cy="1010.4" r="2.5"><title>c4bf5c792848 2026-10-01: 4686 lines</title></circle>
+<circle class="p" cx="121.7" cy="1010.2" r="2.5"><title>5cdcb40f476f 2026-10-01: 4689 lines</title></circle>
+<circle class="p" cx="127.8" cy="1010.2" r="2.5"><title>0834f0102575 2026-10-01: 4689 lines</title></circle>
+<circle class="p" cx="133.4" cy="1010.2" r="2.5"><title>e11374b60e00 2026-10-01: 4689 lines</title></circle>
+<circle class="p" cx="142.8" cy="995.6" r="2.5"><title>f7227144d9ed 2026-10-01: 4933 lines</title></circle>
+<circle class="p" cx="149.9" cy="995.6" r="2.5"><title>8cf6d2f12d9c 2026-10-01: 4933 lines</title></circle>
+<circle class="p" cx="155.5" cy="995.6" r="2.5"><title>98d3e33a27f4 2026-10-01: 4933 lines</title></circle>
+<circle class="p" cx="155.8" cy="995.6" r="2.5"><title>54ca2fe4d4a8 2026-10-01: 4933 lines</title></circle>
+<circle class="p" cx="455.4" cy="994.5" r="2.5"><title>b4230e545cac 2026-10-01: 4952 lines</title></circle>
+<circle class="p" cx="468.4" cy="994.5" r="2.5"><title>79362f0f948b 2026-10-01: 4952 lines</title></circle>
+<circle class="p" cx="472.6" cy="994.5" r="2.5"><title>728514e68d24 2026-10-01: 4952 lines</title></circle>
+<circle class="p" cx="476.8" cy="978.3" r="2.5"><title>623fd87af552 2026-10-01: 5223 lines</title></circle>
+<circle class="p" cx="486.1" cy="978.3" r="2.5"><title>fae0623bf28b 2026-10-01: 5223 lines</title></circle>
+<circle class="p" cx="494.1" cy="978.3" r="2.5"><title>d4d8fade2693 2026-10-01: 5223 lines</title></circle>
+<circle class="p" cx="512.2" cy="978.3" r="2.5"><title>83f9f2675d4a 2026-10-01: 5223 lines</title></circle>
+<circle class="p" cx="512.7" cy="978.3" r="2.5"><title>41cd26204f10 2026-10-01: 5223 lines</title></circle>
+<circle class="p" cx="515.1" cy="978.3" r="2.5"><title>bf2c9c5a1862 2026-10-01: 5223 lines</title></circle>
+<circle class="p" cx="515.6" cy="978.3" r="2.5"><title>e87898dfc8de 2026-10-01: 5223 lines</title></circle>
+<circle class="p" cx="521.6" cy="978.3" r="2.5"><title>fa860d154e4a 2026-10-01: 5223 lines</title></circle>
+<circle class="p" cx="526.0" cy="951.5" r="2.5"><title>e7fa6dd80353 2026-10-01: 5672 lines</title></circle>
+<circle class="p" cx="585.9" cy="944.3" r="2.5"><title>624af8dd9728 2026-10-01: 5793 lines</title></circle>
+<circle class="p" cx="588.7" cy="935.8" r="2.5"><title>85d8b0fc1bd3 2026-10-01: 5935 lines</title></circle>
+<circle class="p" cx="601.1" cy="935.8" r="2.5"><title>902fb93c17bd 2026-10-01: 5935 lines</title></circle>
+<circle class="p" cx="649.2" cy="935.8" r="2.5"><title>f51c2d1669e7 2026-10-01: 5935 lines</title></circle>
+<circle class="p" cx="672.9" cy="934.8" r="2.5"><title>54fcfc330ae6 2026-10-01: 5952 lines</title></circle>
+<circle class="p" cx="691.1" cy="934.8" r="2.5"><title>a9407222d32b 2026-10-01: 5952 lines</title></circle>
+<circle class="p" cx="705.5" cy="934.8" r="2.5"><title>115d483a4dae 2026-10-01: 5952 lines</title></circle>
+<circle class="p" cx="740.0" cy="919.3" r="2.5"><title>8b5127e7c8c4 2026-10-01: 6211 lines</title></circle>
+<text class="s" x="64.0" y="1034" text-anchor="middle">2026-10-01</text>
+<text class="s" x="233.0" y="1034" text-anchor="middle">2026-10-01</text>
+<text class="s" x="402.0" y="1034" text-anchor="middle">2026-10-01</text>
+<text class="s" x="571.0" y="1034" text-anchor="middle">2026-10-01</text>
+<text class="s" x="740.0" y="1034" text-anchor="middle">2026-10-01</text>
+</g>
+<g aria-label="lint">
+<text class="t" x="64" y="1070">lint (warnings)</text>
+<text class="s" x="740" y="1070" text-anchor="end">deno lint warnings — lower is better</text>
+<line class="g" x1="64" x2="740" y1="1180.7" y2="1180.7"/>
+<text class="s" x="58" y="1184.7" text-anchor="end">-0.1</text>
+<line class="g" x1="64" x2="740" y1="1135.0" y2="1135.0"/>
+<text class="s" x="58" y="1139.0" text-anchor="end">0</text>
+<line class="g" x1="64" x2="740" y1="1089.3" y2="1089.3"/>
+<text class="s" x="58" y="1093.3" text-anchor="end">0.1</text>
+<line class="b" x1="64" x2="740" y1="1135.0" y2="1135.0"/>
+<text class="bt" x="740" y="1131.0" text-anchor="end">budget 0</text>
+<polyline class="l" points="64.0,1135.0 78.1,1135.0 91.9,1135.0 121.7,1135.0 127.8,1135.0 133.4,1135.0 142.8,1135.0 149.9,1135.0 155.5,1135.0 155.8,1135.0 455.4,1135.0 468.4,1135.0 472.6,1135.0 476.8,1135.0 486.1,1135.0 494.1,1135.0 512.2,1135.0 512.7,1135.0 515.1,1135.0 515.6,1135.0 521.6,1135.0 526.0,1135.0 585.9,1135.0 588.7,1135.0 601.1,1135.0 649.2,1135.0 672.9,1135.0 691.1,1135.0 705.5,1135.0 740.0,1135.0"/>
+<circle class="p" cx="64.0" cy="1135.0" r="2.5"><title>b892d11c1fe9 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="78.1" cy="1135.0" r="2.5"><title>4ce326bf5474 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="91.9" cy="1135.0" r="2.5"><title>c4bf5c792848 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="121.7" cy="1135.0" r="2.5"><title>5cdcb40f476f 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="127.8" cy="1135.0" r="2.5"><title>0834f0102575 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="133.4" cy="1135.0" r="2.5"><title>e11374b60e00 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="142.8" cy="1135.0" r="2.5"><title>f7227144d9ed 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="149.9" cy="1135.0" r="2.5"><title>8cf6d2f12d9c 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="155.5" cy="1135.0" r="2.5"><title>98d3e33a27f4 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="155.8" cy="1135.0" r="2.5"><title>54ca2fe4d4a8 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="455.4" cy="1135.0" r="2.5"><title>b4230e545cac 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="468.4" cy="1135.0" r="2.5"><title>79362f0f948b 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="472.6" cy="1135.0" r="2.5"><title>728514e68d24 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="476.8" cy="1135.0" r="2.5"><title>623fd87af552 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="486.1" cy="1135.0" r="2.5"><title>fae0623bf28b 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="494.1" cy="1135.0" r="2.5"><title>d4d8fade2693 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="512.2" cy="1135.0" r="2.5"><title>83f9f2675d4a 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="512.7" cy="1135.0" r="2.5"><title>41cd26204f10 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="515.1" cy="1135.0" r="2.5"><title>bf2c9c5a1862 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="515.6" cy="1135.0" r="2.5"><title>e87898dfc8de 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="521.6" cy="1135.0" r="2.5"><title>fa860d154e4a 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="526.0" cy="1135.0" r="2.5"><title>e7fa6dd80353 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="585.9" cy="1135.0" r="2.5"><title>624af8dd9728 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="588.7" cy="1135.0" r="2.5"><title>85d8b0fc1bd3 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="601.1" cy="1135.0" r="2.5"><title>902fb93c17bd 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="649.2" cy="1135.0" r="2.5"><title>f51c2d1669e7 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="672.9" cy="1135.0" r="2.5"><title>54fcfc330ae6 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="691.1" cy="1135.0" r="2.5"><title>a9407222d32b 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="705.5" cy="1135.0" r="2.5"><title>115d483a4dae 2026-10-01: 0 warnings</title></circle>
+<circle class="p" cx="740.0" cy="1135.0" r="2.5"><title>8b5127e7c8c4 2026-10-01: 0 warnings</title></circle>
+<text class="s" x="64.0" y="1204" text-anchor="middle">2026-10-01</text>
+<text class="s" x="233.0" y="1204" text-anchor="middle">2026-10-01</text>
+<text class="s" x="402.0" y="1204" text-anchor="middle">2026-10-01</text>
+<text class="s" x="571.0" y="1204" text-anchor="middle">2026-10-01</text>
+<text class="s" x="740.0" y="1204" text-anchor="middle">2026-10-01</text>
+</g>
+<g aria-label="tests">
+<text class="t" x="64" y="1240">tests (tests)</text>
+<text class="s" x="740" y="1240" text-anchor="end">tests that pass — higher is better</text>
+<line class="g" x1="64" x2="740" y1="1329.6" y2="1329.6"/>
+<text class="s" x="58" y="1333.6" text-anchor="end">210</text>
+<line class="g" x1="64" x2="740" y1="1294.5" y2="1294.5"/>
+<text class="s" x="58" y="1298.5" text-anchor="end">215</text>
+<line class="g" x1="64" x2="740" y1="1259.3" y2="1259.3"/>
+<text class="s" x="58" y="1263.3" text-anchor="end">220</text>
+<polyline class="l" points="155.8,1350.7 515.6,1259.3"/>
+<circle class="p" cx="155.8" cy="1350.7" r="2.5"><title>54ca2fe4d4a8 2026-10-01: 207 tests</title></circle>
+<circle class="p" cx="515.6" cy="1259.3" r="2.5"><title>e87898dfc8de 2026-10-01: 220 tests</title></circle>
+<text class="s" x="64.0" y="1374" text-anchor="middle">2026-10-01</text>
+<text class="s" x="233.0" y="1374" text-anchor="middle">2026-10-01</text>
+<text class="s" x="402.0" y="1374" text-anchor="middle">2026-10-01</text>
+<text class="s" x="571.0" y="1374" text-anchor="middle">2026-10-01</text>
+<text class="s" x="740.0" y="1374" text-anchor="middle">2026-10-01</text>
+</g>
+</svg>
+</body></html>

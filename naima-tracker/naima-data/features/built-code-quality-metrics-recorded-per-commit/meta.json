@@ -12,5 +12,24 @@
       "rel": "relates-to",
       "id": "11c2a358-46cf-4136-b4ce-e4d9480a9755"
     }
-  ]
+  ],
+  "fixedOn": "2026-10-01",
+  "effort": "L",
+  "attached": {
+    "seed-metrics.json": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    },
+    "naima-code-quality.svg": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    },
+    "naima-code-quality.html": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  }
 }
