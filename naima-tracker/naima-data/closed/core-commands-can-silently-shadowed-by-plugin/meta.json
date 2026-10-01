@@ -1,0 +1,14 @@
+{
+  "id": "121119fa-f771-46f2-9c0f-fcd83ba04c02",
+  "title": "Core commands can be silently shadowed by a plugin command, and some kinds skip collision checks",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

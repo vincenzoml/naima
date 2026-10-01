@@ -19,6 +19,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
 - [metrics](#metrics) — named measurements, each the command that measures it, recorded per commit and held to a budget, a floor or a baseline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
+- [privacy](#privacy) — the owner's material enters the repository only with their recorded yes, and no secret enters it at all
 - [docs](#docs) — every feature is documented as part of its implementation, and naima check holds it
 
 ## Commands at a glance
@@ -67,6 +68,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command that measures it — run, recorded per commit, held to a budget, a floor or a baseline, and shown as a trend; every number with the one it is compared to |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
+| [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused |
 | [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
 
 ## Extension points
@@ -75,11 +77,11 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, metrics, rules, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, metrics, rules, privacy, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
-| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, docs |
+| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, metrics, rules, docs |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, metrics, rules, privacy, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers |
@@ -1445,6 +1447,57 @@ Rules: a rule of this project, for agents, people or both: its page is the rule 
 | Section | What it shows |
 |---|---|
 | `rules` | the project's active rules for agents, read before anything else |
+
+## privacy
+
+The owner's material enters the repository only with their recorded yes, and no secret enters it at all.
+
+Its contributions' qualified ids are `privacy/<name>`.
+
+The conversation between the owner and an agent is private: nothing from it is copied into the repository without the owner's explicit yes. A file enters an item's `attachments/` through `naima attach`, which records on the item, in the field `attached`, whose it is: the owner's (`--consent`, their yes restated) or the writer's own (`--own`). The check `attachment-consent` flags an attachment with no record — one copied in by hand — unless the trunk already holds it, or a tool of the program writes it itself (a property's run records). The check `secrets` reads every project file and every attachment for six shapes of secret: a private key with its body (a header alone is not one), and AWS, GitHub, Slack, API-secret and Google keys; `naima attach` refuses a file holding one. A file that must keep one is an exception in the plugin's options, with a reason and the item that tracks it; an exception the trunk's configuration does not hold is refused, so the list only shrinks.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `exceptions` | `[]` | files allowed to hold a secret: a list of { path, reason, item }, path from the project root; one not on the trunk is refused |
+| `generated` | `["run-*.json","counterexample-*.txt"]` | attachment names a tool writes itself, which need no record: shell-style patterns |
+
+### naima attach
+
+Copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused.
+
+```sh
+naima attach <item> <file> (--consent "<the owner's yes, restated>"
+naima --own) [--as <name>] [--by <who>]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--consent` |  | the file is the owner's: their explicit yes to storing it, restated; recorded on the item |
+| `--own` |  | the file is the writer's own material: a log, a test's output, a measurement |
+| `--as` | `the file's own name` | the name it takes in attachments/ |
+| `--by` |  | who attaches it; without it, git's user.name |
+
+Examples:
+
+```sh
+naima attach export-drops ~/Desktop/alpha.png --consent "Yes, attach my screenshot of the export"
+naima attach export-drops test-run.out --own --as proof.out
+```
+
+**Fields**
+
+| Field | Kind | Applies to | Meaning | Values |
+|---|---|---|---|---|
+| `attached` | object | every type | whose each attachment is, as naima attach records it: file name → { from: owner or agent, consent: the owner's yes restated (for the owner's), by, on } |  |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `attachment-consent` | every attachment a branch adds has a record of whose it is (naima attach), every record names a file that is there, and the owner's carry their yes; what the trunk already holds, and what a tool writes itself, is not asked |
+| `secrets` | no project file or attachment holds a private key with its body, or an AWS, GitHub, Slack, API-secret or Google key; an exception names its file, a reason and an item, and the list of exceptions only shrinks |
 
 ## docs
 

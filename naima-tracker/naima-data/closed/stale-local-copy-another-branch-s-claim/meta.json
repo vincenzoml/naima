@@ -1,0 +1,14 @@
+{
+  "id": "e81e8ca5-bad8-478f-8133-7f684bd446c6",
+  "title": "A stale local copy of another branch's claim overrides that branch's newer claim",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

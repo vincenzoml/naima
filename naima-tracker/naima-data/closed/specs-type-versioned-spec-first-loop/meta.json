@@ -1,0 +1,24 @@
+{
+  "id": "3827e991-e675-4aac-87b8-e47352a8c151",
+  "title": "`specs` type, versioned, with a spec-first loop",
+  "status": "closed",
+  "created": "2026-10-01",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ],
+  "fixedOn": "2026-10-01",
+  "effort": "M",
+  "docs": [
+    "naima/docs/guide/plan-with-requirements-specs-and-decisions.md#specifications-how-it-must-behave-version-by-version",
+    "naima/docs/agents/opening-a-worktree.md"
+  ],
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
+}

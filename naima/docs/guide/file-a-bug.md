@@ -19,7 +19,9 @@ Something is broken. Write it down first, before anyone tries to fix it
      agent writes this in its own words; your chat with it is never copied
      in without your yes ([the rule](rules.md#the-owners-chat-stays-private));
    - **the evidence**: what you ran and what it printed, a number, a
-     screenshot — files go in `attachments/` next to it;
+     screenshot — files go in `attachments/` next to it, with
+     `naima attach <item> <file> --own` (a secret in one is refused: cut it
+     out first);
    - **what you saw and what you only suppose**, kept apart;
    - **the consequence**: who notices, and when.
 

@@ -61,8 +61,10 @@ add the project's own data folders. `naima init` writes its own
 - **Small commits, one idea each, with a message that says why.** Any single
   change can then be found and undone.
 - **Look before committing.** `git status` and `git diff --cached`: nothing
-  from step 3 is staged, no secret appears in the diff. A secret already
-  committed is a problem for the owner to know about at once, not to hide.
+  from step 3 is staged, no secret appears in the diff; `naima check` (the
+  check `secrets`) reads every file for the common key shapes. A secret
+  already committed is a problem for the owner to know about at once, not to
+  hide.
 - **Never force-push, never rewrite history.** No `git push --force`, no
   `git rebase` of shared branches, no `git reset --hard` over someone's work,
   no `git commit --amend` of a commit already shared. To undo, add a commit:

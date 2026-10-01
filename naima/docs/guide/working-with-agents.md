@@ -78,7 +78,7 @@ naima queue --human
 ```
 
 For each: read its page, do what it says, put what you saw in its
-`attachments/`, and set the result (`naima set <item> status=passed`, or
+`attachments/` (`naima attach <item> <file> --own`), and set the result (`naima set <item> status=passed`, or
 `failed`). Or ask the agent to record it for you, telling it what you saw.
 
 ## Your chat stays private

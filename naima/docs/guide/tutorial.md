@@ -233,7 +233,7 @@ $ naima board tests
 ## (no section)
   open      greet.sh greets with Hello  — tests/greet-sh-greets-hello
 $ naima check
-2 items, 20 checks
+2 items, 22 checks
 
 all invariants hold
 ```
@@ -248,11 +248,15 @@ naima: bugs/greet-sh-says-helo-instead-hello is fixed: closing takes fixedOn and
 ## 8. Perform the gesture, keep the evidence
 
 Run it, and keep what it printed in the test's `attachments/` folder:
-[evidence](glossary.md#evidence) travels with the claim.
+[evidence](glossary.md#evidence) travels with the claim. `naima attach`
+copies it there and records that it is your own (`--own`); a file someone
+else gave you goes in with their yes instead (`--consent "…"`).
 
 ```console
-$ sh greet.sh Ada | tee naima-tracker/naima-data/tests/greet-sh-greets-hello/attachments/run.txt
+$ sh greet.sh Ada | tee run.txt
 Hello, Ada
+$ naima attach greet-sh-greets run.txt --own
+tests/greet-sh-greets-hello: attached run.txt (your own)
 $ naima set greet-sh-greets status=passed
 tests/greet-sh-greets-hello: status=passed
 ```
