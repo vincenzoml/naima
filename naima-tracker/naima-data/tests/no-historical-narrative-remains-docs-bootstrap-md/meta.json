@@ -1,0 +1,14 @@
+{
+  "id": "73bed74d-6c63-4143-847d-94fafa5f79bf",
+  "title": "No historical narrative remains in docs/bootstrap.md or docs/format.md",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "diff",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "bfa68f9f-57b6-44c4-a38c-afd710c96703"
+    }
+  ]
+}
