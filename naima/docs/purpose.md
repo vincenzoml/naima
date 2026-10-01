@@ -343,8 +343,8 @@ are in [the tutorial](guide/tutorial.md).
    own item: `naima new tests "Export keeps the alpha channel" --set
    runBy=agent` and `naima link export-keeps verifies export-drops`. The test
    fails on the old code and passes on the new.
-5. **Evidence attached.** The test's output goes to the test's
-   `attachments/run.txt`; `naima set export-keeps status=passed`.
+5. **Evidence attached.** `naima attach export-keeps run.txt --own` puts the
+   test's output in its `attachments/`; `naima set export-keeps status=passed`.
 6. **Gate and handover.** The gates run; `naima release export-drops` and
    `naima pass "..."` record the end of the session; the branch is merged
    with `git merge --ff-only`, which refuses rather than overwrite anything.

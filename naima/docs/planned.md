@@ -30,12 +30,9 @@ a [plugin](guide/add-a-plugin.md).
 
 Every action an agent takes on an item has a command, so each is recorded
 the same way and can be checked. Opening, fields, triage, links,
-the description (`naima describe`), notes (`naima note`), claims, proof and
-closing have one. Missing today:
+the description (`naima describe`), notes (`naima note`), attachments
+(`naima attach`), claims, proof and closing have one. Missing today:
 
-- **Attaching a file** to an item's `attachments/`, with the consent of whoever
-  owns it recorded on the item when it is the owner's material. **Today:** the
-  file is copied in by hand.
 - **Moving an item to another type** (a bug that turns out to be a request).
   **Today:** a new item is opened in the right type and the old one linked
   `duplicate-of` it.

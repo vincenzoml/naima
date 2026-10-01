@@ -57,7 +57,10 @@ The title says what happened, not what to do.
    ([the rule](../guide/rules.md#the-owners-chat-stays-private)). A report a
    person wrote as a file is kept as they wrote it.
 2. **The evidence**: a log line, a number, a command with its output, a file
-   in `attachments/`. Evidence travels with the claim.
+   in `attachments/`. Evidence travels with the claim. A file goes in with
+   `naima attach` (below), never copied by hand, and is **redacted before
+   attaching**: a token, a key, a password or a private path in a log is cut
+   out first, because an attachment is permanent once committed.
 3. **What is measured and what is inferred, marked apart.** "Read in the
    code, certain" against what you checked; "not reproduced" against what you
    assume. An item that keeps the two apart stays useful even when its
@@ -105,9 +108,21 @@ naima note <item> "Reproduced on 16-bit PNGs only; 8-bit keeps alpha." --by "tri
 - **What goes in is your own words.** Neither command takes the owner's chat:
   paraphrase it. A verbatim quote, or a file the owner shared, goes in only
   after their explicit yes, and the note says that they gave it
-  ([the rule](../guide/rules.md#the-owners-chat-stays-private)). A command to
-  attach a file with that consent recorded on the item is
-  [planned](../planned.md#commands-for-every-action).
+  ([the rule](../guide/rules.md#the-owners-chat-stays-private)).
+- `naima attach <item> <file>` copies a file into the item's `attachments/`
+  and records on the item, in the field `attached`, whose it is. A file the
+  owner shared goes in only after their explicit yes, restated:
+  `--consent "Yes, attach my screenshot of the export"`. Your own material —
+  a log, a test's output — takes `--own`. With neither it is refused, and so
+  is a file holding a secret (the check `secrets` names the line): redact it
+  and attach again. `--as <name>` renames it; a name already taken is refused.
+- `naima check` holds both: `attachment-consent` fails on an attachment a
+  branch adds with no record (copied in by hand), on a record whose file is
+  gone, and on the owner's file with no yes; `secrets` fails on a private key
+  with its body, or an AWS, GitHub, Slack, API-secret or Google key, in any
+  project file or attachment. An exception lives in the `privacy` plugin's
+  options with a reason and an item, and is added only on the trunk: the list
+  only shrinks.
 
 ## 5. Cross-reference instead of repeating
 
