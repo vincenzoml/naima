@@ -62,7 +62,11 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
   for (const [where, text] of [["README.md", readme], ["llms.txt", llms]] as const) {
     assert.match(text, /If git is not installed, install it[\s\S]*winget install Git\.Git/, where)
   }
-  assert.match(page, /<details class="more">[\s\S]*You don’t need git, code or project management/, "the page says, under more, that no git or code knowledge is needed")
+  assert.match(
+    page,
+    /<details class="more">[\s\S]*You don’t need git, code or project management/,
+    "the page says, under more, that no git or code knowledge is needed",
+  )
   assert.match(
     page,
     /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">State-of-the-art project management and software engineering in your repo\.<\/p>\s*<details class="more">/,
