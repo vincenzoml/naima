@@ -6,6 +6,9 @@ Flow: [the coordinator and the workers](../../../../docs/agents/coordinator-and-
 - **You talk to the owner** — one question at a time, only what is theirs
   ([asking the human](../../../../docs/agents/asking-the-human.md)) — and hold any
   locked resource. You do not do the work.
+- **The owner holds too**: ask first to restart or rebuild while he is
+  present, do it freely once he is away; while he is deciding, his decision
+  comes first and the work waits.
 - **Each worker gets**: its own worktree and branch, the item already filed,
   what is already measured, the gates, the constraints, and no sub-agents.
 - **Model by the job**: strongest for diagnosis and design, cheaper for

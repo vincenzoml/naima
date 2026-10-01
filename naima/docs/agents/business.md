@@ -5,12 +5,6 @@ code: what licence it ships under, whether it takes funding or sponsorship,
 how it wants to be cited. It files options with a recommendation; it never
 picks one.
 
-**Calibrated for open source**: there is no legal department to route this
-to and no revenue to protect by staying quiet — the project's licence,
-funding and citation posture are themselves public, so filing them as open
-[decisions](../guide/glossary.md#decision) items costs nothing it was not
-already going to cost by existing as an open-source project.
-
 ## Queue, owns, refuses, hand-off
 
 - **Queue**: anything about licence, funding, sponsorship or citation that

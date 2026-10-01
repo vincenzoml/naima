@@ -30,6 +30,11 @@ coordinator does not do the work; it holds the conversation.**
   device, a deployment. A worker never drives it unless it is handed over
   explicitly, and then the coordinator does not touch it until the worker
   reports.
+- **The owner is a resource holder too.** A restart or a rebuild is asked
+  first while he is present at the keyboard, and free to do without asking
+  once he is away. While he is deciding, his decision comes first and the
+  work that depends on it waits — the coordinator does not restart or
+  rebuild around him just to keep busy.
 - Spawns workers, merges their branches, and keeps the queue honest.
 - Sets a timer that brings it back when nothing else will. The owner should
   never be the reason work resumes: [the non-stop loop](the-non-stop-loop.md)

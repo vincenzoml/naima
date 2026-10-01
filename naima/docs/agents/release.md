@@ -5,9 +5,7 @@ between a [gate](../guide/glossary.md#gate) going green and the world seeing
 the result, and the role that runs it: what its queue is, what it owns, what
 it refuses, and where it hands off.
 
-**Calibrated for open source**: there is no support contract, no paying
-customer to notify first, and no embargo beyond what a security advisory
-asks for. A release is a tag, an artefact and an announcement; the runbook
+A release is a tag, an artefact and an announcement; the runbook
 below exists so none of the three happens before the one before it is true.
 
 ## Queue, owns, refuses, hand-off

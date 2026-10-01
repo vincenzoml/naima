@@ -6,11 +6,6 @@ is stale against what the code now does. It does not invent what happened —
 it reads the trackers and the commits, and says the same thing in a
 reader's language instead of an agent's.
 
-**Calibrated for open source**: the reader is anyone who finds the
-repository, not a customer with a support contract — so nothing here is
-written for an audience the project can identify or notify directly. What
-gets written is what the public page says, in public.
-
 ## Queue, owns, refuses, hand-off
 
 - **Queue**: a release handed off from [the release role](release.md) once
