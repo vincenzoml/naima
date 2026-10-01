@@ -1,7 +1,8 @@
-# The project site: site/ as it is on main, published to GitHub Pages
-# (https://vincenzoml.github.io/naima/). Only the files under site/; nothing
-# is built. Pages must be enabled in the repository settings, with GitHub
-# Actions as its source.
+# The project site, published to GitHub Pages (https://vincenzoml.github.io/naima/):
+# site/ as it is on main, the documentation rendered into site-styled HTML
+# under docs/, and the repository's star count, all by scripts/site.ts at
+# build time; the page fetches nothing at runtime. Pages must be enabled in
+# the repository settings, with GitHub Actions as its source.
 #
 # Pinned by major version: the official Pages actions, whose majors GitHub
 # keeps compatible.
@@ -10,7 +11,7 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: ["site/**", ".github/workflows/pages.yml"]
+    paths: ["site/**", "docs/**", "naima/docs/**", "scripts/site.ts", ".github/workflows/pages.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,9 +34,19 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.9.7 # as ci.yml
+      - name: Build the site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The star count, when the API answers; without it the page shows no count.
+          stars=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/${{ github.repository }}" | grep -m1 '"stargazers_count"' | tr -dc 0-9 || true)
+          deno run -A scripts/site.ts _site ${stars:+--stars "$stars"}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: site
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

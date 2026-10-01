@@ -7,7 +7,7 @@
 # and runs `naima check`. Nothing is installed globally for Naima; Deno, the
 # one thing Naima needs on the machine, is installed with its official
 # installer when it is missing. Run again, it says Naima is installed and
-# checks it. What it does by hand: docs/guide/install.md#bootstrap-a-project.
+# checks it. What it does by hand: naima/docs/guide/install.md#bootstrap-a-project.
 #
 #   NAIMA_SOURCE           the repository to clone (default: Naima's on GitHub)
 #   NAIMA_REF              the branch to clone (default: dist)
@@ -99,7 +99,7 @@ main() {
       git clone --quiet --branch "$REF" -- "$SOURCE" "$PROGRAM"
     fi
     naima check
-    say "up to date? naima update --check; to update: naima update (docs: $PROGRAM/docs/install.md#updating)"
+    say "up to date? naima update --check; to update: naima update (docs: $PROGRAM/docs/guide/install.md#updating)"
     return 0
   fi
 

@@ -28,6 +28,12 @@ Work from the root of the git repository to track (`git rev-parse --show-topleve
    follow it; every tracker change goes through the CLI. In it, `naima` means
    `deno run -A naima-tracker/naima/naima.ts`.
 
+5. Make every later session know it: add this line, verbatim, to the agent
+   instruction file this repository has — AGENTS.md, CLAUDE.md, or whichever
+   file your agent reads; if there is none, create AGENTS.md — and commit it:
+
+   This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them.
+
 ## By hand, without the installer
 
 ```sh
@@ -38,8 +44,10 @@ deno run -A naima-tracker/naima/naima.ts check
 
 ## More
 
-- For agents, how to learn a project and the flows: https://github.com/vincenzoml/naima/blob/main/docs/agents/README.md
-- The rules every project holds to: https://github.com/vincenzoml/naima/blob/main/docs/guide/rules.md
-- Installing and updating: https://github.com/vincenzoml/naima/blob/main/docs/guide/install.md
-- The guide for people, with a tutorial: https://github.com/vincenzoml/naima/blob/main/docs/guide/README.md
+- The documentation, rendered: https://vincenzoml.github.io/naima/docs/
+
+- For agents, how to learn a project and the flows: https://vincenzoml.github.io/naima/docs/agents/
+- The rules every project holds to: https://vincenzoml.github.io/naima/docs/guide/rules.html
+- Installing and updating: https://vincenzoml.github.io/naima/docs/guide/install.html
+- The guide for people, with a tutorial: https://vincenzoml.github.io/naima/docs/guide/
 - Source: https://github.com/vincenzoml/naima

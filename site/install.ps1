@@ -6,7 +6,7 @@
 # and runs `naima check`. Nothing is installed globally for Naima; Deno, the
 # one thing Naima needs on the machine, is installed with its official
 # installer when it is missing. Run again, it says Naima is installed and
-# checks it. What it does by hand: docs/guide/install.md#bootstrap-a-project.
+# checks it. What it does by hand: naima/docs/guide/install.md#bootstrap-a-project.
 #
 #   NAIMA_SOURCE           the repository to clone (default: Naima's on GitHub)
 #   NAIMA_REF              the branch to clone (default: dist)
@@ -70,7 +70,7 @@ function Install-Naima {
         Invoke-Checked git @('clone', '--quiet', '--branch', $Ref, '--', $Source, $Program)
       }
       Invoke-Checked $DenoExe @('run', '-A', "$Program/naima.ts", 'check')
-      Say "up to date? naima update --check; to update: naima update (docs: $Program/docs/install.md#updating)"
+      Say "up to date? naima update --check; to update: naima update (docs: $Program/docs/guide/install.md#updating)"
       return
     }
     if (-not (Test-Path $Program)) {
