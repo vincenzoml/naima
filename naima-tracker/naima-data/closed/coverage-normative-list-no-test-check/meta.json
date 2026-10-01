@@ -1,9 +1,9 @@
 {
-  "id": "4d67d7fd-8410-420e-9310-34803f59eb1a",
-  "title": "Derived timeline view (`naima view timeline`)",
-  "status": "requested",
+  "id": "6f34bf2d-bf86-43d5-b1a5-b8f84a2fb9d8",
+  "title": "Coverage of a normative list (NO TEST check)",
+  "status": "closed",
   "created": "2026-10-01",
-  "impact": "low",
+  "impact": "medium",
   "priority": "later",
   "confidence": "measured",
   "triagedOn": "2026-10-01",
@@ -21,5 +21,7 @@
   "docs": [
     "naima/docs/guide/plan-with-epics-milestones-and-gates.md",
     "naima/docs/agents/plan-with-epics-and-gates.md"
-  ]
+  ],
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
 }

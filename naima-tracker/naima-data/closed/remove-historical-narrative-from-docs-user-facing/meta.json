@@ -1,11 +1,16 @@
 {
   "id": "bfa68f9f-57b6-44c4-a38c-afd710c96703",
   "title": "Remove historical narrative from docs and user-facing text: docs/bootstrap.md 'History' section and docs/format.md's pre-format-1 layout story. Owner's order: docs describe what is, not how it came to be.",
-  "status": "open",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "low",
   "priority": "now",
   "confidence": "reported",
   "triagedOn": "2026-10-01",
-  "fixedOn": "2026-10-01"
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "096548f"
+  ],
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
 }
