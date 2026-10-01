@@ -24,3 +24,9 @@ scratchpad (`pages/final/`): desktop 1280×860 and phone 390×844, mid-flight an
 final, dark and light, and reduced motion. At 390 px the page's scroll width
 is 390 (no horizontal scroll). In headless Chrome the animation sometimes
 stalls for lack of frames; the page ends on the logo anyway after 6 s.
+
+## Notes
+
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read the item: a single owner visual-judgement gesture on the already-built site, same shape as the other site look-right test.

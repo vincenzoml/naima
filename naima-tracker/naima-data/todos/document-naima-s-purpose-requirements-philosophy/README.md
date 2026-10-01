@@ -62,3 +62,9 @@ before them.
 
 Writing the page itself. This item is filing only, per the request that
 raised it; implementation waits for the owner's go, per AGENTS.md rule 3.
+
+## Notes
+
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read the item in full plus README.md's "Why the name"/"What it is" and develop/architecture.md's dependency rule: writing docs/purpose.md means synthesizing several existing sources and the review's D-01..D-15 decisions into one coherent page, not a short note.

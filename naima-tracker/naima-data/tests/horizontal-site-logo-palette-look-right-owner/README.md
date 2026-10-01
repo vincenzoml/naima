@@ -23,3 +23,9 @@ Pass: the owner says it looks right. Fail: what looks wrong, in their words.
 Headless Chrome through the DevTools protocol, frames in the session scratchpad (`site-horizontal/`):
 desktop 1280×900 light and dark, phone 390×844, mid-flight frames. Scroll width equals the
 viewport at 1280 and 390 on the home page and the docs pages.
+
+## Notes
+
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read the item: a single owner visual-judgement gesture (reload the built site a few times, dark/light, two widths).

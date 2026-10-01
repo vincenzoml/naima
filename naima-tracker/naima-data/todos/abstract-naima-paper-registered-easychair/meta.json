@@ -13,5 +13,6 @@
   "impact": "low",
   "priority": "later",
   "confidence": "reported",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "effort": "S"
 }
