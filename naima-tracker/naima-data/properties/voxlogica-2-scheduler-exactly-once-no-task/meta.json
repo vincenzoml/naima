@@ -1,0 +1,28 @@
+{
+  "id": "96559719-25b5-4df5-a844-ec4330e8032f",
+  "title": "VoxLogicA 2 scheduler: exactly once — no task starts twice, the shared subterm included, and none is left unstarted",
+  "status": "error",
+  "created": "2026-10-01",
+  "verifier": "mcrl2",
+  "model": "develop/case-studies/voxlogica-2-scheduler/scheduler.mcrl2",
+  "property": "develop/case-studies/voxlogica-2-scheduler/exactly-once.mcf",
+  "gate": "paper-submission",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01",
+  "verifierOptions": {
+    "timeoutSeconds": 600
+  },
+  "links": [
+    {
+      "rel": "blocks",
+      "id": "6745e159-810e-4bfb-83f0-a53ffb421d7f"
+    },
+    {
+      "rel": "verifies",
+      "id": "063883d5-76ab-4edc-99a7-47c759a3215e"
+    }
+  ],
+  "lastRun": "run-2026-10-01T18-31-43-205Z.json"
+}

@@ -1,0 +1,2 @@
+% Dependency order: no task starts before every task it depends on is done.
+forall t, d: Task . (val(d in deps(t)) => [(!done(d))* . start(t)] false)

@@ -1,0 +1,21 @@
+{
+  "id": "a001284c-5b9b-44c1-af37-7d01276a91ef",
+  "title": "The owner installs mCRL2, runs the VoxLogicA 2 scheduler case study, and chooses which of its results the paper reports",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "human",
+  "humanBecause": "judgement",
+  "kind": "code",
+  "impact": "medium",
+  "priority": "next",
+  "effort": "S",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01",
+  "gate": "paper-submission",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "063883d5-76ab-4edc-99a7-47c759a3215e"
+    }
+  ]
+}

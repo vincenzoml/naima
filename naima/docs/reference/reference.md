@@ -19,6 +19,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
+- [verifier-mcrl2](#verifier-mcrl2) — the mCRL2 adapter: a property is a modal mu-calculus formula over an mCRL2 specification
 - [ui](#ui) — the views plugins contribute, shown by `naima ui` in a native window, or the browser, from a server on this machine only
 - [metrics](#metrics) — named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
@@ -106,7 +107,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `roles` | roles | a role of the company of agents: `title`, what it `owns`, what it `refuses` (never empty), the `kinds` and `types` on its queue, and `queue(ctx)`, its open items most urgent first | roles |
-| `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier |
+| `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier, verifier-mcrl2 |
 | `ui-views` | ui | a view `naima ui` shows as a tab, or as a panel of its first screen: `name` (its path), `title`, `says`, `order` (lower first, 0 when absent), `panel` (true: on the first screen, not a tab), `render(params, ctx) → { data, html, css? }`, rendered at each request | coordination, triage, gates, ui, metrics |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
 | `metrics` | metrics | a named measurement: `run` (a program and its arguments) and `kind`, or a code `measure`; a bound — `atMost`, `atLeast` or `equals` — and `better` |  |
@@ -1724,6 +1725,26 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 | Verifier | What it checks |
 |---|---|
 | `example-regex` | line-regex properties over a text file: "some <re>" or "never <re>" |
+
+## verifier-mcrl2
+
+The mCRL2 adapter: a property is a modal mu-calculus formula over an mCRL2 specification.
+
+Its contributions' qualified ids are `verifier-mcrl2/<name>`.
+
+Off until `naima.json` names it under `plugins`, since it starts programs. Contributes the `mcrl2` verifier. `model` is an mCRL2 specification; `property` is a modal mu-calculus formula, inline, or the path of an `.mcf` file from the project root, which is then an input of the run. `naima verify` runs `mcrl22lps`, `lps2pbes --counter-example`, and `pbessolve` with an evidence file: `true` holds; `false` is violated, and the evidence, printed by `lps2lts` as an `.aut` labelled transition system, is the counterexample; any other answer, or `verifierOptions.timeoutSeconds` reached by a step, is unknown. A tool that is not there is an error run whose output begins `tool missing:`; a tool that fails is an error with its output. The version recorded is the first line of `mcrl22lps --version`.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `bin` | `PATH` | the absolute directory holding the mCRL2 tools; absent, they are looked up on PATH |
+
+**Verifiers**, used by `naima verify`
+
+| Verifier | What it checks |
+|---|---|
+| `mcrl2` | an mCRL2 specification against a modal mu-calculus formula, inline or an .mcf file: mcrl22lps, lps2pbes, pbessolve; the evidence is the counterexample |
 
 ## ui
 
