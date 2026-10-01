@@ -13,5 +13,8 @@
     "naima/docs/guide/config.md",
     "naima/docs/guide/configure-the-project.md",
     "naima/docs/reference/reference.md"
+  ],
+  "commits": [
+    "9fcd9b03fcca2faf060d5f9bc198f8d3daafc5bd"
   ]
 }
