@@ -17,3 +17,9 @@ stops the server.
   `ui-views` extension point, and the metrics plugin is the first.
 
 Design is not part of this item: the page is functional.
+
+## Notes
+
+### 2026-10-01 — Claude, on claude/evidence-close-2
+
+Evidence review (evidence-close-2): the server, permissions and launcher plumbing are proven (tests/naima-ui-macos-opens-naima-webview-window, tests/naima-ui-serves-views-data-only-run, tests/through-launcher-ui-serves-loopback-interface-stops, all passed). The usability claim is not: tests/owner-opens-naima-ui-project-recorded-metrics is still open, runBy=human, humanBecause=judgement — only the owner can judge the dashboard usable. Not closing pending that gesture.
