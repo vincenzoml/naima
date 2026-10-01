@@ -9,5 +9,11 @@
   "priority": "later",
   "effort": "XL",
   "confidence": "reported",
-  "triagedOn": "2026-09-29"
+  "triagedOn": "2026-09-29",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
 }

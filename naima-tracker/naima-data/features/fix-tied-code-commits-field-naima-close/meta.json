@@ -1,0 +1,16 @@
+{
+  "id": "aac5a3ee-d323-4919-a394-1b50fdc98746",
+  "title": "Fix tied to code: a `commits` field, and `naima close` refuses without one",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

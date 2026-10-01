@@ -1,0 +1,20 @@
+{
+  "id": "ad82fbef-7401-4f0a-baac-231d358c09db",
+  "title": "Roles plugin: declared vocabulary and a per-role queue view",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    },
+    {
+      "rel": "relates-to",
+      "id": "613cc72e-bcb3-4312-85e4-13dae3b48a66"
+    }
+  ]
+}

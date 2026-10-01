@@ -1,0 +1,16 @@
+{
+  "id": "4ebcd644-4871-479e-bb9e-f674281c172a",
+  "title": "Trunk-commit detection while a branch is being prepared",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

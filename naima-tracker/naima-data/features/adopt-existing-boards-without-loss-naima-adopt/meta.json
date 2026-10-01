@@ -1,0 +1,16 @@
+{
+  "id": "6e1145c5-12d8-455c-b46d-d720aa66655a",
+  "title": "Adopt existing boards without loss (`naima adopt`)",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

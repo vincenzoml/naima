@@ -1,0 +1,16 @@
+{
+  "id": "e1c8c7e8-f785-424c-aa07-9962ca2f6343",
+  "title": "Agent-harness entry-point check, and `naima init` writes the agent pointer (opt-in)",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "now",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

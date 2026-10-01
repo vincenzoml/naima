@@ -1,0 +1,16 @@
+{
+  "id": "82fcb7f4-6b9e-4cb9-b3ac-6d76044d7da6",
+  "title": "Stale-page detectors: a passed-but-unticked clause; a test excusing itself",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

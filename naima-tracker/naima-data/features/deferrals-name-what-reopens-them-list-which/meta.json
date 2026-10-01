@@ -1,0 +1,16 @@
+{
+  "id": "bc0964bc-f4f3-4438-9565-40e33a326239",
+  "title": "Deferrals name what reopens them; a list of which documents are authoritative",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

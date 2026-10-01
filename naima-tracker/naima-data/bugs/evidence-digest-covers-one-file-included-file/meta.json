@@ -1,12 +1,12 @@
 {
-  "id": "9e080b53-47d9-4417-9102-2b0d0fed061a",
-  "title": "Document Naima's purpose, requirements and philosophy",
+  "id": "5bcb2cd6-b487-43d1-a6ef-b099c99e4fe4",
+  "title": "Evidence digest covers one file; included-file changes and tool version go unnoticed",
   "status": "open",
-  "created": "2026-09-30",
+  "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
   "confidence": "diagnosed",
-  "fixedOn": "2026-09-30",
+  "triagedOn": "2026-10-01",
   "links": [
     {
       "rel": "relates-to",

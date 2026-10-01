@@ -1,0 +1,16 @@
+{
+  "id": "0f48de68-684b-4f95-8e74-0ea942a8ce94",
+  "title": "Evidence hierarchy and red-then-green, written down",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}
