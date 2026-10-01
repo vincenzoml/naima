@@ -165,6 +165,8 @@ export interface View {
 /** A block of `naima summary`. May be async; one with nothing to say renders no lines. */
 export interface SummarySection {
   name: string
+  /** True for a block also printed at the foot of `naima board` and `naima queue`, beside the work: the evidence the items stand on. */
+  alongside?: boolean
   render(ctx: Context): Rendered | Promise<Rendered>
 }
 

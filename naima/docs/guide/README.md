@@ -35,7 +35,7 @@ What Naima is for: [the purpose](../purpose.md).
 | say what must hold, how it must behave, and what I decided | [Plan with requirements, specifications and decisions](plan-with-requirements-specs-and-decisions.md) |
 | leave agents working and come back to only my part | [What happens while you are away](while-you-are-away.md) |
 | prove a fix and close it | [Prove and close](prove-and-close.md) |
-| measure the work — test time, coverage, warnings — and hold it to a budget | [Metrics and budgets](metrics-and-budgets.md) |
+| measure the work — test time, coverage, warnings, complexity — hold it to a budget, and see how your code's quality moves over time | [Metrics and budgets](metrics-and-budgets.md) |
 | work on several things at once | [Work on several branches at once](several-branches.md) |
 | move to a newer Naima | [Update Naima](update-naima.md) |
 | add a gate, weigh a check, switch a plugin off | [Configure the project](configure-the-project.md) |

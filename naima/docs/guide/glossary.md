@@ -325,8 +325,10 @@ every open item ([read the board, the queue and the gates](read-the-board.md)).
 ### Metric
 
 A name and the command that measures it — test time, coverage, warnings,
-how long an analysis runs — recorded per commit and held to a budget, a
-floor or a baseline: `naima metrics` ([metrics and budgets](metrics-and-budgets.md)).
+how long an analysis runs — or a code-quality number Naima takes itself
+(lines of code, complexity, duplication), recorded per commit, held to a
+budget, a floor or a baseline, and read back over the commit timeline:
+`naima metrics` ([metrics and budgets](metrics-and-budgets.md)).
 
 ### Queue
 

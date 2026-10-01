@@ -387,15 +387,28 @@ export function renderBoard(ctx: Context, type: TypeDef, all: boolean): string[]
   return out
 }
 
+/** The summary sections that stand beside the work — `alongside: true` — each under its name: the foot of a board or a queue. */
+export async function alongside(ctx: Context): Promise<string[]> {
+  const out: string[] = []
+  for (const c of ctx.registry.contributions("summary")) {
+    const section = c.value as SummarySection
+    if (section.alongside !== true) continue
+    const lines = asRendered(await section.render(ctx), `summary section "${c.name}"`).text()
+    if (lines.length) out.push("", `── ${shortOrId(ctx, "summary", c)}`, ...lines)
+  }
+  return out
+}
+
 const board: Command = {
   name: "board",
-  says: "print a type's board, grouped by section, most urgent first",
+  says: "print a type's board, grouped by section, most urgent first; at its foot, the summary sections that stand beside the work, such as the metrics",
   usage: "board <type> [--all]",
   options: [{ name: "--all", says: "also list the items whose status is done" }],
   examples: ["board bugs", "board todos --all"],
-  run(args, ctx) {
+  async run(args, ctx) {
     const p = parse(args, { all: { type: "boolean" } })
     for (const l of renderBoard(ctx, typeOrThrow(ctx, p.positionals[0]), bool(p, "all"))) ctx.out(l)
+    for (const l of await alongside(ctx)) ctx.out(l)
     return 0
   },
 }

@@ -26,6 +26,7 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import {
+  alongside,
   bool,
   type Check,
   code,
@@ -66,6 +67,8 @@ export interface GateResult {
   blocking: Item[]
   /** What is still owed but does not stop it. */
   owed: Item[]
+  /** What stops it that is no item, in words: a number past its bound. */
+  reasons?: string[]
 }
 
 /** A named release or merge condition, backed by items: what any plugin contributes to the `gates` point. */
@@ -234,6 +237,7 @@ function printGate(ctx: Context, gate: GateDef, r: GateResult, hands = false): v
     }`,
   )
   const who = (i: Item) => (hands ? `  (${runByOf(ctx, i) || "unclassified"})` : "")
+  for (const why of r.reasons ?? []) ctx.out(`  ✗ ${why}`)
   for (const i of r.blocking) ctx.out(`  ✗ ${label(i)}  ${i.meta.title}${who(i)}`)
   for (const i of r.owed) ctx.out(`  · ${label(i)}  ${i.meta.title}${who(i)}`)
 }
@@ -262,11 +266,11 @@ const gatesCommand: Command = {
 
 const queue: Command = {
   name: "queue",
-  says: "open items on a gate, split by whose hands the proof needs",
+  says: "open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics",
   usage: "queue [gate] [--human]",
   options: [{ name: "--human", says: "also list the items that need a person or a build, with why" }],
   examples: ["queue", "queue first-public --human"],
-  run(args, ctx) {
+  async run(args, ctx) {
     const p = parse(args, { human: { type: "boolean" } })
     const gate = p.positionals[0]
     const def = gate === undefined ? undefined : ctx.registry.find<GateDef>("gates", gate)?.value
@@ -289,6 +293,7 @@ const queue: Command = {
         ctx.out(`  ${label(i)}  ${i.meta.title}  (${why})`)
       }
     }
+    for (const l of await alongside(ctx)) ctx.out(l)
     return 0
   },
 }

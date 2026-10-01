@@ -44,11 +44,12 @@ a [plugin](guide/add-a-plugin.md).
 ## Metrics
 
 Metrics measured on every commit without anyone asking: a commit hook that
-runs them and records the numbers, and a trend drawn as a chart on a
-dashboard. **Today:** `naima metrics run --record` runs the project's
-metrics when asked, records them per commit, holds each to a budget, a floor
-or a baseline, and `naima metrics trend` draws the trend as text
-([metrics and budgets](guide/metrics-and-budgets.md)).
+runs them and records the numbers. **Today:** `naima metrics run --record`
+runs the project's metrics when asked — commands, and code-quality measures
+built in — records them per commit, holds each to a budget, a floor or a
+baseline; `naima metrics backfill` measures past commits, and `trend`,
+`history` and `plot` (an SVG chart or an HTML report) read them along the
+commit timeline ([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ## Structuring a project from the start
 

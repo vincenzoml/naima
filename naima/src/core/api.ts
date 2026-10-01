@@ -42,7 +42,7 @@ export { EXIT, isInternal, message, NaimaError } from "./errors.ts"
 export { isRegularFile, NEVER_SOURCE, walkFiles, writeFileAtomic } from "./files.ts"
 export { byUrgency, hasFlag, hasTrait, isEvidenceType, isOpen, label, linked, proves, refutes, statusDef, urgency } from "./lifecycle.ts"
 export { flagsOf } from "./vocabulary.ts"
-export { addLink, renderBoard, setFields, typeOrThrow } from "./base.ts"
+export { addLink, alongside, renderBoard, setFields, typeOrThrow } from "./base.ts"
 export { type CheckReport, runChecks } from "./check.ts"
 export {
   type AcrossOptions,

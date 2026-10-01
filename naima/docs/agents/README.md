@@ -54,6 +54,7 @@ them, and Naima's own repository does.
 | [Reporting and triage](reporting-and-triage.md) | when something is said, seen or found |
 | [Planning: epics, milestones and gates](plan-with-epics-and-gates.md) | when the owner names a body of work, a release or a date |
 | [The non-stop loop](the-non-stop-loop.md) | when work should go on while the owner is away, until only the owner's is left |
+| [Code-quality metrics over time](code-quality-metrics.md) | when the owner asks how the code's quality moves, or for a chart of a metric over the commits |
 
 Whatever the flow, the owner's chat is private: nothing from it goes into
 the repository verbatim, and a file the owner shared becomes an attachment

@@ -17,7 +17,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
-- [metrics](#metrics) — named measurements, each the command that measures it, recorded per commit and held to a budget, a floor or a baseline
+- [metrics](#metrics) — named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
 - [privacy](#privacy) — the owner's material enters the repository only with their recorded yes, and no secret enters it at all
 - [docs](#docs) — every feature is documented as part of its implementation, and naima check holds it
@@ -41,7 +41,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`unlink`](#naima-unlink) | core | remove a stored link |
 | [`move`](#naima-move) | core | move an item to another type, keeping its id and links; refuses a status or field the new type does not declare |
 | [`check`](#naima-check) | core | run every invariant; exit 1 on any problem |
-| [`board`](#naima-board) | core | print a type's board, grouped by section, most urgent first |
+| [`board`](#naima-board) | core | print a type's board, grouped by section, most urgent first; at its foot, the summary sections that stand beside the work, such as the metrics |
 | [`view`](#naima-view) | core | print a plugin view — as text, its data as JSON, or markdown; without a name, list them |
 | [`summary`](#naima-summary) | core | where the project stands, in one screen: every plugin's section |
 | [`plugins`](#naima-plugins) | core | list loaded plugins, the extension points each declares, what each uses of the others, and what each contributes to every point; a contribution's qualified id is <plugin>/<name>, shown when its short name is shared or renamed |
@@ -58,7 +58,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves |
 | [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not |
 | [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks |
-| [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs |
+| [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics |
 | [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out |
 | [`spec`](#naima-spec) | planning | each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version |
 | [`decisions`](#naima-decisions) | planning | search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first |
@@ -66,7 +66,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
-| [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command that measures it — run, recorded per commit, held to a budget, a floor or a baseline, and shown as a trend; every number with the one it is compared to |
+| [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
 | [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused |
 | [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
@@ -84,7 +84,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, metrics, rules, privacy, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics |
-| `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers |
+| `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers, metrics |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
 | `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to |  |
@@ -93,7 +93,9 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }` | verifier |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
-| `metrics` | metrics | a named measurement: `run` (a program and its arguments), `kind`, and a bound — `atMost`, `atLeast` or `equals` |  |
+| `metrics` | metrics | a named measurement: `run` (a program and its arguments) and `kind`, or a code `measure`; a bound — `atMost`, `atLeast` or `equals` — and `better` |  |
+| `code-measures` | metrics | a code-quality number taken in process from the files: `measure({ files, source }, metric) → number \| { error }`, with its `unit` and `better` | metrics |
+| `code-languages` | metrics | a language code measures read: `extensions`, `code`, `comments`, `quotes`, and `functions(stripped) → [{ name, line, lines, complexity }]` when it can find them | metrics |
 
 ## core
 
@@ -363,7 +365,7 @@ naima check
 
 ### naima board
 
-Print a type's board, grouped by section, most urgent first.
+Print a type's board, grouped by section, most urgent first; at its foot, the summary sections that stand beside the work, such as the metrics.
 
 ```sh
 naima board <type> [--all]
@@ -932,7 +934,7 @@ naima gate show beta
 
 ### naima queue
 
-Open items on a gate, split by whose hands the proof needs.
+Open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics.
 
 ```sh
 naima queue [gate] [--human]
@@ -1335,35 +1337,49 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 
 ## metrics
 
-Named measurements, each the command that measures it, recorded per commit and held to a budget, a floor or a baseline.
+Named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline.
 
 Its contributions' qualified ids are `metrics/<name>`.
 
-A metric is a name and the command that measures it — test time, coverage, lint warnings, size, how long an analysis runs. The project declares its metrics as data in its configuration; this plugin brings none. `naima metrics run` runs them and prints every number with the one it is compared to: the last recorded on an earlier commit of this line of history, and the bound. A bound is a budget (`atMost`), a floor (`atLeast`) or a baseline (`equals`); a `ratchet` makes a gain fail until the bound follows it, so a budget only goes down and a floor only up; loosening a bound names the item that says why. `--record` writes the numbers, with the commit they measure, as evidence; `naima metrics trend` draws them along history. How a number is read is a kind, and any plugin may contribute one to the `metric-kinds` point. Naima may start the programs the metrics name, and only those: the launcher grants each one.
+A metric is a name and the command that measures it — test time, coverage, lint warnings, size, how long an analysis runs — or a code measure Naima takes itself from the files: lines of code, files, functions, function size, cyclomatic complexity, duplication, TODO markers, dependencies. The project declares its metrics as data in its configuration, from scratch or from a preset (`naima metrics presets`). `naima metrics run` runs them and prints every number with the one it is compared to: the last recorded on an earlier commit of this line of history, and the bound. A bound is a budget (`atMost`), a floor (`atLeast`) or a baseline (`equals`); a `ratchet` makes a gain fail until the bound follows it, so a budget only goes down and a floor only up; loosening a bound names the item that says why. `--record` writes the numbers, with the commit they measure, as evidence, one file per run; `naima metrics backfill` measures past commits — code measures from git's objects, commands in a temporary worktree — so the timeline starts full. `naima metrics trend`, `history` (text, JSON, CSV) and `plot` (an SVG chart or an HTML report, no dependency) read the records back along the commit timeline, and `naima summary`, `naima board` and `naima queue` show where each metric stands. How a number is read is a kind (`metric-kinds`), a code measure (`code-measures`) or a language's function finder (`code-languages`): any plugin may contribute one. Naima may start the programs the metrics name, and only those: the launcher grants each one.
 
 Options, each with the default it takes when nothing sets it:
 
 | Option | Default | What it does |
 |---|---|---|
-| `metrics` | `{}` | `plugins.metrics.options.metrics` in `naima-tracker/naima-data/naima.json`: metric name → { "run": [program, ...args], "kind", "pattern", "unit", "says", one of "atMost" \| "atLeast" \| "equals", "ratchet", "tolerance", "because" }. kind defaults to exit, which with no bound must equal 0. |
+| `metrics` | `{}` | `plugins.metrics.options.metrics` in `naima-tracker/naima-data/naima.json`: metric name → { "preset", "run": [program, ...args], "prepare", "kind", "pattern", "field", or "measure" with "language", "include", "exclude", "statistic", "window"; "unit", "says", "better", one of "atMost" \| "atLeast" \| "equals", "ratchet", "tolerance", "because" }. kind defaults to exit, which with no bound must equal 0. A preset fills in the rest; any key beside it overrides it. |
 
-**Extension points** it declares: `metric-kinds`, `metrics`.
+**Extension points** it declares: `metric-kinds`, `metrics`, `code-measures`, `code-languages`.
 
 ### naima metrics
 
-The project's metrics — each a name and the command that measures it — run, recorded per commit, held to a budget, a floor or a baseline, and shown as a trend; every number with the one it is compared to.
+The project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to.
 
 ```sh
 naima metrics [list]
 naima metrics run [name...] [--record]
 naima metrics bound <name> <value> [--because <item>]
 naima metrics trend <name>
+naima metrics history [name...] [--json
+naima --csv] [--last <n>]
+naima metrics backfill [name...] [--since <ref>] [--last <n>] [--every <n>] [--again]
+naima metrics plot [name...] [--out <file>] [--html] [--last <n>] [--title <t>]
+naima metrics presets [--json]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--record` |  | run: write the numbers, with the commit they measure, to metrics/ in the data directory |
 | `--because` |  | bound: the item that says why a bound is loosened — a budget raised, a floor lowered; refused without it |
+| `--json` |  | history: one JSON list of commits, each with its date and values; presets: a ready declaration of every preset |
+| `--csv` |  | history: comma-separated, one row per commit — commit, date, then each metric |
+| `--last` |  | history and plot: only the last n commits recorded; backfill: the last n commits of the first-parent line (default 30) |
+| `--since` |  | backfill: the commits after this ref, on the first-parent line up to HEAD |
+| `--every` |  | backfill: every nth commit, counting back from HEAD, which is always measured |
+| `--again` |  | backfill: measure commits already recorded too |
+| `--out` |  | plot: write the chart to this file instead of printing it |
+| `--html` |  | plot: a page with the chart and a table of where each metric started and where it is now, instead of the bare SVG |
+| `--title` |  | plot: the chart's title |
 
 Examples:
 
@@ -1373,6 +1389,11 @@ naima metrics run --record
 naima metrics run tests coverage
 naima metrics bound test-time 140 --because bugs/slow-ci
 naima metrics trend tests
+naima metrics history --csv
+naima metrics backfill --last 50 --every 5
+naima metrics plot coverage complexity --last 50 --out quality.svg
+naima metrics plot --html --out quality.html
+naima metrics presets
 ```
 
 **Checks**, run by `naima check`
@@ -1383,6 +1404,8 @@ naima metrics trend tests
 
 **Directories** it owns under the tracker root: `metrics/`.
 
+**Summary sections**: `metrics`.
+
 **Metric kinds**, how `naima metrics` reads a number
 
 | Kind | What it reads |
@@ -1391,6 +1414,44 @@ naima metrics trend tests
 | `number` | the first group of `pattern` in the output, stdout then stderr — with no pattern, the first number |
 | `count` | how many lines of the output match `pattern` (every non-blank line, with none): warnings, findings, files |
 | `duration` | how many seconds the command took, wall clock |
+| `json` | the number at `field`, a dotted path, in the JSON the command prints — an array there counts its entries: `deno lint --json`'s diagnostics |
+
+**Code measures**, taken in process by a metric's `measure`
+
+| Measure | Unit | Better | What it measures |
+|---|---|---|---|
+| `loc` | lines | neither | lines of code: lines with code on them, comments and blank lines left out |
+| `files` | files | neither | how many files, of the languages selected |
+| `functions` | functions | neither | how many functions, methods and arrow functions, in the languages that find them (TypeScript, JavaScript) |
+| `function-size` | lines | lower | lines per function: a `statistic` of them — mean (default), median, p90, max or sum |
+| `complexity` |  | lower | cyclomatic complexity per function, estimated: a `statistic` of it — mean (default), median, p90, max or sum |
+| `duplication` | % | lower | the share of code lines inside a run of `window` (default 6) consecutive lines that appears more than once |
+| `todos` | markers | lower | how many TODO, FIXME, XXX and HACK markers the files carry — or matches of `pattern` |
+| `dependencies` | dependencies | lower | how many dependencies the manifests declare: package.json, deno.json(c) imports, requirements.txt, go.mod, Cargo.toml |
+
+**Code languages**, read by the code measures
+
+| Language | Files | Functions and complexity |
+|---|---|---|
+| `typescript` | .ts .tsx .mts .cts | yes |
+| `javascript` | .js .jsx .mjs .cjs | yes |
+| `python` | .py |  |
+| `rust` | .rs |  |
+| `go` | .go |  |
+| `java` | .java |  |
+| `kotlin` | .kt .kts |  |
+| `c` | .c .h |  |
+| `cpp` | .cc .cpp .cxx .hpp .hh |  |
+| `csharp` | .cs |  |
+| `swift` | .swift |  |
+| `ruby` | .rb |  |
+| `shell` | .sh .bash .zsh |  |
+| `mcrl2` | .mcrl2 .mcf |  |
+| `css` | .css |  |
+| `html` | .html .htm |  |
+| `markdown` | .md |  |
+| `json` | .json .jsonc |  |
+| `yaml` | .yml .yaml |  |
 
 ## rules
 

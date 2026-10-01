@@ -7,7 +7,11 @@ to software: any command that prints a number, or succeeds or fails, is one.
 
 Naima runs the project's metrics, prints every number next to the number it
 is compared to, records them per [commit](glossary.md#commit) as evidence,
-holds each to a bound, and draws them as a trend.
+holds each to a bound, and draws them as a trend, a table or a chart over the
+commit timeline. A set of code-quality metrics comes built in — lines of code,
+complexity, duplication, coverage and more — so you can
+[see how your code's quality moves over time](#see-how-your-codes-quality-moves-over-time)
+without installing anything.
 
 **Example.** "The analysis must still run in under ten minutes": a metric
 `analysis-time`, the command that runs the analysis, a budget of 600
@@ -35,7 +39,13 @@ the bounds.
 
 | Key | What it is |
 |---|---|
-| `run` | the command, as a list: the program first, then its arguments. No shell. |
+| `preset` | a ready metric to start from (below): `"code.complexity"`, `"deno.coverage"`. Any other key overrides the preset's. |
+| `run` | the command, as a list: the program first, then its arguments. No shell. `{tmp}` in an argument is a fresh temporary path. |
+| `prepare` | a command run first, which must succeed: the test run a coverage report reads. |
+| `measure` | instead of `run`: a code measure Naima takes itself from the files (below). |
+| `language`, `include`, `exclude` | for a `measure`: the languages it reads (every programming language by default) and the paths it reads or leaves out — `"src"`, or a pattern such as `"**/*.test.ts"`. |
+| `statistic` | for function size and complexity: `mean` (default), `median`, `p90`, `max` or `sum`. |
+| `better` | `higher`, `lower` or `neither`: which way is an improvement. Without it, a budget means lower and a floor higher. |
 | `kind` | how the number is read from the run (below). Default `exit`. |
 | `pattern` | for `number`: a regular expression whose first group is the number; for `count`: the lines to count. |
 | `unit`, `says` | how the number is printed, and what it measures. |
@@ -57,6 +67,7 @@ except kind `exit`, which must then equal 0.
 | `number` | the first group of `pattern` in the output; without a pattern, the first number |
 | `count` | how many lines of the output match `pattern` (every non-blank line without one): warnings, findings |
 | `duration` | how many seconds the command took |
+| `json` | the number at `field`, a dotted path, in the JSON the command prints; a list there counts its entries |
 
 A plugin can add a kind — a coverage report's format, say — through the
 `metric-kinds` extension point ([reference](../reference/reference.md)).
@@ -102,25 +113,120 @@ moved — is refused unless `--because` names an item that says why, and the
 item is written into the metric; `naima check` reports a `because` that names
 no item.
 
-## See the trend
+## Code-quality metrics, built in
+
+`naima metrics presets` lists ready metrics. Declare one by naming its
+preset; add a bound or narrow the files if you like:
+
+```json
+"metrics": {
+  "loc": { "preset": "code.loc", "include": ["src"] },
+  "complexity": { "preset": "code.complexity" },
+  "complexity-max": { "preset": "code.complexity-max", "atMost": 40 },
+  "duplication": { "preset": "code.duplication", "atMost": 3 },
+  "lint": { "preset": "deno.lint", "atMost": 0 },
+  "coverage": { "preset": "deno.coverage", "atLeast": 80, "ratchet": true }
+}
+```
+
+| Preset | What it measures | Better |
+|---|---|---|
+| `code.loc` | lines of code, comments and blank lines left out; `"language": "typescript"` for one language | — |
+| `code.files` | source files | — |
+| `code.functions` | functions, methods and arrow functions | — |
+| `code.function-size`, `code.function-size-max` | lines per function: the mean, the longest | lower |
+| `code.complexity`, `code.complexity-max` | cyclomatic complexity per function, estimated: the mean, the worst | lower |
+| `code.duplication` | the share of code lines in a block of six or more repeated elsewhere | lower |
+| `code.todos` | TODO, FIXME, XXX and HACK markers | lower |
+| `code.dependencies` | dependencies the manifests declare: package.json, deno.json, requirements.txt, go.mod, Cargo.toml | lower |
+| `deno.lint`, `deno.type-errors` | lint warnings, type errors | lower |
+| `deno.tests`, `deno.test-time` | tests that pass, how long they take | higher, lower |
+| `deno.coverage` | line coverage of the tests | higher |
+| `node.tests`, `node.test-time` | the same for Node's test runner | higher, lower |
+
+The `code.*` metrics are measured by Naima itself, from the files: no
+program to install, nothing to configure. Lines and files work for every
+language Naima knows (TypeScript, JavaScript, Python, Rust, Go, Java, C,
+C++, shell and more); functions and complexity are found in TypeScript and
+JavaScript by a small estimator that counts each function's decisions — `if`,
+loops, `case`, `catch`, `&&`, `||`, `??` and `? :` — plus one. It is an
+estimate, good for watching a trend, not a parser. Another language's
+function finder can be added by a plugin (`code-languages`), and so can a new
+measure (`code-measures`): see the [reference](../reference/reference.md).
+
+The `deno.*` and `node.*` metrics run the tool: change `run` when your
+project runs its tests differently, say `["deno", "task", "test"]`. Metrics
+that run the same command share one run.
+
+## See how your code's quality moves over time
+
+Every recorded run is a point on the commit timeline. Four ways to read them:
 
 ```sh
-naima metrics trend tests
+naima metrics trend complexity            # one metric, as a line of text
+naima metrics history                     # every metric, one row per commit
+naima metrics history --csv > quality.csv # for a spreadsheet; --json for a program
+naima metrics plot coverage complexity --out quality.svg   # a chart
+naima metrics plot --html --out quality.html               # a chart and a table, for a browser
 ```
 
 ```
-tests (floor 201): ▁▂▄█  190 → 201
-  3f2a…  2026-09-28  190
-  9c1b…  2026-09-29  194, +4
+complexity (no bound): ▃▄▄▅▃▂  3.12 → 2.98
+  3f2a…  2026-09-28  3.12
+  9c1b…  2026-09-29  3.2, +0.08
   ...
 ```
 
-The trend follows the history of the current commit: a record made on
+The chart has one panel per metric: commit dates along the bottom, the value
+up the side, and the metric's bound as a dashed line. Hover a point to see
+its commit. `--last 50` keeps the last fifty commits recorded. Without
+`--out` it is printed, so `> quality.svg` works too.
+
+**Starting with a full timeline.** A project that has just declared its
+metrics has no records yet. `naima metrics backfill` measures past commits
+and records each one:
+
+```sh
+naima metrics backfill                    # the last 30 commits of the main line
+naima metrics backfill --last 50 --every 5
+naima metrics backfill --since v1.0 complexity duplication
+```
+
+It never touches your files. The `code.*` metrics read each past commit
+straight from git; metrics that run a command run it in a temporary copy of
+the repository, removed at the end. A commit already recorded is skipped.
+Commit the records it writes, like any other.
+
+**Asking an agent.** You need none of these commands yourself. Say, for
+example, "plot coverage and complexity over the last 50 commits": the agent
+backfills what is missing, writes the chart, and shows it to you.
+
+The timeline follows the history of the current commit: a record made on
 another branch appears once that branch is merged.
+
+## Beside the work
+
+`naima summary` has a metrics section, and `naima board` and `naima queue`
+show it at their foot, next to the tests and the items: each metric's last
+number, the one before, whether that is better or worse, its bound and a
+small trend.
+
+```
+── metrics
+  ✓ complexity      2.98 (was 3.2, better; no bound)  ▃▄▄▅▃▂
+  ✗ coverage        78.1 % (was 81.4 %, worse; floor 80 %)  ▅▆▇▆▃
+```
 
 ## As a gate
 
 The `metrics` [gate](glossary.md#gate) holds when the latest record of the
 current commit has every metric within its bound: `naima gates metrics
---check` is the release condition "no number got worse". Run `naima metrics
-run --record` first, so there is a record of the commit.
+--check` is the release condition "no number got worse", and it says which
+number fails and by how much:
+
+```
+metrics — The project's metrics: BLOCKED by 0
+  ✗ coverage: 78.1 %, past the floor 80
+```
+
+Run `naima metrics run --record` first, so there is a record of the commit.
