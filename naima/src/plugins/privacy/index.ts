@@ -127,13 +127,29 @@ function attachmentsOf(item: Item): string[] {
     .filter((n) => !n.split("/").some((part) => part.startsWith(".")))
 }
 
-/** The trunk and the files it holds under `dir`, or null outside git or with no trunk. */
-function trunkFiles(ctx: Context, dir: string): { name: string; files: Set<string> } | null {
+/**
+ * The contents the trunk holds under `dir`, as git blob ids, or null outside
+ * git or with no trunk. By content, not by path: an item closed or moved on a
+ * branch keeps attachments the trunk already has.
+ */
+function trunkBlobs(ctx: Context, dir: string): Set<string> | null {
   if (!isGitRepo(ctx.root)) return null
   const name = trunk(ctx.root)
   if (!name) return null
-  const listed = gitOrNull(ctx.root, "ls-tree", "-r", "-z", "--name-only", name, "--", dir) ?? ""
-  return { name, files: new Set(listed.split("\0").filter(Boolean)) }
+  const listed = gitOrNull(ctx.root, "ls-tree", "-r", "-z", name, "--", dir) ?? ""
+  return new Set(listed.split("\0").flatMap((l) => l.split("\t")[0]?.split(" ")[2] ?? []))
+}
+
+/** The git blob id of each file, by path from the project root; empty outside git. */
+function blobsOf(ctx: Context, paths: string[]): Map<string, string> {
+  const out = new Map<string, string>()
+  if (!isGitRepo(ctx.root)) return out
+  for (let i = 0; i < paths.length; i += 200) {
+    const chunk = paths.slice(i, i + 200)
+    const ids = (gitOrNull(ctx.root, "hash-object", "--", ...chunk) ?? "").split("\n")
+    chunk.forEach((p, n) => ids[n] && out.set(p, ids[n]))
+  }
+  return out
 }
 
 /** Who writes: `--by`, else git's user.name; refused when neither says. */
@@ -215,21 +231,29 @@ export default function privacy(options: { [key: string]: unknown } = {}, api?: 
       "every attachment a branch adds has a record of whose it is (naima attach), every record names a file that is there, and the owner's carry their yes; what the trunk already holds, and what a tool writes itself, is not asked",
     run(ctx) {
       const out: Finding[] = []
-      const onTrunk = trunkFiles(ctx, ctx.trackerDir)
+      const onTrunk = trunkBlobs(ctx, ctx.trackerDir)
+      const unrecorded: { item: Item; name: string; path: string }[] = []
+      for (const item of ctx.repo.items) {
+        const records = recordsOf(item)
+        const here = gitPath(relative(ctx.root, join(item.dir, ATTACHMENTS)))
+        for (const name of attachmentsOf(item)) {
+          if (!Object.hasOwn(records, name) && !generated.some((g) => g.test(name))) unrecorded.push({ item, name, path: `${here}/${name}` })
+        }
+      }
+      const blobs = onTrunk?.size ? blobsOf(ctx, unrecorded.map((u) => u.path)) : new Map<string, string>()
+      for (const { item, name, path } of unrecorded) {
+        if (onTrunk?.has(blobs.get(path) ?? "")) continue
+        out.push({
+          level: "problem",
+          item,
+          message: `${label(item)}: ${ATTACHMENTS}/${name} has no consent record — naima attach ${
+            label(item)
+          } ${path} --consent "<the owner's yes>" if it is the owner's (after asking), --own if it is yours; or remove it`,
+        })
+      }
       for (const item of ctx.repo.items) {
         const records = recordsOf(item)
         const files = attachmentsOf(item)
-        const here = gitPath(relative(ctx.root, join(item.dir, ATTACHMENTS)))
-        for (const name of files) {
-          if (Object.hasOwn(records, name) || generated.some((g) => g.test(name)) || onTrunk?.files.has(`${here}/${name}`)) continue
-          out.push({
-            level: "problem",
-            item,
-            message: `${label(item)}: ${ATTACHMENTS}/${name} has no consent record — naima attach ${
-              label(item)
-            } ${here}/${name} --consent "<the owner's yes>" if it is the owner's (after asking), --own if it is yours; or remove it`,
-          })
-        }
         for (const [name, raw] of Object.entries(records)) {
           if (!files.includes(name)) {
             out.push({ level: "problem", item, message: `${label(item)}: ${ATTACHED.name} names ${name}, which is not in ${ATTACHMENTS}/` })

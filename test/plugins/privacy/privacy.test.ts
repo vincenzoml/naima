@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { test } from "node:test"
@@ -134,7 +134,7 @@ test("the attachment-consent check: an attachment with no record is flagged, so 
   }
 })
 
-test("an attachment the trunk already holds is not flagged: the check holds what a branch adds", async () => {
+test("an attachment the trunk already holds is not flagged, even moved to another item: the check holds what a branch adds", async () => {
   const p = tempProject([tasks, privacy()], { git: true })
   try {
     const item = createItem(p.ctx, p.ctx.registry.types.get("tasks")!, "Old evidence")
@@ -143,6 +143,8 @@ test("an attachment the trunk already holds is not flagged: the check holds what
     p.git("commit", "-q", "-m", "old evidence")
     p.git("checkout", "-q", "-b", "work")
     writeFileSync(join(item.dir, "attachments", "new.txt"), "added here\n")
+    const moved = createItem(p.ctx, p.ctx.registry.types.get("tasks")!, "Moved evidence")
+    renameSync(join(item.dir, "attachments", "old.txt"), join(moved.dir, "attachments", "old.txt"))
     p.ctx.reload()
     const problems = (await runChecks(p.ctx)).problems.map((f) => f.message).join("\n")
     assert.match(problems, /attachments\/new\.txt has no consent record/)
