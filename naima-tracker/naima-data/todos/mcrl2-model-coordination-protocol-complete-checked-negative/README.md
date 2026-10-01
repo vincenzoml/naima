@@ -29,6 +29,10 @@ Candidate properties beyond the two filed:
 
 ## Notes
 
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read naima-paper/sections/protocol.tex in full (the existing TLA+ sketch and its own todo): completing the spec, a bounded multi-session model, two tool runs (mCRL2/Apalache per the paper, or mCRL2 per project convention), and a negative-experiment counterexample is a substantial modeling task.
+
 ### 2026-10-01 — Vincenzo Ciancia, on claude/big-mcrl2-model
 
 Model and properties written; running them needs mCRL2 installed - owner action: installing the toolset is a download the owner approves, so the run is the owner's gesture (runBy human, humanBecause decision).

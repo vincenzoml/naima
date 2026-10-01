@@ -10,3 +10,9 @@ exactly as [prove and close](../../../../naima/docs/guide/prove-and-close.md#pro
 dropped in their favour.
 
 Set `verifier`, `model` (a path from the project root) and `property` in meta.json, then `naima verify`.
+
+## Notes
+
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read the item: an explicit placeholder that is split into the real property items once todos/voxlogica-2-scheduler-case-study-description-model is built; this item's own remaining work is the split, not the modeling.

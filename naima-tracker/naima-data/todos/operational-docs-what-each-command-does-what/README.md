@@ -17,3 +17,11 @@ Landed on claude/f-u5-policy-map (commit ab72b8d): commands carry an enforces fi
 ### 2026-10-01 — Vincenzo Ciancia, on claude/f-u5-policy-map
 
 Changed at e0824c5: enforces is optional in the plugin contract, so an outside plugin's command without it is a note in naima check, not a problem; first-party commands are held to it by test/plugins/docs/policy-map.test.ts. Proof tests/every-command-maps-what-enforces-reference passed.
+
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read the item's notes and commits ab72b8d/e0824c5 (enforces field added across 52 command manifests, plugin-contract.md, the reference generator, test/plugins/docs/policy-map.test.ts): a schema change touching every first-party command, already shipped but non-trivial in scope.
+
+### 2026-10-01 — Claude (implementer), on claude/big-policy-map
+
+Verified on claude/big-policy-map: the policy-map work from ab72b8d/e0824c5 is already an ancestor of main and this branch. Re-ran deno task docs (no drift), deno task verify, node --test, and bun test — all green, including the two policy-map tests (every command maps to enforces; a plugin command without it is a note, not a problem). No code change needed; left for the trunk to close since this branch cannot close its own claim.

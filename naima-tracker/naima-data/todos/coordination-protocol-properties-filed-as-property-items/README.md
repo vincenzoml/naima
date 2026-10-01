@@ -13,6 +13,10 @@ its formula, and `naima verify` has run it and it holds.
 
 ## Notes
 
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read naima-paper/sections/protocol.tex and naima/src/plugins/verifier-mcrl2/index.ts (184 lines, adapter exists): filing the four protocol properties and getting naima verify green depends on the mCRL2 model from todos/mcrl2-model-coordination-protocol-complete-checked-negative existing; wiring items to an existing adapter once the model is there is still multi-item setup work.
+
 ### 2026-10-01 — Vincenzo Ciancia, on claude/big-mcrl2-model
 
 Model and properties written; running them needs mCRL2 installed - owner action: installing the toolset is a download the owner approves, so the run is the owner's gesture (runBy human, humanBecause decision).

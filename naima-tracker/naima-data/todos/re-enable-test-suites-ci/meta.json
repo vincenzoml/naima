@@ -7,5 +7,7 @@
   "impact": "low",
   "confidence": "reported",
   "runBy": "human",
-  "humanBecause": "decision"
+  "humanBecause": "decision",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
 }
