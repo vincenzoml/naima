@@ -77,7 +77,7 @@ Every command: what it does, and the policy or invariant it enforces — or noth
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof | nothing: it only reads |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence | a property holds only with a run of its verifier on exactly what it has now, attached as evidence; a model or input outside the project is refused |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes | nothing: it only reads |
-| [`ui`](#naima-ui) | ui | show the views the plugins contribute — first the summary, the gates and what is next, then the metrics and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it | the views are served only on the loopback interface, and every request without this run's token is refused |
+| [`ui`](#naima-ui) | ui | show the views the plugins contribute — first the summary, the gates, what is next and the claims, then the boards, the metrics, the session notes, each item with its evidence and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it | the views are served only on the loopback interface, and every request without this run's token is refused |
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to | numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work | nothing: it only prints |
 | [`hooks`](#naima-hooks) | commit-hooks | the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it | the installed pre-commit hook runs the staged checks and the companion rules before every commit; install refuses to take over a core.hooksPath that is not Naima's unless --force |
@@ -248,14 +248,19 @@ Print one item: fields, links in both directions, attachments, prose.
 **Enforces**: Nothing: it only reads.
 
 ```sh
-naima show <item>
+naima show <item> [--json]
 ```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--json` |  | print the item as JSON: its fields, its links with the other end's title and status and whether it is evidence that proves or refutes, its attachments, its prose |
 
 Examples:
 
 ```sh
 naima show export-drops
 naima show bugs/export-drops-alpha-channel
+naima show export-drops --json
 ```
 
 ### naima list
@@ -425,18 +430,20 @@ Print a type's board, grouped by section, most urgent first; at its foot, the su
 **Enforces**: Nothing: it prints derived state, never stored.
 
 ```sh
-naima board <type> [--all]
+naima board <type> [--all] [--json]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--all` |  | also list the items whose status is done |
+| `--json` |  | print the board as JSON: the open items by section, most urgent first, and the done ones with --all; the foot is the summary's |
 
 Examples:
 
 ```sh
 naima board bugs
 naima board todos --all
+naima board bugs --json
 ```
 
 ### naima view
@@ -845,18 +852,20 @@ Who holds what, recombined from every branch.
 **Enforces**: Nothing: it only reads.
 
 ```sh
-naima claims [--branch <b>]
+naima claims [--branch <b>] [--json]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--branch` |  | only the claim of this branch |
+| `--json` |  | print the claims as JSON: each branch's items, note and marks, and the items more than one branch holds |
 
 Examples:
 
 ```sh
 naima claims
 naima claims --branch fix/export-alpha
+naima claims --json
 ```
 
 ### naima prune
@@ -893,13 +902,14 @@ Write this session's note (one new file), or list the newest.
 ```sh
 naima pass "<what changed, what is proven, what is left>"
 naima pass --file <f>
-naima pass --list [n]
+naima pass --list [n] [--json]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--file` |  | read the note from a file instead of the arguments |
 | `--list` | `5` | print the newest n notes across every branch instead of writing one |
+| `--json` |  | with --list, print the notes as JSON: each one's date, instant, branch, file and text |
 
 Examples:
 
@@ -907,6 +917,7 @@ Examples:
 naima pass "Exporter keeps alpha; proof owed: tests/export-keeps-alpha"
 naima pass --file note.md
 naima pass --list 3
+naima pass --list 3 --json
 ```
 
 ### naima event
@@ -959,7 +970,9 @@ naima event 2026-09-20 "The vendor ended support for v1"
 
 | View | Title | Where | What it shows |
 |---|---|---|---|
+| `claims` | Claims | first screen | who holds what, recombined from every branch, and the items more than one branch holds; its data is `naima claims --json` |
 | `timeline` | Timeline | tab | the project's events — gates, epics, releases, sessions, records — derived from the items and git, oldest first |
+| `notes` | Session notes | tab | the newest session notes, across every branch, newest first; `?n=` says how many (5); its data is `naima pass --list [n] --json` |
 
 ## triage
 
@@ -1731,13 +1744,13 @@ The views plugins contribute, shown by `naima ui` in a native window, or the bro
 
 Its contributions' qualified ids are `ui/<name>`.
 
-`naima ui` starts a server bound to the loopback interface, on a free port, that refuses every request without the token of its run, and opens it in a native window titled Naima. Each view is one a plugin contributes to `ui-views`, rendered from the files at each request, so the window shows what the files hold now. The first screen holds the views that are panels — the summary, which this plugin renders from every plugin's summary section exactly as `naima summary` does; the gates, from the gates plugin, as `naima gates` reports them; what is next, from the triage plugin, as `naima view next` ranks it — and every other view is a tab, the metrics plugin's first. `/data/<view>` answers the same view's data as JSON, the same data the command prints with `--json`. Closing the window stops the server. The window is a webview, loaded from JSR at a pinned version, only by `naima ui`, and in a process of its own: the rest of Naima has no dependency. Where it cannot open — on Node or Bun, on a system it does not run on, offline on its first run, when it fetches its library — the default browser opens instead, and `naima ui` says so in one line; `--browser` asks for the browser. Only `ui` is granted, by the launcher, the loopback network and the programs that show it.
+`naima ui` starts a server bound to the loopback interface, on a free port, that refuses every request without the token of its run, and opens it in a native window titled Naima. Each view is one a plugin contributes to `ui-views`, rendered from the files at each request, so the window shows what the files hold now. The first screen holds the views that are panels — the summary, which this plugin renders from every plugin's summary section exactly as `naima summary` does; the gates, from the gates plugin, as `naima gates` reports them; what is next, from the triage plugin, as `naima view next` ranks it; the claims, from the coordination plugin, as `naima claims` recombines them — and every other view is a tab: the boards, which this plugin renders as `naima board` does, one type at a time; the session notes across branches, from the coordination plugin, as `naima pass --list`; one item, which this plugin renders as `naima show` does, its evidence first — its attachments and the items of a type that can prove it, each marked proves, refutes or not yet — and to which every item reference of the window links; the metrics and the others. `/data/<view>` answers the same view's data as JSON, the same data the command prints with `--json`. Closing the window stops the server. The window is a webview, loaded from JSR at a pinned version, only by `naima ui`, and in a process of its own: the rest of Naima has no dependency. Where it cannot open — on Node or Bun, on a system it does not run on, offline on its first run, when it fetches its library — the default browser opens instead, and `naima ui` says so in one line; `--browser` asks for the browser. Only `ui` is granted, by the launcher, the loopback network and the programs that show it.
 
 **Extension points** it declares: `ui-views`.
 
 ### naima ui
 
-Show the views the plugins contribute — first the summary, the gates and what is next, then the metrics and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it.
+Show the views the plugins contribute — first the summary, the gates, what is next and the claims, then the boards, the metrics, the session notes, each item with its evidence and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it.
 
 **Enforces**: The views are served only on the loopback interface, and every request without this run's token is refused.
 
@@ -1764,6 +1777,8 @@ naima ui --browser
 | View | Title | Where | What it shows |
 |---|---|---|---|
 | `summary` | Summary | first screen | where the project stands: every plugin's summary section, as `naima summary` prints it; its data is `naima summary --json` |
+| `board` | Boards | tab | a type's board, its open items by section, most urgent first: `?type=` picks the type (the first one that takes new items), `?all=1` adds the done ones; its data is `naima board <type> [--all] --json` |
+| `item` | Item | tab | one item, picked by `?item=`: its evidence — its attachments and the items of a type that can prove, whether each proves or refutes now — then its fields, its other links and its prose; its data is `naima show <item> --json`, null when none is picked |
 
 ## metrics
 

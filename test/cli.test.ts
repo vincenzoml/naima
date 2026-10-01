@@ -267,7 +267,7 @@ export default () => ({ name: "codes", says: "exit codes", commands: [
     assert.equal(bug.code, 70)
     assert.match(bug.err, /^naima: internal error: TypeError: .*NAIMA_DEBUG=1/)
     const usage = await naima(h.root, ["show"], program)
-    assert.deepEqual([usage.code, usage.err], [2, "naima: usage: naima show <item>"])
+    assert.deepEqual([usage.code, usage.err], [2, "naima: usage: naima show <item> [--json]"])
   } finally {
     h.cleanup()
   }

@@ -1,7 +1,9 @@
 // The UI: `naima ui` shows the views plugins contribute in a native window:
 // first a screen of panels — the summary, which this plugin renders from the
-// core's summary sections, the gates and what is next — then the tabs, the
-// metrics first; served by a local server that lives as
+// core's summary sections, the gates, what is next and the claims — then the
+// tabs: the boards and the item with its evidence, which this plugin renders
+// from the core's board and item data, the metrics, the session notes and the
+// rest; served by a local server that lives as
 // long as the window does. It is the first piece of the dashboard: a new
 // plugin's view appears without this plugin knowing that plugin.
 //
@@ -11,16 +13,21 @@
 // (docs/guide/install.md#the-permissions).
 
 import {
+  boardData,
   bool,
   type Command,
   type Context,
   CONTRACT,
   type ExtensionPoint,
+  itemData,
+  type ItemLink,
+  label,
   parse,
   type Plugin,
   shortOrId,
   summarySections,
   table,
+  typeOrThrow,
   usageError,
 } from "../../core/api.ts"
 import { browserCommand, denoDir, denoPath, openBrowser, type Opened, openWindow, osName, windowCommand, windowUnavailable } from "./open.ts"
@@ -72,6 +79,109 @@ export const summaryView: UiView = {
       data: Object.fromEntries(sections.map((s) => [s.name, s.rendering.data])),
       html: html.length ? html.join("\n") : "<p>No plugin contributes a summary section.</p>",
       css: "pre{margin:0 0 12px;white-space:pre-wrap}h3{margin:12px 0 4px;font-size:1em}",
+    }
+  },
+}
+
+/** An item's reference, linked to the item view, where its evidence is. */
+const itemLink = (id: string, ref: string): string => `<a href="/view/item?item=${encodeURIComponent(id)}"><code>${esc(ref)}</code></a>`
+
+/** The board of a type, picked by `?type=` (the first type that takes new items when absent), its done items too with `?all=1`: what `naima board` prints. */
+export const boardView: UiView = {
+  name: "board",
+  title: "Boards",
+  says:
+    "a type's board, its open items by section, most urgent first: `?type=` picks the type (the first one that takes new items), `?all=1` adds the done ones; its data is `naima board <type> [--all] --json`",
+  order: 1,
+  render(params, ctx) {
+    const types = [...ctx.registry.types.values()]
+    const wanted = params["type"]?.[0] ?? types.find((t) => t.creatable !== false)?.id ?? types[0]?.id
+    const type = typeOrThrow(ctx, wanted)
+    const all = params["all"]?.[0] === "1"
+    const d = boardData(ctx, type, all)
+    const rows = (list: { id: string; ref: string; title: string; status: string }[]) =>
+      `<table><thead><tr>${["Status", "Item", "Title"].map((h) => `<th scope="col">${h}</th>`).join("")}</tr></thead><tbody>${
+        list.map((r) => `<tr><td>${esc(r.status)}</td><td>${itemLink(r.id, r.ref)}</td><td>${esc(r.title)}</td></tr>`).join("")
+      }</tbody></table>`
+    const form = [
+      '<form class="pick" method="get" action="/view/board">',
+      '<label for="board-type">Type</label>',
+      `<select id="board-type" name="type">${
+        types.map((t) => `<option value="${esc(t.id)}"${t.id === type.id ? " selected" : ""}>${esc(t.title)}</option>`).join("")
+      }</select>`,
+      `<label><input type="checkbox" name="all" value="1"${all ? " checked" : ""}> with the done items</label>`,
+      '<button type="submit">Show</button>',
+      "</form>",
+    ].join("\n")
+    return {
+      data: d,
+      html: [
+        `<h1>${esc(d.title)}</h1>`,
+        form,
+        `<p>${d.open} open, ${d.done} done</p>`,
+        ...d.sections.map((s) => `<h2>${esc(s.section || "(no section)")}</h2>\n${rows(s.items)}`),
+        ...(d.closed?.length ? [`<h2>Done</h2>\n${rows(d.closed)}`] : []),
+      ].join("\n"),
+      css:
+        "table{border-collapse:collapse;margin:0 0 12px}th,td{padding:2px 12px 2px 0;text-align:left;vertical-align:top}h2{font-size:1.1em;margin:16px 0 4px}",
+    }
+  },
+}
+
+/** One item, picked by `?item=`, with its evidence first — its attachments, and the items that can prove it, with whether each proves or refutes now: what `naima show` prints. */
+export const itemView: UiView = {
+  name: "item",
+  title: "Item",
+  says:
+    "one item, picked by `?item=`: its evidence — its attachments and the items of a type that can prove, whether each proves or refutes now — then its fields, its other links and its prose; its data is `naima show <item> --json`, null when none is picked",
+  order: 20,
+  render(params, ctx) {
+    const ref = params["item"]?.[0]?.trim()
+    const form = [
+      '<form class="pick" method="get" action="/view/item">',
+      '<label for="item-ref">Item</label>',
+      `<input id="item-ref" name="item" list="item-refs" value="${esc(ref ?? "")}" autocomplete="off">`,
+      `<datalist id="item-refs">${ctx.repo.items.map((i) => `<option value="${esc(label(i))}">${esc(i.meta.title)}</option>`).join("")}</datalist>`,
+      '<button type="submit">Show</button>',
+      "</form>",
+    ].join("\n")
+    if (!ref) return { data: null, html: ["<h1>Item</h1>", form, "<p>Pick an item: its reference, or its id.</p>"].join("\n") }
+    const d = itemData(ctx, ctx.repo.resolve(ref))
+    const verdict = (l: ItemLink) => (l.refutes ? '<strong class="refutes">refutes</strong>' : l.proves ? '<strong class="proves">proves</strong>' : "not yet")
+    const linkRow = (l: ItemLink, evidence: boolean) =>
+      `<tr><td>${esc(l.says)}${l.implied ? " (inverse)" : ""}</td><td>${l.ref ? itemLink(l.id, l.ref) : `<code>${esc(l.id)}</code>`}</td><td>${
+        esc(l.title ?? "not in the tracker")
+      }</td><td>${esc(l.status ?? "")}</td>${evidence ? `<td>${verdict(l)}</td>` : ""}</tr>`
+    const head = (cols: string[]) => `<thead><tr>${cols.map((h) => `<th scope="col">${h}</th>`).join("")}</tr></thead>`
+    const evidence = d.links.filter((l) => l.evidence)
+    const others = d.links.filter((l) => !l.evidence)
+    const fields = Object.entries(d.fields)
+    return {
+      data: d,
+      html: [
+        form,
+        `<h1>${esc(d.title)}</h1>`,
+        `<p><code>${esc(d.ref)}</code> · <strong>${esc(d.status)}</strong> · <code>${esc(d.id)}</code></p>`,
+        '<h2 id="evidence">Evidence</h2>',
+        d.attachments.length ? `<h3>Attachments</h3><ul>${d.attachments.map((f) => `<li><code>${esc(f)}</code></li>`).join("")}</ul>` : "<p>No attachment.</p>",
+        evidence.length
+          ? `<table>${head(["Relation", "Item", "Title", "Status", "Verdict"])}<tbody>${evidence.map((l) => linkRow(l, true)).join("")}</tbody></table>`
+          : "<p>No linked item can prove it.</p>",
+        '<h2 id="fields">Fields</h2>',
+        fields.length
+          ? `<dl>${fields.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(typeof v === "string" ? v : JSON.stringify(v))}</dd>`).join("")}</dl>`
+          : "<p>No other field.</p>",
+        ...(others.length
+          ? [
+            '<h2 id="links">Links</h2>',
+            `<table>${head(["Relation", "Item", "Title", "Status"])}<tbody>${others.map((l) => linkRow(l, false)).join("")}</tbody></table>`,
+          ]
+          : []),
+        '<h2 id="prose">Page</h2>',
+        `<pre>${esc(d.readme)}</pre>`,
+      ].join("\n"),
+      css:
+        "table{border-collapse:collapse;margin:0 0 12px}th,td{padding:2px 12px 2px 0;text-align:left;vertical-align:top}dl{display:grid;grid-template-columns:max-content 1fr;gap:2px 12px}dd{margin:0}pre{white-space:pre-wrap}.proves{color:#1a7f37}.refutes{color:#cf222e}h2{font-size:1.1em;margin:16px 0 4px}",
     }
   },
 }
@@ -150,7 +260,7 @@ export async function runUi(ctx: Context, flags: { browser: boolean; open: boole
 const uiCommand: Command = {
   name: "ui",
   says:
-    "show the views the plugins contribute — first the summary, the gates and what is next, then the metrics and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it",
+    "show the views the plugins contribute — first the summary, the gates, what is next and the claims, then the boards, the metrics, the session notes, each item with its evidence and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it",
   enforces: "the views are served only on the loopback interface, and every request without this run's token is refused",
   usage: "ui [--browser | --no-open] [--log]",
   options: [
@@ -174,13 +284,15 @@ export default function ui(): Plugin {
     about:
       "`naima ui` starts a server bound to the loopback interface, on a free port, that refuses every request without the token of its run, and opens it in a native window titled Naima. " +
       "Each view is one a plugin contributes to `ui-views`, rendered from the files at each request, so the window shows what the files hold now. " +
-      "The first screen holds the views that are panels — the summary, which this plugin renders from every plugin's summary section exactly as `naima summary` does; the gates, from the gates plugin, as `naima gates` reports them; what is next, from the triage plugin, as `naima view next` ranks it — and every other view is a tab, the metrics plugin's first. " +
+      "The first screen holds the views that are panels — the summary, which this plugin renders from every plugin's summary section exactly as `naima summary` does; the gates, from the gates plugin, as `naima gates` reports them; what is next, from the triage plugin, as `naima view next` ranks it; the claims, from the coordination plugin, as `naima claims` recombines them — and every other view is a tab: " +
+      "the boards, which this plugin renders as `naima board` does, one type at a time; the session notes across branches, from the coordination plugin, as `naima pass --list`; " +
+      "one item, which this plugin renders as `naima show` does, its evidence first — its attachments and the items of a type that can prove it, each marked proves, refutes or not yet — and to which every item reference of the window links; the metrics and the others. " +
       "`/data/<view>` answers the same view's data as JSON, the same data the command prints with `--json`. Closing the window stops the server. " +
       "The window is a webview, loaded from JSR at a pinned version, only by `naima ui`, and in a process of its own: the rest of Naima has no dependency. " +
       "Where it cannot open — on Node or Bun, on a system it does not run on, offline on its first run, when it fetches its library — the default browser opens instead, and `naima ui` says so in one line; " +
       "`--browser` asks for the browser. Only `ui` is granted, by the launcher, the loopback network and the programs that show it.",
     points: [viewsPoint],
-    contributes: { "ui-views": [summaryView] },
+    contributes: { "ui-views": [summaryView, boardView, itemView] },
     commands: [uiCommand],
   }
 }
