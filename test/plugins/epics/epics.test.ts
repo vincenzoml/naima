@@ -1,6 +1,8 @@
 // Epics: an item type that groups items; its status follows them, and a gate on it stands for them.
 
 import assert from "node:assert/strict"
+import { readFileSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
 import { test } from "node:test"
 import { addLink, createItem, type Plugin, runChecks, setFields, typeOrThrow } from "../../../naima/src/core/api.ts"
 import { tempProject } from "../../core/testing.ts"
@@ -123,6 +125,24 @@ test("a part-of link to an item that is not an epic is a problem", async () => {
     const a = createItem(ctx, typeOrThrow(ctx, "bugs"), "Crash")
     createItem(ctx, typeOrThrow(ctx, "bugs"), "Hang", { links: [{ rel: "part-of", id: a.meta.id }] })
     assert.match((await runChecks(ctx)).problems.map((f) => f.message).join("\n"), /bugs\/hang is part of bugs\/crash, which is not an epic/)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("an epic's status set by hand against its items fails naima check, as naima set would have refused it", async () => {
+  const p = project()
+  try {
+    const { ctx } = p
+    const epic = createItem(ctx, typeOrThrow(ctx, "epics"), "Beta polish")
+    const a = createItem(ctx, typeOrThrow(ctx, "bugs"), "Crash")
+    await p.run("epic", "add", epic.slug, a.slug)
+    const problems = async () => (await runChecks(p.ctx)).problems.map((f) => f.message).join("\n")
+    assert.equal(await problems(), "")
+    const path = join(ctx.repo.resolve(`epics/${epic.slug}`).dir, "meta.json")
+    writeFileSync(path, JSON.stringify({ ...JSON.parse(readFileSync(path, "utf8")), status: "done" }))
+    p.ctx.reload()
+    assert.match(await problems(), /epics\/beta-polish is done, but its items make it open/)
   } finally {
     p.cleanup()
   }

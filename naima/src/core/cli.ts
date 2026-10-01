@@ -5,7 +5,7 @@
 
 import { existsSync, mkdirSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
-import { CARRY_MODES, type Lock, parseLock, posixRelative, programDir, readRaw, sourceRefusal, writeRaw } from "./config.ts"
+import { CARRY_MODES, DEFAULT_CARRY, type Lock, parseLock, posixRelative, programDir, readRaw, sourceRefusal, withCarry, writeRaw } from "./config.ts"
 import { consoleIO, type IO, type Place } from "./context.ts"
 import { cliCommands } from "./entry.ts"
 import { FORMAT, formatRefusal, isFormat, migrate, MIGRATIONS, type Step } from "./format.ts"
@@ -17,7 +17,6 @@ import {
   DATA_DIR,
   DATA_FILE,
   DEFAULT_DATA,
-  DIST_BRANCH,
   findData,
   globalOptions,
   PROGRAM_DIR,
@@ -32,15 +31,19 @@ import {
 import {
   align,
   carry,
+  checkoutWork,
+  COMMIT_UNAVAILABLE,
+  copyProgram,
   ignoreProgram,
   localWork,
+  lockedDistSource,
+  readCopy,
   refuseLocalWork,
   remoteHead,
   short,
   SOURCE_CHANGED,
   stage,
   type Target,
-  vendor,
   withoutCredentials,
 } from "./program.ts"
 import { EXIT, isInternal, message, NaimaError } from "./errors.ts"
@@ -60,22 +63,44 @@ export interface CliOptions extends OpenOptions {
   io?: IO
   /** Print the stack of an internal error (NAIMA_DEBUG=1). */
   debug?: boolean
+  /** The per-user cache commits are fetched into (NAIMA_CACHE, which the launcher sets). */
+  cache?: string
 }
 
 const usage = (name: string): string => `usage: naima ${cliCommands.find((c) => c.name === name)?.usage ?? name}`
 
+/** What the running Naima is: the source and commit it is, and why nobody else could run that commit, if so. */
+interface Running {
+  commit: string
+  source: string | null
+  work: string | null
+  /** The git repository holding it, when it is a clone: a repository on this disk that has the commit. */
+  repo: string | null
+}
+
 /**
- * The commit of the running Naima, when it is a clone of its own — of a dist commit, or of a main commit whose naima/ runs;
- * null when it is vendored into a project.
+ * The running Naima, when it knows what it is: a copy names its source and
+ * commit, a clone of Naima's repository runs its naima/ at HEAD. Null when it
+ * is neither — a vendored copy committed before copies said what they were.
  */
-function runningCommit(programRoot: string): string | null {
+function running(at: string): Running | null {
+  // Resolved first: Deno grants the real path, and a file that does not exist cannot be resolved through a symbolic link.
+  const programRoot = real(at)
+  const copy = readCopy(programRoot)
+  if (copy) {
+    const work = localWork({ root: programRoot, tracker: programRoot, program: programRoot, source: copy.source, commit: copy.commit, carry: DEFAULT_CARRY })
+    return { commit: copy.commit, source: copy.source, work, repo: null }
+  }
   // git always prints --show-toplevel with forward slashes, even on Windows, where real(programRoot)
   // (node:fs) uses backslashes: without nativePath() the two never compared equal there, so a fresh
   // Windows clone was never recognized as its own clone (naima: this Naima is not a clone with an origin).
   const gitTop = toplevel(programRoot)
   const top = gitTop === null ? null : nativePath(gitTop)
-  const own = top !== null && (top === real(programRoot) || join(top, RUNTIME_DIR) === real(programRoot))
-  return own ? gitOrNull(programRoot, "rev-parse", "HEAD") : null
+  // Both resolved: on Windows a temporary folder may be named by its short 8.3 form on one side only.
+  if (top === null || real(join(top, RUNTIME_DIR)) !== programRoot) return null
+  const commit = gitOrNull(programRoot, "rev-parse", "HEAD")
+  if (!commit) return null
+  return { commit, source: gitOrNull(programRoot, "remote", "get-url", "origin"), work: checkoutWork(top), repo: top }
 }
 
 function locate(opts: CliOptions, flag: string | undefined): (Place & { lock: Lock; raw: Record<string, unknown> }) | null {
@@ -89,15 +114,22 @@ function locate(opts: CliOptions, flag: string | undefined): (Place & { lock: Lo
   return { root: toplevel(data) ?? dirname(dirname(data)), data, program: programDir(data, lock), lock, raw }
 }
 
-const targetOf = (place: Place, lock: Lock): Target => ({
-  root: place.root,
-  tracker: trackerOf(place.data),
-  program: place.program,
-  source: lock.source,
-  commit: lock.commit,
-  carry: lock.carry,
-  ...(lock.verify ? { verify: lock.verify } : {}),
-})
+function targetOf(place: Place, lock: Lock, opts: CliOptions): Target {
+  // The running Naima's clone holds the commit it runs: a copy made from it needs no network. Asked only when it is not the program.
+  const elsewhere = real(opts.programRoot) !== real(runtimeOf(place.program) ?? place.program)
+  const repo = elsewhere ? running(opts.programRoot)?.repo : null
+  return {
+    root: place.root,
+    tracker: trackerOf(place.data),
+    program: place.program,
+    source: lock.source,
+    commit: lock.commit,
+    carry: lock.carry,
+    ...(lock.verify ? { verify: lock.verify } : {}),
+    ...(opts.cache ? { cache: opts.cache } : {}),
+    ...(repo ? { seeds: [repo] } : {}),
+  }
+}
 
 export { withoutCredentials }
 
@@ -135,28 +167,39 @@ async function init(args: string[], opts: CliOptions, io: IO): Promise<number> {
     io.out(await nextStep({ root, data: real(data), program: programDir(data, parseLock(readRaw(data))) }, opts, io))
     return 0
   }
-  const commit = runningCommit(opts.programRoot)
-  const origin = commit && gitOrNull(opts.programRoot, "remote", "get-url", "origin")
-  if (!commit || !origin) {
+  const me = running(opts.programRoot)
+  if (!me?.source) {
     throw new Error(
-      `this Naima is not a clone with an origin: naima init records the source and commit of the Naima that runs it — git clone --branch ${DIST_BRANCH} <source> ${TRACKER_DIR}/naima, and run init from there`,
+      `this Naima is neither a copy nor a clone with an origin: naima init records the source and commit of the Naima that runs it — git clone --depth 1 <source> <a folder outside the project>, and run its naima/naima.ts init from the project`,
     )
   }
-  const source = withoutCredentials(origin)
+  const { commit } = me
+  const source = withoutCredentials(me.source)
   const refusal = sourceRefusal(source)
   if (refusal) throw new Error(`the origin of ${opts.programRoot} cannot be a lock's source: it ${refusal}`)
   // Everyone else must be able to fetch what is locked: nothing uncommitted, nothing its origin lacks.
-  const work = localWork({ root, tracker, program: opts.programRoot, source, commit, carry: "clone" })
-  if (work) {
-    throw new Error(`the Naima that runs init has ${work}, so nobody else could run the commit it would lock — push it to its origin, or clone a pushed one`)
+  if (me.work) {
+    throw new Error(`the Naima that runs init has ${me.work}, so nobody else could run the commit it would lock — push it to its origin, or clone a pushed one`)
   }
   mkdirSync(data, { recursive: true })
   const readme = join(tracker, "README.md")
   if (!existsSync(readme)) writeFileSync(readme, TRACKER_README)
   const formats = formatsFor(opts.firstParty.map((p) => p.factory({}, apiFor(p.name, { rename: {} }))))
-  writeRaw(data, { format: FORMAT, ...(Object.keys(formats).length ? { formats } : {}), source, commit, carry: "clone" })
-  ignoreProgram({ root, tracker, program, source, commit, carry: "clone" }, true)
-  io.out(`wrote ${TRACKER_DIR}/: README.md, .gitignore, ${DATA_DIR}/${DATA_FILE} — locked to ${source} at ${short(commit)}`)
+  writeRaw(data, { format: FORMAT, ...(Object.keys(formats).length ? { formats } : {}), source, commit })
+  const t: Target = {
+    root,
+    tracker,
+    program,
+    source,
+    commit,
+    carry: DEFAULT_CARRY,
+    ...(opts.cache ? { cache: opts.cache } : {}),
+    ...(me.repo ? { seeds: [me.repo] } : {}),
+  }
+  ignoreProgram(t, true)
+  // Launched, init leaves the program in place; run directly, as a test, the first launched run copies it.
+  const copied = opts.launched && real(opts.programRoot) !== real(program) ? (align(t), `, ${TRACKER_DIR}/${PROGRAM_DIR}/`) : ""
+  io.out(`wrote ${TRACKER_DIR}/: README.md, .gitignore, ${DATA_DIR}/${DATA_FILE}${copied} — locked to ${source} at ${short(commit)}`)
   excludeHost(root, program, write, io)
   io.out(await nextStep({ root, data: real(data), program }, opts, io))
   return 0
@@ -182,24 +225,30 @@ async function update(args: string[], opts: CliOptions, place: Place, lock: Lock
     io.out(`trusted ${lock.source} at the locked commit ${short(lock.commit)}; nothing else moved`)
     return 0
   }
-  const t = targetOf(place, lock)
+  const t = targetOf(place, lock, opts)
   const head = remoteHead(t)
   const main = head.commit
+  // A dist commit is named by the main commit it was built from: the same code, which update moves the lock to all the same.
+  const dist = main === lock.commit ? null : lockedDistSource(t)
+  const locked = dist ? `${short(lock.commit)} (the dist of ${short(dist)})` : short(lock.commit)
   if (check) {
     if (main === lock.commit) io.out(`current: the source's ${head.branch} is the locked commit ${short(main)}`)
-    else io.out(`the source's ${head.branch} moved: ${short(lock.commit)} → ${short(main)} — naima update`)
+    else if (dist === main) {
+      io.out(`the lock names ${locked}, the code of the source's ${head.branch} as a dist commit — naima update locks ${head.branch} itself`)
+    } else io.out(`the source's ${head.branch} moved: ${locked} → ${short(main)} — naima update`)
     return main === lock.commit ? 0 : 1
   }
   if (main !== lock.commit) {
     // Move the program first, and only then the lock: a refusal leaves both where they were.
     if (lock.carry === "vendored") {
       refuseLocalWork(t)
-      vendor(t, main)
+      copyProgram({ ...t, commit: main })
     } else align({ ...t, commit: main })
-    writeRaw(place.data, { ...raw, commit: main })
-    io.out(`locked ${short(lock.commit)} → ${short(main)}`)
+    writeRaw(place.data, withCarry({ ...raw, commit: main }, lock.carry))
+    io.out(`locked ${locked} → ${short(main)}`)
     return RELAUNCH // the new Naima finishes: it is the one that knows the new format
   }
+  if (raw["carry"] !== undefined && withCarry(raw, lock.carry)["carry"] === undefined) writeRaw(place.data, withCarry(raw, lock.carry))
   const from = raw["format"]
   const { all } = await owed(raw, place, opts)
   const steps = migrate(place.data, MIGRATIONS, all.slice(1))
@@ -209,21 +258,21 @@ async function update(args: string[], opts: CliOptions, place: Place, lock: Lock
   return 0
 }
 
-function carryCommand(args: string[], place: Place, lock: Lock, raw: Record<string, unknown>, io: IO): number {
+function carryCommand(args: string[], opts: CliOptions, place: Place, lock: Lock, raw: Record<string, unknown>, io: IO): number {
   const [to, ...extra] = parse(args).positionals
   if (!to || extra.length || !CARRY_MODES.includes(to as Carry)) throw new Error(usage("carry"))
   if (to === lock.carry) {
     io.out(`already carried as ${to}`)
     return 0
   }
-  carry(targetOf(place, lock), to as Carry)
-  writeRaw(place.data, { ...raw, carry: to })
+  carry(targetOf(place, lock, opts), to as Carry)
+  writeRaw(place.data, withCarry(raw, to as Carry))
   stage(place.root, join(place.data, DATA_FILE))
   io.out(`carried as ${to} (was ${lock.carry}), staged — commit it as one change: git commit -m "Carry Naima as ${to}"`)
   return 0
 }
 
-/** What `naima guide` points at, from the program root: all of it ships in the dist. */
+/** What `naima guide` points at, from the program root: all of it is in naima/, so in every copy. */
 export const GUIDE_PAGES: readonly (readonly [string, string])[] = [
   ["skill", "skills/naima/SKILL.md"],
   ["index", "docs/README.md"],
@@ -256,7 +305,7 @@ async function guideSections(opts: CliOptions, data: string | undefined, io: IO)
 async function guide(opts: CliOptions, data: string | undefined, io: IO): Promise<number> {
   for (const line of await guideSections(opts, data, io)) io.out(line)
   const at = (path: string): string => relative(opts.cwd, join(opts.programRoot, path)) || "."
-  const commit = runningCommit(opts.programRoot)
+  const commit = running(opts.programRoot)?.commit
   io.out(`Naima ${commit ? commit.slice(0, 12) : "(vendored)"}, data format ${FORMAT}, at ${at("")}`)
   io.out("Read these as files; they are the documentation of the Naima that runs:")
   for (const [name, path] of GUIDE_PAGES) io.out(`  ${name.padEnd(8)} ${at(path)}`)
@@ -300,20 +349,24 @@ export async function runCli(argv: string[], opts: CliOptions): Promise<number> 
       const acceptSource = command === "update" && args.includes("--accept-source")
       let moved = null
       try {
-        moved = align({ ...targetOf(place, place.lock), acceptSource })
+        moved = align({ ...targetOf(place, place.lock, opts), acceptSource })
       } catch (e) {
         // update --check only reads the source: it answers whatever program runs it.
         const readOnly = command === "update" && args.includes("--check")
-        if (!(readOnly && e instanceof NaimaError && e.code === SOURCE_CHANGED)) throw e
+        // A locked commit that cannot be had is what update moves past: whatever program runs it moves the lock to main.
+        const moving = command === "update" && !acceptSource
+        const code = e instanceof NaimaError ? e.code : null
+        if (!((readOnly && code === SOURCE_CHANGED) || (moving && code === COMMIT_UNAVAILABLE))) throw e
       }
       if (moved?.from && moved.from !== place.lock.commit) io.err(`naima: locked commit moved ${short(moved.from)} → ${short(place.lock.commit)}`)
-      if (moved || real(opts.programRoot) !== real(runtimeOf(place.program) ?? place.program)) return RELAUNCH
+      const target = runtimeOf(place.program)
+      if (moved || (target && real(opts.programRoot) !== real(target))) return RELAUNCH
     }
     if (command === "update" || command === "carry") {
       if (!opts.launched) {
         throw new Error(`naima ${command} moves the program, so it runs through the launcher: deno run -A ${TRACKER_DIR}/naima/naima.ts ${command}`)
       }
-      return command === "update" ? await update(args, opts, place, place.lock, place.raw, io) : carryCommand(args, place, place.lock, place.raw, io)
+      return command === "update" ? await update(args, opts, place, place.lock, place.raw, io) : carryCommand(args, opts, place, place.lock, place.raw, io)
     }
     const ctx = await openProject(place, opts, io)
     if (isHelp(command)) return help(ctx, io)

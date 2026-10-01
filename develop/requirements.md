@@ -40,8 +40,9 @@ archived with its proof) are three states, never added into one number
 `test/lifecycle.test.ts`.
 
 **proof-stays-current.** A proof counts only for what it was run on. A
-property that held on a model since changed, or with a different property,
-verifier or options, is no longer current, and `naima close` refuses it.
+property that held on a model since changed, on an included file since
+changed, by another tool version, or with a different property, verifier or
+options, is no longer current, and `naima close` refuses it.
 Held by: the check `property-evidence`, the write hooks
 `property-reopens-when-changed` (a changed property goes back to open) and
 `holds-only-by-verify` (a property holds only with a run for what it is now),
@@ -69,7 +70,7 @@ the trunk is a fast-forward is a flow, not code: not enforced by Naima.
 
 **checked-like-code.** The tracker has invariants, and `naima check` fails
 when one breaks, the way a test suite fails when the code breaks. Held by:
-`naima check` itself, run by `deno task verify` in this repository and by CI.
+`naima check` itself, run by `deno task verify` in this repository before every push.
 
 **documented-always.** Every feature is documented as part of its
 implementation ([the documentation rule](documentation.md)). Held by: the
@@ -83,7 +84,8 @@ it is ([the rules](../naima/docs/guide/rules.md), each marked enforced or conven
 a person is asked only for what is theirs, a fix names the gesture that
 proves it, a branch does not close what it claims on its own tests. Held by:
 the checks `human-says-why`, `fix-names-its-gesture` (a note) and
-`claims-resolve`, and the write hook `no-closing-own-claims`. The rules of
+`claims-resolve`, the write hook `no-closing-own-claims` and its check
+counterpart `closed-not-claimed`. The rules of
 [AGENTS.md](../AGENTS.md), the rules for working on Naima, that are judgement, such as when to ask the owner,
 are not enforced.
 
@@ -94,9 +96,9 @@ that Deno, Node and Bun all provide. Nothing is installed. Held by:
 `test/arch.test.ts` ("the core imports nothing outside itself but node
 built-ins"), and `deno.json`, which has no imports.
 
-**portable-runtime.** The same code runs on Deno, Node and Bun. Held by: CI
-(`.github/workflows/ci.yml`), which runs the tests on all three, on Linux and
-macOS.
+**portable-runtime.** The same code runs on Deno, Node and Bun. Held by: the
+tests, run on all three before every push (`deno task verify`, `node --test`,
+`bun test`; [AGENTS.md](../AGENTS.md#before-pushing)).
 
 **small-fixed-core.** The core names no item type, field, relation, gate,
 verifier or plugin; everything above it is a plugin. Held by:
@@ -136,9 +138,9 @@ program](../naima/docs/guide/install.md#every-run-aligns-the-program)). Held by:
 
 **runtime-only-distribution.** A project receives only what runs Naima: no
 tests, no CI, no development agent rules, none of Naima's own tracker items
-([the dist branch](../naima/docs/guide/install.md#the-dist-branch)). Held by: the runtime
-folder `naima/`, which the dist copies and nothing else, and
-`test/dist.test.ts`, which holds the dist to it.
+([the copy](../naima/docs/guide/install.md#the-copy)). Held by: the runtime
+folder `naima/`, which a project's program is a copy of and nothing else, and
+`test/runtime-folder.test.ts` and `test/site.test.ts`, which hold the copy to it.
 
 **forward-migration.** The data has a format number; it moves only with a
 migration, forward only and deterministic; newer data is refused and left
@@ -202,8 +204,9 @@ same data. It serves **fork-friendly**.
 
 **The installed program holds nothing but what runs Naima.** Test runners,
 type-checkers and agent harnesses that walk a project's files would pick up
-Naima's tests, CI or agent rules if they were there. So a project clones a
-runtime-only branch, and Naima's own development stays on `main`. It serves
+Naima's tests, CI or agent rules if they were there. So a project copies
+only the runtime folder of a `main` commit, and Naima's own development stays
+beside it. It serves
 **runtime-only-distribution** and **contained**.
 
 **A host's own material lives organised in its naima-data.** Everything a

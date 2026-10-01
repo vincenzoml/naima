@@ -8,7 +8,7 @@ the [owner](../guide/glossary.md#owner)'s chat — files it at once, before inve
 holds every time the owner asks for a feature, reports a problem, decides or
 defers something, not only when a flow is explicitly invoked: it is a
 standing behaviour, in the background, so the work underway is not derailed.
-The filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–6): it rewrites the
+The filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–7): it rewrites the
 description in its own words, searches duplicates first (`naima list`, or
 `naima new --dedupe`, which prints likely duplicates of the same type before
 writing and still writes) and links rather than refiles, records what it
@@ -89,6 +89,17 @@ naima triage set <item> impact=high priority=next confidence=reported
 | `confidence` | do we understand it? `measured` · `diagnosed` · `reported` · `unclear` |
 | `effort` | **never guessed.** Nothing in a report says what a fix costs; leave it empty until someone has looked at the code. An unsized item sinks in the ranking, which is the honest outcome |
 
+**Classifiers take the project's values.** `area` (where it lives) and
+`kind` (the mode of work; a role's name is a kind) take the values the
+project lists, if it lists any: `naima types` prints each list with how many
+items hold each value, and marks a value off the list. Pick a value from the
+list. A new value is defined in `naima.json`'s `extends`, title and meaning,
+in the same commit that first uses it; an off-list value already in the
+tracker is a note from `naima check` (the check `values`) naming its items —
+report it, never rewrite those items to make the note go away. `gate` and
+`epic` are fixed lists: a gate no plugin contributes, or `part-of` an item that is
+not an epic, fails the check.
+
 [Triage what you touch](../guide/rules.md#triage-what-you-touch): opening,
 reporting or fixing an item means leaving its fields set. `naima triage` prints coverage per type; do not add to what it
 says is missing.
@@ -133,7 +144,34 @@ naima note <item> "Reproduced on 16-bit PNGs only; 8-bit keeps alpha." --by "tri
   options with a reason and an item, and is added only on the trunk: the list
   only shrinks.
 
-## 5. Cross-reference instead of repeating
+## 5. Deferring: say why, and what reopens it
+
+Not everything triaged gets worked on now. An item with `priority=parked`, or
+a bug `wontfix` or a todo `dropped`, is a **deferral**, not a loss: it is
+still captured in full (steps 2–4) exactly as any other item, with its
+reason on the page, then set
+[`reopensWhen`](../guide/glossary.md#reopenswhen) — prose, or a link to the
+item or document whose change would make it worth re-arguing. An item left
+without a reason, or without `reopensWhen`, is a problem `naima check`
+reports: a deferral nobody can act on is silently re-argued the next time
+someone notices it.
+
+`naima view parked` lists every parked, wontfix or dropped item with its
+trigger. Read it before opening a new item that looks familiar: when the
+thing being reported is already there, the answer is **"I already told
+you"** — point at the existing item and its `reopensWhen`, rather than
+triaging a duplicate. When `reopensWhen` has come true, reopen the item
+(`naima set <item> priority=next` or `naima set <item> status=open`) instead
+of filing a new one.
+
+A project's own authoritative documents — which page is the one to trust for
+a given kind of status — are declared in `plugins.triage.options.documents`
+and printed first by `naima guide`. A project rule can say so explicitly
+(`naima rules`, this one's: "no new status or summary document — update the
+authoritative one"): update the document named there, never start a new one
+beside it.
+
+## 6. Cross-reference instead of repeating
 
 Items name each other by permanent id (`naima link`), never by a slug in
 prose:
@@ -142,7 +180,7 @@ prose:
 - a duplicate is `duplicate-of` its twin, and the twin keeps the evidence;
 - an item that waits on another is `blocked-by` it.
 
-## 6. Whose hands does the proof need
+## 7. Whose hands does the proof need
 
 `runBy` says who can perform the gesture, by the instrument:
 
@@ -155,7 +193,7 @@ prose:
 Mark it with more care than any other field: it decides who picks the gesture
 up, and both mistakes are expensive.
 
-## 7. Closing
+## 8. Closing
 
 A fix is not a close. Closing takes the fix (`fixedOn`), the gesture that
 proves it as an item linked `verifies`, and the gesture performed and passed —
@@ -168,8 +206,14 @@ The proof must also be **current**. `naima close` refuses when:
 - an item verifying it **refutes** it — a test that `failed`, a property
   that is `violated`: evidence against outweighs any evidence for;
 - `naima check` finds a problem on an item verifying it — a property that
-  holds on a model, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
+  holds on a model, an included file, a tool version, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
   the gesture again (`naima verify`), then close.
+
+Never close, or set `holds`, by editing `meta.json` or moving a directory:
+every write hook that would refuse it has a check counterpart, so the hand
+edit fails `naima check` — `closed-not-claimed` on an archived item the
+branch you stand on still claims, `property-evidence` on a `holds` with no
+current run.
 
 ## Safety rules
 
@@ -179,5 +223,8 @@ The proof must also be **current**. `naima close` refuses when:
 - **No secret in an item or an attachment.** Enforced by the check `secrets`.
 - **A fixed item is never closed without a passing proof.** Enforced by
   `naima close` and the check `closed-carries-proof`.
+- **No write a command would refuse, made by hand.** Enforced by the check
+  counterpart of every write hook that protects a state: `closed-not-claimed`,
+  `property-evidence` and `epics`.
 - **Evidence against a claim outweighs evidence for it.** Enforced by `naima
   close`, which refuses an item a verifying item refutes.

@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { test } from "node:test"
-import { vendor } from "../../naima/src/core/program.ts"
+import { copyProgram } from "../../naima/src/core/program.ts"
 import { writeFileAtomic, writeJson } from "../../naima/src/core/internal.ts"
 import { gitIn } from "./testing.ts"
 
@@ -23,38 +23,35 @@ test("a write replaces the file whole: new content lands beside it, then is rena
   }
 })
 
-test("a vendored update that fails to check out leaves the previous program in place", () => {
-  const base = mkdtempSync(join(tmpdir(), "naima-vendor-"))
-  const saved = process.env["GIT_INDEX_FILE"]
+test("a copy that cannot be made leaves the previous program in place, and nothing beside it", () => {
+  const base = mkdtempSync(join(tmpdir(), "naima-copy-"))
   try {
     const source = join(base, "source")
-    mkdirSync(source)
+    mkdirSync(join(source, "naima", "src"), { recursive: true })
     gitIn(source, "init", "-q", "-b", "main")
-    writeFileSync(join(source, "naima.ts"), "v1\n")
+    writeFileSync(join(source, "naima", "naima.ts"), "v1\n")
+    writeFileSync(join(source, "naima", "src", "cli.ts"), "v1\n")
+    writeFileSync(join(source, "README.md"), "not runtime\n")
     gitIn(source, "add", "-A")
     gitIn(source, "commit", "-q", "-m", "v1")
-    writeFileSync(join(source, "naima.ts"), "v2\n")
-    gitIn(source, "commit", "-q", "-am", "v2")
-    const next = gitIn(source, "rev-parse", "HEAD")
+    const first = gitIn(source, "rev-parse", "HEAD")
+    gitIn(source, "rm", "-q", "-r", "naima")
+    gitIn(source, "commit", "-q", "-m", "no runtime folder")
+    const broken = gitIn(source, "rev-parse", "HEAD")
     const root = join(base, "host")
     const tracker = join(root, "naima-tracker")
     const program = join(tracker, "naima")
-    mkdirSync(program, { recursive: true })
+    mkdirSync(tracker, { recursive: true })
     gitIn(root, "init", "-q", "-b", "main")
-    writeFileSync(join(program, "naima.ts"), "v1\n")
-    const t = { root, tracker, program, source, commit: "0".repeat(40), carry: "vendored" as const }
+    const t = { root, tracker, program, source, commit: first, carry: "vendored" as const, cache: join(base, "cache") }
 
-    process.env["GIT_INDEX_FILE"] = join(base, "no", "such", "dir", "index") // the checkout cannot write its index
-    assert.throws(() => vendor(t, next))
+    copyProgram(t)
+    assert.equal(readFileSync(join(program, "naima.ts"), "utf8"), "v1\n")
+    assert.ok(!existsSync(join(program, "README.md")), "only naima/ is copied")
+    assert.throws(() => copyProgram({ ...t, commit: broken }), /holds no naima\/ folder/)
     assert.equal(readFileSync(join(program, "naima.ts"), "utf8"), "v1\n", "the program that ran before is still there")
-    delete process.env["GIT_INDEX_FILE"]
-    vendor(t, next)
-    assert.equal(readFileSync(join(program, "naima.ts"), "utf8"), "v2\n")
     assert.deepEqual(readdirSync(tracker).sort(), ["naima"], "nothing is left beside it")
-    assert.ok(existsSync(program))
   } finally {
-    if (saved === undefined) delete process.env["GIT_INDEX_FILE"]
-    else process.env["GIT_INDEX_FILE"] = saved
     rmSync(base, { recursive: true, force: true })
   }
 })

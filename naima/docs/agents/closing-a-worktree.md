@@ -40,6 +40,14 @@ the fix has one, because a rule that always fires is the same defect the
 other way round. Set `runBy` by the instrument that settles it; a person's
 gesture also says `humanBecause` ([asking the human](asking-the-human.md)).
 
+Name the evidence the test carries in `evidenceKind`, by
+[the ranking](../guide/prove-and-close.md#3-perform-it-keep-the-evidence):
+the owner's gesture, then a screenshot, log line or number, then the live
+state read by tooling, then a before-and-after comparison; "the code looks
+right" proves nothing. Never report a number without the one it is compared
+with. A test that verifies a bug is run red first, on the code before the fix:
+record the day in `redSeen` and keep the failing run with the passing one.
+
 A test nobody can find is a test nobody runs: [triage](../guide/glossary.md#triage) it like any item.
 
 When the item follows a spec (`specified-by`), confirm the code matches the
@@ -52,8 +60,9 @@ requirement with no passing proof.
 The [proof](../guide/glossary.md#proof) is the gesture as it stands, not as it once stood: `naima close`
 refuses an item that a verifying item refutes (a failed test, a violated
 property), and one whose verifying item `naima check` reports — a property
-that holds on a model changed since its run
-([closing](reporting-and-triage.md#7-closing)).
+that holds on a model, an included file or a tool version changed since its
+run
+([closing](reporting-and-triage.md#8-closing)).
 
 ## 2. Triage what is left open
 

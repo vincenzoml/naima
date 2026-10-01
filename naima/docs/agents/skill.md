@@ -15,12 +15,13 @@ when to use it.
   verbatim; their files are attached only with an explicit yes
   ([the rule](../guide/rules.md#the-owners-chat-stays-private)).
 - **Bootstrap.** In a project without `naima-tracker/`: install Deno if it is
-  missing, with its official installer, clone Naima into
-  `naima-tracker/naima/`, and run `naima init`
+  missing, with its official installer, clone Naima's `main`, shallow,
+  outside the project, and run its `naima init` from the project, which
+  copies `naima/` into `naima-tracker/naima/`
   ([bootstrap a project](../guide/install.md#bootstrap-a-project)). In a project with
   one, every run aligns the program itself.
 - **Update at the start of a session.** `naima update --check`; when the
-  source's dist has moved, `naima update`, the checks, and one commit
+  source's main has moved, `naima update`, the checks, and one commit
   ([updating](../guide/install.md#updating)). Running it is the agent's job.
 - **Read the project's rules.** `naima rules --audience agents`, before
   anything else: the project's own rules, kept as [items](../guide/glossary.md#item) of its tracker
@@ -28,7 +29,7 @@ when to use it.
 - **Work by the rules and the flows.** Read [the rules](../guide/rules.md),
   then the [flow](README.md#the-flows) that applies.
 - **Read the corpus as files.** The [flows](../guide/glossary.md#flow), the rules, the format and the docs
-  are plain markdown in the clone; `naima guide` prints where they are.
+  are plain markdown in the copy; `naima guide` prints where they are.
 
 It is a thin pointer, never a second copy: the rules are on
 [the rules page](../guide/rules.md), the procedures in the [flows](README.md#the-flows),
@@ -39,7 +40,7 @@ checked by `naima check` like every other markdown file in this repository.
 
 ## Loading it
 
-The skill ships in the clone, so it is always the one of the Naima the
+The skill is in the copy, so it is always the one of the Naima the
 project runs. Point the agent tool at it rather than copying the file, so its
 links keep resolving. For Claude Code, from the project:
 
@@ -48,5 +49,5 @@ mkdir -p .claude/skills && ln -s ../../naima-tracker/naima/skills/naima .claude/
 ```
 
 That link is the project's own choice, outside `naima-tracker/`: Naima never
-writes it. Before the first clone exists, give the agent this page's bootstrap
+writes it. Before the first copy exists, give the agent this page's bootstrap
 instead.

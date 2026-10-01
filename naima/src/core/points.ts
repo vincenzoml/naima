@@ -19,6 +19,7 @@ import type {
   RelationDef,
   SummarySection,
   TypeDef,
+  ValueDef,
   View,
   WriteHook,
 } from "./types.ts"
@@ -141,7 +142,7 @@ export const fieldsPoint: ExtensionPoint<FieldDef> = {
     ),
   gaps: (f) => [
     ...says(f, "holds"),
-    ...(f.kind === "enum" ? Object.entries(f.values ?? {}).flatMap(([v, s]) => (blank(s) ? [`: value "${v}" does not say what it means`] : [])) : []),
+    ...Object.entries(f.values ?? {}).flatMap(([v, s]) => (blank(s) ? [`: value "${v}" does not say what it means`] : [])),
   ],
   document: (fields) => [
     "",
@@ -159,7 +160,7 @@ export const fieldsPoint: ExtensionPoint<FieldDef> = {
             : f.configured
             ? "set by the project's configuration"
             : f.values
-            ? Object.entries(f.values).map(([v, s]) => `${code(v)} ${s}`).join("; ")
+            ? (f.kind === "enum" ? "" : "an open list: ") + Object.entries(f.values).map(([v, s]) => `${code(v)} ${s}`).join("; ")
             : "",
           f.multiple ? "one, or a list of several" : "",
         ].filter(Boolean).join("; "),
@@ -306,9 +307,15 @@ export const extendsPoint: ExtensionPoint<Extension> = {
     const other = Object.keys(e).find((k) => !own.includes(k))
     return other ? `extends a ${e.type !== undefined ? "type" : "field"}, which takes no "${other}"` : null
   },
-  gaps: (e) => Object.entries(e.statuses ?? {}).flatMap(([name, s]) => (blank(s.says) ? [`: status "${name}" does not say what it means`] : [])),
+  gaps: (e) => [
+    ...Object.entries(e.statuses ?? {}).flatMap(([name, s]) => (blank(s.says) ? [`: status "${name}" does not say what it means`] : [])),
+    ...Object.entries(e.values ?? {}).flatMap(([v, d]) => (blank(typeof d === "string" ? d : d?.says) ? [`: value "${v}" does not say what it means`] : [])),
+  ],
   document: (es) => ["", "**Extensions** of other plugins' types and fields", "", ...es.map(extensionLine)],
 }
+
+/** A declared value as the reference says it: its title, then what it means. */
+const valueSaid = (d: string | ValueDef): string => (typeof d === "string" ? d : d.title ? `${d.title} — ${d.says}` : d.says)
 
 function extensionLine(e: Extension): string {
   const moves = (t: Record<string, string[]>) => Object.entries(t).map(([f, to]) => `${code(f)} → ${to.map(code).join(", ")}`).join("; ")
@@ -319,7 +326,7 @@ function extensionLine(e: Extension): string {
       ...(e.transitions ? [`moves ${moves(e.transitions)}`] : []),
     ]
     : [
-      ...(e.values ? [`values ${Object.entries(e.values).map(([v, s]) => `${code(v)} ${s}`).join("; ")}`] : []),
+      ...(e.values ? [`values ${Object.entries(e.values).map(([v, d]) => `${code(v)} ${valueSaid(d)}`).join("; ")}`] : []),
       ...(e.appliesTo || e.traits ? [`applies to ${appliesSaid(e.appliesTo, e.traits)}`] : []),
     ]
   return `- ${e.type !== undefined ? `type ${code(e.type)}` : `field ${code(e.field ?? "")}`}: ${parts.join("; ")}`

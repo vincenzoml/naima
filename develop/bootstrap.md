@@ -8,15 +8,15 @@ case for this: Naima's repository uses exactly the model every project uses
 ([installing and updating](../naima/docs/guide/install.md)).
 
 1. **The tracker is managed by the locked commit.** `naima-tracker/naima/` is
-   a gitignored clone of Naima itself, locked by `naima.json` to a commit of
-   its own [`dist` branch](../naima/docs/guide/install.md#the-dist-branch), exactly as a project
-   is; that commit is the "previous version". `deno task naima <command>` runs
-   it, through the launcher. Alignment clones it from this repository's own
-   objects — the dist commits are here once `origin/dist` is fetched — so it
-   needs no network. A lock on a commit of `main`, as before the dist existed,
-   keeps working; the first `naima update` after the dist is published moves
-   it onto the dist (two updates, when the locked commit predates the dist:
-   the first reaches the main that knows it).
+   a gitignored copy of Naima's own `naima/`, locked by `naima.json` to a
+   commit of `main`, exactly as a project is
+   ([the copy](../naima/docs/guide/install.md#the-copy)); that commit is the
+   "previous version". `deno task naima <command>` runs it, through the
+   working tree's launcher. Alignment fetches the commit into the per-user
+   cache from this repository's own objects, so it needs no network. A lock
+   that names a commit of the `dist` branch runs it as a clone, cloned from
+   this repository once `origin/dist` is fetched, until `naima update` moves
+   it to `main`.
 2. **The working tree is tested against the tracker, never its authority.**
    `deno task dev <command>` runs the working tree on the same data, and
    `deno task verify` runs `check` with both: the working tree as a test, the

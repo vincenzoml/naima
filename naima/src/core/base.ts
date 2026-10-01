@@ -7,7 +7,7 @@ import { join } from "node:path"
 import { bool, pairs, parse, str, strs, usageError } from "./args.ts"
 import { coreChecks, runChecks } from "./check.ts"
 import { groupBy } from "./collections.ts"
-import { appliesTo, fieldValue, parseFieldValue } from "./fields.ts"
+import { appliesTo, fieldValue, isOpenList, parseFieldValue } from "./fields.ts"
 import { currentBranch, gitOrNull, isGitRepo } from "./git.ts"
 import {
   ATTACHMENTS,
@@ -28,7 +28,7 @@ import { CONTRACT } from "./contract.ts"
 import { shortOrId } from "./names.ts"
 import { asRendered, type Format, linesAs, rendered } from "./rendered.ts"
 import { flagsOf } from "./vocabulary.ts"
-import type { Command, Context, Contribution, Item, Plugin, SummarySection, TypeDef, View, WriteHook } from "./types.ts"
+import type { Command, Context, Contribution, FieldDef, Item, Plugin, SummarySection, TypeDef, View, WriteHook } from "./types.ts"
 
 export function typeOrThrow(ctx: Context, id: string | undefined): TypeDef {
   const type = id ? ctx.registry.types.get(id) : undefined
@@ -535,9 +535,34 @@ const runs: Command = {
   },
 }
 
+/** Every value an item holds of a field: one string, or each string of a list. */
+const heldValues = (v: unknown): string[] => (typeof v === "string" ? [v] : Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [])
+
+/** A field's list of values, each with how many items hold it, then the values held that are not on it. */
+function valueLines(ctx: Context, def: FieldDef): string[] {
+  const counts = new Map<string, number>()
+  for (const item of ctx.repo.items) {
+    if (!appliesTo(def, item.type)) continue
+    for (const v of heldValues(item.meta[def.name])) counts.set(v, (counts.get(v) ?? 0) + 1)
+  }
+  const listed = Object.entries(def.values ?? {})
+  const off = [...counts.keys()].filter((v) => !Object.hasOwn(def.values ?? {}, v)).sort()
+  const width = Math.max(...[...listed.map(([v]) => v), ...off].map((v) => v.length), 8)
+  const row = (v: string, said: string) => `  ${v.padEnd(width)} ${String(counts.get(v) ?? 0).padStart(4)}  ${said}`
+  const meaning = (v: string, says: string): string => {
+    const title = def.titles?.[v]
+    return title && says && title !== says ? `${title} — ${says}` : title || says
+  }
+  return [
+    `${def.name} — ${def.kind === "enum" ? "fixed" : "open"} list`,
+    ...listed.map(([v, says]) => row(v, meaning(v, says))),
+    ...off.map((v) => row(v, "not on the list")),
+  ]
+}
+
 const types: Command = {
   name: "types",
-  says: "list item types, their statuses and fields",
+  says: "list item types, their statuses and fields, then every field's list of values with how many items hold each",
   usage: "types",
   examples: ["types"],
   run(_args, ctx) {
@@ -549,6 +574,9 @@ const types: Command = {
       const fields = [...ctx.registry.fields.values()].filter((f) => appliesTo(f, t.id)).map((f) => f.name)
       ctx.out(`  fields: ${fields.join(", ")}`)
     }
+    const listed = [...ctx.registry.fields.values()].filter((f) => (f.kind === "enum" || isOpenList(f)) && Object.keys(f.values ?? {}).length)
+    if (listed.length) ctx.out("")
+    for (const def of listed) for (const line of valueLines(ctx, def)) ctx.out(line)
     return 0
   },
 }

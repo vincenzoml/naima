@@ -7,8 +7,8 @@ read or write code beyond changing one word in a one-line script.
 
 In everyday use an agent types these commands for you
 ([how the project runs](how-the-project-runs.md)); doing them once by hand
-shows what it does. The project here is a tiny script, but the same steps
-run a data analysis or a paper.
+shows what it does. The project here is a tiny script; the same steps
+run any software, and any other project, such as a data analysis or a paper.
 
 Every output below is what the commands printed when this tutorial was run.
 Yours differs only in the item ids, the dates, the commit and the folder.
@@ -40,7 +40,7 @@ $ curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh
 naima: cloning https://github.com/vincenzoml/naima.git (dist) into naima-tracker/naima
 wrote naima-tracker/: README.md, .gitignore, naima-data/naima.json — locked to https://github.com/vincenzoml/naima.git at 89530499e809
 next: naima new bugs "<the first thing to do>"
-0 items, 20 checks
+0 items, 31 checks
 
 all invariants hold
 
@@ -189,7 +189,7 @@ Naima notices that nothing proves the fix yet. That is a note, not a failure:
 
 ```console
 $ naima check
-1 items, 20 checks
+1 items, 31 checks
 
 notes (not failures):
   · bugs/greet-sh-says-helo-instead-hello is fixed, and nothing verifies it
@@ -233,7 +233,7 @@ $ naima board tests
 ## (no section)
   open      greet.sh greets with Hello  — tests/greet-sh-greets-hello
 $ naima check
-2 items, 22 checks
+2 items, 31 checks
 
 all invariants hold
 ```
@@ -275,7 +275,7 @@ bugs: 0 open
   fixed, not proven     0
   resolved, not closed  0
 $ naima check
-2 items, 20 checks
+2 items, 31 checks
 
 all invariants hold
 ```

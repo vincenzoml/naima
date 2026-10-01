@@ -6,7 +6,7 @@ import { join } from "node:path"
 import { groupBy } from "./collections.ts"
 import { message } from "./errors.ts"
 import { formatCheck } from "./format.ts"
-import { fieldError, fieldsOf } from "./fields.ts"
+import { appliesTo, fieldError, fieldsOf, isOpenList, offList } from "./fields.ts"
 import { isUuid, README, titleWords } from "./item.ts"
 import { label } from "./lifecycle.ts"
 import { storedLinks } from "./repo.ts"
@@ -56,6 +56,31 @@ const fields: Check = {
       for (const def of fieldsOf(ctx.registry, item)) {
         const error = fieldError(def, item.meta[def.name])
         if (error) out.push(problem(`${label(item)}: ${def.name} ${JSON.stringify(item.meta[def.name])} ${error}`, item))
+      }
+    }
+    return out
+  },
+}
+
+const values: Check = {
+  name: "values",
+  says:
+    "every value of a field with an open list of values — area or kind, once the project declares their values — is on its list; a value off it is a note naming the items that hold it, which are never rewritten",
+  run(ctx) {
+    const out: Finding[] = []
+    for (const def of ctx.registry.fields.values()) {
+      if (!isOpenList(def)) continue
+      const holders = new Map<string, Item[]>()
+      for (const item of ctx.repo.items) {
+        if (!appliesTo(def, item.type)) continue
+        for (const v of offList(def, item.meta[def.name])) holders.set(v, [...(holders.get(v) ?? []), item])
+      }
+      const list = Object.keys(def.values ?? {}).join(", ")
+      for (const [v, items] of holders) {
+        out.push(note(
+          `${def.name} "${v}" is not on its list (${list}): ${items.length} item${items.length === 1 ? "" : "s"} — ${items.map(label).join(", ")}. ` +
+            `Define it under extends in naima.json, in the commit that first uses it, or set those items to a value on the list`,
+        ))
       }
     }
     return out
@@ -129,7 +154,7 @@ const duplicates: Check = {
   },
 }
 
-export const coreChecks: Check[] = [readable, identity, fields, links, layout, duplicates, formatCheck()]
+export const coreChecks: Check[] = [readable, identity, fields, values, links, layout, duplicates, formatCheck()]
 
 export interface CheckReport {
   problems: Finding[]

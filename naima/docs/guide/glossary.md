@@ -225,6 +225,18 @@ release or loses work), `high` (a newcomer would hit it and not come back),
 
 A triage field: when. `now`, `next`, `later`, `parked`.
 
+### Deferral
+
+An item with `priority=parked`, or a bug `wontfix` or a todo `dropped`:
+deliberately not being worked on now, with the reason on its page. See
+[reopensWhen](#reopenswhen) and [`naima view parked`](triage.md).
+
+### ReopensWhen
+
+A field on a deferral: what would make it worth re-arguing, as prose or a
+link to the item or document that would. Unset, a deferral is silently
+re-argued the next time someone notices it.
+
 ### Confidence
 
 A triage field: do we understand it? `measured`, `diagnosed`, `reported`,
@@ -286,6 +298,21 @@ a regression is recognised when it comes back.
 
 What backs a claim: a log line, a number, a screenshot, a command's output,
 kept in the item's `attachments/`. "It works" without it is not a proof.
+Ranked, strongest first: the owner's own gesture; a screenshot, log line or
+number; the live state read by tooling; a before-and-after comparison; and
+"the code looks right", which proves nothing. No number without its
+comparison.
+
+### Evidence kind
+
+The field `evidenceKind` on a test: which rank of [evidence](#evidence) it
+carries — `owner-gesture`, `observation`, `live-read`, `diff` or `inspection`.
+
+### Red, then green
+
+A regression test proves a fix only if it was seen failing on the code before
+the fix, then passing on the fix. The field `redSeen` records the day it was
+seen red.
 
 ### Run by
 
@@ -355,7 +382,10 @@ every one does.
 ### Write hook
 
 A rule run on every change to an item, which can refuse it: a branch closing
-its own claimed items, a property set to `holds` by hand.
+its own claimed items, a property set to `holds` by hand. A hand edit of
+`meta.json` never meets a write hook, so each one that protects a state of the
+tracker has a [check](#check) counterpart that `naima check` runs on the
+tracker as it is.
 
 ### Derived
 
@@ -431,14 +461,14 @@ project. Everyone who works on the project runs that one.
 ### Alignment
 
 What every run does first: make the program directory exactly the locked
-commit, cloning it when it is missing. It never overwrites work and never
+commit, copying it when it is missing. It never overwrites work and never
 pulls.
 
-### Dist branch
+### Copy
 
-The branch of Naima's repository a project clones: only the files that run
-Naima, without its tests or its own tracker
-([the dist branch](install.md#the-dist-branch)).
+What a project's program directory is: the files of Naima's `naima/` folder
+at the locked commit, without its tests or its own tracker, fetched through
+the per-user cache ([the copy](install.md#the-copy)).
 
 ### Update
 
@@ -457,8 +487,8 @@ The step that rewrites the data from one [format](#format) to the next, run by
 
 ### Carry
 
-How the program directory is kept: an ignored `clone` (the default),
-`vendored` (committed as plain files) or a git `submodule`
+How the program directory is kept: an ignored `copy` (the default),
+`vendored` (the copy, committed) or a git `submodule`
 ([how the program is carried](install.md#how-the-program-is-carried)).
 
 ### Fork

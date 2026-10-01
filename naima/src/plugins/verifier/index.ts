@@ -2,16 +2,17 @@
 //
 // A property item names a verifier (an adapter any plugin can contribute), a
 // model file and a property. `naima verify` runs the adapter and attaches the
-// run — verdict, output, counterexample, and the hash of the model it ran
-// on — to the item. A property that `holds` is evidence exactly as a passed
+// run — verdict, output, counterexample, and one digest over every file it
+// read and the tool's version — to the item. A property that `holds` is evidence exactly as a passed
 // test is: it can `verify` a bug and close it.
 //
-// A verdict is only as good as the model it was reached on, so `check` fails
-// when a property claims to hold and the model has changed since its run.
+// A verdict is only as good as what it was reached on, so `check` fails when
+// a property claims to hold and the model, a file it includes or the tool's
+// version has changed since its run.
 
 import { createHash } from "node:crypto"
 import { existsSync, readFileSync } from "node:fs"
-import { isAbsolute, join, relative, resolve } from "node:path"
+import { isAbsolute, join, relative, resolve, sep } from "node:path"
 import {
   ATTACHMENTS,
   bool,
@@ -33,7 +34,7 @@ import {
   writeJson,
 } from "../../core/api.ts"
 import { exampleRegex } from "./adapters/example-regex.ts"
-import { type Verdict, type Verifier, verifiersPoint, type VerifyResult } from "./contract.ts"
+import { type Verdict, type Verifier, verifiersPoint, type VerifyRequest, type VerifyResult } from "./contract.ts"
 
 export type { Verdict, Verifier, VerifyRequest, VerifyResult } from "./contract.ts"
 
@@ -61,10 +62,21 @@ export interface RunRecord {
   property: string
   /** The sha256 of the item's `verifierOptions`, keys sorted; absent in runs recorded before it was kept, meaning none. */
   optionsSha256?: string
+  /** Every file the run read — the model and what it includes — from the project root, sorted, each with its sha256. Absent in runs recorded before it was kept: the model alone. */
+  inputs?: RunInput[]
+  /** The tool's version, as the adapter's `version` gave it; absent when the adapter declares none. */
+  toolVersion?: string
+  /** One digest over `inputs` and `toolVersion` (`digestOf`): what the run speaks for, in one value. */
+  inputsSha256?: string
   verdict: Verdict
   output: string
   counterexample?: string
   at: string
+}
+
+export interface RunInput {
+  path: string
+  sha256: string
 }
 
 const STATUS: Record<Verdict, string> = { holds: "holds", violated: "violated", error: "error", unknown: "error" }
@@ -104,6 +116,22 @@ const optionsOf = (item: Item): Record<string, unknown> => {
 }
 const optionsHash = (options: Record<string, unknown>): string => createHash("sha256").update(canonical(options)).digest("hex")
 
+/** The one digest a run keeps over everything it read and the tool that read it. */
+export const digestOf = (inputs: readonly RunInput[], toolVersion: string | undefined): string =>
+  createHash("sha256").update(canonical({ inputs: inputs.map((i) => [i.path, i.sha256]), toolVersion: toolVersion ?? null })).digest("hex")
+
+/** The files a run on `item` reads, from the project root, sorted, the model always among them: what the adapter declares, or the model alone. */
+async function inputsOf(ctx: Context, verifier: Verifier, item: Item, request: VerifyRequest): Promise<string[]> {
+  const declared = verifier.inputs ? await verifier.inputs(request, ctx) : []
+  const out = new Set<string>([String(item.meta["model"])])
+  for (const abs of declared) {
+    const rel = relative(ctx.root, abs)
+    if (!modelPath(ctx.root, rel)) throw new Error(`${label(item)}: input ${abs} is outside the project — a model reads only files inside it`)
+    out.add(rel.split(sep).join("/"))
+  }
+  return [...out].sort()
+}
+
 const template = (title: string): string =>
   `# ${title}\n\nThe property in words, and why it matters.\n\nSet \`verifier\`, \`model\` (a path from the project root) and \`property\` in meta.json, then \`naima verify\`.\n`
 
@@ -114,7 +142,16 @@ function asRun(value: unknown): RunRecord | string {
   const missing = ["verifier", "model", "modelSha256", "property", "output", "at"].filter((k) => typeof r[k] !== "string")
   if (missing.length) return `${missing.join(", ")} missing or not text`
   if (!VERDICTS.includes(r["verdict"] as Verdict)) return `verdict ${JSON.stringify(r["verdict"])} is not one of ${VERDICTS.join(", ")}`
-  for (const k of ["optionsSha256", "counterexample"]) if (r[k] !== undefined && typeof r[k] !== "string") return `${k} is not text`
+  for (const k of ["optionsSha256", "counterexample", "toolVersion", "inputsSha256"]) {
+    if (r[k] !== undefined && typeof r[k] !== "string") return `${k} is not text`
+  }
+  const inputs = r["inputs"]
+  if (
+    inputs !== undefined &&
+    (!Array.isArray(inputs) || !inputs.every((i) => i && typeof i === "object" && typeof i.path === "string" && typeof i.sha256 === "string"))
+  ) {
+    return "inputs is not a list of { path, sha256 }"
+  }
   return r as unknown as RunRecord
 }
 
@@ -164,10 +201,17 @@ export async function verifyItem(ctx: Context, item: Item): Promise<Verdict> {
   if (!path) throw new Error(`${label(item)}: model ${model} is outside the project — model is a path from the project root`)
   if (!existsSync(path)) throw new Error(`${label(item)}: model ${model} does not exist`)
   const options = optionsOf(item)
+  const request = { model: path, property, options }
+  const inputs = (await inputsOf(ctx, verifier, item, request)).map((rel): RunInput => {
+    const abs = resolve(ctx.root, rel)
+    if (!existsSync(abs)) throw new Error(`${label(item)}: input ${rel} does not exist`)
+    return { path: rel, sha256: sha256(abs) }
+  })
+  const toolVersion = verifier.version ? await verifier.version(ctx) : undefined
   const hash = sha256(path)
   let result: VerifyResult
   try {
-    result = inContract(id, await verifier.verify({ model: path, property, options }, ctx))
+    result = inContract(id, await verifier.verify(request, ctx))
   } catch (e) {
     result = { verdict: "error", output: e instanceof Error ? e.message : String(e) }
   }
@@ -179,6 +223,9 @@ export async function verifyItem(ctx: Context, item: Item): Promise<Verdict> {
     modelSha256: hash,
     property,
     optionsSha256: optionsHash(options),
+    inputs,
+    ...(toolVersion !== undefined ? { toolVersion } : {}),
+    inputsSha256: digestOf(inputs, toolVersion),
     verdict: result.verdict,
     output: result.output,
     at,
@@ -230,8 +277,8 @@ const verifiers: Command = {
 const evidence: Check = {
   name: "property-evidence",
   says:
-    "a property names a known verifier and an existing model; one that holds carries a run of its current property, verifier, model and options, on the model as it is now",
-  run(ctx) {
+    "a property names a known verifier and an existing model; one that holds carries a run of its current property, verifier, model and options, on every file it reads as it is now and the tool's version as it is now",
+  async run(ctx) {
     const out: Finding[] = []
     const problem = (item: Item, message: string) => out.push({ level: "problem", message: `${label(item)}: ${message}`, item })
     for (const item of properties(ctx)) {
@@ -250,7 +297,10 @@ const evidence: Check = {
       const run = loaded && "run" in loaded ? loaded.run : null
       if (!run) problem(item, "holds, but carries no run")
       else if (run.verdict !== "holds") problem(item, `holds, but its last run says ${run.verdict}`)
-      else for (const why of staleness(ctx, item, run)) problem(item, `${why} — run naima verify again`)
+      else {
+        const whys = [...staleness(ctx, item, run), ...(await toolStaleness(ctx, item, run, out))]
+        for (const why of whys) problem(item, `${why} — run naima verify again`)
+      }
     }
     return out
   },
@@ -270,6 +320,50 @@ export function staleness(ctx: Context, item: Item, run: RunRecord): string[] {
   if (run.model !== model) out.push(`holds on model ${run.model}, not ${String(model)}`)
   else if (path && existsSync(path) && run.modelSha256 !== sha256(path)) out.push("holds on a model that has changed since")
   if ((run.optionsSha256 ?? optionsHash({})) !== optionsHash(optionsOf(item))) out.push("holds with other verifierOptions than it has now")
+  if (run.inputs) {
+    if (run.inputsSha256 !== digestOf(run.inputs, run.toolVersion)) out.push("its run record's digest does not match the inputs and tool version it lists")
+    const changed = run.inputs.filter((i) => i.path !== run.model).filter((i) => {
+      const abs = modelPath(ctx.root, i.path)
+      return !abs || !existsSync(abs) || sha256(abs) !== i.sha256
+    })
+    if (changed.length) out.push(`holds on inputs that have changed since: ${changed.map((i) => i.path).join(", ")}`)
+  }
+  return out
+}
+
+/**
+ * What only the adapter can say about a run: whether the files the model reads
+ * now are the ones it read, and whether the tool is the version that ran.
+ * Asking may start the tool, so it runs in `check`, not in a write hook; an
+ * adapter that cannot answer leaves a note.
+ */
+async function toolStaleness(ctx: Context, item: Item, run: RunRecord, findings: Finding[]): Promise<string[]> {
+  const verifier = typeof item.meta["verifier"] === "string" ? verifierOf(ctx, item.meta["verifier"]) : undefined
+  const path = typeof item.meta["model"] === "string" ? modelPath(ctx.root, item.meta["model"]) : null
+  if (!verifier || !path || !existsSync(path) || typeof item.meta["property"] !== "string") return []
+  const out: string[] = []
+  const request = { model: path, property: item.meta["property"], options: optionsOf(item) }
+  try {
+    const now = await inputsOf(ctx, verifier, item, request)
+    const was = (run.inputs ?? [{ path: run.model }]).map((i) => i.path)
+    if (canonical(now) !== canonical(was)) out.push(`holds on inputs ${was.join(", ")}, but the model now reads ${now.join(", ")}`)
+    if (verifier.version) {
+      const version = await verifier.version(ctx)
+      if (version !== run.toolVersion) {
+        out.push(
+          `holds by ${run.toolVersion === undefined ? "an unrecorded tool version" : `tool version ${JSON.stringify(run.toolVersion)}`}, not ${
+            JSON.stringify(version)
+          }`,
+        )
+      }
+    }
+  } catch (e) {
+    findings.push({
+      level: "note",
+      item,
+      message: `${label(item)}: verifier "${verifier.id}" could not say what the model reads or its version: ${e instanceof Error ? e.message : String(e)}`,
+    })
+  }
   return out
 }
 
@@ -318,8 +412,8 @@ export default function verifier(): Plugin {
     says: "properties checked by formal-methods tools, with each run attached as evidence",
     about:
       "A `properties` item names a `verifier` (an adapter any plugin can contribute), a `model` file (a path from the project root) and a `property` in the verifier's own language. " +
-      "`naima verify` runs the adapter and attaches the run — verdict, output, the model's sha256 — and the counterexample as its own file, then sets the status from the verdict. " +
-      "A property that holds is evidence exactly as a passed test is: it can `verify` a bug and close it. A verdict is only as good as what it was reached on, so `naima check` fails when a property claims to hold and its property, verifier, model path, `verifierOptions` or model contents have changed since the run. " +
+      "`naima verify` runs the adapter and attaches the run — verdict, output, the model's sha256, and one digest over every file the run read (the model and what the adapter's `inputs` says it includes) and the tool's version (the adapter's `version`) — and the counterexample as its own file, then sets the status from the verdict. " +
+      "A property that holds is evidence exactly as a passed test is: it can `verify` a bug and close it. A verdict is only as good as what it was reached on, so `naima check` fails when a property claims to hold and its property, verifier, model path, `verifierOptions`, model contents, any file it includes, the set of files it reads, or the tool's version have changed since the run. " +
       "The shipped adapter, `example-regex`, is a stand-in that shows the shape of a real one.",
     types: [
       {

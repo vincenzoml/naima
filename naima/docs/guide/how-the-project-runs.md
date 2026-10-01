@@ -16,7 +16,7 @@ report → file → triage → claim → work → prove → close
 | Step | Who | What happens | Command |
 |---|---|---|---|
 | **Report** | you, or anyone | you say what you noticed, in chat, in your own words; or you write the item yourself | — |
-| **File** | an agent | the report becomes an [item](glossary.md#item) at once, before anyone works on it | `naima new bugs "Figure 3 uses last year's data"` |
+| **File** | an agent | the report becomes an [item](glossary.md#item) at once, before anyone works on it | `naima new bugs "Save button does nothing on a phone"` |
 | **Triage** | an agent | it rewrites the report as a clear description in its own words, checks for duplicates and links them, and ranks it | `naima triage set <item> impact=high priority=now confidence=reported` |
 | **Claim** | the agent that takes the work | it opens its own [worktree](glossary.md#worktree) and records that it holds the item, so nobody else starts it unknowingly | `naima claim <item> --note "why"` |
 | **Work** | that agent | it does the work — code, an analysis script, a paragraph — in its own copy, in small [commits](glossary.md#commit) | git, handled by the agent |
@@ -61,9 +61,10 @@ naima new features "Export to PDF with the figures in colour"
 naima board features
 ```
 
-Epics, milestones, requirements and specifications as items are
-[planned](../planned.md#epics-and-milestones); today a todo or a feature
-whose page lists its parts stands in for an epic.
+Grouping work as an [epic](glossary.md#epic), giving a release a date as a
+[milestone](glossary.md#milestone), and saying what must hold and how exactly
+([requirements, specifications and decisions](plan-with-requirements-specs-and-decisions.md))
+are items too: [plan with epics, milestones and gates](plan-with-epics-milestones-and-gates.md).
 
 ## Gates
 
@@ -99,7 +100,14 @@ because everything is written down in files:
 
 Worktrees and branches follow one naming scheme, and each worktree carries
 a claim file: `naima open` makes both, and `naima check` fails what breaks
-them. A way of working keeps going until only your work is left
+them
+([the enforced rule](rules.md#worktrees-and-branches-are-named-by-one-scheme-and-every-worktree-carries-a-claim)).
+Full lifecycle of a piece of work, start to finish, each step naming its
+command: [the tutorial](tutorial.md) walks it for a single worktree; opening
+one and finishing it are their own pages, for agents:
+[opening a worktree](../agents/opening-a-worktree.md),
+[closing a worktree](../agents/closing-a-worktree.md). A way of working
+keeps going until only your work is left
 ([while you are away](while-you-are-away.md)).
 
 ## Decisions

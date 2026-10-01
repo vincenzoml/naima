@@ -506,6 +506,32 @@ const noClosingOwnWork: WriteHook = {
   },
 }
 
+/**
+ * The check counterpart of no-closing-own-claims: a hand edit (a directory
+ * moved into the archive, meta.json rewritten) never meets the hook, so the
+ * state it protects is asserted here — nothing the branch you stand on claims
+ * is archived.
+ */
+const closedNotClaimed: Check = {
+  name: "closed-not-claimed",
+  says:
+    "no archived item (one in a type that is not creatable, where naima close moves it) is claimed by the branch you stand on: what no-closing-own-claims refuses on a write, asserted on the tracker as it is, hand edits included",
+  run(ctx) {
+    const branch = currentBranch(ctx.root)
+    if (branch === "HEAD") return []
+    const mine = new Set(readClaims(ctx).filter((c) => c.branch === branch).flatMap((c) => c.items.map((e) => e.id)))
+    return ctx.repo.items
+      .filter((i) => mine.has(i.meta.id) && ctx.registry.types.get(i.type)?.creatable === false)
+      .map((i): Finding => ({
+        level: "problem",
+        item: i,
+        message: `${
+          label(i)
+        } is closed, yet ${branch}, the branch you are on, claims it: a branch does not close its own items — move it back, or, if the evidence owner closed it, release the claim (naima release ${i.slug})`,
+      }))
+  },
+}
+
 const whereWeWere: SummarySection = {
   name: "where we were",
   render(ctx) {
@@ -553,7 +579,7 @@ export default function coordination(options: Record<string, unknown> = {}): Plu
       { name: "exempt", says: "branches the naming scheme does not apply to: names, or patterns with *", default: "[]" },
     ],
     dirs: [CLAIMS, PASSES],
-    checks: [claimsResolve, worktreePolicy(policy), trunkMoved],
+    checks: [claimsResolve, worktreePolicy(policy), trunkMoved, closedNotClaimed],
     commands: [openCommand(policy), claim, release, claims, prune, pass],
     summary: [whereWeWere, inHand],
     hooks: [noClosingOwnWork],

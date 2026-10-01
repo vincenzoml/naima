@@ -16,7 +16,20 @@ import { DATA_FILE, DEFAULT_PROGRAM } from "./layout.ts"
 import { FORMAT, formatRefusal, formatsOf } from "./format.ts"
 import type { Carry, Config, Extension, PluginConfig, PluginOptions, PluginSource, Severity } from "./types.ts"
 
-export const CARRY_MODES: readonly Carry[] = ["clone", "vendored", "submodule"]
+export const CARRY_MODES: readonly Carry[] = ["copy", "vendored", "submodule"]
+
+/** The carry naima.json records by leaving `carry` out. */
+export const DEFAULT_CARRY: Carry = "copy"
+
+/**
+ * `raw` with `carry` recorded: left out when it is the default, so that a
+ * Naima that predates the copy, reading the default as its clone, still
+ * aligns and updates onto the Naima that copies.
+ */
+export function withCarry(raw: Record<string, unknown>, carry: Carry): Record<string, unknown> {
+  const { carry: _was, ...rest } = raw
+  return carry === DEFAULT_CARRY ? rest : { ...rest, carry }
+}
 
 const KEYS = new Set(["format", "formats", "source", "commit", "carry", "verify", "program", "plugins", "rename", "extends"])
 const COMMIT = /^[0-9a-f]{40}$/
@@ -55,7 +68,8 @@ export function parseLock(raw: Record<string, unknown>): Lock {
   const refusal = sourceRefusal(source)
   if (refusal) throw new Error(`${DATA_FILE}: source ${refusal}`)
   if (typeof commit !== "string" || !COMMIT.test(commit)) throw new Error(`${DATA_FILE}: commit must be the full hash of the Naima commit this project runs`)
-  const carry = raw["carry"] ?? "clone"
+  // "clone" is how naima.json named the gitignored program before it was a copy: the same place, the same ignoring.
+  const carry = raw["carry"] === undefined || raw["carry"] === "clone" ? DEFAULT_CARRY : raw["carry"]
   if (!CARRY_MODES.includes(carry as Carry)) throw new Error(`${DATA_FILE}: carry must be one of: ${CARRY_MODES.join(", ")}`)
   const program = raw["program"] ?? DEFAULT_PROGRAM
   if (typeof program !== "string" || !program.trim()) throw new Error(`${DATA_FILE}: program must be a path, relative to the data directory`)

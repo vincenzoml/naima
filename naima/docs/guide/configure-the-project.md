@@ -23,6 +23,37 @@ Every key and its default: [configuration](config.md).
 Then put [items](glossary.md#item) on it with `naima set <item> gate=v1`, and ask with
 `naima gates v1`. What `holdsOn` means: [gates](read-the-board.md#gates).
 
+## Define the values a field takes
+
+`area` and `kind` are free text until the project lists their values. A
+list keeps a value from being a guess that sorts like a fact: each value has
+a title and says what it means.
+
+```json
+{
+  "extends": [
+    { "field": "area", "values": {
+      "cli": { "title": "Command line", "says": "the naima command and its output" },
+      "docs": "the guide and the reference"
+    } },
+    { "field": "kind", "values": { "code": "a change to the program", "tester": "a gesture the tester role performs" } }
+  ]
+}
+```
+
+A value is what it means, or `{ "title", "says" }`. A plugin can add values
+to the same list, the same way. The list is open: `naima check` reports a
+value off it as a note, naming the items that hold it, and changes none of
+them — define the value, or set those items to one on the list, yourself.
+To make an off-list value fail the check, weigh the core's `values` check
+`problem` (below). `naima types` prints every list, each value with how many
+items hold it, values off the list marked.
+
+`gate` and `epic` are fixed lists already: a gate's values are the gates
+contributed, an epic's the epics filed; anything else fails the check.
+
+Add a value in the commit that first uses it, with its meaning.
+
 ## Make a check stricter, or quieter
 
 Each [check](glossary.md#check) is weighed `problem` (fails `naima check`),

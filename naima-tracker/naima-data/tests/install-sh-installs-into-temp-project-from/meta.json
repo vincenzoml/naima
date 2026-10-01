@@ -1,0 +1,16 @@
+{
+  "id": "2e96b3ac-df67-4469-b745-c2f79c3b7691",
+  "title": "install.sh installs into a temp project from a local source on this Mac: fresh, again, and refusing outside a repository",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "confidence": "measured",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "18a6662b-aab1-4833-80c0-63b109e48736"
+    }
+  ]
+}

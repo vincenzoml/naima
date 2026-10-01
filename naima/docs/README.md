@@ -1,8 +1,11 @@
 # Documentation
 
-Start with [what Naima is for](purpose.md): an enabling technology and a
-decision support system for any versioned work — software, a data analysis,
-a paper with colleagues — run by AI agents for an owner who only decides.
+Start with [what Naima is for](purpose.md): a silent software house of AI
+agents, born for software, that turns vibe coding into an exact science —
+tests, metrics, reviews, gates and formal methods applied for an owner who
+only decides and need not be a programmer. Then any project: a data
+analysis, a paper with colleagues, each with its own checks in place of
+tests.
 Then start from who you are.
 
 | You are… | Start at | Then |
@@ -21,7 +24,9 @@ Then start from who you are.
   project runs, the tutorial, a page per everyday task, concepts, the [rules](guide/rules.md) (the only
   page that states them), a project's own rules
   ([write one](guide/write-a-project-rule.md)), installing, configuration,
-  questions, glossary.
+  questions, glossary, and [extending Naima](guide/extending-naima.md) for a
+  programmer writing a plugin or a researcher adopting Naima outside
+  software.
 - **[agents/](agents/README.md)** — for agents. How an agent learns a
   project, the skill, [the project's own rules](agents/read-the-project-rules.md),
   and the flows: the procedures an agent follows.

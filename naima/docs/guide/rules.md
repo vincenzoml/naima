@@ -18,6 +18,15 @@ Rules that apply only to developing Naima itself are in Naima's own
 `AGENTS.md`, not here; [a project's own rules](#a-projects-own-rules) are
 data in its tracker.
 
+**A rule's reason is not the same as documentation's history.** "Documentation
+states what is, never how it came to be" is about product pages: the guide,
+the reference, a feature's own page — none of them tell the story of why a
+decision was made. A rule is different on purpose: every rule on this page
+carries its reason, because the reason is part of what the rule *is* — it is
+how you judge whether the rule still applies when the situation changes. So a
+rule's reason stays here, on the rule; it is never repeated as history on a
+product page.
+
 ## The tracker
 
 ### Change the tracker only through the CLI
@@ -27,7 +36,14 @@ editing `meta.json` by hand. An item's page, `README.md`, is written with
 `naima describe` (the description) and `naima note` (a dated, attributed,
 append-only note); a person may also write it as a file.
 **Enforced by** the checks `readable`, `identity`, `fields` and `links`,
-which fail on what a hand edit typically breaks; the rest is convention.
+which fail on what a hand edit typically breaks, and by the check counterpart
+of every write hook that protects a state — `property-evidence` for
+`holds-only-by-verify` and `property-reopens-when-changed`,
+`closed-not-claimed` for `no-closing-own-claims`, `epics` for `epic-status` — so a hand edit that a
+command would have refused fails `naima check`. The hooks that guard a move
+rather than a state (`status-moves`, `notes-append-only`) and the ones that
+only fill in a value (`triage-stamps-its-date`, `planning-stamps`) have none;
+the rest is convention.
 
 ### Run `naima check` before every commit
 
@@ -70,8 +86,9 @@ never fails: [prove and close](prove-and-close.md).
 ### A proof is current, and evidence against it wins
 
 An item whose verifying item [refutes](glossary.md#refutes) it, or whose
-proof `naima check` reports as no longer current (a property run on a model
-changed since), cannot be closed. **Enforced by** `naima close` and the check
+proof `naima check` reports as no longer current (a property run on a model,
+a file the model includes, or a tool version that has changed since), cannot
+be closed. **Enforced by** `naima close` and the check
 `property-evidence`; a property becomes `holds` only through `naima verify`
 (the write hook `holds-only-by-verify`).
 
@@ -82,10 +99,43 @@ changed since), cannot be closed. **Enforced by** `naima close` and the check
 `naima attach`. **Convention**, except for properties, whose runs
 `naima verify` attaches.
 
+### Evidence is ranked, and no number stands without its comparison
+
+Strongest first: the owner performing the gesture; a screenshot, a log line or
+a number; the live state read by tooling; a before-and-after comparison; "the
+code looks right", which proves nothing. A test names its rank in
+`evidenceKind`. A number proves something only beside the value it is
+compared with. **Enforced by** the check `inspection-proves-nothing`, as a
+note; the rest is **convention**: [prove and close](prove-and-close.md#3-perform-it-keep-the-evidence).
+
+### A regression test is seen red before it is green
+
+A test that verifies a bug was run on the code before the fix and failed,
+then on the fix and passed; `redSeen` records the day it failed.
+**Enforced by** the check `regression-test-saw-red`, as a note.
+
+### A page does not outlive its answer
+
+An open item's unticked clause does not name a test that has passed, and an
+agent's test does not excuse itself because something was held.
+**Enforced by** the checks `unticked-clause-names-passed-test` and
+`test-excuses-itself`, as notes; the excuse phrases are the `trackers` option
+`excusePhrases`.
+
 ### A partial item says what is left
 
 **Enforced by** the check `partial-says-what-is-left`: an item in status
 `partial` carries at least one unticked `- [ ]` line on its page.
+
+### A deferred item says why, and what would reopen it
+
+A [deferral](glossary.md#deferral) — `priority=parked`, or a bug `wontfix`
+or a todo `dropped` — is still an item someone may re-argue later, not a
+loss: say why it is deferred on its page, and set
+[`reopensWhen`](glossary.md#reopenswhen). `naima view parked` lists every
+one with its trigger, so a deferral is found before it is re-argued from
+scratch. **Enforced by** the check `deferred-says-why`: a deferred item left
+exactly as the unfilled template it was created with is a problem.
 
 ### Behaviour shipped without proof is marked
 
@@ -124,7 +174,10 @@ A branch does not close its own items on the strength of its own tests:
 someone else checks the proof, from the [trunk](glossary.md#trunk), after the
 merge. **Enforced by** the write hook `no-closing-own-claims`: `naima close`
 refuses an item the current branch [claims](glossary.md#claim-file), unless
-`--force`, which is for the one who owns the evidence.
+`--force`, which is for the one who owns the evidence; and the check
+`closed-not-claimed` fails on an archived item the current branch still
+claims, however it got there — release the claim once the evidence owner has
+closed it.
 
 ### The owner's chat stays private
 

@@ -8,23 +8,18 @@ what does, and [what Naima is for](purpose.md#what-exists-today) sums it up.
 Each entry says what it is, what you can do today instead, and an example.
 The order is the order of the work: the first entries come first.
 
-## Epics and milestones
+## Metrics
 
-- **[Epics](guide/glossary.md#epic)** as an item type: a large goal grouping
-  features and todos. Example: "Replicate the 2024 study".
-- **[Milestones](guide/glossary.md#milestone)**: a [gate](guide/glossary.md#gate)
-  with a date, so `naima queue` can say what is late. Example: "draft results
-  by 15 November".
-- **Today:** a gate declared in `naima.json`, and a [todo](guide/glossary.md#todo)
-  whose page lists its parts and the date in prose.
-
-## Item types for other work
-
-Packs of item types for work that is not software: experiments and analyses
-whose evidence is a reproducible run; sections and reviews of a paper.
-**Today:** bugs, todos, features and tests fit most of this already ("figure
-3 uses last year's data" is a bug), and a project can add its own types with
-a [plugin](guide/add-a-plugin.md).
+- **Code-quality metrics side by side with tests**: measures of the code
+  itself, read next to the test results, so a change that passes its tests
+  but makes the code harder to maintain is seen.
+- **Metrics measured on every commit without anyone asking**: a commit hook
+  that runs them and records the numbers, and a trend drawn as a chart on a
+  dashboard.
+- **Today:** `naima metrics run --record` runs the project's metrics when
+  asked, records them per commit, holds each to a budget, a floor or a
+  baseline, and `naima metrics trend` draws the trend as text
+  ([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ## Model checkers and the strength of evidence
 
@@ -33,23 +28,14 @@ a [plugin](guide/add-a-plugin.md).
   applies.
 - **The mCRL2 model of Naima's own claims** ("no claim is ever lost") as a
   property in Naima's own tracker.
-- **A check for red-then-green**: a test must be shown to fail on the old
-  work and pass on the new.
-- **A written order of how strong each kind of evidence is**: a run beats a
-  reading of the code, a measurement beats a report.
+- **Red-then-green shown by the run itself**: the failing run on the old work
+  attached and checked, not only its day recorded in `redSeen`.
 - **Today:** properties, `naima verify` and expiring proofs work, with one
   example verifier, `naima/src/plugins/verifier/adapters/example-regex.ts`
   ([prove and close](guide/prove-and-close.md#properties-proven-by-a-tool)).
-
-## Metrics
-
-Metrics measured on every commit without anyone asking: a commit hook that
-runs them and records the numbers. **Today:** `naima metrics run --record`
-runs the project's metrics when asked — commands, and code-quality measures
-built in — records them per commit, holds each to a budget, a floor or a
-baseline; `naima metrics backfill` measures past commits, and `trend`,
-`history` and `plot` (an SVG chart or an HTML report) read them along the
-commit timeline ([metrics and budgets](guide/metrics-and-budgets.md)).
+  The evidence ranking (`evidenceKind`) and the red-then-green record
+  (`redSeen`) are tracker fields, with checks that note their absence
+  ([prove and close](guide/prove-and-close.md#3-perform-it-keep-the-evidence)).
 
 ## Structuring a project from the start
 
@@ -75,6 +61,16 @@ these choices in chat, and the owner's answers become
 instruction file (such as `AGENTS.md` or `CLAUDE.md`) pointing at the
 [skill](agents/skill.md). **Today:** the installer's instructions tell the
 agent to do it ([working with AI agents](guide/working-with-agents.md#get-an-agent-going)).
+
+## Item types for other work
+
+Naima is born for software; these are packs of item types for other work
+([beyond software](purpose.md#beyond-software-any-project)): experiments and
+analyses whose evidence is a reproducible run; sections and reviews of a
+paper.
+**Today:** bugs, todos, features and tests fit most of this already ("figure
+3 uses last year's data" is a bug), and a project can add its own types with
+a [plugin](guide/add-a-plugin.md).
 
 ## Roles
 

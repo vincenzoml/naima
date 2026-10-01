@@ -1,8 +1,8 @@
 import assert from "node:assert/strict"
-import { existsSync, readdirSync, rmSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { test } from "node:test"
-import { createItem, DEFAULT_DATA, type Plugin } from "../../../naima/src/core/api.ts"
+import { createItem, DEFAULT_DATA, type Plugin, runChecks } from "../../../naima/src/core/api.ts"
 import { createContext, DEFAULT_PROGRAM, gitIn, tempProject } from "../../core/testing.ts"
 import coordination, { readClaims, readPasses } from "../../../naima/src/plugins/coordination/index.ts"
 
@@ -265,5 +265,42 @@ test("a claim merged into the trunk and released on its branch, not yet committe
   } finally {
     p.cleanup()
     rmSync(w, { recursive: true, force: true })
+  }
+})
+
+test("an item closed by hand while this branch claims it fails naima check, as naima close would have refused it", async () => {
+  const archive: Plugin = {
+    name: "archive",
+    says: "test archive",
+    types: [{
+      id: "archived",
+      dir: "ARCHIVED",
+      title: "Archived",
+      says: "",
+      statuses: { closed: { category: "done", says: "" } },
+      initialStatus: "closed",
+      creatable: false,
+    }],
+  }
+  const p = tempProject([things, archive, coordination()], { git: true })
+  try {
+    const { ctx } = p
+    const a = createItem(ctx, ctx.registry.types.get("things")!, "Alpha")
+    p.git("checkout", "-q", "-b", "me/work")
+    assert.equal(await p.run("claim", a.slug), 0)
+    const problems = async () => (await runChecks(p.ctx)).problems.map((f) => f.message).join("\n")
+    assert.equal(await problems(), "")
+    // the hand edit naima close refuses: the item's directory moved into the archive
+    mkdirSync(join(ctx.trackerRoot, "ARCHIVED"), { recursive: true })
+    const moved = join(ctx.trackerRoot, "ARCHIVED", a.slug)
+    renameSync(a.dir, moved)
+    const meta = join(moved, "meta.json")
+    writeFileSync(meta, JSON.stringify({ ...JSON.parse(readFileSync(meta, "utf8")), status: "closed" }))
+    p.ctx.reload()
+    assert.match(await problems(), /archived\/alpha is closed, yet me\/work, the branch you are on, claims it.*release/)
+    assert.equal(await p.run("release", a.slug), 0)
+    assert.equal(await problems(), "")
+  } finally {
+    p.cleanup()
   }
 })
