@@ -1,0 +1,19 @@
+{
+  "id": "04fdd827-4285-4479-a01c-24337ca61725",
+  "title": "tracker-folder.md no longer names a nonexistent 'milestones' type: it describes a milestone as a gate with a date",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "diff",
+  "confidence": "measured",
+  "impact": "low",
+  "priority": "next",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "d477c3f7-9e2c-41ac-b2c6-77715d6edc40"
+    }
+  ]
+}

@@ -1,0 +1,597 @@
+[0m[32mTask[0m [0m[36mverify[0m deno task typecheck && deno task lint && deno fmt --check && deno task test && deno run -A naima/src/cli.ts check && deno run -A naima/src/cli.ts docs --check naima/docs/reference/reference.md && deno run -A naima/naima.ts check
+[0m[32mTask[0m [0m[36mtypecheck[0m deno check naima/naima.ts naima/src/ test/ scripts/
+[0m[32mTask[0m [0m[36mlint[0m deno lint
+Checked 133 files
+Checked 136 files
+[0m[32mTask[0m [0m[36mtest[0m deno test -A test/
+[0m[38;5;245mrunning 5 tests from ./test/arch.test.ts[0m
+the core imports nothing outside itself but node built-ins, and requires nothing ... [0m[32mok[0m [0m[38;5;245m(4ms)[0m
+a plugin, wherever it lives, imports only the core's public API and its own files ... [0m[32mok[0m [0m[38;5;245m(4ms)[0m
+the core names no plugin's type, field, relation or plugin ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+the scanner sees every way a module can reach another ... [0m[32mok[0m [0m[38;5;245m(168µs)[0m
+the plugin API holds what a plugin may use, and nothing that loads, migrates or runs the program ... [0m[32mok[0m [0m[38;5;245m(156µs)[0m
+[0m[38;5;245mrunning 12 tests from ./test/cli.test.ts[0m
+init writes naima-tracker/ and nothing else, locked to the Naima that runs it; again, it changes nothing ... [0m[32mok[0m [0m[38;5;245m(226ms)[0m
+the tracker's README and Naima's own share one sentence ... [0m[32mok[0m [0m[38;5;245m(290µs)[0m
+init refuses outside a git repository ... [0m[32mok[0m [0m[38;5;245m(10ms)[0m
+every first-party plugin but the opt-in ones is loaded with nothing but the lock; new, link, show, board, from a subdirectory ... [0m[32mok[0m [0m[38;5;245m(934ms)[0m
+--data names a data directory that has moved ... [0m[32mok[0m [0m[38;5;245m(195ms)[0m
+newer data is refused in one line, and nothing is written ... [0m[32mok[0m [0m[38;5;245m(140ms)[0m
+a third-party plugin runs only from inside the program; a first-party name takes replacedBy, never source ... [0m[32mok[0m [0m[38;5;245m(181ms)[0m
+update and carry move the program, so they run only through the launcher; guide points at files that exist ... [0m[32mok[0m [0m[38;5;245m(274ms)[0m
+guide, inside a project, prints the project's active rules for agents first, then the documentation ... [0m[32mok[0m [0m[38;5;245m(400ms)[0m
+the reference is the program's: a project's own gates do not change it ... [0m[32mok[0m [0m[38;5;245m(165ms)[0m
+exit codes tell a usage error (2) from an internal one (70), and a command's own 75 is not a request to relaunch ... [0m[32mok[0m [0m[38;5;245m(162ms)[0m
+list, unlink, view, types and help each do what their usage says ... [0m[32mok[0m [0m[38;5;245m(468ms)[0m
+[0m[38;5;245mrunning 5 tests from ./test/configuration.test.ts[0m
+a first-party plugin takes its options from the plugins table: the docs reference is held, beta markers scan where they are told ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+a plugin switched off is not loaded; a replaced one runs other code under its name; the core can only be weighed ... [0m[32mok[0m [0m[38;5;245m(76ms)[0m
+a check is weighed as the project says: a note made a problem, a problem a note, a check switched off; a check nobody declares is refused ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+format 1 moves forward: the plugins list becomes the table, the top-level gates the gates plugin's options ... [0m[32mok[0m [0m[38;5;245m(440µs)[0m
+the development build reads format-1 data as migrated, in memory: its gates hold, and it says what update will do ... [0m[32mok[0m [0m[38;5;245m(28ms)[0m
+[0m[38;5;245mrunning 1 test from ./test/core/collections.test.ts[0m
+groupBy keeps key and item order, and is linear in the number of items ... [0m[32mok[0m [0m[38;5;245m(7ms)[0m
+[0m[38;5;245mrunning 34 tests from ./test/core/core.test.ts[0m
+slugs are readable, bounded and unique ... [0m[32mok[0m [0m[38;5;245m(634µs)[0m
+the registry refuses a name declared twice ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+naima.json: the formats, the lock, and the plugins table — options, enabled, source, replacedBy, check severities ... [0m[32mok[0m [0m[38;5;245m(889µs)[0m
+naima.json: entryFiles overrides the sensible defaults for the agent-harness entry-point check ... [0m[32mok[0m [0m[38;5;245m(84µs)[0m
+the data directory: --data or NAIMA_DATA, else the first naima-tracker/naima-data/ walking up ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+an item is a directory with a uuid, and links are resolved in both directions ... [0m[32mok[0m [0m[38;5;245m(25ms)[0m
+check reports every broken invariant instead of crashing ... [0m[32mok[0m [0m[38;5;245m(23ms)[0m
+set validates against the field's declaration ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+board and summary are derived from the items ... [0m[32mok[0m [0m[38;5;245m(28ms)[0m
+a status is only one the type declares itself, never an Object.prototype key ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+a date field holds only a real calendar date ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+non-Latin titles keep their letters: distinct slugs, and no false duplicates ... [0m[32mok[0m [0m[38;5;245m(44ms)[0m
+new never reuses a directory: a slug taken in another case, or by a concurrent run, is suffixed ... [0m[32mok[0m [0m[38;5;245m(135ms)[0m
+new validates every --set before it writes anything ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+new --dedupe prints likely duplicates of the same type before writing, and still writes ... [0m[32mok[0m [0m[38;5;245m(31ms)[0m
+features/renaming-item-keeps-page-s-title-line: naima set of title rewrites the page's title line too, in one write ... [0m[32mok[0m [0m[38;5;245m(13ms)[0m
+features/naima-move-item-another-type-keeping-id: move keeps id and links, refuses a status or field the new type lacks ... [0m[32mok[0m [0m[38;5;245m(35ms)[0m
+an empty item reference is a usage error, never the only item ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+a link is stored in one direction only: its inverse is already the link ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+a meta.json whose id, title or status is not a string is unreadable, not a crash ... [0m[32mok[0m [0m[38;5;245m(43ms)[0m
+a directory check cannot read is a problem: a misspelled type, an _underscored or a symlinked item ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+entry-pointers: check reports a plain-text path or a markdown link in a configured entry file that names a missing file ... [0m[32mok[0m [0m[38;5;245m(2ms)[0m
+a write is seen by the next read in the same run, with no reload ... [0m[32mok[0m [0m[38;5;245m(23ms)[0m
+a plugin cannot take a name the entry point answers; a check, summary or rank name another plugin declared is shared, by qualified id ... [0m[32mok[0m [0m[38;5;245m(624µs)[0m
+the registry and the config cannot be changed once the project is loaded ... [0m[32mok[0m [0m[38;5;245m(822µs)[0m
+properties: a slug is lowercase letters, digits and single dashes, at most 60 long, and slugifying it again changes nothing ... [0m[32mok[0m [0m[38;5;245m(9ms)[0m
+properties: every value a field's kind accepts comes back from the command line as it went in ... [0m[32mok[0m [0m[38;5;245m(883µs)[0m
+every write helper runs every plugin's beforeWrite and afterWrite, in load order, with the fields on disk before it ... [0m[32mok[0m [0m[38;5;245m(26ms)[0m
+a beforeWrite hook may change what is written, or refuse: the refusal says why, and nothing is written ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+a hook that refuses without saying why is a bug in the hook, not a refusal ... [0m[32mok[0m [0m[38;5;245m(11ms)[0m
+a write hook's name is qualified: two plugins' hooks by one name both run, and are told apart by id ... [0m[32mok[0m [0m[38;5;245m(161µs)[0m
+two branches that open an item with one title take two slugs, and merge without a conflict ... [0m[32mok[0m [0m[38;5;245m(584ms)[0m
+when the other branches cannot be read — a shallow clone — a new slug ends in its uuid's first eight characters ... [0m[32mok[0m [0m[38;5;245m(186ms)[0m
+a contribution names each program it runs by one word or an absolute path, which the launcher can pass to Deno ... [0m[32mok[0m [0m[38;5;245m(377µs)[0m
+[0m[38;5;245mrunning 3 tests from ./test/core/epipe.test.ts[0m
+piping naima's output into a reader that closes early ends quietly, on deno ... [0m[32mok[0m [0m[38;5;245m(69ms)[0m
+piping naima's output into a reader that closes early ends quietly, on node ... [0m[32mok[0m [0m[38;5;245m(132ms)[0m
+piping naima's output into a reader that closes early ends quietly, on bun ... [0m[32mok[0m [0m[38;5;245m(48ms)[0m
+[0m[38;5;245mrunning 2 tests from ./test/core/files.test.ts[0m
+a write replaces the file whole: new content lands beside it, then is renamed over it ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+a copy that cannot be made leaves the previous program in place, and nothing beside it ... [0m[32mok[0m [0m[38;5;245m(371ms)[0m
+[0m[38;5;245mrunning 8 tests from ./test/core/format.test.ts[0m
+this Naima reads format 1 + the number of migrations it carries ... [0m[32mok[0m [0m[38;5;245m(382µs)[0m
+migration is forward only and deterministic: the same input gives byte-identical output, and again changes nothing ... [0m[32mok[0m [0m[38;5;245m(5ms)[0m
+newer data is refused and left as it was; a migration that throws writes nothing ... [0m[32mok[0m [0m[38;5;245m(2ms)[0m
+check fails on a tracker that mixes formats ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+a plugin's own migrations run after the core's and record its format in formats, deterministically and once ... [0m[32mok[0m [0m[38;5;245m(2ms)[0m
+a plugin's migrations go 1, 2, 3 with no gap: the registry refuses a plugin that skips one ... [0m[32mok[0m [0m[38;5;245m(274µs)[0m
+check fails on an item still in the shape a plugin's migration replaced ... [0m[32mok[0m [0m[38;5;245m(13ms)[0m
+data that owes a plugin's migration: the launched program refuses it, the development build reads it migrated in memory, and writes nothing ... [0m[32mok[0m [0m[38;5;245m(2ms)[0m
+[0m[38;5;245mrunning 8 tests from ./test/core/git.test.ts[0m
+records are recombined from every unmerged branch, with the working tree winning ... [0m[32mok[0m [0m[38;5;245m(331ms)[0m
+a test's commit starts no background maintenance, so a local clone right after it finds every object ... [0m[32mok[0m [0m[38;5;245m(190ms)[0m
+a project's files are regular files: never a submodule's directory, never through a symbolic link ... [0m[32mok[0m [0m[38;5;245m(144ms)[0m
+paths meet git in posix form, whatever the platform's separator ... [0m[32mok[0m [0m[38;5;245m(91ms)[0m
+reading across branches starts a bounded number of git processes, however many branches and files ... [0m[32mok[0m [0m[38;5;245m(786ms)[0m
+the trunk is origin's HEAD, main or master — and without any, every local branch is read; a detached HEAD is not a ref to read ... [0m[32mok[0m [0m[38;5;245m(534ms)[0m
+one git wrapper: a missing ref and a missing git binary are told apart ... [0m[32mok[0m [0m[38;5;245m(120ms)[0m
+a branch checked out in another worktree is read from that worktree's disk, uncommitted files and deletions included ... [0m[32mok[0m [0m[38;5;245m(472ms)[0m
+[0m[38;5;245mrunning 5 tests from ./test/core/lock.test.ts[0m
+a source git would read as an option is refused, and so is a relative path ... [0m[32mok[0m [0m[38;5;245m(574µs)[0m
+URLs, scp-like addresses, file: URLs and absolute paths are sources ... [0m[32mok[0m [0m[38;5;245m(70µs)[0m
+credentials leave an origin URL before it becomes a lock: all of them over http, the password elsewhere ... [0m[32mok[0m [0m[38;5;245m(108µs)[0m
+--data is read by one parser, the launcher's and the program's: both forms, and an empty value refused ... [0m[32mok[0m [0m[38;5;245m(314µs)[0m
+verify is "signed" or absent ... [0m[32mok[0m [0m[38;5;245m(73µs)[0m
+[0m[38;5;245mrunning 5 tests from ./test/core/names.test.ts[0m
+every contribution has a qualified id; a short name resolves while it is unambiguous ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+a name two plugins would both store is refused at load, naming both qualified ids and the rename that resolves it ... [0m[32mok[0m [0m[38;5;245m(642µs)[0m
+a rename resolves a stored collision: the contribution goes by its new name, its own plugin reads it so, and its data is stored so ... [0m[32mok[0m [0m[38;5;245m(15ms)[0m
+a rename must name a contribution a loaded plugin declares, and never a plugin that reads its names as declared ... [0m[32mok[0m [0m[38;5;245m(287µs)[0m
+commands two plugins share run by qualified id; the short name is refused as ambiguous, naming both ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+[0m[38;5;245mrunning 6 tests from ./test/core/notes.test.ts[0m
+naima note appends a dated, attributed entry to a Notes section, and a second one after it ... [0m[32mok[0m [0m[38;5;245m(34ms)[0m
+naima note takes its text from --file, and refuses an empty text or a heading with a usage error ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+naima note says who writes it: --by, else git's user.name, else it refuses ... [0m[32mok[0m [0m[38;5;245m(200ms)[0m
+naima describe replaces the description, keeping the title and the Notes section ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+naima describe refuses an empty text, a title line and a Notes heading, and writes nothing ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+a prose write goes through the write hooks: a refusal leaves the README as it was, and the notes are append-only ... [0m[32mok[0m [0m[38;5;245m(32ms)[0m
+[0m[38;5;245mrunning 5 tests from ./test/core/pointer.test.ts[0m
+brokenEntryLinks: a markdown link and a plain-text path that name a missing file; a URL or an anchor is never one ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+brokenEntryLinks: a configured entry file that does not exist is skipped, not a problem ... [0m[32mok[0m [0m[38;5;245m(2ms)[0m
+pointerLine and entryPointers: the one-line pointer at Naima's own agent docs, relative to the entry file ... [0m[32mok[0m [0m[38;5;245m(870µs)[0m
+entryPointers: present once the file links to the agent docs, from wherever it names them ... [0m[32mok[0m [0m[38;5;245m(991µs)[0m
+writePointer: appends the pointer line under a blank line, once ... [0m[32mok[0m [0m[38;5;245m(971µs)[0m
+[0m[38;5;245mrunning 5 tests from ./test/core/points.test.ts[0m
+the core's kinds are extension points like any other ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+a plugin declares a new extension point, another contributes to it, and a command uses it — without editing the core ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+a point validates what is contributed to it, and names are qualified and renamed as the core's are ... [0m[32mok[0m [0m[38;5;245m(904µs)[0m
+a contribution to a point no loaded plugin declares is refused, unless the plugin says the point is optional ... [0m[32mok[0m [0m[38;5;245m(158µs)[0m
+a point is declared once, and never under a manifest key's name ... [0m[32mok[0m [0m[38;5;245m(150µs)[0m
+[0m[38;5;245mrunning 3 tests from ./test/core/rendered.test.ts[0m
+a view renders its data once: as text, its data as JSON, or its markdown ... [0m[32mok[0m [0m[38;5;245m(33ms)[0m
+summary prints every section's text, its data as JSON, or markdown under a heading each ... [0m[32mok[0m [0m[38;5;245m(8ms)[0m
+a check may be async: awaited in load order, and one that rejects is a problem, never a crash ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+[0m[38;5;245mrunning 1 test from ./test/core/typecheck.test.ts[0m
+a misspelt field read off meta does not compile; the typed accessor does, with the field's type ... [0m[32mok[0m [0m[38;5;245m(756ms)[0m
+[0m[38;5;245mrunning 6 tests from ./test/core/values.test.ts[0m
+a string field takes an open list of values, each with a title and what it means, from any plugin ... [0m[32mok[0m [0m[38;5;245m(6ms)[0m
+a value off an open list is a note naming the items, and the items are left as they are ... [0m[32mok[0m [0m[38;5;245m(222ms)[0m
+a field with no list declared is not checked against one ... [0m[32mok[0m [0m[38;5;245m(191ms)[0m
+gate and epic are fixed lists: a value off them is a problem ... [0m[32mok[0m [0m[38;5;245m(202ms)[0m
+naima types prints each field's values, with their titles and how many items hold each, off-list ones marked ... [0m[32mok[0m [0m[38;5;245m(36ms)[0m
+a project declares its values in naima.json, and check passes with a note for an off-list value ... [0m[32mok[0m [0m[38;5;245m(620ms)[0m
+[0m[38;5;245mrunning 1 test from ./test/coverage.test.ts[0m
+coverage of a copied source is mapped to the file it is an identical copy of, and nothing else ... [0m[32mok[0m [0m[38;5;245m(4ms)[0m
+[0m[38;5;245mrunning 13 tests from ./test/distribution.test.ts[0m
+bootstrap, init, new, check: the only addition is naima-tracker/, and git sees naima-data/, README.md and .gitignore but not naima/ ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+a second clone of the host, a new worktree and another project copy the locked commit from the user's cache, with the source gone ... [0m[32mok[0m [0m[38;5;245m(4s)[0m
+naima update pulls, migrates and records the new commit; a normal run never pulls ... [0m[32mok[0m [0m[38;5;245m(3s)[0m
+alignment refuses rather than destroy or guess: changed files, an unreachable commit, no network on the first run ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+a fork source is honoured once accepted: the whole project runs that fork at that commit ... [0m[32mok[0m [0m[38;5;245m(2s)[0m
+under the launcher's permissions Naima writes only under naima-tracker/ and runs only git: Deno refuses the rest ... [0m[32mok[0m [0m[38;5;245m(2s)[0m
+a pulled lock that moves the commit on the same source is followed, and says so ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+verify: "signed" runs a locked commit only when git verifies its signature ... [0m[32mok[0m [0m[38;5;245m(2s)[0m
+a verifier's declared programs, and only they, are allowed besides git ... [0m[32mok[0m [0m[38;5;245m(2s)[0m
+under the launcher, the trunk reads another worktree's uncommitted claim from its disk ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+naima carry round-trips copy → vendored → submodule → copy, the checks passing and the same commit running in each mode ... [0m[32mok[0m [0m[38;5;245m(4s)[0m
+a project locked to a dist commit keeps running its clone; naima update moves it to main, by its Source-Commit trailer, as a copy ... [0m[32mok[0m [0m[38;5;245m(4s)[0m
+a clone of a main commit in the program directory, as an install once made, becomes a copy on the next run, unless it holds work ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+[0m[38;5;245mrunning 5 tests from ./test/docs-pages.test.ts[0m
+every relative link in every markdown file of the repository resolves ... [0m[32mok[0m [0m[38;5;245m(186ms)[0m
+every page of naima/docs/guide/ is linked from its index ... [0m[32mok[0m [0m[38;5;245m(473µs)[0m
+every page of naima/docs/agents/ is linked from its index ... [0m[32mok[0m [0m[38;5;245m(157µs)[0m
+every page of develop/ is linked from its index ... [0m[32mok[0m [0m[38;5;245m(118µs)[0m
+the rules are linked from the skill, AGENTS.md and the agent pages ... [0m[32mok[0m [0m[38;5;245m(167µs)[0m
+[0m[38;5;245mrunning 5 tests from ./test/extending.test.ts[0m
+a plugin adds a type, a status to another plugin's type, a value and a type to another's field, and gets a field by trait — without editing the core ... [0m[32mok[0m [0m[38;5;245m(231ms)[0m
+an extension may add, never redefine: an existing status keeps its category, and a field its kind ... [0m[32mok[0m [0m[38;5;245m(2ms)[0m
+a type's transitions hold on every write: a status moves only where they allow, and a forced write takes the move on ... [0m[32mok[0m [0m[38;5;245m(29ms)[0m
+the gate field takes its values from every gate contributed, and an item may be on several ... [0m[32mok[0m [0m[38;5;245m(14ms)[0m
+a project extends the loaded plugins from naima.json, as a plugin would ... [0m[32mok[0m [0m[38;5;245m(113ms)[0m
+[0m[38;5;245mrunning 3 tests from ./test/external.test.ts[0m
+a file of the project runs as a plugin when its sha256 is the one pinned, and is refused the moment it changes ... [0m[32mok[0m [0m[38;5;245m(142ms)[0m
+a module of a git repository runs pinned by commit, fetched once into the tracker folder, which git ignores ... [0m[32mok[0m [0m[38;5;245m(913ms)[0m
+a plugin says the contract it is written for: a newer one is refused, one that says none is read as contract 1 ... [0m[32mok[0m [0m[38;5;245m(44ms)[0m
+[0m[38;5;245mrunning 3 tests from ./test/git.test.ts[0m
+nativePath turns git's forward-slash toplevel into the separator a Windows node:fs path uses ... [0m[32mok[0m [0m[38;5;245m(399µs)[0m
+nativePath is the identity on POSIX, where git's separator already is the platform's ... [0m[32mok[0m [0m[38;5;245m(60µs)[0m
+gitPath and nativePath are inverses, on an arbitrary separator ... [0m[32mok[0m [0m[38;5;245m(53µs)[0m
+[0m[38;5;245mrunning 5 tests from ./test/init.test.ts[0m
+init refuses to lock a commit its origin lacks, or a Naima with uncommitted changes: nobody else could run it ... [0m[32mok[0m [0m[38;5;245m(2s)[0m
+init strips the credentials from an origin URL before it writes the lock ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+init's next step names a type the loaded plugins really create, not a hard-coded one ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+init prints the exclude line for each host tool configuration it finds, and writes them only with --write-excludes ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+init prints the agent pointer for each configured entry file it finds, and writes it only with --write-agent-pointer ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+[0m[38;5;245mrunning 6 tests from ./test/launcher.test.ts[0m
+the environment allow-list keeps Naima's, git's, ssh's and the locale's variables, and nothing else ... [0m[32mok[0m [0m[38;5;245m(557µs)[0m
+the program is handed only the allow-listed environment: an unrelated secret is not there, git's variables are ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+a project path with a comma is refused in one named line, not with Deno's NotCapable ... [0m[32mok[0m [0m[38;5;245m(469ms)[0m
+init --write-excludes may write the host's deno.json through the launcher; init alone may not touch it ... [0m[32mok[0m [0m[38;5;245m(969ms)[0m
+init --write-agent-pointer may write the host's AGENTS.md through the launcher; init alone may not touch it ... [0m[32mok[0m [0m[38;5;245m(967ms)[0m
+through the launcher, ui may serve on the loopback interface and no other command may listen ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+[0m[38;5;245mrunning 5 tests from ./test/lifecycle.test.ts[0m
+a branch does not close an item it claims on its own tests; --force, from the evidence owner, does ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+an item another branch claims, or nobody does, closes from here ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+a failed test blocks a gate that waits only for code, and so does the fix it refutes ... [0m[32mok[0m [0m[38;5;245m(185ms)[0m
+close refuses an item whose proof no longer holds: a property that holds on a model changed since ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+no first-party verifier starts a program: the launcher would allow it to every project ... [0m[32mok[0m [0m[38;5;245m(79ms)[0m
+[0m[38;5;245mrunning 7 tests from ./test/plugins/adopt/adopt.test.ts[0m
+propose inserts markers only: removing them gives the source back byte for byte, and the dry run writes nothing ... [0m[32mok[0m [0m[38;5;245m(122ms)[0m
+a list item at the end of a file with no final newline needs no closing marker ... [0m[32mok[0m [0m[38;5;245m(613µs)[0m
+split: a dry run first, then one item per marker with its prose byte for byte, its section, its status and where it came from ... [0m[32mok[0m [0m[38;5;245m(426ms)[0m
+a re-run adds only what is missing and never overwrites an item ... [0m[32mok[0m [0m[38;5;245m(469ms)[0m
+audit re-reads every committed version of the source and reports each line not carried over ... [0m[32mok[0m [0m[38;5;245m(486ms)[0m
+links are proposed only on a shared real commit and shared wording; everything else is printed for a person to decide ... [0m[32mok[0m [0m[38;5;245m(555ms)[0m
+adopt refuses a split before markers, a path outside the project, and never removes the source ... [0m[32mok[0m [0m[38;5;245m(365ms)[0m
+[0m[38;5;245mrunning 3 tests from ./test/plugins/announce/announce.test.ts[0m
+a feature is announceable only once user-facing, shipped, documented and checked by a person or end to end ... [0m[32mok[0m [0m[38;5;245m(141ms)[0m
+a refuting proof outweighs a person's check; an owner-gesture counts whoever ran it ... [0m[32mok[0m [0m[38;5;245m(60ms)[0m
+the public copy may name only announceable features, by label or title ... [0m[32mok[0m [0m[38;5;245m(68ms)[0m
+[0m[38;5;245mrunning 3 tests from ./test/plugins/beta-markers/beta-markers.test.ts[0m
+a marker must name an open item and dies with its proof ... [0m[32mok[0m [0m[38;5;245m(19ms)[0m
+with nothing configured, every source file of the project is scanned, and nothing git ignores ... [0m[32mok[0m [0m[38;5;245m(100ms)[0m
+a marker naming an item since archived is found through the archive, and a bad reference says why ... [0m[32mok[0m [0m[38;5;245m(25ms)[0m
+[0m[38;5;245mrunning 11 tests from ./test/plugins/coordination/coordination.test.ts[0m
+a claim is one file on the claimer's branch, visible from every other ... [0m[32mok[0m [0m[38;5;245m(987ms)[0m
+prune finds claims whose branch is gone ... [0m[32mok[0m [0m[38;5;245m(563ms)[0m
+session notes are one file each, newest first by instant ... [0m[32mok[0m [0m[38;5;245m(338ms)[0m
+a count that is not a positive whole number is a usage error, not an empty listing ... [0m[32mok[0m [0m[38;5;245m(145ms)[0m
+a claim belongs to a branch: on a detached HEAD it is refused ... [0m[32mok[0m [0m[38;5;245m(213ms)[0m
+a branch's own claim is read from its branch, not from a stale copy the reader's disk carries ... [0m[32mok[0m [0m[38;5;245m(621ms)[0m
+a released claim stays released: the trunk's copy does not bring it back, and a new claim reuses the file ... [0m[32mok[0m [0m[38;5;245m(774ms)[0m
+prune lists a stale claim another ref carries, naming the ref it must be dropped from ... [0m[32mok[0m [0m[38;5;245m(586ms)[0m
+two workers' uncommitted claims, in their own worktrees, are seen by each other and by the trunk ... [0m[32mok[0m [0m[38;5;245m(677ms)[0m
+a claim merged into the trunk and released on its branch, not yet committed, is gone from the trunk too ... [0m[32mok[0m [0m[38;5;245m(598ms)[0m
+an item closed by hand while this branch claims it fails naima check, as naima close would have refused it ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+[0m[38;5;245mrunning 2 tests from ./test/plugins/coordination/timeline.test.ts[0m
+the timeline derives gates, epics, releases, sessions and records, oldest first, and counts what has no date ... [0m[32mok[0m [0m[38;5;245m(901ms)[0m
+without gates or epics loaded, the timeline still shows releases, sessions and records ... [0m[32mok[0m [0m[38;5;245m(235ms)[0m
+[0m[38;5;245mrunning 6 tests from ./test/plugins/coordination/worktrees.test.ts[0m
+open makes the worktree, the branch and the claim in one step, by the naming scheme ... [0m[32mok[0m [0m[38;5;245m(992ms)[0m
+open refuses what would break the scheme, and touches nothing when it does ... [0m[32mok[0m [0m[38;5;245m(558ms)[0m
+the policy check fails a worktree or a branch off the scheme, and an unclaimed worktree with work on it ... [0m[32mok[0m [0m[38;5;245m(3s)[0m
+a worktree that only files items passes with a session note, no claim needed ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+a preparing claim is told when the trunk takes a commit, and which were made on the trunk directly ... [0m[32mok[0m [0m[38;5;245m(2s)[0m
+prune --branch deletes a branch and its worktree, and refuses unmerged work with no archive tag ... [0m[32mok[0m [0m[38;5;245m(871ms)[0m
+[0m[38;5;245mrunning 12 tests from ./test/plugins/docs/docs.test.ts[0m
+a contribution without its documentation fails check, named ... [0m[32mok[0m [0m[38;5;245m(15ms)[0m
+the core and the docs plugin document themselves ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+the reference is generated, written, and checked for drift ... [0m[32mok[0m [0m[38;5;245m(41ms)[0m
+the reference lists every extension point, who declares it and who contributes to it, and documents each contribution as its point says ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+every internal link of the generated reference resolves ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+a shipped feature names documentation that exists ... [0m[32mok[0m [0m[38;5;245m(47ms)[0m
+relative links in the configured markdown resolve ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+anchors follow GitHub's rule, duplicates numbered ... [0m[32mok[0m [0m[38;5;245m(107µs)[0m
+with nothing configured, every markdown file of the project is link-checked, and nothing git ignores ... [0m[32mok[0m [0m[38;5;245m(99ms)[0m
+a feature's docs name a markdown file: a bare #heading, an empty entry or a directory is no documentation ... [0m[32mok[0m [0m[38;5;245m(67ms)[0m
+a setext heading, underlined with === or ---, is an anchor links resolve to ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+properties: an anchor is lowercase, has no whitespace or punctuation but - and _, and a heading's anchor is found in its file ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+[0m[38;5;245mrunning 6 tests from ./test/plugins/epics/epics.test.ts[0m
+an epic's status follows its items: open while any is open, done when all are closed ... [0m[32mok[0m [0m[38;5;245m(46ms)[0m
+an epic's status cannot be set against its items ... [0m[32mok[0m [0m[38;5;245m(25ms)[0m
+naima epic shows each epic with its progress, what blocks it and whose hands it waits on ... [0m[32mok[0m [0m[38;5;245m(52ms)[0m
+a gate on an epic stands for the epic's items ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+a part-of link to an item that is not an epic is a problem ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+an epic's status set by hand against its items fails naima check, as naima set would have refused it ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+[0m[38;5;245mrunning 4 tests from ./test/plugins/gates/coverage.test.ts[0m
+naima coverage prints every entry with its test or NO TEST, and --check exits 1 on NO TEST ... [0m[32mok[0m [0m[38;5;245m(80ms)[0m
+a gate can require a list's coverage: every NO TEST blocks it, by name ... [0m[32mok[0m [0m[38;5;245m(20ms)[0m
+a test naming an entry no list has is a note; a list whose source cannot be read is a problem ... [0m[32mok[0m [0m[38;5;245m(34ms)[0m
+a coverage list is configured with exactly one source, and a gate requires only a list that exists ... [0m[32mok[0m [0m[38;5;245m(299µs)[0m
+[0m[38;5;245mrunning 5 tests from ./test/plugins/gates/gates.test.ts[0m
+a code gate waits for code, a proof gate for everything ... [0m[32mok[0m [0m[38;5;245m(55ms)[0m
+an unknown gate is refused, and a proof of a gated item must be gated ... [0m[32mok[0m [0m[38;5;245m(35ms)[0m
+gates are configured, never hard-coded ... [0m[32mok[0m [0m[38;5;245m(284µs)[0m
+gated-proof-is-gated says what it decides: an ungated proof of a gated item is a problem, whatever it ranks ... [0m[32mok[0m [0m[38;5;245m(26ms)[0m
+the gates option names the file it is configured in, in the shape it is written ... [0m[32mok[0m [0m[38;5;245m(85µs)[0m
+[0m[38;5;245mrunning 5 tests from ./test/plugins/gates/milestones.test.ts[0m
+a gate with a date is a milestone: gates and queue show the days left or overdue ... [0m[32mok[0m [0m[38;5;245m(15ms)[0m
+a check warns when a milestone is past its date and does not hold, never when it holds ... [0m[32mok[0m [0m[38;5;245m(13ms)[0m
+due and version are validated where the gate is declared ... [0m[32mok[0m [0m[38;5;245m(335µs)[0m
+gate new declares a gate in naima.json, validated; the next run has it ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+gate add and remove put items on a gate and take them off, through the write hooks; gate show lists it ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+[0m[38;5;245mrunning 10 tests from ./test/plugins/hooks/hooks.test.ts[0m
+built-in rule: setting fixedOn without a linked verifying test fails, and passes once the test is in the commit ... [0m[32mok[0m [0m[38;5;245m(312ms)[0m
+requires a field: setting fixedOn without commits fails, and passes with commits set in the same commit ... [0m[32mok[0m [0m[38;5;245m(269ms)[0m
+requires a note: a change to a feature without a note on its page fails, and passes with one ... [0m[32mok[0m [0m[38;5;245m(284ms)[0m
+requires an item of a type: a change under a path with no tests item changed fails, and passes with one ... [0m[32mok[0m [0m[38;5;245m(212ms)[0m
+nothing staged, nothing found; a field already set before the commit does not trigger again ... [0m[32mok[0m [0m[38;5;245m(262ms)[0m
+check --staged runs only the staged-change checks ... [0m[32mok[0m [0m[38;5;245m(96ms)[0m
+a malformed companion rule fails loading, naming it ... [0m[32mok[0m [0m[38;5;245m(466µs)[0m
+hooks install: the hook passes over an unrelated commit without starting Naima, fails over a tracker change, and --no-verify skips it ... [0m[32mok[0m [0m[38;5;245m(477ms)[0m
+hooks install refuses a core.hooksPath that is not Naima's, unless --force; uninstall undoes only its own ... [0m[32mok[0m [0m[38;5;245m(177ms)[0m
+the hook watches the data directory and every rule's paths, and a hook written for other rules is reported ... [0m[32mok[0m [0m[38;5;245m(158ms)[0m
+[0m[38;5;245mrunning 4 tests from ./test/plugins/loop/loop.test.ts[0m
+naima loop refuses to start without a target, or on one it does not know ... [0m[32mok[0m [0m[38;5;245m(15ms)[0m
+a work list stops when every line is done or carries a written deferral ... [0m[32mok[0m [0m[38;5;245m(13ms)[0m
+an epic stops when every item is closed or needs only the owner, who gets them in order with why ... [0m[32mok[0m [0m[38;5;245m(47ms)[0m
+a gate stops when it holds only the owner's work ... [0m[32mok[0m [0m[38;5;245m(23ms)[0m
+[0m[38;5;245mrunning 8 tests from ./test/plugins/metrics/code.test.ts[0m
+the TypeScript estimator finds functions, arrows and methods, and counts each one's decisions ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+comments and blank lines are not code; strings that look like comments are ... [0m[32mok[0m [0m[38;5;245m(69µs)[0m
+duplication, statistics, manifests and path selection ... [0m[32mok[0m [0m[38;5;245m(506µs)[0m
+a preset declares a metric with its measure, unit and direction; a malformed one is refused ... [0m[32mok[0m [0m[38;5;245m(478µs)[0m
+code metrics are measured in process, recorded with the commit's date, and read back as history in text, JSON and CSV ... [0m[32mok[0m [0m[38;5;245m(494ms)[0m
+backfill measures past commits without touching the working tree, and skips what is already recorded ... [0m[32mok[0m [0m[38;5;245m(498ms)[0m
+plot draws an SVG panel per metric with its bound, and an HTML report beside it ... [0m[32mok[0m [0m[38;5;245m(289ms)[0m
+the metrics stand beside the work: in summary, at the foot of the board and the queue, and the gate says which number fails ... [0m[32mok[0m [0m[38;5;245m(773ms)[0m
+[0m[38;5;245mrunning 7 tests from ./test/plugins/metrics/metrics.test.ts[0m
+each kind of expectation holds, fails, and a ratchet fails on a gain the bound has not followed ... [0m[32mok[0m [0m[38;5;245m(653µs)[0m
+a malformed metric is refused when the project loads, naming it ... [0m[32mok[0m [0m[38;5;245m(596µs)[0m
+every first-party kind reads its number from a real run ... [0m[32mok[0m [0m[38;5;245m(132ms)[0m
+run --record writes evidence per commit, every number printed with its baseline, and trend draws the line ... [0m[32mok[0m [0m[38;5;245m(255ms)[0m
+a bound is loosened only with an item that says why; tightening needs none ... [0m[32mok[0m [0m[38;5;245m(44ms)[0m
+a metric's because must name an item, and its kind must exist ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+the launcher lets the program start the metrics' programs, and only when metrics are declared ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+[0m[38;5;245mrunning 1 test from ./test/plugins/pack-analyses/pack-analyses.test.ts[0m
+an analysis is confirmed only by a passing test, refuted by a failing one, and the check says which ... [0m[32mok[0m [0m[38;5;245m(31ms)[0m
+[0m[38;5;245mrunning 5 tests from ./test/plugins/planning/planning.test.ts[0m
+a requirement is met only by a passing proof; the check and the requirements view say where each stands ... [0m[32mok[0m [0m[38;5;245m(44ms)[0m
+a spec is versioned name-vN: a revision copies the page, supersedes the old, and one version per name is current ... [0m[32mok[0m [0m[38;5;245m(36ms)[0m
+a decision is dated and settled on creation, found by a search before asking, and a human item it settles is noted ... [0m[32mok[0m [0m[38;5;245m(35ms)[0m
+a release is marked released only once every stage is recorded, or skipped and said by whom ... [0m[32mok[0m [0m[38;5;245m(75ms)[0m
+a session records a test sitting: dated, append-only, and groups by run ... [0m[32mok[0m [0m[38;5;245m(22ms)[0m
+[0m[38;5;245mrunning 6 tests from ./test/plugins/privacy/privacy.test.ts[0m
+findSecrets catches each of six secret shapes, and a private-key header with no body after it is not one ... [0m[32mok[0m [0m[38;5;245m(838µs)[0m
+the secrets check reports a secret in a project file and in an attachment; an exception needs a reason and an item, and one matching nothing is a note ... [0m[32mok[0m [0m[38;5;245m(114ms)[0m
+the exception list only shrinks: an exception the trunk's configuration does not hold is refused ... [0m[32mok[0m [0m[38;5;245m(228ms)[0m
+naima attach copies a file with a consent record; it refuses without --consent or --own, and refuses a file holding a secret ... [0m[32mok[0m [0m[38;5;245m(35ms)[0m
+the attachment-consent check: an attachment with no record is flagged, so is a record with no file or an owner's file with no yes ... [0m[32mok[0m [0m[38;5;245m(34ms)[0m
+an attachment the trunk already holds is not flagged, even moved to another item: the check holds what a branch adds ... [0m[32mok[0m [0m[38;5;245m(310ms)[0m
+[0m[38;5;245mrunning 4 tests from ./test/plugins/roles/roles.test.ts[0m
+every default role says what it owns and what it refuses, and the roles named in the purpose are all there ... [0m[32mok[0m [0m[38;5;245m(559µs)[0m
+naima queue --role lists one role's open items, most urgent first, by role, kind or type, and on a gate when one is named ... [0m[32mok[0m [0m[38;5;245m(71ms)[0m
+the kinds the roles take are the vocabulary of kind: a kind no role takes is a note, never refused ... [0m[32mok[0m [0m[38;5;245m(24ms)[0m
+without the roles plugin, queue --role says so instead of listing nothing ... [0m[32mok[0m [0m[38;5;245m(935µs)[0m
+[0m[38;5;245mrunning 3 tests from ./test/plugins/rule-templates/rule-templates.test.ts[0m
+ships four to six templates, none present as a project rule until added ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+rule-templates add writes an ordinary rules item, audience agents, for the project to enable or edit ... [0m[32mok[0m [0m[38;5;245m(14ms)[0m
+an unknown template id is refused ... [0m[32mok[0m [0m[38;5;245m(898µs)[0m
+[0m[38;5;245mrunning 2 tests from ./test/plugins/rules/rules.test.ts[0m
+naima rules lists the active rules, must before should, filtered by audience; a retired one is not shown ... [0m[32mok[0m [0m[38;5;245m(48ms)[0m
+the rules check: every active rule has its text, a valid audience, and an enforcedBy that names a check ... [0m[32mok[0m [0m[38;5;245m(66ms)[0m
+[0m[38;5;245mrunning 6 tests from ./test/plugins/trackers/commits.test.ts[0m
+close refuses a resolved item with no commit reachable from the trunk ... [0m[32mok[0m [0m[38;5;245m(239ms)[0m
+close succeeds once a real commit from the trunk is named ... [0m[32mok[0m [0m[38;5;245m(232ms)[0m
+close --force closes without a commit ... [0m[32mok[0m [0m[38;5;245m(187ms)[0m
+a check reports a commits hash git does not have ... [0m[32mok[0m [0m[38;5;245m(142ms)[0m
+a closed item from before the cutoff is not checked for a commit; one after it is ... [0m[32mok[0m [0m[38;5;245m(201ms)[0m
+commits=["legacy"] grandfathers an item closed the same day the rule shipped, without a guessed hash ... [0m[32mok[0m [0m[38;5;245m(297ms)[0m
+[0m[38;5;245mrunning 7 tests from ./test/plugins/trackers/trackers.test.ts[0m
+fixed, resolved, closed are three states, and closing needs the proof ... [0m[32mok[0m [0m[38;5;245m(278ms)[0m
+an archived item without proof fails the check; archives cannot be opened ... [0m[32mok[0m [0m[38;5;245m(14ms)[0m
+bugs counts unfixed apart from fixed-but-unproven; partial must say what is left ... [0m[32mok[0m [0m[38;5;245m(23ms)[0m
+an item handed to a person says why, or check fails ... [0m[32mok[0m [0m[38;5;245m(11ms)[0m
+a test names its evidence from the ranking; a passed regression test with no red run, or on inspection alone, is noted ... [0m[32mok[0m [0m[38;5;245m(42ms)[0m
+stale pages: an unticked clause naming a passed test, and an agent's test excusing itself, are notes ... [0m[32mok[0m [0m[38;5;245m(68ms)[0m
+the excuse phrases are the project's to set, and the stale-page notes can be weighed or switched off ... [0m[32mok[0m [0m[38;5;245m(34ms)[0m
+[0m[38;5;245mrunning 8 tests from ./test/plugins/triage/deferral.test.ts[0m
+a parked item is deferred, whatever its status ... [0m[32mok[0m [0m[38;5;245m(26ms)[0m
+view parked lists wontfix, dropped and parked items, with reopensWhen when set ... [0m[32mok[0m [0m[38;5;245m(43ms)[0m
+view parked refuses an argument ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+bugs/deferral-reason-becomes-check-parked-wontfix-must: a parked, wontfix or dropped item left as its unfilled template is a problem ... [0m[32mok[0m [0m[38;5;245m(47ms)[0m
+an open item, even a half-finished one, is not checked as a deferral ... [0m[32mok[0m [0m[38;5;245m(33ms)[0m
+naima guide prints the authoritative documents, current and retired ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+a check notes a retired document still named from a current one ... [0m[32mok[0m [0m[38;5;245m(22ms)[0m
+options.documents is validated ... [0m[32mok[0m [0m[38;5;245m(183µs)[0m
+[0m[38;5;245mrunning 14 tests from ./test/plugins/triage/triage.test.ts[0m
+set stamps a human decision; derive never touches effort or a decided item ... [0m[32mok[0m [0m[38;5;245m(47ms)[0m
+urgency: impact before priority, effort breaks ties, done sinks ... [0m[32mok[0m [0m[38;5;245m(43ms)[0m
+an unset impact or priority counts as the middle of its scale, an unset effort as the largest size ... [0m[32mok[0m [0m[38;5;245m(64ms)[0m
+confidence is read off the page's own words ... [0m[32mok[0m [0m[38;5;245m(136µs)[0m
+negated evidence is not evidence: a page that could not reproduce it is unclear, not measured ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+view next takes a positive whole count ... [0m[32mok[0m [0m[38;5;245m(31ms)[0m
+bugs/naima-triage-coverage-table-runs-effort-confidence: the coverage table's header keeps its columns apart ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+each triage subcommand answers a misuse with its own usage ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+a triage field changed by any command stamps triagedOn and stops being derived; derive stamps nothing ... [0m[32mok[0m [0m[38;5;245m(13ms)[0m
+view next carries an age column, marking an unclaimed now item ... [0m[32mok[0m [0m[38;5;245m(193ms)[0m
+view next does not mark an item a branch's claim names ... [0m[32mok[0m [0m[38;5;245m(317ms)[0m
+unclaimed-now-item-aging notes a now item open past the configured age with no claim on it ... [0m[32mok[0m [0m[38;5;245m(860ms)[0m
+triage: options.maxNowAgeDays must be a positive whole number ... [0m[32mok[0m [0m[38;5;245m(176µs)[0m
+a change that touches no triage field stamps nothing ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+[0m[38;5;245mrunning 9 tests from ./test/plugins/ui/ui.test.ts[0m
+the server answers a view and its data with the token, a cookie after it, and refuses every request without it ... [0m[32mok[0m [0m[38;5;245m(15ms)[0m
+the server binds the loopback interface only: another interface of this machine does not answer ... [0m[32mok[0m [0m[38;5;245m(4ms)[0m
+a view a plugin contributes is a tab, without the ui plugin knowing that plugin; the metrics view is first among the first-party ones ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+the metrics view picks metrics and a range of commits, from the records on disk at each request ... [0m[32mok[0m [0m[38;5;245m(652ms)[0m
+the window is opened when it can be, and closing it stops the server ... [0m[32mok[0m [0m[38;5;245m(16ms)[0m
+when the window cannot open, or fails to, the browser opens instead, said in one line ... [0m[32mok[0m [0m[38;5;245m(29ms)[0m
+--browser opens the browser and never the window; --no-open opens nothing and prints the address ... [0m[32mok[0m [0m[38;5;245m(29ms)[0m
+the window needs Deno on a system it runs on; its process may only load the webview's library, fetch it from its release, and read Deno's directory ... [0m[32mok[0m [0m[38;5;245m(165µs)[0m
+the launcher grants ui, and no other command, the loopback network, the Deno that opens the window and the browser's opener ... [0m[32mok[0m [0m[38;5;245m(216µs)[0m
+[0m[38;5;245mrunning 10 tests from ./test/plugins/verifier-mcrl2/mcrl2.test.ts[0m
+mCRL2: a formula that holds runs mcrl22lps, lps2pbes with evidence, pbessolve, and holds ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+mCRL2: a violated formula returns pbessolve's evidence, printed by lps2lts, as the counterexample ... [0m[32mok[0m [0m[38;5;245m(657µs)[0m
+mCRL2: a missing tool is an error that says which and how to get it, never a verdict ... [0m[32mok[0m [0m[38;5;245m(554µs)[0m
+mCRL2: a tool that fails is an error with its output; a time limit hit is unknown; pbessolve's other answers are unknown ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+mCRL2: a property naming an .mcf file reads it, from the project root, and declares it as an input ... [0m[32mok[0m [0m[38;5;245m(951µs)[0m
+mCRL2: the tools come from PATH, or from the bin option, and are declared as the programs it runs ... [0m[32mok[0m [0m[38;5;245m(174µs)[0m
+mCRL2 through naima verify: the run records the tool version; a missing tool records an error run, not a crash ... [0m[32mok[0m [0m[38;5;245m(30ms)[0m
+mCRL2 live: the real tools decide the fixture model ... [0m[33mignored[0m [0m[38;5;245m(0ms)[0m
+the model-checker plugins are opt-in: loaded, and their tools granted by the launcher, only where naima.json names them ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+switched on, both model-checker plugins are documented as every loaded plugin must be ... [0m[32mok[0m [0m[38;5;245m(182ms)[0m
+[0m[38;5;245mrunning 8 tests from ./test/plugins/verifier-voxlogica/voxlogica.test.ts[0m
+VoxLogicA: the property is a boolean the session prints; true holds, false is violated with every printed value ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+VoxLogicA: a name the session does not print, or prints as a number, is an error naming what it does print ... [0m[32mok[0m [0m[38;5;245m(130µs)[0m
+VoxLogicA: a session the tool rejects is an error with its message; output that is not its JSON is an error ... [0m[32mok[0m [0m[38;5;245m(336µs)[0m
+VoxLogicA: a missing tool is an error that says how to point at it; a time limit hit is unknown ... [0m[32mok[0m [0m[38;5;245m(308µs)[0m
+VoxLogicA: the inputs are the session, the images it loads and the sessions it imports, the tool's own library left out ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+VoxLogicA: the version is the option, or read beside the program, and says so when it cannot be told ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+VoxLogicA through naima verify: the property holds, its image is an input, and a changed image makes it stale ... [0m[32mok[0m [0m[38;5;245m(26ms)[0m
+VoxLogicA live: the real tool decides the fixture session ... [0m[32mok[0m [0m[38;5;245m(1s)[0m
+[0m[38;5;245mrunning 11 tests from ./test/plugins/verifier/verifier.test.ts[0m
+a run is attached as evidence, with the counterexample and the model's hash ... [0m[32mok[0m [0m[38;5;245m(18ms)[0m
+adapters come from any plugin; a missing verifier or model is a problem ... [0m[32mok[0m [0m[38;5;245m(26ms)[0m
+the example adapter reads lines as written: no phantom last line, no trailing \r ... [0m[32mok[0m [0m[38;5;245m(765µs)[0m
+an adapter outside the contract gives a property in error with a readable output, never a status-less one ... [0m[32mok[0m [0m[38;5;245m(48ms)[0m
+a property holds only for what was run: a changed property, verifier, model path or options is reported ... [0m[32mok[0m [0m[38;5;245m(14ms)[0m
+a property's inputs are checked: its options are a declared field, its paths stay inside, its run record is read with care ... [0m[32mok[0m [0m[38;5;245m(49ms)[0m
+changing what a property was verified on sets it back to open, by any command ... [0m[32mok[0m [0m[38;5;245m(16ms)[0m
+holds set by hand is refused; naima verify still writes it ... [0m[32mok[0m [0m[38;5;245m(22ms)[0m
+a hand edit of meta.json to holds, with no run, fails naima check as naima set would have refused it ... [0m[32mok[0m [0m[38;5;245m(12ms)[0m
+the run keeps one digest over every input and the tool version: a change to an included file reopens the property ... [0m[32mok[0m [0m[38;5;245m(15ms)[0m
+a property run by another version of its tool is reported stale ... [0m[32mok[0m [0m[38;5;245m(13ms)[0m
+[0m[38;5;245mrunning 4 tests from ./test/runtime-folder.test.ts[0m
+naima/ holds only what runs Naima: no test, no fixture, no CI, no agent rules, none of Naima's own items ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+every import in naima/ resolves inside naima/, or is a node: built-in ... [0m[32mok[0m [0m[38;5;245m(10ms)[0m
+every relative link in naima/'s markdown resolves inside naima/ ... [0m[32mok[0m [0m[38;5;245m(7ms)[0m
+a project's program holds exactly naima/, and init, check, new, guide, a new worktree and update all work on it ... [0m[32mok[0m [0m[38;5;245m(6s)[0m
+[0m[38;5;245mrunning 6 tests from ./test/site.test.ts[0m
+the site serves what the page points at: the installers, llms.txt, the favicon ... [0m[32mok[0m [0m[38;5;245m(905µs)[0m
+the agent prompt is one line naming the repository, whose README, llms.txt and the page all give the steps ... [0m[32mok[0m [0m[38;5;245m(687µs)[0m
+the logo is NAIMA on one line, named for assistive technology, its AI lit; the palette is defined once ... [0m[32mok[0m [0m[38;5;245m(461µs)[0m
+the page links the documentation and the repository, with room for a star count filled at build time ... [0m[32mok[0m [0m[38;5;245m(52µs)[0m
+the build writes the star count into the page when it has one, and leaves no empty count without ... [0m[32mok[0m [0m[38;5;245m(5ms)[0m
+install.sh installs Naima in a git repository, says so when run again, and refuses outside one ... [0m[32mok[0m [0m[38;5;245m(5s)[0m
+[0m[38;5;245mrunning 1 test from ./test/skill.test.ts[0m
+skills/naima/SKILL.md loads, and its links resolve ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+[0m[38;5;245mrunning 3 tests from ./test/uses.test.ts[0m
+the first-party plugins declare what they read of each other, and it resolves ... [0m[32mok[0m [0m[38;5;245m(3ms)[0m
+switching off the plugin whose vocabulary another uses fails at load, naming what is missing and who uses it ... [0m[32mok[0m [0m[38;5;245m(1ms)[0m
+a third-party plugin's uses are held the same way: a missing name, an ambiguous one, a point nobody declares ... [0m[32mok[0m [0m[38;5;245m(2ms)[0m
+
+[0m[32mok[0m | 360 passed | 0 failed | 1 ignored [0m[38;5;245m(1m53s)[0m
+
+331 items, 48 checks
+
+notes (not failures):
+  · kind "task" is not on its list (decision, coordination, review, design, research, code, refactor, test, evidence, report, triage, model, verification, release, writing, docs, announcement, community, business): 1 item — todos/project-site-horizontal-logo-one-palette-aa. Define it under extends in naima.json, in the commit that first uses it, or set those items to a value on the list
+  · kind "feature" is not on its list (decision, coordination, review, design, research, code, refactor, test, evidence, report, triage, model, verification, release, writing, docs, announcement, community, business): 1 item — features/runtime-one-folder. Define it under extends in naima.json, in the commit that first uses it, or set those items to a value on the list
+  · kind "defect" is not on its list (decision, coordination, review, design, research, code, refactor, test, evidence, report, triage, model, verification, release, writing, docs, announcement, community, business): 1 item — closed/bun-s-5-second-default-test-timeout. Define it under extends in naima.json, in the commit that first uses it, or set those items to a value on the list
+  · bugs/bun-test-ignores-bunfig-toml-s-30 is resolved — naima close bun-test-ignores-bunfig-toml-s-30
+  · bugs/doc-names-milestones-type-that-does-not is resolved — naima close doc-names-milestones-type-that-does-not
+  · bugs/worktree-policy-check-fails-branch-s-own is resolved — naima close worktree-policy-check-fails-branch-s-own
+  · todos/docs-programmers-researchers-building-naima is resolved — naima close docs-programmers-researchers-building-naima
+  · todos/document-14-features-proven-without-documentation is resolved — naima close document-14-features-proven-without-documentation
+  · todos/document-lifecycle-fix-end-end is resolved — naima close document-lifecycle-fix-end-end
+  · todos/locked-resources-owner-as-holder-stated-coordinator is resolved — naima close locked-resources-owner-as-holder-stated-coordinator
+  · todos/public-framing-vision-silent-company-not-tracker is resolved — naima close public-framing-vision-silent-company-not-tracker
+  · todos/reconcile-docs-state-what-rule-carries-anonymised is resolved — naima close reconcile-docs-state-what-rule-carries-anonymised
+  · todos/review-reporting-triage-sequence-against-industry-practice is resolved — naima close review-reporting-triage-sequence-against-industry-practice
+  · todos/seed-naima-s-own-tracker-rule-items is resolved — naima close seed-naima-s-own-tracker-rule-items
+  · todos/surface-how-long-now-priority-item-has is resolved — naima close surface-how-long-now-priority-item-has
+  · features/adopt-existing-boards-without-loss-naima-adopt is resolved — naima close adopt-existing-boards-without-loss-naima-adopt
+  · features/copy-install-program-plain-copy-naima-from is resolved — naima close copy-install-program-plain-copy-naima-from
+  · features/cross-branch-views-read-every-local-worktree is resolved — naima close cross-branch-views-read-every-local-worktree
+  · features/declarative-extension-points-instead-12-hard-coded is resolved — naima close declarative-extension-points-instead-12-hard-coded
+  · features/extending-another-plugin-s-types-fields-traits is resolved — naima close extending-another-plugin-s-types-fields-traits
+  · features/external-plugins-pinned-sources-contract-version-frozen is resolved — naima close external-plugins-pinned-sources-contract-version-frozen
+  · features/fix-tied-code-commits-field-naima-close is resolved — naima close fix-tied-code-commits-field-naima-close
+  · features/host-leakage-installed-program-directory-holds-only is resolved — naima close host-leakage-installed-program-directory-holds-only
+  · features/lock-trust-policy-refuse-changed-source-verifiers is resolved — naima close lock-trust-policy-refuse-changed-source-verifiers
+  · features/naima-ui-metrics-view-native-window-dashboard is resolved — naima close naima-ui-metrics-view-native-window-dashboard
+  · features/names-qualified-plugin-name-ids-short-aliases is resolved — naima close names-qualified-plugin-name-ids-short-aliases
+  · features/per-plugin-data-migrations is resolved — naima close per-plugin-data-migrations
+  · features/plugin-configuration-plugins-table-options-enabled-replacedb is resolved — naima close plugin-configuration-plugins-table-options-enabled-replacedb
+  · features/project-rules-as-tracker-data-rules-type is resolved — naima close project-rules-as-tracker-data-rules-type
+  · features/proof-currency-registry-level-predicate-plus-refutes is resolved — naima close proof-currency-registry-level-predicate-plus-refutes
+  · features/slug-uniqueness-check-unmerged-local-refs-at is resolved — naima close slug-uniqueness-check-unmerged-local-refs-at
+  · features/triage-fallbacks-middle-impact-priority-worst-effort is resolved — naima close triage-fallbacks-middle-impact-priority-worst-effort
+  · features/views-return-data-text-checks-gates-views is resolved — naima close views-return-data-text-checks-gates-views
+  · features/vocabulary-sharing-between-plugins-declared-uses-roles is resolved — naima close vocabulary-sharing-between-plugins-declared-uses-roles
+  · features/write-time-hooks-beforewrite-can-veto-afterwrite is resolved — naima close write-time-hooks-beforewrite-can-veto-afterwrite
+  · features/reference-install-skills-hosted-github-planned is fixed, and nothing verifies it
+  · tests/adapter-outside-contract-gives-property-error-readable passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/branch-s-own-claim-read-from-branch passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/bun-s-dist-init-install-sh-tests passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/change-file-property-s-model-includes-tool passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/count-that-not-positive-whole-number-usage passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/date-field-holds-only-real-calendar-date passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/directory-check-cannot-read-problem-misspelled-type passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/empty-item-reference-usage-error-never-only passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/epic-s-status-set-by-hand-against passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/example-adapter-reads-lines-as-written-no passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/feature-s-docs-name-markdown-file-bare passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/gated-proof-gated-says-what-decides-ungated passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/init-locks-only-pushed-clean-commit-strips passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/item-closed-by-hand-while-this-branch passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/launcher-refuses-comma-path-hands-only-allow passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/link-stored-one-direction-only-inverse-already passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/lock-source-git-would-read-as-option passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/marker-naming-item-since-archived-found-through passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/meta-json-whose-id-title-status-not passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/negated-evidence-not-evidence-page-that-could passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/new-never-reuses-directory-slug-taken-another passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/new-validates-every-set-before-writes-anything passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/non-latin-titles-keep-their-letters-distinct passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/paths-meet-git-posix-form-whatever-platform passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/piping-naima-s-output-into-reader-that passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/plain-bun-test-test-passes-under-load passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/plugin-cannot-take-name-entry-point-answers passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/project-s-files-regular-files-never-submodule passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/property-holds-only-what-was-run-changed passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/property-s-inputs-checked-options-declared-field passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/property-set-holds-by-hand-meta-json passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/prune-lists-stale-claim-another-ref-carries passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/reference-program-s-project-s-own-gates passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/released-claim-stays-released-trunk-s-copy passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/setext-heading-underlined-anchor-links-resolve-src passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/status-only-one-type-declares-itself-never passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/tracker-folder-md-no-longer-names-nonexistent passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/triage-coverage-table-s-header-keeps-columns passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/trunk-origin-s-head-main-master-without passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/worktree-policy-judges-only-own-worktree-sibling passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/write-replaces-file-whole-new-content-lands passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/write-seen-by-next-read-same-run passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · worktree /Users/vincenzo/data/local/repos/naima-worktrees/evidence-close-5 (claude/evidence-close-5) carries no claim: claim its items there before any work (naima claim)
+  · worktree /Users/vincenzo/data/local/repos/naima-worktrees/sweep-2 (claude/sweep-2) carries no claim: claim its items there before any work (naima claim)
+
+all invariants hold
+naima/docs/reference/reference.md is current, and everything loaded is documented
+331 items, 45 checks
+
+notes (not failures):
+  · bugs/bun-test-ignores-bunfig-toml-s-30 is resolved — naima close bun-test-ignores-bunfig-toml-s-30
+  · bugs/doc-names-milestones-type-that-does-not is resolved — naima close doc-names-milestones-type-that-does-not
+  · bugs/worktree-policy-check-fails-branch-s-own is resolved — naima close worktree-policy-check-fails-branch-s-own
+  · todos/docs-programmers-researchers-building-naima is resolved — naima close docs-programmers-researchers-building-naima
+  · todos/document-14-features-proven-without-documentation is resolved — naima close document-14-features-proven-without-documentation
+  · todos/document-lifecycle-fix-end-end is resolved — naima close document-lifecycle-fix-end-end
+  · todos/locked-resources-owner-as-holder-stated-coordinator is resolved — naima close locked-resources-owner-as-holder-stated-coordinator
+  · todos/public-framing-vision-silent-company-not-tracker is resolved — naima close public-framing-vision-silent-company-not-tracker
+  · todos/reconcile-docs-state-what-rule-carries-anonymised is resolved — naima close reconcile-docs-state-what-rule-carries-anonymised
+  · todos/review-reporting-triage-sequence-against-industry-practice is resolved — naima close review-reporting-triage-sequence-against-industry-practice
+  · todos/seed-naima-s-own-tracker-rule-items is resolved — naima close seed-naima-s-own-tracker-rule-items
+  · todos/surface-how-long-now-priority-item-has is resolved — naima close surface-how-long-now-priority-item-has
+  · features/adopt-existing-boards-without-loss-naima-adopt is resolved — naima close adopt-existing-boards-without-loss-naima-adopt
+  · features/copy-install-program-plain-copy-naima-from is resolved — naima close copy-install-program-plain-copy-naima-from
+  · features/cross-branch-views-read-every-local-worktree is resolved — naima close cross-branch-views-read-every-local-worktree
+  · features/declarative-extension-points-instead-12-hard-coded is resolved — naima close declarative-extension-points-instead-12-hard-coded
+  · features/extending-another-plugin-s-types-fields-traits is resolved — naima close extending-another-plugin-s-types-fields-traits
+  · features/external-plugins-pinned-sources-contract-version-frozen is resolved — naima close external-plugins-pinned-sources-contract-version-frozen
+  · features/fix-tied-code-commits-field-naima-close is resolved — naima close fix-tied-code-commits-field-naima-close
+  · features/host-leakage-installed-program-directory-holds-only is resolved — naima close host-leakage-installed-program-directory-holds-only
+  · features/lock-trust-policy-refuse-changed-source-verifiers is resolved — naima close lock-trust-policy-refuse-changed-source-verifiers
+  · features/naima-ui-metrics-view-native-window-dashboard is resolved — naima close naima-ui-metrics-view-native-window-dashboard
+  · features/names-qualified-plugin-name-ids-short-aliases is resolved — naima close names-qualified-plugin-name-ids-short-aliases
+  · features/per-plugin-data-migrations is resolved — naima close per-plugin-data-migrations
+  · features/plugin-configuration-plugins-table-options-enabled-replacedb is resolved — naima close plugin-configuration-plugins-table-options-enabled-replacedb
+  · features/project-rules-as-tracker-data-rules-type is resolved — naima close project-rules-as-tracker-data-rules-type
+  · features/proof-currency-registry-level-predicate-plus-refutes is resolved — naima close proof-currency-registry-level-predicate-plus-refutes
+  · features/slug-uniqueness-check-unmerged-local-refs-at is resolved — naima close slug-uniqueness-check-unmerged-local-refs-at
+  · features/triage-fallbacks-middle-impact-priority-worst-effort is resolved — naima close triage-fallbacks-middle-impact-priority-worst-effort
+  · features/views-return-data-text-checks-gates-views is resolved — naima close views-return-data-text-checks-gates-views
+  · features/vocabulary-sharing-between-plugins-declared-uses-roles is resolved — naima close vocabulary-sharing-between-plugins-declared-uses-roles
+  · features/write-time-hooks-beforewrite-can-veto-afterwrite is resolved — naima close write-time-hooks-beforewrite-can-veto-afterwrite
+  · features/reference-install-skills-hosted-github-planned is fixed, and nothing verifies it
+  · tests/adapter-outside-contract-gives-property-error-readable passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/branch-s-own-claim-read-from-branch passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/bun-s-dist-init-install-sh-tests passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/change-file-property-s-model-includes-tool passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/count-that-not-positive-whole-number-usage passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/date-field-holds-only-real-calendar-date passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/directory-check-cannot-read-problem-misspelled-type passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/empty-item-reference-usage-error-never-only passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/epic-s-status-set-by-hand-against passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/example-adapter-reads-lines-as-written-no passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/feature-s-docs-name-markdown-file-bare passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/gated-proof-gated-says-what-decides-ungated passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/init-locks-only-pushed-clean-commit-strips passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/item-closed-by-hand-while-this-branch passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/launcher-refuses-comma-path-hands-only-allow passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/link-stored-one-direction-only-inverse-already passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/lock-source-git-would-read-as-option passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/marker-naming-item-since-archived-found-through passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/meta-json-whose-id-title-status-not passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/negated-evidence-not-evidence-page-that-could passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/new-never-reuses-directory-slug-taken-another passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/new-validates-every-set-before-writes-anything passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/non-latin-titles-keep-their-letters-distinct passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/paths-meet-git-posix-form-whatever-platform passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/piping-naima-s-output-into-reader-that passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/plain-bun-test-test-passes-under-load passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/plugin-cannot-take-name-entry-point-answers passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/project-s-files-regular-files-never-submodule passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/property-holds-only-what-was-run-changed passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/property-s-inputs-checked-options-declared-field passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/property-set-holds-by-hand-meta-json passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/prune-lists-stale-claim-another-ref-carries passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/reference-program-s-project-s-own-gates passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/released-claim-stays-released-trunk-s-copy passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/setext-heading-underlined-anchor-links-resolve-src passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/status-only-one-type-declares-itself-never passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/tracker-folder-md-no-longer-names-nonexistent passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/triage-coverage-table-s-header-keeps-columns passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/trunk-origin-s-head-main-master-without passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/worktree-policy-judges-only-own-worktree-sibling passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/write-replaces-file-whole-new-content-lands passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · tests/write-seen-by-next-read-same-run passed as a regression test, and no red run is recorded — set redSeen once it is seen failing before the fix
+  · worktree /Users/vincenzo/data/local/repos/naima-worktrees/evidence-close-5 (claude/evidence-close-5) carries no claim: claim its items there before any work (naima claim)
+  · worktree /Users/vincenzo/data/local/repos/naima-worktrees/sweep-2 (claude/sweep-2) carries no claim: claim its items there before any work (naima claim)
+
+all invariants hold
