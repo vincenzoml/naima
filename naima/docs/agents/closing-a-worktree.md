@@ -63,6 +63,9 @@ property), and one whose verifying item `naima check` reports — a property
 that holds on a model, an included file or a tool version changed since its
 run
 ([closing](reporting-and-triage.md#8-closing)).
+A property run whose output begins `tool missing:` proves nothing: say in the
+report that the tool was not installed and the property is unverified, and
+do not install a model checker without the owner's go — it is a download.
 
 ## 2. Triage what is left open
 

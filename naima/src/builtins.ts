@@ -18,6 +18,8 @@ import trackers from "./plugins/trackers/index.ts"
 import triage from "./plugins/triage/index.ts"
 import ui from "./plugins/ui/index.ts"
 import verifier from "./plugins/verifier/index.ts"
+import verifierMcrl2 from "./plugins/verifier-mcrl2/index.ts"
+import verifierVoxlogica from "./plugins/verifier-voxlogica/index.ts"
 
 /** Every first-party plugin: its name, and the factory that makes it from its options. */
 export const firstParty: readonly FirstParty[] = [
@@ -30,6 +32,8 @@ export const firstParty: readonly FirstParty[] = [
   { name: "loop", factory: loop },
   { name: "beta-markers", factory: betaMarkers },
   { name: "verifier", factory: verifier },
+  { name: "verifier-mcrl2", factory: verifierMcrl2, optIn: true },
+  { name: "verifier-voxlogica", factory: verifierVoxlogica, optIn: true },
   { name: "ui", factory: ui },
   { name: "metrics", factory: metrics },
   { name: "rules", factory: rules },
@@ -37,6 +41,6 @@ export const firstParty: readonly FirstParty[] = [
   { name: "docs", factory: docs },
 ]
 
-/** Every first-party plugin's manifest, each made with its options in `options` (by plugin name) or none: for tests, which load them without a naima.json. */
+/** Every first-party plugin's manifest, each made with its options in `options` (by plugin name) or none, an opt-in one only when `options` names it: for tests, which load them without a naima.json. */
 export const firstPartyPlugins = (options: Record<string, PluginOptions> = {}): Plugin[] =>
-  firstParty.map((p) => p.factory(options[p.name] ?? {}, apiFor(p.name, { rename: {} })))
+  firstParty.filter((p) => !p.optIn || p.name in options).map((p) => p.factory(options[p.name] ?? {}, apiFor(p.name, { rename: {} })))

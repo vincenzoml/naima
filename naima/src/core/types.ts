@@ -339,6 +339,8 @@ export type PluginFactory = (options: PluginOptions, api: PluginApi) => Plugin
 export interface FirstParty {
   name: string
   factory: PluginFactory
+  /** Loaded only when the project's plugins table has an entry for it: a plugin that starts a program is not granted one by default. */
+  optIn?: boolean
 }
 
 /** How much a check's finding weighs in this project: off, a note, or a problem that fails `naima check`. */

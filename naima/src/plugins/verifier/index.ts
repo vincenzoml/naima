@@ -207,11 +207,18 @@ export async function verifyItem(ctx: Context, item: Item): Promise<Verdict> {
     if (!existsSync(abs)) throw new Error(`${label(item)}: input ${rel} does not exist`)
     return { path: rel, sha256: sha256(abs) }
   })
-  const toolVersion = verifier.version ? await verifier.version(ctx) : undefined
+  // A tool that cannot say its version (it is not installed, say) cannot run either: the run is an error that says why.
+  let toolVersion: string | undefined
+  let unversioned: string | undefined
+  try {
+    toolVersion = verifier.version ? await verifier.version(ctx) : undefined
+  } catch (e) {
+    unversioned = e instanceof Error ? e.message : String(e)
+  }
   const hash = sha256(path)
   let result: VerifyResult
   try {
-    result = inContract(id, await verifier.verify(request, ctx))
+    result = unversioned !== undefined ? { verdict: "error", output: unversioned } : inContract(id, await verifier.verify(request, ctx))
   } catch (e) {
     result = { verdict: "error", output: e instanceof Error ? e.message : String(e) }
   }
@@ -414,7 +421,7 @@ export default function verifier(): Plugin {
       "A `properties` item names a `verifier` (an adapter any plugin can contribute), a `model` file (a path from the project root) and a `property` in the verifier's own language. " +
       "`naima verify` runs the adapter and attaches the run — verdict, output, the model's sha256, and one digest over every file the run read (the model and what the adapter's `inputs` says it includes) and the tool's version (the adapter's `version`) — and the counterexample as its own file, then sets the status from the verdict. " +
       "A property that holds is evidence exactly as a passed test is: it can `verify` a bug and close it. A verdict is only as good as what it was reached on, so `naima check` fails when a property claims to hold and its property, verifier, model path, `verifierOptions`, model contents, any file it includes, the set of files it reads, or the tool's version have changed since the run. " +
-      "The shipped adapter, `example-regex`, is a stand-in that shows the shape of a real one.",
+      "The shipped adapter, `example-regex`, is a stand-in that shows the shape of a real one; the opt-in `verifier-mcrl2` and `verifier-voxlogica` plugins contribute the real ones.",
     types: [
       {
         id: TYPE,

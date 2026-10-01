@@ -1,0 +1,15 @@
+{
+  "about": "What the mCRL2 tools print, transcribed from the toolset's documented output (release 202307): not recorded on this machine, where mCRL2 is not installed. The live test runs the real tools where they are on PATH.",
+  "version": { "exit": 0, "stdout": "mcrl22lps mCRL2 toolset 202307.1 (Release)\n", "stderr": "" },
+  "mcrl22lps": { "exit": 0, "stdout": "", "stderr": "" },
+  "mcrl22lpsSyntaxError": {
+    "exit": 1,
+    "stdout": "",
+    "stderr": "error: syntax error at line 2, column 15: unexpected 'On'\nerror: parsing failed\n"
+  },
+  "lps2pbes": { "exit": 0, "stdout": "", "stderr": "" },
+  "pbessolveTrue": { "exit": 0, "stdout": "true\n", "stderr": "" },
+  "pbessolveFalse": { "exit": 0, "stdout": "false\n", "stderr": "" },
+  "evidence": "des (0,2,3)\n(0,\"on\",1)\n(1,\"off\",2)\n",
+  "lps2lts": { "exit": 0, "stdout": "", "stderr": "" }
+}

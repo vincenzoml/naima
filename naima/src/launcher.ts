@@ -167,11 +167,19 @@ function otherWorktrees(root: string, data: string | null): string[] {
   return worktrees(root).filter((w) => !w.self).map((w) => join(w.path, inside))
 }
 
+/** The first-party plugins loaded only when the project's plugins table names them: each starts a program. Kept equal to builtins.ts's `optIn` by a test. */
+export const OPT_IN: readonly string[] = ["verifier-mcrl2", "verifier-voxlogica"]
+
+/** An entry of the plugins table that switches its plugin on: present, and not `enabled: false`. */
+const isOn = (e: unknown): boolean => !!e && typeof e === "object" && (e as { enabled?: unknown }).enabled !== false
+
 /**
  * May the loaded contributions start a program besides git? Only when the
  * project loads code the program does not ship — a third-party plugin, or a
  * replacement for a first-party one — or declares metrics, each naming the
- * program that measures it: no other first-party contribution starts one.
+ * program that measures it, or switches on a first-party plugin that is off
+ * until asked for (`OPT_IN`), each starting a model checker: no other
+ * first-party contribution starts one.
  * Read in every format: a list of plugins (format 1), or a table whose entries
  * name a source or a replacement, or give the metrics plugin metrics.
  */
@@ -183,6 +191,8 @@ export function mayRun(data: string | null): boolean {
     if (!plugins || typeof plugins !== "object") return false
     const metrics = (plugins as { metrics?: { options?: { metrics?: unknown } } }).metrics?.options?.metrics
     if (metrics && typeof metrics === "object" && Object.keys(metrics).length) return true
+    const entries = plugins as Record<string, unknown>
+    if (OPT_IN.some((name) => isOn(entries[name]))) return true
     return Object.values(plugins).some((e) => !!e && typeof e === "object" && ("source" in e || "replacedBy" in e))
   } catch {
     return false

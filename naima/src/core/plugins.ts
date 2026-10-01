@@ -146,7 +146,7 @@ function make(name: string, factory: PluginFactory, entry: PluginConfig | undefi
 /**
  * Every plugin `config` loads, in load order: the first-party ones in their
  * order — each as it is, switched off, or replaced by the module its
- * `replacedBy` names — then the third-party ones in the table's order.
+ * `replacedBy` names; one that is opt-in only when the table names it — then the third-party ones in the table's order.
  */
 export async function composePlugins(
   where: Where,
@@ -155,8 +155,9 @@ export async function composePlugins(
 ): Promise<Plugin[]> {
   const out: Plugin[] = []
   const known = new Set(firstParty.map((p) => p.name))
-  for (const { name, factory } of firstParty) {
+  for (const { name, factory, optIn } of firstParty) {
     const entry = config.plugins[name]
+    if (optIn && !entry) continue
     if (entry?.source !== undefined) {
       throw new Error(
         `${DATA_FILE}: plugins.${name} is first-party and already loaded — replacedBy runs other code under its name; source is for a third-party plugin`,

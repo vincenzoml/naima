@@ -1,0 +1,22 @@
+{
+  "layers": [],
+  "print": [
+    {
+      "name": "vol",
+      "vltype": "number",
+      "value": "9"
+    },
+    {
+      "name": "square_small",
+      "vltype": "bool",
+      "value": "False"
+    },
+    {
+      "name": "square_nonempty",
+      "vltype": "bool",
+      "value": "True"
+    }
+  ],
+  "log": "[       263ms] [info] Parsing input...\n[       357ms] [info] Preparing computation...\n[       378ms] [info] Importing file \"/opt/VoxLogicA/stdlib.imgql\"\n[       397ms] [info] Loading file /project/square.png\n[       532ms] [info] Starting computation...\n[       533ms] [info] Running 10 tasks\n[       619ms] [user] square_small=false\n[       619ms] [user] square_nonempty=true\n[       619ms] [user] vol=9.0\n[       622ms] [info] ... done.\n",
+  "error": ""
+}
