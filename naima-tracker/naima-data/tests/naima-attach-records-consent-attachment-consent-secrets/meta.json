@@ -1,0 +1,26 @@
+{
+  "id": "bbfb25b1-3a9f-4062-85ca-782469fd7a12",
+  "title": "naima attach records consent; attachment-consent and secrets checks catch what a branch adds (test/plugins/privacy/privacy.test.ts, on Deno, Node and Bun)",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "d500536b-8b51-4d73-bc8d-a6b40c113e9f"
+    },
+    {
+      "rel": "verifies",
+      "id": "426f67fc-f722-4f57-8329-ee16544fa596"
+    },
+    {
+      "rel": "verifies",
+      "id": "0d464e71-e558-428b-a74d-f569758f47e6"
+    }
+  ]
+}
