@@ -35,8 +35,10 @@ curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh     # macOS, Linux
 irm https://vincenzoml.github.io/naima/install.ps1 | iex          # Windows PowerShell
 ```
 
-The installer (`site/install.sh`, `site/install.ps1` on `main`) refuses
-outside a git repository and needs git. When Deno is missing it installs it
+The installer (`site/install.sh`, `site/install.ps1` on `main`) installs at
+the top of the git repository it is run in, wherever in it that is; outside
+one it stops, asking whether this is the root of the project and, if so, to
+have the agent create a repository there and install Naima. It needs git. When Deno is missing it installs it
 with Deno's official installer, saying so; with `NAIMA_NO_DENO_INSTALL` set it
 prints that command instead, and stops. Then it does the steps below, the
 commit aside: it clones `main`, shallow, into a temporary folder, runs that

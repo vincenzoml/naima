@@ -39,7 +39,7 @@ const AGENT_LINE =
   "This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them."
 
 test("the agent prompt is one line naming the repository, whose README, llms.txt and the page all give the steps", () => {
-  assert.equal(prompt, "Please install https://github.com/vincenzoml/naima in this repository.")
+  assert.equal(prompt, "Please install https://github.com/vincenzoml/naima in the root of this repository; create a repository at the root if missing.")
   assert.match(page, /<link rel="alternate" type="text\/plain" href="llms\.txt"/, "the page points an agent at llms.txt")
   const hidden = /<section class="sr" aria-label="For AI agents">([\s\S]*?)<\/section>/.exec(page)?.[1] ?? ""
   assert.ok(hidden.includes("https://github.com/vincenzoml/naima"), "the page's block for agents names the repository")
@@ -49,6 +49,11 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
     assert.match(text, /naima-tracker\/naima\/naima\.ts check/, where)
     assert.match(text, /naima-tracker\/naima\/skills\/naima\/SKILL\.md/, where)
     assert.match(text, /AGENTS\.md/, where)
+    assert.match(
+      text,
+      /in the\s+root of this repository \(if it is not a git repository yet, create one\s+at the\s+root/,
+      `${where} says: in the root of this repository, creating one there if missing`,
+    )
     assert.ok(text.includes(AGENT_LINE), `${where} gives the line to paste, verbatim`)
   }
   for (const [where, text] of [["llms.txt", llms], ["README.md", readme]] as const) {
@@ -165,6 +170,10 @@ test("install.sh installs Naima in a git repository, says so when run again, and
     const refused = run(outside)
     assert.equal(refused.status, 1)
     assert.match(refused.stderr, /not a git repository/)
+    assert.match(
+      refused.stderr,
+      /Is this the root of your project\? If so, ask your agent to create a repository here and install Naima from https:\/\/vincenzoml\.github\.io\/naima\//,
+    )
     assert.ok(!existsSync(join(outside, "naima-tracker")))
   } finally {
     removeTemp(base)
