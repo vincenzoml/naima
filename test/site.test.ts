@@ -62,11 +62,11 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
   for (const [where, text] of [["README.md", readme], ["llms.txt", llms]] as const) {
     assert.match(text, /If git is not installed, install it[\s\S]*winget install Git\.Git/, where)
   }
-  assert.match(page, /<p class="need">You don’t need to know git, code or project management\./)
+  assert.match(page, /<details class="more">[\s\S]*You don’t need git, code or project management/, "the page says, under more, that no git or code knowledge is needed")
   assert.match(
     page,
-    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">Born for software: a silent software house of AI agents that turns vibe coding into an exact science[\s\S]*?Then any project/,
-    "the line under the tagline says what it is for: software first, then any project",
+    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">State-of-the-art project management and software engineering in your repo\.<\/p>\s*<details class="more">/,
+    "under the tagline: one line saying what Naima is, then a more toggle",
   )
   assert.doesNotMatch(page, /every claim comes with its evidence/, "the long passage is the README's, not the page's")
   assert.ok(existsSync(join(NAIMA, RUNTIME_DIR, "skills", "naima", "SKILL.md")), "the skill the prompt names ships")
