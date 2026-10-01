@@ -64,6 +64,32 @@ checked by a formal-methods tool is evidence exactly as a passed test is:
 `naima check` fails when the model, or the property, [verifier](glossary.md#verifier) or options it
 was run with, has changed since.
 
+Evidence is ranked, strongest first, and a test says which kind it carries in
+its `evidenceKind` field:
+
+| Rank | `evidenceKind` | The evidence |
+|---|---|---|
+| 1 | `owner-gesture` | the owner performed the gesture and saw the result |
+| 2 | `observation` | a screenshot, a log line or a number, kept with the item |
+| 3 | `live-read` | the live state, read by tooling: a query, an API call, the running program's own answer |
+| 4 | `diff` | a before-and-after comparison: counts, sizes, outputs |
+| 5 | `inspection` | "the code looks right" — which proves nothing |
+
+**No number without its comparison**: a count, a timing or a size proves
+something only beside the value it is compared with — before and after,
+expected and seen.
+
+A regression test — one that verifies a bug — proves the fix only if it was
+seen failing on the code before the fix, then passing on the fix: **red, then
+green**. Its `redSeen` field records the day it was seen red. `naima check`
+notes a passed regression test with no `redSeen`, and a passed test whose
+evidence is `inspection`.
+
+A page can also outlive its answer. Two more notes find that: an open item's
+unticked `- [ ]` clause naming a test that has since passed, and an agent's
+test whose page excuses it because something was held
+([prove and close](prove-and-close.md#3-perform-it-keep-the-evidence)).
+
 ## Derived, never stored
 
 Boards, queues, gate states, urgency and summaries are computed when asked

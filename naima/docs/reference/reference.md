@@ -91,7 +91,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, planning, verifier |
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
-| `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }` | verifier |
+| `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
 | `metrics` | metrics | a named measurement: `run` (a program and its arguments), `kind`, and a bound — `atMost`, `atLeast` or `equals` |  |
 
@@ -528,6 +528,30 @@ Three words that are not synonyms:
 
 An item whose proof needs a person says why in `humanBecause`. Only a judgement, a reserved decision, a credential or a physical act makes something a person's: needing the running software makes it `agent-hands`, not `human`.
 
+## The evidence ranking
+
+Not all evidence is worth the same. From strongest to weakest, the values of a test's `evidenceKind`:
+
+1. `owner-gesture` — the owner performed the gesture and saw the result
+2. `observation` — a screenshot, a log line or a number, kept with the item
+3. `live-read` — the live state, read by tooling: a query, an API call, the running program's own answer
+4. `diff` — a before-and-after comparison: counts, sizes, outputs
+5. `inspection` — the code looks right — which proves nothing
+
+No number without its comparison: a count, a timing or a size proves something only beside the value it is compared with — before and after, expected and seen.
+
+A regression test is one that `verifies` a bug. It proves the fix only if it was seen failing first, on the code before the fix: red, then green. `redSeen` records the day it was seen red, and the page's notes say how. `naima check` notes a passed regression test with no `redSeen`, and a passed test whose evidence is `inspection`.
+
+## Stale pages
+
+A page can outlive its answer. Two notes, never failures, find it: an open item's unticked `- [ ]` clause that names a test which has since passed, as `tests/<slug>` or as "the linked test" once every item verifying it has passed — `unticked-clause-names-passed-test`; and an open test marked `runBy: agent` whose page, below its title, excuses it with a resource being held — `test-excuses-itself`, matching the phrases in the option `excusePhrases`. Each can be weighed, or switched off, under `plugins.trackers.checks`.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `excusePhrases` | `["held by","was held","is held","in use by","locked by","busy","unavailable"]` | the phrases (any case) by which an open agent's test says it could not run because something was held; test-excuses-itself notes them |
+
 ### naima close
 
 Archive a resolved item: fixed, and proven by an item that has passed.
@@ -630,6 +654,8 @@ Traits: `fixable`.
 | `closedFrom` | string | closed | the type the item was archived from |  |
 | `runBy` | enum | tests, bugs, todos | who can perform the proving gesture — the instrument, not the effort | `agent` settled by a command: a unit test, a grep, an API call; `agent-hands` settled by an agent driving the running software; `human` needs a person: a judgement of how it looks, a physical act, a reserved decision; `build` needs an artefact nobody here makes: a signed build, a second machine |
 | `humanBecause` | enum | tests, bugs, todos | why only a person can perform the proof, when runBy is human | `judgement` how it looks, sounds or feels: no instrument can settle it; `decision` a decision reserved to the owner; `credential` a secret, an account or a signature only a person holds; `physical` a physical act or a machine only a person has at hand |
+| `evidenceKind` | enum | tests | what the test's evidence is, from the ranking: strongest first | `owner-gesture` the owner performed the gesture and saw the result; `observation` a screenshot, a log line or a number, kept with the item; `live-read` the live state, read by tooling: a query, an API call, the running program's own answer; `diff` a before-and-after comparison: counts, sizes, outputs; `inspection` the code looks right — which proves nothing |
+| `redSeen` | date | tests | the day a regression test was seen failing on the code before the fix: red, then green |  |
 | `area` | string | every type | where it lives: the surface somebody would have open while working on it |  |
 | `kind` | string | every type | the mode of work it demands: code, decision, research, writing… |  |
 
@@ -649,6 +675,10 @@ Traits: `fixable`.
 | `fix-names-its-gesture` | a fixed item names the gesture that would prove it |
 | `closed-carries-proof` | every archived item is verified by an item that has passed |
 | `human-says-why` | an open item whose proof needs a person (runBy human) says why in humanBecause |
+| `regression-test-saw-red` | a passed test that verifies a bug records the day it was seen failing first, in redSeen |
+| `inspection-proves-nothing` | a passed test whose evidenceKind is inspection is noted: reading the code is no evidence |
+| `unticked-clause-names-passed-test` | an open item's unticked clause that names a test which has passed — as tests/<slug>, or as its linked test once every item verifying it has passed — is noted: tick it, or reopen the test |
+| `test-excuses-itself` | an open test marked runBy agent whose page says a resource was held (the option excusePhrases) is noted: an agent's gesture waits on no one |
 
 **Summary sections**: `bugs`.
 
@@ -797,6 +827,7 @@ naima pass --list 3
 | `claims-resolve` | a claim written in this worktree names items that exist |
 | `worktree-policy` | every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem |
 | `trunk-moved-while-preparing` | a branch whose claim is marked preparing is told every commit the trunk took that it lacks, and which of them the trunk's reflog records as committed on the trunk directly |
+| `closed-not-claimed` | no archived item (one in a type that is not creatable, where naima close moves it) is claimed by the branch you stand on: what no-closing-own-claims refuses on a write, asserted on the tracker as it is, hand edits included |
 
 **Directories** it owns under the tracker root: `claims/`, `passes/`.
 
@@ -1042,7 +1073,7 @@ Traits: `group`.
 
 | Check | What it holds |
 |---|---|
-| `epics` | an item is part of an epic, never of an item of another type; an open epic groups at least one item |
+| `epics` | an item is part of an epic, never of an item of another type; an open epic groups at least one item; an epic's status is the one its items give it, as the epic-status hook writes it, hand edits included |
 
 **Summary sections**: `epics`.
 
@@ -1265,7 +1296,7 @@ Properties checked by formal-methods tools, with each run attached as evidence.
 
 Its contributions' qualified ids are `verifier/<name>`.
 
-A `properties` item names a `verifier` (an adapter any plugin can contribute), a `model` file (a path from the project root) and a `property` in the verifier's own language. `naima verify` runs the adapter and attaches the run — verdict, output, the model's sha256 — and the counterexample as its own file, then sets the status from the verdict. A property that holds is evidence exactly as a passed test is: it can `verify` a bug and close it. A verdict is only as good as what it was reached on, so `naima check` fails when a property claims to hold and its property, verifier, model path, `verifierOptions` or model contents have changed since the run. The shipped adapter, `example-regex`, is a stand-in that shows the shape of a real one.
+A `properties` item names a `verifier` (an adapter any plugin can contribute), a `model` file (a path from the project root) and a `property` in the verifier's own language. `naima verify` runs the adapter and attaches the run — verdict, output, the model's sha256, and one digest over every file the run read (the model and what the adapter's `inputs` says it includes) and the tool's version (the adapter's `version`) — and the counterexample as its own file, then sets the status from the verdict. A property that holds is evidence exactly as a passed test is: it can `verify` a bug and close it. A verdict is only as good as what it was reached on, so `naima check` fails when a property claims to hold and its property, verifier, model path, `verifierOptions`, model contents, any file it includes, the set of files it reads, or the tool's version have changed since the run. The shipped adapter, `example-regex`, is a stand-in that shows the shape of a real one.
 
 **Extension points** it declares: `verifiers`.
 
@@ -1328,7 +1359,7 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 
 | Check | What it holds |
 |---|---|
-| `property-evidence` | a property names a known verifier and an existing model; one that holds carries a run of its current property, verifier, model and options, on the model as it is now |
+| `property-evidence` | a property names a known verifier and an existing model; one that holds carries a run of its current property, verifier, model and options, on every file it reads as it is now and the tool's version as it is now |
 
 **Write hooks**, run on every item write
 

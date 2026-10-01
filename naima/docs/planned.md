@@ -28,13 +28,14 @@ The order is the order of the work: the first entries come first.
   applies.
 - **The mCRL2 model of Naima's own claims** ("no claim is ever lost") as a
   property in Naima's own tracker.
-- **A check for red-then-green**: a test must be shown to fail on the old
-  work and pass on the new.
-- **A written order of how strong each kind of evidence is**: a run beats a
-  reading of the code, a measurement beats a report.
+- **Red-then-green shown by the run itself**: the failing run on the old work
+  attached and checked, not only its day recorded in `redSeen`.
 - **Today:** properties, `naima verify` and expiring proofs work, with one
   example verifier, `naima/src/plugins/verifier/adapters/example-regex.ts`
   ([prove and close](guide/prove-and-close.md#properties-proven-by-a-tool)).
+  The evidence ranking (`evidenceKind`) and the red-then-green record
+  (`redSeen`) are tracker fields, with checks that note their absence
+  ([prove and close](guide/prove-and-close.md#3-perform-it-keep-the-evidence)).
 
 ## Structuring a project from the start
 

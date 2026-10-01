@@ -347,6 +347,15 @@ what it was verified on changes, `holds` written only by `naima verify`, and
 no branch closing an item it claims — are listed in the
 [reference](reference.md).
 
+**A hook needs a check counterpart.** A hook runs only on writes the core's
+helpers make; a hand edit of `meta.json`, or a directory moved by hand, never
+meets it. A hook that protects a state of the tracker — not a move from one
+state to another, and not a value it fills in — comes with a
+check (a `checks` [contribution](#contributions)) that asserts the same state on the tracker as it is, so
+`naima check` fails where the command would have refused:
+`holds-only-by-verify` and `property-reopens-when-changed` with
+`property-evidence`, `no-closing-own-claims` with `closed-not-claimed`, `epic-status` with `epics`.
+
 ## Cooperation without imports
 
 Plugins do not import each other. They cooperate through what they declare:
@@ -383,8 +392,20 @@ const myChecker: Verifier = {
     // options: the item's `verifierOptions` object.
     return { verdict: "holds", output: "…", /* counterexample: "…" */ }
   },
+  // optional: every file a run reads, the model included, as absolute paths
+  inputs: ({ model }, ctx) => [model, includedBy(model)],
+  // optional: the tool's version
+  version: async (ctx) => await toolVersion(),
 }
 ```
+
+**Inputs and version.** A tool that reads more than the model — an included
+file, a library of definitions — declares it with `inputs`; one whose verdict
+depends on its release declares `version`. `naima verify` records each input
+with its sha256, the version, and one digest over all of them; `naima check`
+asks the adapter again and reports a property that holds stale when an input
+changed, the model reads other files, or the version moved. An input outside
+the project is refused. Without `inputs`, the model alone is recorded.
 
 | Verdict | Item status | Meaning |
 |---|---|---|
@@ -414,11 +435,14 @@ a run that did not complete.
 
 A `properties` item names `verifier`, `model` (a path from the project root)
 and `property`. `naima verify` runs the adapter and attaches the run —
-verdict, output, the model's sha256 and the options' — plus the
+verdict, output, the model's sha256 and the options', every input with its
+sha256, the tool's version and one digest over inputs and version — plus the
 counterexample as its own file. `naima check` fails when a property claims to
-hold and its property, verifier, model path, options or model contents have
-changed since the run. The shipped adapter, `example-regex`, is a stand-in; real
-adapters are separate plugins.
+hold and its property, verifier, model path, options, model contents, an
+input's contents, the set of inputs or the tool's version have changed since
+the run. The shipped adapter, `example-regex`, is a stand-in that
+reads `#include <path>` lines and declares them as inputs; real adapters are
+separate plugins.
 
 ## Testing a plugin
 

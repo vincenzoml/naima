@@ -40,8 +40,9 @@ archived with its proof) are three states, never added into one number
 `test/lifecycle.test.ts`.
 
 **proof-stays-current.** A proof counts only for what it was run on. A
-property that held on a model since changed, or with a different property,
-verifier or options, is no longer current, and `naima close` refuses it.
+property that held on a model since changed, on an included file since
+changed, by another tool version, or with a different property, verifier or
+options, is no longer current, and `naima close` refuses it.
 Held by: the check `property-evidence`, the write hooks
 `property-reopens-when-changed` (a changed property goes back to open) and
 `holds-only-by-verify` (a property holds only with a run for what it is now),
@@ -83,7 +84,8 @@ it is ([the rules](../naima/docs/guide/rules.md), each marked enforced or conven
 a person is asked only for what is theirs, a fix names the gesture that
 proves it, a branch does not close what it claims on its own tests. Held by:
 the checks `human-says-why`, `fix-names-its-gesture` (a note) and
-`claims-resolve`, and the write hook `no-closing-own-claims`. The rules of
+`claims-resolve`, the write hook `no-closing-own-claims` and its check
+counterpart `closed-not-claimed`. The rules of
 [AGENTS.md](../AGENTS.md), the rules for working on Naima, that are judgement, such as when to ask the owner,
 are not enforced.
 
