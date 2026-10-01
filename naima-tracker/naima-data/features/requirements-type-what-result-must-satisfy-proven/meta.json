@@ -12,5 +12,10 @@
       "rel": "relates-to",
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
     }
+  ],
+  "fixedOn": "2026-10-01",
+  "effort": "M",
+  "docs": [
+    "naima/docs/guide/plan-with-requirements-specs-and-decisions.md#requirements-what-must-hold"
   ]
 }
