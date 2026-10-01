@@ -8,7 +8,7 @@ the [owner](../guide/glossary.md#owner)'s chat — files it at once, before inve
 holds every time the owner asks for a feature, reports a problem, decides or
 defers something, not only when a flow is explicitly invoked: it is a
 standing behaviour, in the background, so the work underway is not derailed.
-The filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–6): it rewrites the
+The filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–7): it rewrites the
 description in its own words, searches duplicates first (`naima list`, or
 `naima new --dedupe`, which prints likely duplicates of the same type before
 writing and still writes) and links rather than refiles, records what it
@@ -133,7 +133,34 @@ naima note <item> "Reproduced on 16-bit PNGs only; 8-bit keeps alpha." --by "tri
   options with a reason and an item, and is added only on the trunk: the list
   only shrinks.
 
-## 5. Cross-reference instead of repeating
+## 5. Deferring: say why, and what reopens it
+
+Not everything triaged gets worked on now. An item with `priority=parked`, or
+a bug `wontfix` or a todo `dropped`, is a **deferral**, not a loss: it is
+still captured in full (steps 2–4) exactly as any other item, with its
+reason on the page, then set
+[`reopensWhen`](../guide/glossary.md#reopenswhen) — prose, or a link to the
+item or document whose change would make it worth re-arguing. An item left
+without a reason, or without `reopensWhen`, is a problem `naima check`
+reports: a deferral nobody can act on is silently re-argued the next time
+someone notices it.
+
+`naima view parked` lists every parked, wontfix or dropped item with its
+trigger. Read it before opening a new item that looks familiar: when the
+thing being reported is already there, the answer is **"I already told
+you"** — point at the existing item and its `reopensWhen`, rather than
+triaging a duplicate. When `reopensWhen` has come true, reopen the item
+(`naima set <item> priority=next` or `naima set <item> status=open`) instead
+of filing a new one.
+
+A project's own authoritative documents — which page is the one to trust for
+a given kind of status — are declared in `plugins.triage.options.documents`
+and printed first by `naima guide`. A project rule can say so explicitly
+(`naima rules`, this one's: "no new status or summary document — update the
+authoritative one"): update the document named there, never start a new one
+beside it.
+
+## 6. Cross-reference instead of repeating
 
 Items name each other by permanent id (`naima link`), never by a slug in
 prose:
@@ -142,7 +169,7 @@ prose:
 - a duplicate is `duplicate-of` its twin, and the twin keeps the evidence;
 - an item that waits on another is `blocked-by` it.
 
-## 6. Whose hands does the proof need
+## 7. Whose hands does the proof need
 
 `runBy` says who can perform the gesture, by the instrument:
 
@@ -155,7 +182,7 @@ prose:
 Mark it with more care than any other field: it decides who picks the gesture
 up, and both mistakes are expensive.
 
-## 7. Closing
+## 8. Closing
 
 A fix is not a close. Closing takes the fix (`fixedOn`), the gesture that
 proves it as an item linked `verifies`, and the gesture performed and passed —
