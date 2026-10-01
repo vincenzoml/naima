@@ -293,6 +293,7 @@ function kindVocabulary(roles: readonly RoleDef[]): Record<string, string> {
 const rolesCommand: Command = {
   name: "roles",
   says: "every role: what it owns, what it refuses, the kinds and types on its queue, and how many open items are on it",
+  enforces: "nothing: it only reads; a role that refuses nothing is refused when the plugin loads",
   usage: "roles [--json]",
   options: [{ name: "--json", says: "print the roles as JSON: name, title, owns, refuses, kinds, types, flow, open" }],
   examples: ["roles", "roles --json"],

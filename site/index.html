@@ -103,8 +103,9 @@
   .need { margin: var(--s-2) 0 0; max-width: 30em; text-align: center; font-size: 15px; font-weight: 600; line-height: 1.5; text-wrap: balance; }
   .about { margin: 0; max-width: 30em; text-wrap: balance; text-align: center; font-size: 17px; line-height: 1.6; color: var(--muted); text-wrap: pretty; }
   .tagline { margin: 0; text-align: center; font-size: var(--t-lead); font-weight: 650; letter-spacing: -.015em; line-height: 1.35; }
-  .tagline .ai { color: var(--accent); }
-  .tagline .branch { font-size: .82em; padding: .26em .55em .3em .45em; vertical-align: .08em; }
+  /* No accent in the tagline: the only lit AI is the one in the logo. */
+  .tagline .branch { font-size: .82em; padding: .26em .5em .3em; vertical-align: .08em; border-color: var(--line); }
+  .tagline .branch svg { color: inherit; }
 
   .os { display: flex; justify-content: center; gap: var(--s-1); margin: 0 0 var(--s-3); }
   .os button {

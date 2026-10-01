@@ -121,6 +121,7 @@ function rulesRendered(rules: Rule[], heading: string): Rendered<Rule[]> {
 const command: Command = {
   name: "rules",
   says: "print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work",
+  enforces: "nothing: it only prints",
   usage: "rules [--audience <agents|people|everyone>] [--json]",
   options: [
     { name: "--audience", says: "only the rules for that audience, and those for everyone" },

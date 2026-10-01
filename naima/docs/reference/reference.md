@@ -29,59 +29,61 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 
 ## Commands at a glance
 
-| Command | Plugin | What it does |
-|---|---|---|
-| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given |
-| [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
-| [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change |
-| [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files |
-| [`help`](#naima-help) | core | list every command the loaded plugins provide, with its usage |
-| [`new`](#naima-new) | core | open an item |
-| [`show`](#naima-show) | core | print one item: fields, links in both directions, attachments, prose |
-| [`list`](#naima-list) | core | list items, most urgent first |
-| [`set`](#naima-set) | core | set fields on an item; an empty value removes the field |
-| [`note`](#naima-note) | core | append a dated, attributed note to an item's Notes section: the writer's own words, never a person's message pasted in; earlier notes are never rewritten |
-| [`describe`](#naima-describe) | core | replace an item's description, keeping its title line and its Notes section |
-| [`link`](#naima-link) | core | link two items; only this direction is stored, the inverse is derived |
-| [`unlink`](#naima-unlink) | core | remove a stored link |
-| [`move`](#naima-move) | core | move an item to another type, keeping its id and links; refuses a status or field the new type does not declare |
-| [`check`](#naima-check) | core | run every invariant; exit 1 on any problem |
-| [`board`](#naima-board) | core | print a type's board, grouped by section, most urgent first; at its foot, the summary sections that stand beside the work, such as the metrics |
-| [`view`](#naima-view) | core | print a plugin view — as text, its data as JSON, or markdown; without a name, list them |
-| [`summary`](#naima-summary) | core | where the project stands, in one screen: every plugin's section |
-| [`plugins`](#naima-plugins) | core | list loaded plugins, the extension points each declares, what each uses of the others, and what each contributes to every point; a contribution's qualified id is <plugin>/<name>, shown when its short name is shared or renamed |
-| [`types`](#naima-types) | core | list item types, their statuses and fields, then every field's list of values with how many items hold each |
-| [`runs`](#naima-runs) | core | list the external programs the loaded contributions declare they start (a model checker, say), which the launcher allows besides git |
-| [`close`](#naima-close) | trackers | archive a resolved item: fixed, and proven by an item that has passed |
-| [`bugs`](#naima-bugs) | trackers | how many bugs have no code written, and how many are fixed but unproven |
-| [`open`](#naima-open) | coordination | start a piece of work: a worktree <worktrees>/<what> on a new branch <who>/<what> from the trunk, and its claim on the items, in one step |
-| [`claim`](#naima-claim) | coordination | record that this branch is working on items (writes one file on this branch) |
-| [`release`](#naima-release) | coordination | drop this branch's claim on items; the last one removes the file, unless the branch is being prepared (claim --preparing) |
-| [`claims`](#naima-claims) | coordination | who holds what, recombined from every branch |
-| [`prune`](#naima-prune) | coordination | list (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds |
-| [`pass`](#naima-pass) | coordination | write this session's note (one new file), or list the newest |
-| [`event`](#naima-event) | coordination | record an event the timeline cannot derive — a decision taken elsewhere, a build handed out, a policy, an outside fact — as one new file; everything else on `naima view timeline` is derived |
-| [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves |
-| [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not |
-| [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks |
-| [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics. With --role, one role's queue instead |
-| [`coverage`](#naima-coverage) | gates | each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST |
-| [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out |
-| [`spec`](#naima-spec) | planning | each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version |
-| [`decisions`](#naima-decisions) | planning | search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first |
-| [`roles`](#naima-roles) | roles | every role: what it owns, what it refuses, the kinds and types on its queue, and how many open items are on it |
-| [`announce`](#naima-announce) | announce | the features that may be announced — user-facing, shipped, documented and checked by a person or end to end — major first: the source of release notes |
-| [`loop`](#naima-loop) | loop | the non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his |
-| [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
-| [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
-| [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
-| [`ui`](#naima-ui) | ui | show the views the plugins contribute — first the summary, the gates and what is next, then the metrics and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it |
-| [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to |
-| [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
-| [`hooks`](#naima-hooks) | commit-hooks | the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it |
-| [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused |
-| [`adopt`](#naima-adopt) | adopt | adopt a board the project already keeps (a TODO.md, an issue list in markdown) as items, without losing a line: propose markers, split, audit, links — each a dry run until --write; the source is never deleted |
-| [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
+Every command: what it does, and the policy or invariant it enforces — or nothing, and what it does instead. Each command's manifest says what it does; `enforces` is optional, and `documented` notes a command without it.
+
+| Command | Plugin | What it does | What it enforces |
+|---|---|---|---|
+| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given | the program is locked to a commit of its source that is committed and pushed, and nothing outside the tracker directory is written unless --write-excludes or --write-agent-pointer asks |
+| [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything | the lock moves only to the head of the source's main, with the data migrated forward in the same change; a source naima.json names other than the one the program was aligned from is refused, by every command, until --accept-source |
+| [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change | nothing: it switches how the program is carried and stages the switch as one change for a person to commit |
+| [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files | nothing: it only prints |
+| [`help`](#naima-help) | core | list every command the loaded plugins provide, with its usage | nothing: it only prints |
+| [`new`](#naima-new) | core | open an item | every field is validated against its type's declarations before the item exists, and every write hook runs: a typo or a refusal leaves nothing behind; an archive type takes no new item |
+| [`show`](#naima-show) | core | print one item: fields, links in both directions, attachments, prose | nothing: it only reads |
+| [`list`](#naima-list) | core | list items, most urgent first | nothing: it only reads |
+| [`set`](#naima-set) | core | set fields on an item; an empty value removes the field | every pair is validated against the declared fields and passes every write hook (a status moves only along its type's transitions, and each plugin's own hooks); nothing is written unless all pass |
+| [`note`](#naima-note) | core | append a dated, attributed note to an item's Notes section: the writer's own words, never a person's message pasted in; earlier notes are never rewritten | notes are append-only and attributed: the writer is named, earlier notes are never rewritten, and a note holds no heading of its own |
+| [`describe`](#naima-describe) | core | replace an item's description, keeping its title line and its Notes section | the title line and the Notes section stay as they are: a description holding a title or a Notes section is refused |
+| [`link`](#naima-link) | core | link two items; only this direction is stored, the inverse is derived | the relation is a declared one and an item never links to itself; only one direction is stored |
+| [`unlink`](#naima-unlink) | core | remove a stored link | only a stored link is removed: an inverse is derived, never stored |
+| [`move`](#naima-move) | core | move an item to another type, keeping its id and links; refuses a status or field the new type does not declare | the id and links are kept; a status or field the new type does not declare is refused unless --force |
+| [`check`](#naima-check) | core | run every invariant; exit 1 on any problem | every invariant the loaded plugins declare (their checks): exit 1 on any problem; with --staged, the ones the pre-commit hook runs |
+| [`board`](#naima-board) | core | print a type's board, grouped by section, most urgent first; at its foot, the summary sections that stand beside the work, such as the metrics | nothing: it prints derived state, never stored |
+| [`view`](#naima-view) | core | print a plugin view — as text, its data as JSON, or markdown; without a name, list them | nothing: it prints derived state, never stored |
+| [`summary`](#naima-summary) | core | where the project stands, in one screen: every plugin's section | nothing: it prints derived state, never stored |
+| [`plugins`](#naima-plugins) | core | list loaded plugins, the extension points each declares, what each uses of the others, and what each contributes to every point; a contribution's qualified id is <plugin>/<name>, shown when its short name is shared or renamed | nothing: it only reads |
+| [`types`](#naima-types) | core | list item types, their statuses and fields, then every field's list of values with how many items hold each | nothing: it only reads |
+| [`runs`](#naima-runs) | core | list the external programs the loaded contributions declare they start (a model checker, say), which the launcher allows besides git | nothing: it lists the programs the launcher allows besides git; the launcher refuses any other |
+| [`close`](#naima-close) | trackers | archive a resolved item: fixed, and proven by an item that has passed | an item is archived only when fixed and proven: fixedOn set and a verified-by item that has passed, with every write hook agreeing; --force takes a hook's refusal on, for the one who owns the evidence |
+| [`bugs`](#naima-bugs) | trackers | how many bugs have no code written, and how many are fixed but unproven | nothing: it only counts |
+| [`open`](#naima-open) | coordination | start a piece of work: a worktree <worktrees>/<what> on a new branch <who>/<what> from the trunk, and its claim on the items, in one step | work happens on its own branch and worktree from the trunk, and its claim on the items is recorded in the same step |
+| [`claim`](#naima-claim) | coordination | record that this branch is working on items (writes one file on this branch) | a claim belongs to a branch, never to a detached HEAD, and is one file on that branch |
+| [`release`](#naima-release) | coordination | drop this branch's claim on items; the last one removes the file, unless the branch is being prepared (claim --preparing) | only this branch's own claim is dropped, and only on items it holds; while the branch is being prepared, the emptied file is kept |
+| [`claims`](#naima-claims) | coordination | who holds what, recombined from every branch | nothing: it only reads |
+| [`prune`](#naima-prune) | coordination | list (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds | the trunk is never pruned, and a branch with unmerged commits that no archive/<branch> tag holds is refused; nothing is removed without --write |
+| [`pass`](#naima-pass) | coordination | write this session's note (one new file), or list the newest | a session note is one new file: earlier ones are never rewritten |
+| [`event`](#naima-event) | coordination | record an event the timeline cannot derive — a decision taken elsewhere, a build handed out, a policy, an outside fact — as one new file; everything else on `naima view timeline` is derived | an event has a YYYY-MM-DD date and a one-word kind, and is one new file; what the timeline derives is never recorded |
+| [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves | the four fields take only their declared values, through the write hooks; derive writes only with --write |
+| [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not | with --check, every listed gate holds: exit 1 if one does not |
+| [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks | writes to naima.json and to the items are validated and pass the write hooks |
+| [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics. With --role, one role's queue instead | nothing: it prints derived state, never stored |
+| [`coverage`](#naima-coverage) | gates | each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST | nothing: it reads each list from its source every time, never a copy, and marks an entry no test proves NO TEST |
+| [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out | only an epic groups items and never itself, and its status follows its items: setting it against them is refused |
+| [`spec`](#naima-spec) | planning | each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version | a revision is a new spec item, its next version, that supersedes the old one; the old version is kept as it was |
+| [`decisions`](#naima-decisions) | planning | search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first | nothing: it only searches, so a settled question is looked up before it is asked again |
+| [`roles`](#naima-roles) | roles | every role: what it owns, what it refuses, the kinds and types on its queue, and how many open items are on it | nothing: it only reads; a role that refuses nothing is refused when the plugin loads |
+| [`announce`](#naima-announce) | announce | the features that may be announced — user-facing, shipped, documented and checked by a person or end to end — major first: the source of release notes | nothing: it only lists, and only features user-facing, shipped, documented and checked by a person or end to end |
+| [`loop`](#naima-loop) | loop | the non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his | the loop runs only on a target chosen before starting — a work list, an epic or a gate —; with --check, exit 1 while it is not stopped |
+| [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof | nothing: it only reads |
+| [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence | a property holds only with a run of its verifier on exactly what it has now, attached as evidence; a model or input outside the project is refused |
+| [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes | nothing: it only reads |
+| [`ui`](#naima-ui) | ui | show the views the plugins contribute — first the summary, the gates and what is next, then the metrics and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it | the views are served only on the loopback interface, and every request without this run's token is refused |
+| [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to | numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why |
+| [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work | nothing: it only prints |
+| [`hooks`](#naima-hooks) | commit-hooks | the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it | the installed pre-commit hook runs the staged checks and the companion rules before every commit; install refuses to take over a core.hooksPath that is not Naima's unless --force |
+| [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused | an owner's file is attached only with their yes restated in --consent, or the writer's own with --own; a file holding a secret, a hidden or path-like name, or a name already used is refused |
+| [`adopt`](#naima-adopt) | adopt | adopt a board the project already keeps (a TODO.md, an issue list in markdown) as items, without losing a line: propose markers, split, audit, links — each a dry run until --write; the source is never deleted | no line of the source is lost and the source is never deleted; nothing is written without --write, and the only edit to the source is adding marker lines |
+| [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it | with --check, the file is what the manifests generate and every loaded contribution is documented, this field included: exit 1 otherwise |
 
 ## Extension points
 
@@ -123,6 +125,8 @@ An item is a directory under `<tracker>/<TYPE>/<slug>/`: `README.md` for the pro
 
 Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given.
 
+**Enforces**: The program is locked to a commit of its source that is committed and pushed, and nothing outside the tracker directory is written unless --write-excludes or --write-agent-pointer asks.
+
 ```sh
 naima init [--write-excludes] [--write-agent-pointer]
 ```
@@ -143,6 +147,8 @@ naima init --write-agent-pointer
 ### naima update
 
 Move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything.
+
+**Enforces**: The lock moves only to the head of the source's main, with the data migrated forward in the same change; a source naima.json names other than the one the program was aligned from is refused, by every command, until --accept-source.
 
 ```sh
 naima update [--check
@@ -166,6 +172,8 @@ naima update --accept-source
 
 Switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change.
 
+**Enforces**: Nothing: it switches how the program is carried and stages the switch as one change for a person to commit.
+
 ```sh
 naima carry <copy|vendored|submodule>
 ```
@@ -181,6 +189,8 @@ naima carry copy
 
 Inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files.
 
+**Enforces**: Nothing: it only prints.
+
 ```sh
 naima guide
 ```
@@ -195,6 +205,8 @@ naima guide
 
 List every command the loaded plugins provide, with its usage.
 
+**Enforces**: Nothing: it only prints.
+
 ```sh
 naima help
 ```
@@ -208,6 +220,8 @@ naima help
 ### naima new
 
 Open an item.
+
+**Enforces**: Every field is validated against its type's declarations before the item exists, and every write hook runs: a typo or a refusal leaves nothing behind; an archive type takes no new item.
 
 ```sh
 naima new <type> "<title>" [--section <s>] [--set field=value]... [--dedupe]
@@ -231,6 +245,8 @@ naima new todos "Retry export on timeout" --dedupe
 
 Print one item: fields, links in both directions, attachments, prose.
 
+**Enforces**: Nothing: it only reads.
+
 ```sh
 naima show <item>
 ```
@@ -245,6 +261,8 @@ naima show bugs/export-drops-alpha-channel
 ### naima list
 
 List items, most urgent first.
+
+**Enforces**: Nothing: it only reads.
 
 ```sh
 naima list [type] [--open]
@@ -265,6 +283,8 @@ naima list bugs --open
 
 Set fields on an item; an empty value removes the field.
 
+**Enforces**: Every pair is validated against the declared fields and passes every write hook (a status moves only along its type's transitions, and each plugin's own hooks); nothing is written unless all pass.
+
 ```sh
 naima set <item> field=value...
 ```
@@ -279,6 +299,8 @@ naima set export-drops area=
 ### naima note
 
 Append a dated, attributed note to an item's Notes section: the writer's own words, never a person's message pasted in; earlier notes are never rewritten.
+
+**Enforces**: Notes are append-only and attributed: the writer is named, earlier notes are never rewritten, and a note holds no heading of its own.
 
 ```sh
 naima note <item> "<text>" [--by <who>]
@@ -301,6 +323,8 @@ naima note export-drops --file finding.md
 
 Replace an item's description, keeping its title line and its Notes section.
 
+**Enforces**: The title line and the Notes section stay as they are: a description holding a title or a Notes section is refused.
+
 ```sh
 naima describe <item> "<text>"
 naima describe <item> --file <f>
@@ -321,6 +345,8 @@ naima describe export-drops --file triaged.md
 
 Link two items; only this direction is stored, the inverse is derived.
 
+**Enforces**: The relation is a declared one and an item never links to itself; only one direction is stored.
+
 ```sh
 naima link <from> <relation> <to>
 ```
@@ -336,6 +362,8 @@ naima link export-drops blocked-by release-notes
 
 Remove a stored link.
 
+**Enforces**: Only a stored link is removed: an inverse is derived, never stored.
+
 ```sh
 naima unlink <from> <relation> <to>
 ```
@@ -349,6 +377,8 @@ naima unlink export-keeps verifies export-drops
 ### naima move
 
 Move an item to another type, keeping its id and links; refuses a status or field the new type does not declare.
+
+**Enforces**: The id and links are kept; a status or field the new type does not declare is refused unless --force.
 
 ```sh
 naima move <item> <type> [--force]
@@ -368,6 +398,8 @@ naima move export-drops features --force
 ### naima check
 
 Run every invariant; exit 1 on any problem.
+
+**Enforces**: Every invariant the loaded plugins declare (their checks): exit 1 on any problem; with --staged, the ones the pre-commit hook runs.
 
 ```sh
 naima check [--staged] [--all-worktrees]
@@ -390,6 +422,8 @@ naima check --all-worktrees
 
 Print a type's board, grouped by section, most urgent first; at its foot, the summary sections that stand beside the work, such as the metrics.
 
+**Enforces**: Nothing: it prints derived state, never stored.
+
 ```sh
 naima board <type> [--all]
 ```
@@ -408,6 +442,8 @@ naima board todos --all
 ### naima view
 
 Print a plugin view — as text, its data as JSON, or markdown; without a name, list them.
+
+**Enforces**: Nothing: it prints derived state, never stored.
 
 ```sh
 naima view [--json
@@ -431,6 +467,8 @@ naima view --json next 10
 
 Where the project stands, in one screen: every plugin's section.
 
+**Enforces**: Nothing: it prints derived state, never stored.
+
 ```sh
 naima summary [--json
 naima --markdown]
@@ -453,6 +491,8 @@ naima summary --markdown
 
 List loaded plugins, the extension points each declares, what each uses of the others, and what each contributes to every point; a contribution's qualified id is <plugin>/<name>, shown when its short name is shared or renamed.
 
+**Enforces**: Nothing: it only reads.
+
 ```sh
 naima plugins
 ```
@@ -467,6 +507,8 @@ naima plugins
 
 List item types, their statuses and fields, then every field's list of values with how many items hold each.
 
+**Enforces**: Nothing: it only reads.
+
 ```sh
 naima types
 ```
@@ -480,6 +522,8 @@ naima types
 ### naima runs
 
 List the external programs the loaded contributions declare they start (a model checker, say), which the launcher allows besides git.
+
+**Enforces**: Nothing: it lists the programs the launcher allows besides git; the launcher refuses any other.
 
 ```sh
 naima runs [--json]
@@ -582,6 +626,8 @@ Options, each with the default it takes when nothing sets it:
 
 Archive a resolved item: fixed, and proven by an item that has passed.
 
+**Enforces**: An item is archived only when fixed and proven: fixedOn set and a verified-by item that has passed, with every write hook agreeing; --force takes a hook's refusal on, for the one who owns the evidence.
+
 ```sh
 naima close <item> [--force]
 ```
@@ -600,6 +646,8 @@ naima close export-drops --force
 ### naima bugs
 
 How many bugs have no code written, and how many are fixed but unproven.
+
+**Enforces**: Nothing: it only counts.
 
 ```sh
 naima bugs
@@ -731,6 +779,8 @@ Options, each with the default it takes when nothing sets it:
 
 Start a piece of work: a worktree <worktrees>/<what> on a new branch <who>/<what> from the trunk, and its claim on the items, in one step.
 
+**Enforces**: Work happens on its own branch and worktree from the trunk, and its claim on the items is recorded in the same step.
+
 ```sh
 naima open <item>... [--as <who>] [--name <what>] [--note "why"]
 ```
@@ -751,6 +801,8 @@ naima open export-drops export-keeps --as claude --name export-alpha
 ### naima claim
 
 Record that this branch is working on items (writes one file on this branch).
+
+**Enforces**: A claim belongs to a branch, never to a detached HEAD, and is one file on that branch.
 
 ```sh
 naima claim <item>... [--note "why"] [--preparing
@@ -774,6 +826,8 @@ naima claim --preparing
 
 Drop this branch's claim on items; the last one removes the file, unless the branch is being prepared (claim --preparing).
 
+**Enforces**: Only this branch's own claim is dropped, and only on items it holds; while the branch is being prepared, the emptied file is kept.
+
 ```sh
 naima release <item>...
 ```
@@ -787,6 +841,8 @@ naima release export-drops
 ### naima claims
 
 Who holds what, recombined from every branch.
+
+**Enforces**: Nothing: it only reads.
 
 ```sh
 naima claims [--branch <b>]
@@ -806,6 +862,8 @@ naima claims --branch fix/export-alpha
 ### naima prune
 
 List (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds.
+
+**Enforces**: The trunk is never pruned, and a branch with unmerged commits that no archive/<branch> tag holds is refused; nothing is removed without --write.
 
 ```sh
 naima prune [--write]
@@ -830,6 +888,8 @@ naima prune --branch claude/old-idea --archive --write
 
 Write this session's note (one new file), or list the newest.
 
+**Enforces**: A session note is one new file: earlier ones are never rewritten.
+
 ```sh
 naima pass "<what changed, what is proven, what is left>"
 naima pass --file <f>
@@ -852,6 +912,8 @@ naima pass --list 3
 ### naima event
 
 Record an event the timeline cannot derive — a decision taken elsewhere, a build handed out, a policy, an outside fact — as one new file; everything else on `naima view timeline` is derived.
+
+**Enforces**: An event has a YYYY-MM-DD date and a one-word kind, and is one new file; what the timeline derives is never recorded.
 
 ```sh
 naima event <YYYY-MM-DD> "<what happened>" [--kind <kind>]
@@ -916,6 +978,8 @@ Options, each with the default it takes when nothing sets it:
 ### naima triage
 
 Coverage of the four fields; set them; list what needs a human; derive what the page proves.
+
+**Enforces**: The four fields take only their declared values, through the write hooks; derive writes only with --write.
 
 ```sh
 naima triage
@@ -1009,6 +1073,8 @@ Options, each with the default it takes when nothing sets it:
 
 Every gate, whoever declared it, and whether it holds; --check exits 1 if one does not.
 
+**Enforces**: With --check, every listed gate holds: exit 1 if one does not.
+
 ```sh
 naima gates [name...] [--check] [--json]
 ```
@@ -1029,6 +1095,8 @@ naima gates --json
 ### naima gate
 
 Declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks.
+
+**Enforces**: Writes to naima.json and to the items are validated and pass the write hooks.
 
 ```sh
 naima gate new <name> "<title>" [--says <s>] [--due YYYY-MM-DD] [--version <v>] [--holds-on code|proof] [--coverage <list>,...]
@@ -1058,6 +1126,8 @@ naima gate show beta
 
 Open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics. With --role, one role's queue instead.
 
+**Enforces**: Nothing: it prints derived state, never stored.
+
 ```sh
 naima queue [gate] [--human] [--role <role>]
 ```
@@ -1079,6 +1149,8 @@ naima queue first-public --role implementer
 ### naima coverage
 
 Each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST.
+
+**Enforces**: Nothing: it reads each list from its source every time, never a copy, and marks an entry no test proves NO TEST.
 
 ```sh
 naima coverage [list...] [--check] [--json]
@@ -1139,6 +1211,8 @@ An epic groups items: `naima epic add <epic> <item>...` links each item `part-of
 ### naima epic
 
 Each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out.
+
+**Enforces**: Only an epic groups items and never itself, and its status follows its items: setting it against them is refused.
 
 ```sh
 naima epic [<epic>...] [--all] [--json]
@@ -1206,6 +1280,8 @@ Planning as items, so each is proven or checked rather than implied by a test. A
 
 Each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version.
 
+**Enforces**: A revision is a new spec item, its next version, that supersedes the old one; the old version is kept as it was.
+
 ```sh
 naima spec [--json]
 naima spec revise <spec>
@@ -1226,6 +1302,8 @@ naima spec revise specs/export-format
 ### naima decisions
 
 Search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first.
+
+**Enforces**: Nothing: it only searches, so a settled question is looked up before it is asked again.
 
 ```sh
 naima decisions [<word>...] [--all] [--json]
@@ -1362,6 +1440,8 @@ Options, each with the default it takes when nothing sets it:
 
 Every role: what it owns, what it refuses, the kinds and types on its queue, and how many open items are on it.
 
+**Enforces**: Nothing: it only reads; a role that refuses nothing is refused when the plugin loads.
+
 ```sh
 naima roles [--json]
 ```
@@ -1429,6 +1509,8 @@ Options, each with the default it takes when nothing sets it:
 
 The features that may be announced — user-facing, shipped, documented and checked by a person or end to end — major first: the source of release notes.
 
+**Enforces**: Nothing: it only lists, and only features user-facing, shipped, documented and checked by a person or end to end.
+
 ```sh
 naima announce [--since <date>] [--gate <gate>] [--all] [--json]
 ```
@@ -1482,6 +1564,8 @@ Options, each with the default it takes when nothing sets it:
 
 The non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his.
 
+**Enforces**: The loop runs only on a target chosen before starting — a work list, an epic or a gate —; with --check, exit 1 while it is not stopped.
+
 ```sh
 naima loop <target> [--every <minutes>] [--json] [--check]
 ```
@@ -1522,6 +1606,8 @@ Options, each with the default it takes when nothing sets it:
 
 List what is marked as shipped without proof, and the state of each proof.
 
+**Enforces**: Nothing: it only reads.
+
 ```sh
 naima beta [--check]
 ```
@@ -1559,6 +1645,8 @@ A `properties` item names a `verifier` (an adapter any plugin can contribute), a
 
 Run the verifier of properties and attach each run as evidence.
 
+**Enforces**: A property holds only with a run of its verifier on exactly what it has now, attached as evidence; a model or input outside the project is refused.
+
 ```sh
 naima verify <property>...
 naima verify --all
@@ -1578,6 +1666,8 @@ naima verify --all
 ### naima verifiers
 
 List the verifier adapters every plugin contributes.
+
+**Enforces**: Nothing: it only reads.
 
 ```sh
 naima verifiers
@@ -1649,6 +1739,8 @@ Its contributions' qualified ids are `ui/<name>`.
 
 Show the views the plugins contribute — first the summary, the gates and what is next, then the metrics and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it.
 
+**Enforces**: The views are served only on the loopback interface, and every request without this run's token is refused.
+
 ```sh
 naima ui [--browser
 naima --no-open] [--log]
@@ -1692,6 +1784,8 @@ Options, each with the default it takes when nothing sets it:
 ### naima metrics
 
 The project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to.
+
+**Enforces**: Numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why.
 
 ```sh
 naima metrics [list]
@@ -1809,6 +1903,8 @@ A project's rules — how an agent works here (quiet, simple, fast), how it repo
 
 Print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work.
 
+**Enforces**: Nothing: it only prints.
+
 ```sh
 naima rules [--audience <agents|people|everyone>] [--json]
 ```
@@ -1877,6 +1973,8 @@ Options, each with the default it takes when nothing sets it:
 
 The pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it.
 
+**Enforces**: The installed pre-commit hook runs the staged checks and the companion rules before every commit; install refuses to take over a core.hooksPath that is not Naima's unless --force.
+
 ```sh
 naima hooks [list]
 naima hooks install [--force]
@@ -1923,6 +2021,8 @@ Options, each with the default it takes when nothing sets it:
 
 Copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused.
 
+**Enforces**: An owner's file is attached only with their yes restated in --consent, or the writer's own with --own; a file holding a secret, a hidden or path-like name, or a name already used is refused.
+
 ```sh
 naima attach <item> <file> (--consent "<the owner's yes, restated>"
 naima --own) [--as <name>] [--by <who>]
@@ -1966,6 +2066,8 @@ Its contributions' qualified ids are `adopt/<name>`.
 ### naima adopt
 
 Adopt a board the project already keeps (a TODO.md, an issue list in markdown) as items, without losing a line: propose markers, split, audit, links — each a dry run until --write; the source is never deleted.
+
+**Enforces**: No line of the source is lost and the source is never deleted; nothing is written without --write, and the only edit to the source is adding marker lines.
 
 ```sh
 naima adopt <propose|split|audit|links> <file> [--write]
@@ -2016,6 +2118,8 @@ Options, each with the default it takes when nothing sets it:
 
 Print the reference generated from the loaded manifests; write it, or check that a file matches it.
 
+**Enforces**: With --check, the file is what the manifests generate and every loaded contribution is documented, this field included: exit 1 otherwise.
+
 ```sh
 naima docs [--write [path]] [--check [path]]
 ```
@@ -2043,7 +2147,7 @@ naima docs --check docs/reference.md
 
 | Check | What it holds |
 |---|---|
-| `documented` | every loaded plugin, command (with an example and every option), type, status, field, value, relation, check, view, gate and verifier carries its documentation |
+| `documented` | every loaded plugin, command (with an example and every option), type, status, field, value, relation, check, view, gate and verifier carries its documentation; a command that does not say what it enforces is a note |
 | `reference-current` | with the reference option set, the reference file is what `naima docs` generates from the loaded manifests |
 | `features-documented` | a feature in a documented status names its documentation in `docs`, and every name there resolves to a markdown file, and a heading when it names one |
 | `links-resolve` | every relative link in every markdown file of the project (or under the links option) points at a file, and a heading (ATX or setext) when it names one |

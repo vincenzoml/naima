@@ -168,6 +168,8 @@ export default function privacy(options: { [key: string]: unknown } = {}, api?: 
     name: "attach",
     says:
       "copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused",
+    enforces:
+      "an owner's file is attached only with their yes restated in --consent, or the writer's own with --own; a file holding a secret, a hidden or path-like name, or a name already used is refused",
     usage: 'attach <item> <file> (--consent "<the owner\'s yes, restated>" | --own) [--as <name>] [--by <who>]',
     options: [
       { name: "--consent", says: "the file is the owner's: their explicit yes to storing it, restated; recorded on the item" },

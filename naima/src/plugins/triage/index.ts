@@ -307,6 +307,7 @@ const stampTriage: WriteHook = {
 const triage: Command = {
   name: "triage",
   says: "coverage of the four fields; set them; list what needs a human; derive what the page proves",
+  enforces: "the four fields take only their declared values, through the write hooks; derive writes only with --write",
   usage: [coverage, ...Object.values(SUBCOMMANDS)].map((s) => s.usage).join(" | "),
   options: [{ name: "--write", says: "with derive: save the derived values instead of reporting them" }],
   examples: ["triage", "triage set export-drops impact=high priority=now effort=M", "triage missing", "triage derive --write"],

@@ -303,6 +303,7 @@ async function gateRows(ctx: Context, names: string[] = []): Promise<{ def: Gate
 const gatesCommand: Command = {
   name: "gates",
   says: "every gate, whoever declared it, and whether it holds; --check exits 1 if one does not",
+  enforces: "with --check, every listed gate holds: exit 1 if one does not",
   usage: "gates [name...] [--check] [--json]",
   options: [
     { name: "--check", says: "exit 1 when a listed gate does not hold" },
@@ -383,6 +384,7 @@ const queue: Command = {
   name: "queue",
   says:
     "open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics. With --role, one role's queue instead",
+  enforces: "nothing: it prints derived state, never stored",
   usage: "queue [gate] [--human] [--role <role>]",
   options: [
     { name: "--human", says: "also list the items that need a person or a build, with why" },
@@ -469,6 +471,7 @@ const gateCommand: Command = {
   name: "gate",
   says:
     "declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks",
+  enforces: "writes to naima.json and to the items are validated and pass the write hooks",
   usage:
     'gate new <name> "<title>" [--says <s>] [--due YYYY-MM-DD] [--version <v>] [--holds-on code|proof] [--coverage <list>,...] | gate add <gate> <item>... | gate remove <gate> <item>... | gate show <gate>',
   options: [
@@ -562,6 +565,7 @@ function coverageCommand(lists: Record<string, CoverageConfig>): Command {
   return {
     name: "coverage",
     says: "each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST",
+    enforces: "nothing: it reads each list from its source every time, never a copy, and marks an entry no test proves NO TEST",
     usage: "coverage [list...] [--check] [--json]",
     options: [
       { name: "--check", says: "exit 1 when an entry has NO TEST, or a list's source cannot be read" },

@@ -163,6 +163,8 @@ export interface Command {
   options?: OptionDoc[]
   /** Complete invocations, without the leading `naima`. */
   examples?: string[]
+  /** The policy or invariant the command enforces, and how; one that enforces none says `nothing` and what it does instead. */
+  enforces?: string
   run(args: string[], ctx: Context): number | Promise<number>
 }
 

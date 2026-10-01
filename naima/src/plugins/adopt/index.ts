@@ -522,6 +522,8 @@ const command: Command = {
   name: "adopt",
   says:
     "adopt a board the project already keeps (a TODO.md, an issue list in markdown) as items, without losing a line: propose markers, split, audit, links — each a dry run until --write; the source is never deleted",
+  enforces:
+    "no line of the source is lost and the source is never deleted; nothing is written without --write, and the only edit to the source is adding marker lines",
   usage: "adopt <propose|split|audit|links> <file> [--write]",
   options: [{ name: "--write", says: "with propose, split or links: do it, instead of printing what would be done" }],
   examples: ["adopt propose TODO.md", "adopt propose TODO.md --write", "adopt split TODO.md --write", "adopt audit TODO.md", "adopt links TODO.md"],
