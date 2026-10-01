@@ -1,0 +1,14 @@
+{
+  "id": "b7a3cd53-d395-4daa-b942-e1efbf45932e",
+  "title": "A status of `__proto__`, `constructor` or `toString` is accepted as a valid item status",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

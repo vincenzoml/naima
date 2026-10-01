@@ -1,0 +1,14 @@
+{
+  "id": "d379679a-9067-4338-85a4-4d6a6f126e13",
+  "title": "`naima prune` skips stale claims that live only on other branches' refs",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "3177b18e-dac7-48be-a89c-29e912021d4d",
+  "title": "Both directions of a link can be stored for the same relation",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}
