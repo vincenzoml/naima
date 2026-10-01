@@ -11,7 +11,8 @@
   "confidence": "diagnosed",
   "triagedOn": "2026-09-29",
   "docs": [
-    "docs/documentation.md",
-    "docs/reference.md#docs"
+    "docs/guide/rules.md#features-are-documented-as-part-of-their-implementation",
+    "docs/develop/documentation.md",
+    "docs/reference/reference.md#docs"
   ]
 }

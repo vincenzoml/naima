@@ -11,7 +11,8 @@
   "confidence": "diagnosed",
   "triagedOn": "2026-09-29",
   "docs": [
-    "docs/flows/asking-the-human.md#when-you-hand-work-to-a-person",
-    "docs/reference.md#trackers"
+    "docs/agents/asking-the-human.md#when-you-hand-work-to-a-person",
+    "docs/guide/rules.md#work-handed-to-a-person-says-why",
+    "docs/reference/reference.md#trackers"
   ]
 }

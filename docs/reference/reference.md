@@ -23,7 +23,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given |
 | [`update`](#naima-update) | core | move the lock to the head of the source's dist branch — its main, when the source publishes no dist: fetch it, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
 | [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored clone, vendored as committed files, or a git submodule — staging the switch as one change |
-| [`guide`](#naima-guide) | core | print where the running Naima's documentation is: the skill, the docs index, the flows, the format, installing; read them as files |
+| [`guide`](#naima-guide) | core | print where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files |
 | [`help`](#naima-help) | core | list every command the loaded plugins provide, with its usage |
 | [`new`](#naima-new) | core | open an item |
 | [`show`](#naima-show) | core | print one item: fields, links in both directions, attachments, prose |
@@ -140,7 +140,7 @@ naima carry clone
 
 ### naima guide
 
-Print where the running Naima's documentation is: the skill, the docs index, the flows, the format, installing; read them as files.
+Print where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files.
 
 ```sh
 naima guide

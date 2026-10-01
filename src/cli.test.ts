@@ -10,6 +10,7 @@ import { dirname, join } from "node:path"
 import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 import { firstParty } from "./builtins.ts"
+import { GUIDE_PAGES } from "./core/cli.ts"
 import { gitIn, removeTemp } from "./core/testing.ts"
 import { ABOUT, FORMAT, runCli, TRACKER_README } from "./core/internal.ts"
 
@@ -191,7 +192,7 @@ test("update and carry move the program, so they run only through the launcher; 
     const guide = await naima(NAIMA, ["guide"])
     assert.equal(guide.code, 0)
     const paths = [...guide.out.matchAll(/^ {2}\S+\s+(\S+)$/gm)].map((m) => m[1] as string)
-    assert.equal(paths.length, 5)
+    assert.equal(paths.length, GUIDE_PAGES.length)
     for (const p of paths) assert.ok(existsSync(join(NAIMA, p)), p)
     assert.doesNotMatch(guide.out, /AGENTS\.md/, "Naima's own development rules are not a host's documentation")
   } finally {

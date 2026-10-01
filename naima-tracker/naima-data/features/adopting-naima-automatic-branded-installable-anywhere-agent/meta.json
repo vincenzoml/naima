@@ -8,10 +8,10 @@
   "effort": "L",
   "triagedOn": "2026-09-30",
   "docs": [
-    "docs/install.md",
-    "docs/using-naima.md",
-    "docs/skill.md",
-    "docs/config.md#the-automatic-principle"
+    "docs/guide/install.md",
+    "docs/guide/tracker-folder.md",
+    "docs/agents/skill.md",
+    "docs/guide/config.md#the-automatic-principle"
   ],
   "confidence": "measured"
 }
