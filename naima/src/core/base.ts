@@ -2,13 +2,14 @@
 // plugin: the generic fields and relations, the invariants, and the commands
 // that work on any item type.
 
-import { existsSync, readdirSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { bool, pairs, parse, str, strs, usageError } from "./args.ts"
 import { coreChecks, runChecks } from "./check.ts"
 import { groupBy } from "./collections.ts"
 import { appliesTo, fieldValue, parseFieldValue } from "./fields.ts"
-import { ATTACHMENTS, createItem, readReadme, saveMeta, type WriteOptions } from "./item.ts"
+import { currentBranch, gitOrNull, isGitRepo } from "./git.ts"
+import { ATTACHMENTS, createItem, joinProse, NOTES_HEADING, readReadme, saveMeta, saveProse, splitProse, today, type WriteOptions } from "./item.ts"
 import { byUrgency, isOpen, label } from "./lifecycle.ts"
 import { CONTRACT } from "./contract.ts"
 import { shortOrId } from "./names.ts"
@@ -191,6 +192,79 @@ const unlink: Command = {
     const { links: _links, ...rest } = a.meta
     saveMeta(ctx, { ...a, meta: kept.length ? { ...rest, links: kept } : rest })
     ctx.out(`removed ${label(a)} ${rel} ${label(b)}`)
+    return 0
+  },
+}
+
+/** The text a prose command writes: its `--file`, else its arguments after the item, trimmed; a usage error when empty. */
+function proseText(cmd: Command, file: string | undefined, words: string[]): string {
+  const text = (file ? readFileSync(file, "utf8") : words.join(" ")).trim()
+  if (!text) throw usageError(cmd)
+  return text
+}
+
+/** The lines of `text` that are markdown headings, outside fenced code blocks. */
+const headings = (text: string): string[] => {
+  let fenced = false
+  return text.split("\n").filter((l) => {
+    if (/^\s*(```|~~~)/.test(l)) fenced = !fenced
+    else if (!fenced && /^#{1,6}\s/.test(l)) return true
+    return false
+  })
+}
+
+/** Who writes a note: `--by`, else git's user.name in a git project; refused when neither says. */
+function author(ctx: Context, by: string | undefined): string {
+  const who = by?.trim() || (isGitRepo(ctx.root) ? gitOrNull(ctx.root, "config", "user.name") : null)
+  if (!who) throw new Error("say who writes the note: --by <name>, or set git's user.name")
+  return who
+}
+
+const note: Command = {
+  name: "note",
+  says:
+    "append a dated, attributed note to an item's Notes section: the writer's own words, never a person's message pasted in; earlier notes are never rewritten",
+  usage: 'note <item> "<text>" [--by <who>] | note <item> --file <f> [--by <who>]',
+  options: [
+    { name: "--by", says: "who writes the note; without it, git's user.name" },
+    { name: "--file", says: "read the note from a file instead of the arguments" },
+  ],
+  examples: ['note export-drops "Reproduced on a 16-bit PNG; 8-bit keeps alpha." --by "triage agent"', "note export-drops --file finding.md"],
+  run(args, ctx) {
+    const p = parse(args, { by: { type: "string" }, file: { type: "string" } })
+    const [ref, ...words] = p.positionals
+    if (!ref?.trim()) throw usageError(this)
+    const text = proseText(this, str(p, "file"), words)
+    if (headings(text).length) throw new Error(`a note sits under its own dated heading, so it holds none: write it without "${headings(text)[0]}"`)
+    const item = ctx.repo.resolve(ref)
+    const who = author(ctx, str(p, "by"))
+    const branch = isGitRepo(ctx.root) ? currentBranch(ctx.root) : "HEAD"
+    const entry = `### ${today(ctx)} — ${who}${branch === "HEAD" ? "" : `, on ${branch}`}\n\n${text}`
+    const prose = splitProse(readReadme(item))
+    saveProse(ctx, item, joinProse({ ...prose, notes: [prose.notes || NOTES_HEADING, entry].join("\n\n") }))
+    ctx.out(`${label(item)}: note added`)
+    return 0
+  },
+}
+
+const describe: Command = {
+  name: "describe",
+  says: "replace an item's description, keeping its title line and its Notes section",
+  usage: 'describe <item> "<text>" | describe <item> --file <f>',
+  options: [{ name: "--file", says: "read the description from a file instead of the arguments" }],
+  examples: ['describe export-drops "Export to PNG loses the alpha channel; done when every bit depth keeps it."', "describe export-drops --file triaged.md"],
+  run(args, ctx) {
+    const p = parse(args, { file: { type: "string" } })
+    const [ref, ...words] = p.positionals
+    if (!ref?.trim()) throw usageError(this)
+    const text = proseText(this, str(p, "file"), words)
+    const hs = headings(text)
+    if (/^#\s/.test(text)) throw new Error(`the title is not part of the description: change it with naima set ${ref} title="..."`)
+    if (hs.some((h) => h.trimEnd() === NOTES_HEADING)) throw new Error(`a description holds no ${NOTES_HEADING} section: notes are added with naima note`)
+    const item = ctx.repo.resolve(ref)
+    const prose = splitProse(readReadme(item))
+    saveProse(ctx, item, joinProse({ ...prose, title: prose.title || `# ${item.meta.title}`, description: text }))
+    ctx.out(`${label(item)}: description replaced`)
     return 0
   },
 }
@@ -417,6 +491,18 @@ const statusMoves: WriteHook = {
   },
 }
 
+/** The Notes section only grows: a prose write that changes or drops a note already there is refused, unless --force. */
+const notesAppendOnly: WriteHook = {
+  name: "notes-append-only",
+  says: "a write of an item's prose keeps its Notes section as it was and may only add after it; --force takes a rewrite on",
+  beforeWrite(write) {
+    if (write.prose === undefined || write.force) return
+    const was = splitProse(readReadme(write.item)).notes
+    if (splitProse(write.prose).notes.startsWith(was)) return
+    return `${label(write.item)}: the Notes section is append-only — add a note with naima note, or pass --force to rewrite it`
+  },
+}
+
 export const corePlugin: Plugin = {
   name: "core",
   contract: CONTRACT,
@@ -439,7 +525,7 @@ export const corePlugin: Plugin = {
     { name: "blocked-by", inverse: "blocks", says: "waits on" },
   ],
   checks: coreChecks,
-  commands: [newCommand, show, list, set, link, unlink, check, board, view, summary, plugins, types, runs],
+  commands: [newCommand, show, list, set, note, describe, link, unlink, check, board, view, summary, plugins, types, runs],
   summary: [counts],
-  hooks: [statusMoves],
+  hooks: [statusMoves, notesAppendOnly],
 }
