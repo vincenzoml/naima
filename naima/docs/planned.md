@@ -50,14 +50,6 @@ the same way and can be checked. Missing today:
   [the rules](guide/rules.md#change-the-tracker-only-through-the-cli) allow
   for the page and not for the fields.
 
-## Worktree names and claim files
-
-- **A naming policy** for [worktrees](guide/glossary.md#worktree) and
-  branches, checked: who works, and on what.
-- **A check that every worktree carries a [claim file](guide/glossary.md#claim-file).**
-- **Today:** the [opening flow](agents/opening-a-worktree.md) names the
-  branch `<who>/<what>` and claims before any work, by convention.
-
 ## The non-stop method
 
 A way of working in which agents keep going, without the owner having to

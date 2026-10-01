@@ -111,6 +111,13 @@ test("the policy check fails a worktree or a branch off the scheme, and an uncla
     await right.run("claim", "alpha")
     ;({ problems } = await messages(p.ctx))
     assert.doesNotMatch(problems, /agent\/right/, "an uncommitted claim on its disk is enough")
+    right.git("add", "-A")
+    right.git("commit", "-q", "-m", "claim")
+    await right.run("release", "alpha")
+    right.git("add", "-A")
+    right.git("commit", "-q", "-m", "release")
+    ;({ problems } = await messages(p.ctx))
+    assert.doesNotMatch(problems, /agent\/right/, "a claim released at closing still counts: its commits carried it")
 
     const exempt = project({ exempt: ["stray"], worktrees: `../${basename(p.root)}-worktrees` })
     try {
@@ -145,8 +152,11 @@ test("a preparing claim is told when the trunk takes a commit, and which were ma
 
     w.git("merge", "-q", "--no-edit", "main")
     assert.doesNotMatch((await messages(p.ctx)).notes, /main took|directly/, "merged in: nothing left to say")
+    assert.equal(await w.run("release", "alpha"), 0)
+    assert.deepEqual(readClaims(p.ctx).map((c) => [c.preparing, c.items.length]), [[true, 0]], "the last release keeps the mark while preparing")
     assert.equal(await w.run("claim", "--not-preparing"), 0)
     assert.equal(readClaims(p.ctx)[0]?.preparing, undefined)
+    assert.equal(readdirSync(join(p.dir, "ready", DEFAULT_DATA, "claims")).length, 0, "dropping the mark removes the file it alone kept")
     await assert.rejects(at(p, p.root).run("claim", "--preparing"), /no claim/)
   } finally {
     p.cleanup()
@@ -172,15 +182,15 @@ test("prune --branch deletes a branch and its worktree, and refuses unmerged wor
     assert.match(p.output.join("\n"), /agent\/work has 1 commit not on main and no archive\/agent\/work tag/)
     await assert.rejects(p.run("prune", "--branch", "agent/work", "--write"), /archive\/agent\/work/)
     assert.ok(existsSync(join(p.dir, "work")))
-    assert.equal(gitIn(p.root, "branch", "--list", "agent/work").trim(), "agent/work")
+    assert.equal(gitIn(p.root, "branch", "--list", "--format=%(refname:short)", "agent/work").trim(), "agent/work")
 
     assert.equal(await p.run("prune", "--branch", "agent/work", "--archive", "--write"), 0)
     assert.match(gitIn(p.root, "log", "-1", "--format=%s", "archive/agent/work"), /unmerged work/, "the tag keeps the work")
     assert.ok(!existsSync(join(p.dir, "work")))
-    assert.equal(gitIn(p.root, "branch", "--list", "agent/work").trim(), "")
+    assert.equal(gitIn(p.root, "branch", "--list", "--format=%(refname:short)", "agent/work").trim(), "")
 
     assert.equal(await p.run("prune", "--branch", "agent/done", "--write"), 0, "a merged branch needs no tag")
-    assert.equal(gitIn(p.root, "branch", "--list", "agent/done").trim(), "")
+    assert.equal(gitIn(p.root, "branch", "--list", "--format=%(refname:short)", "agent/done").trim(), "")
     await assert.rejects(p.run("prune", "--branch", "main", "--write"), /trunk/)
   } finally {
     p.cleanup()

@@ -9,6 +9,20 @@ this page is the procedure. Preparing the branch is the developer's work. Decidi
 trunk is a separate call: whoever wrote the code does not also decide it
 ships.
 
+## 0. Say the branch is being prepared
+
+```sh
+naima claim --preparing
+```
+
+From then on `naima check` notes every commit the trunk takes that the
+branch lacks — merge it in again (step 6) — and names each one the trunk's
+reflog records as committed on the trunk directly, outside the flow
+([worktree isolation](worktree-isolation.md#2-nobody-commits-on-the-trunk-while-branches-are-being-prepared)).
+While the mark is set, releasing the last item (step 3) keeps the claim
+file, empty, to hold it; `naima claim --not-preparing` drops the mark and
+removes that file, just before the hand-over (step 7).
+
 ## 1. Every fix names the gesture that would prove it
 
 The fix feels finished when the tests are green. It is not resolved until
@@ -98,7 +112,7 @@ not tested with yours.
 
 ## 7. Hand it over
 
-Say: the merge command, that it fast-forwards, what arrives red and from
+Drop the mark and commit the removal: `naima claim --not-preparing`. Then say: the merge command, that it fast-forwards, what arrives red and from
 where, and what is left open with its gesture. The merge itself:
 
 ```sh
@@ -107,11 +121,19 @@ git merge --ff-only <branch>
 
 If it refuses, stop ([worktree isolation](worktree-isolation.md), rule 3).
 
-## 8. Only then, remove the worktree
+## 8. Only then, remove the worktree and the branch
 
 ```sh
-git worktree remove <path>
+naima prune --branch <who>/<what>             # what would go
+naima prune --branch <who>/<what> --write     # remove the worktree, delete the branch
 ```
+
+From the main checkout. It refuses a branch with commits the trunk lacks
+unless an `archive/<branch>` tag holds them; `--archive` makes the tag
+first, so abandoned work stays recoverable (`git switch -c <branch>
+archive/<branch>`). Never `git branch -D` a branch whose work is not on the
+trunk. Before a bulk sweep of the tracker (many items closed, moved or
+deleted in one go), tag where it starts: `git tag checkpoint/<date>-<what>`.
 
 ## Not part of closing
 

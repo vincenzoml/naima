@@ -7,10 +7,13 @@ this checklist and the page disagree, the page wins.
 
 1. **The work has an item.** If not: `naima new <type> "<what happened>"`,
    then triage it.
-2. **Its own worktree:** `git worktree add -b <who>/$1 <worktrees-dir>/$1`,
-   dependencies installed.
-3. **Claim, from inside the worktree:** `naima claim <item>... --note "why"` —
-   one file, on this branch; commit it with the work.
+2. **Its own worktree, branch and claim, one command:**
+   `naima open <item>... --as <who> --name $1 --note "why"` — the worktree
+   `<worktrees-dir>/$1` on `<who>/$1` from the trunk, the claim written in it.
+   `cd` there; install dependencies.
+3. **Commit the claim with the work.** More items: `naima claim <item>...`,
+   from inside the worktree. A worktree off the scheme, or with commits and
+   no claim, fails `naima check`.
 4. **A scratchpad is not a tracker.** Defects, tasks and verifications are items.
 
 Never write into another checkout, and never commit on the trunk:
