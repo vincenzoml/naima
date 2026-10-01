@@ -177,8 +177,10 @@ test("through the launcher, ui may serve on the loopback interface and no other 
       })
       void exited.then((code) => fail(new Error(`ui exited ${code}: ${err}`)))
     })
+    // the first screen, rendered under the launcher's grants
     const r = await fetch(url, { redirect: "manual" })
-    assert.equal(r.status, 302)
+    assert.equal(r.status, 200)
+    assert.match(await r.text(), /aria-labelledby="panel-summary"/)
     assert.equal((await fetch(url.replace(/\?token=.*/, ""))).status, 403)
     // Ctrl-C in a terminal reaches the whole process group: the launcher and the program
     process.kill(-child.pid!, "SIGINT")

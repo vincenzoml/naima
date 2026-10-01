@@ -9,3 +9,7 @@ Done: every doc page, the site and the skill are read for jargon; every term is 
 ### 2026-10-01 — Claude, on claude/evidence-close-3
 
 Evidence mismatch: attached verify.log/node-test.log only show deno task verify and node --test passing — they prove nothing about jargon, glossary completeness or paper references, which is what this item claims. Spot-checked independently: naima/docs/guide/glossary.md exists (582 lines); no reference to 'the Naima paper' / 'our paper' found in docs (only generic 'a paper' used as an example project, which is not in scope). The audit itself (read-through for jargon, one-definition-per-term check) was not performed or evidenced. Reopening: clear fixedOn, set status back to open pending real audit evidence.
+
+### 2026-10-01 — docs-auditor, on claude/jargon-audit
+
+Performed the audit: read all 56 pages (naima/docs/guide/, naima/docs/agents/, purpose.md, docs/README.md, README.md, site/llms.txt, SKILL.md) in full, 7128 lines. Four checks per page (paper references, undefined acronyms, glossary-link-on-first-use, paragraphs anchored to a file/command/example), two scripted and two read by eye; before/after counts and method in attachments/jargon-audit-2026-10-01.md. Found and fixed two genuine issues: an unexpanded acronym (CJK) in guide/concepts.md, and an unglossed term (webview) in guide/install.md. No research-paper reference found anywhere (reconfirms the prior spot-check). No missing glossary entry. Will add a proving test next.

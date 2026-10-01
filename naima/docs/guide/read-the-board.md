@@ -127,9 +127,17 @@ what is on that gate. A project adds its own roles, or replaces one, under
 `naima view` lists the named views the loaded plugins offer, such as `next`
 (open items, most urgent first), or `timeline` (when each gate and epic
 opened and finished, each release and session, derived from the items and git);
-`naima view next --json` gives the data behind it. `naima ui` shows the views
-plugins contribute as tabs of one window: the metrics, the timeline, the
-coverage of the project's declared lists. Every command: [reference](../reference/reference.md).
+`naima view next --json` gives the data behind it.
+
+## The window
+
+`naima ui` opens a window. Its first screen, **Home**, shows three panels:
+the summary (what `naima summary` prints), the gates and whether each holds,
+with the items blocking it (what `naima gates` prints), and what is next (what
+`naima view next` ranks). They are the same data the commands print, read
+from the files each time the page loads, so the window and the terminal never
+disagree. The other views are tabs: the metrics, the timeline, the coverage
+of the project's declared lists, and any a plugin adds. Every command: [reference](../reference/reference.md).
 
 ## How long a `now` item has waited
 

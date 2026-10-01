@@ -104,3 +104,9 @@ Decisions taken while implementing, where the definition left a choice:
 Proof: `tests/project-dist-holds-only-what-runs-naima` (offline half passed;
 the online half needs the first dist push) and
 `tests/ci-runs-pinned-linux-macos-pushes-dist`.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/evidence-close-5
+
+Reopened: the linked proving test (tests/project-dist-holds-only-what-runs-naima) verifies the dist-branch mechanism, which no longer exists (src/dist.test.ts is gone, aebd210 replaced dist with copy-on-install). Its own CI-side counterpart (tests/ci-runs-pinned-linux-macos-pushes-dist) is withdrawn for the same reason. Evidence does not match the shipped implementation, so this is not proof. A real, current proof exists for the related but distinct item features/copy-install-program-plain-copy-naima-from (tests/copy-install-end-end-program-exactly-naima, red-then-green, passed) — the owner should judge whether these two items are the same requirement under copy-on-install and should be merged, or whether host-leakage needs its own fresh proving test.

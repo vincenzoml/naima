@@ -367,6 +367,32 @@ const next: View = {
   },
 }
 
+const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+
+/** What is next, as a panel of the first screen of `naima ui`: the shape the `ui-views` point takes, declared here since plugins never import each other. */
+const nextUiView = {
+  name: "next",
+  title: "Next up",
+  says: "the open items, most urgent first, ranked as `naima view next` ranks them; `?n=` says how many (15); its data is `naima view --json next`",
+  order: 10,
+  panel: true,
+  render(params: Record<string, string[]>, ctx: Context) {
+    const rows = nextRows(ctx, positiveInt(params["n"]?.[0], 15, "next"))
+    const cells = (r: NextRow) =>
+      [r.impact ?? "", r.priority ?? "", r.effort ?? "", ageSuffix(r)].map((v) => `<td>${esc(v)}</td>`).join("") +
+      `<td><code>${esc(r.ref)}</code></td><td>${esc(r.title)}</td>`
+    return {
+      data: rows,
+      html: rows.length
+        ? `<table class="next"><thead><tr>${
+          ["Impact", "Priority", "Effort", "Age", "Item", "Title"].map((h) => `<th scope="col">${h}</th>`).join("")
+        }</tr></thead><tbody>${rows.map((r) => `<tr>${cells(r)}</tr>`).join("")}</tbody></table>`
+        : "<p>Nothing is open.</p>",
+      css: "table.next{border-collapse:collapse}table.next th,table.next td{padding:2px 12px 2px 0;text-align:left;vertical-align:top}",
+    }
+  },
+}
+
 const parked: View = {
   name: "parked",
   says: "every parked, wontfix or dropped item, with what would reopen it",
@@ -523,6 +549,9 @@ export default function triagePlugin(options: Record<string, unknown> = {}): Plu
     rank,
     commands: [triage],
     views: [next, parked],
+    // What is next is a panel of naima ui when the ui plugin is loaded; without it, still a view.
+    contributes: { "ui-views": [nextUiView] },
+    optional: ["ui-views"],
     summary: [top],
     hooks: [stampTriage],
     checks: [deferredSaysWhy, retiredStillLinked(options), unclaimedAgingNow(options)],

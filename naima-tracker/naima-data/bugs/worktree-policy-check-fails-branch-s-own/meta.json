@@ -1,6 +1,0 @@
-{
-  "id": "f53adb98-d01d-4f1d-ade2-0f0d6071538d",
-  "title": "worktree-policy check fails a branch's own gate over a sibling worktree's missing claim",
-  "status": "open",
-  "created": "2026-10-01"
-}

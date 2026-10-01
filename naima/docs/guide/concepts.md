@@ -19,7 +19,7 @@ naima-tracker/naima-data/<type>/<slug>/attachments/    the evidence
 `meta.json` always holds `id` (a permanent uuid), `title` and `status`; the
 rest are fields declared by plugins. The slug is a readable name made from
 the title's words in whatever script they are written (Latin letters lose their
-accents; Cyrillic, CJK and every other letter are kept), and may
+accents; Cyrillic, Chinese, Japanese, Korean and every other letter are kept), and may
 change; the id never does, and links hold ids. A slug another local branch
 already holds under the same type is not taken again
 ([across branches](../agents/worktree-isolation.md#item-slugs-across-branches)). On the command line an item is

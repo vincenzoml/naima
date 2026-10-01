@@ -1,0 +1,26 @@
+{
+  "id": "2cc1b23e-cb49-4f2f-9b73-292a67fb3009",
+  "title": "Plugin configuration: a `plugins` table with options, enabled and replacedBy",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "links": [
+    {
+      "rel": "blocked-by",
+      "id": "36c3a45d-fe64-40c7-83fe-d6d62128ef5e"
+    }
+  ],
+  "effort": "M",
+  "triagedOn": "2026-09-30",
+  "docs": [
+    "naima/docs/guide/extending-naima.md"
+  ],
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "610abf1"
+  ],
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
+}

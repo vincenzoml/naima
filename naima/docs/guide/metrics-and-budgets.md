@@ -161,7 +161,7 @@ that run the same command share one run.
 ## See how your code's quality moves over time
 
 **See your project's metrics: `naima ui`.** It opens a window, titled
-Naima, with the chart and the table of every metric. Tick the metrics you
+Naima; its **Metrics** tab holds the chart and the table of every metric. Tick the metrics you
 want and pick the first and the last commit, then **Show**. The window reads
 the records each time it shows them, so a metric recorded while it is open
 appears on the next **Show**. Closing the window ends it.

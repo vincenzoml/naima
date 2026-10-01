@@ -1,0 +1,19 @@
+{
+  "id": "00db4410-2b37-4d4c-bf93-083ee8169ace",
+  "title": "worktree-policy judges only its own worktree, a sibling's missing claim is a note not a problem (test/plugins/coordination/worktrees.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "diff",
+  "confidence": "measured",
+  "impact": "medium",
+  "priority": "now",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "f53adb98-d01d-4f1d-ade2-0f0d6071538d"
+    }
+  ]
+}

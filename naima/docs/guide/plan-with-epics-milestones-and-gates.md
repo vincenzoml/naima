@@ -66,6 +66,8 @@ beta — Public beta (version 0.9; due 2026-12-01, 17 days left): BLOCKED by 2
 `naima gates`, `naima queue beta` and `naima summary` say the days left, `today`, or how many days overdue. Once the date has passed and the gate does not hold,
 `naima check` warns (the check `milestone-overdue`) — a note, not a failure: a late milestone is news, not a broken project.
 
+`naima gates --json` prints the same as data: each gate's name, title, timing, whether it holds, and the items blocking it or owing only proof. The gates are also a panel of the first screen of `naima ui`.
+
 ## See when things happened: the timeline
 
 ```sh

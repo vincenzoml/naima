@@ -11,3 +11,7 @@ Done: epics exist as a type or a declared list of values (each with a title and 
 ### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
 
 U4 proof run: withdrawn as a duplicate of features/epics-milestones-gates-owner-can-create-by, which the (a) epics/gates branch ships. Leaving status as-is for the evidence owner to close.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/evidence-close-5
+
+Withdrawn as a duplicate of features/epics-milestones-gates-owner-can-create-by (already shipped), per the item's own 2026-10-01 note from the U4 proof run.

@@ -77,7 +77,7 @@ Every command: what it does, and the policy or invariant it enforces — or noth
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof | nothing: it only reads |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence | a property holds only with a run of its verifier on exactly what it has now, attached as evidence; a model or input outside the project is refused |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes | nothing: it only reads |
-| [`ui`](#naima-ui) | ui | show the views the plugins contribute — the project's metrics first — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it | the views are served only on the loopback interface, and every request without this run's token is refused |
+| [`ui`](#naima-ui) | ui | show the views the plugins contribute — first the summary, the gates and what is next, then the metrics and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it | the views are served only on the loopback interface, and every request without this run's token is refused |
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to | numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work | nothing: it only prints |
 | [`hooks`](#naima-hooks) | commit-hooks | the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it | the installed pre-commit hook runs the staged checks and the companion rules before every commit; install refuses to take over a core.hooksPath that is not Naima's unless --force |
@@ -107,7 +107,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `roles` | roles | a role of the company of agents: `title`, what it `owns`, what it `refuses` (never empty), the `kinds` and `types` on its queue, and `queue(ctx)`, its open items most urgent first | roles |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier |
-| `ui-views` | ui | a view `naima ui` shows as a tab: `name` (its path), `title`, `says`, `order` (lower first, 0 when absent), `render(params, ctx) → { data, html, css? }`, rendered at each request | coordination, gates, metrics |
+| `ui-views` | ui | a view `naima ui` shows as a tab, or as a panel of its first screen: `name` (its path), `title`, `says`, `order` (lower first, 0 when absent), `panel` (true: on the first screen, not a tab), `render(params, ctx) → { data, html, css? }`, rendered at each request | coordination, triage, gates, ui, metrics |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
 | `metrics` | metrics | a named measurement: `run` (a program and its arguments) and `kind`, or a code `measure`; a bound — `atMost`, `atLeast` or `equals` — and `better` |  |
 | `code-measures` | metrics | a code-quality number taken in process from the files: `measure({ files, source }, metric) → number \| { error }`, with its `unit` and `better` | metrics |
@@ -957,9 +957,9 @@ naima event 2026-09-20 "The vendor ended support for v1"
 
 **UI views**, the tabs of `naima ui`
 
-| View | Title | What it shows |
-|---|---|---|
-| `timeline` | Timeline | the project's events — gates, epics, releases, sessions, records — derived from the items and git, oldest first |
+| View | Title | Where | What it shows |
+|---|---|---|---|
+| `timeline` | Timeline | tab | the project's events — gates, epics, releases, sessions, records — derived from the items and git, oldest first |
 
 ## triage
 
@@ -1044,6 +1044,12 @@ naima triage derive --write
 |---|---|
 | `triage-stamps-its-date` | a change to priority, impact, effort or confidence — by naima set, triage set, or any command — stamps triagedOn with today and drops triagedBy: derived; a write triage derive marks derived stamps nothing |
 
+**UI views**, the tabs of `naima ui`
+
+| View | Title | Where | What it shows |
+|---|---|---|---|
+| `next` | Next up | first screen | the open items, most urgent first, ranked as `naima view next` ranks them; `?n=` says how many (15); its data is `naima view --json next` |
+
 ## gates
 
 Named release conditions backed by items.
@@ -1070,18 +1076,20 @@ Every gate, whoever declared it, and whether it holds; --check exits 1 if one do
 **Enforces**: With --check, every listed gate holds: exit 1 if one does not.
 
 ```sh
-naima gates [name...] [--check]
+naima gates [name...] [--check] [--json]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--check` |  | exit 1 when a listed gate does not hold |
+| `--json` |  | print the gates as JSON: each one's name, title, timing, whether it holds, and the items blocking it or owed |
 
 Examples:
 
 ```sh
 naima gates
 naima gates first-public --check
+naima gates --json
 ```
 
 ### naima gate
@@ -1185,9 +1193,10 @@ naima coverage paid --check
 
 **UI views**, the tabs of `naima ui`
 
-| View | Title | What it shows |
-|---|---|---|
-| `coverage` | Coverage | each normative list the project declares, read from its source now, every entry with the test that proves it or NO TEST |
+| View | Title | Where | What it shows |
+|---|---|---|---|
+| `gates` | Gates | first screen | every gate and whether it holds, with the items blocking it and those owing only proof, as `naima gates` reports them; its data is `naima gates --json` |
+| `coverage` | Coverage | tab | each normative list the project declares, read from its source now, every entry with the test that proves it or NO TEST |
 
 ## epics
 
@@ -1722,13 +1731,13 @@ The views plugins contribute, shown by `naima ui` in a native window, or the bro
 
 Its contributions' qualified ids are `ui/<name>`.
 
-`naima ui` starts a server bound to the loopback interface, on a free port, that refuses every request without the token of its run, and opens it in a native window titled Naima. Each tab is a view a plugin contributes to `ui-views` — the metrics plugin's is the first — rendered from the files at each request, so the window shows what the files hold now; `/data/<view>` answers the same view's data as JSON. Closing the window stops the server. The window is a webview, loaded from JSR at a pinned version, only by `naima ui`, and in a process of its own: the rest of Naima has no dependency. Where it cannot open — on Node or Bun, on a system it does not run on, offline on its first run, when it fetches its library — the default browser opens instead, and `naima ui` says so in one line; `--browser` asks for the browser. Only `ui` is granted, by the launcher, the loopback network and the programs that show it.
+`naima ui` starts a server bound to the loopback interface, on a free port, that refuses every request without the token of its run, and opens it in a native window titled Naima. Each view is one a plugin contributes to `ui-views`, rendered from the files at each request, so the window shows what the files hold now. The first screen holds the views that are panels — the summary, which this plugin renders from every plugin's summary section exactly as `naima summary` does; the gates, from the gates plugin, as `naima gates` reports them; what is next, from the triage plugin, as `naima view next` ranks it — and every other view is a tab, the metrics plugin's first. `/data/<view>` answers the same view's data as JSON, the same data the command prints with `--json`. Closing the window stops the server. The window is a webview, loaded from JSR at a pinned version, only by `naima ui`, and in a process of its own: the rest of Naima has no dependency. Where it cannot open — on Node or Bun, on a system it does not run on, offline on its first run, when it fetches its library — the default browser opens instead, and `naima ui` says so in one line; `--browser` asks for the browser. Only `ui` is granted, by the launcher, the loopback network and the programs that show it.
 
 **Extension points** it declares: `ui-views`.
 
 ### naima ui
 
-Show the views the plugins contribute — the project's metrics first — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it.
+Show the views the plugins contribute — first the summary, the gates and what is next, then the metrics and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it.
 
 **Enforces**: The views are served only on the loopback interface, and every request without this run's token is refused.
 
@@ -1749,6 +1758,12 @@ Examples:
 naima ui
 naima ui --browser
 ```
+
+**UI views**, the tabs of `naima ui`
+
+| View | Title | Where | What it shows |
+|---|---|---|---|
+| `summary` | Summary | first screen | where the project stands: every plugin's summary section, as `naima summary` prints it; its data is `naima summary --json` |
 
 ## metrics
 
@@ -1825,9 +1840,9 @@ naima metrics presets
 
 **UI views**, the tabs of `naima ui`
 
-| View | Title | What it shows |
-|---|---|---|
-| `metrics` | Metrics | the project's metrics along the commit timeline: a chart and a table of each, for the metrics and the commits picked |
+| View | Title | Where | What it shows |
+|---|---|---|---|
+| `metrics` | Metrics | tab | the project's metrics along the commit timeline: a chart and a table of each, for the metrics and the commits picked |
 
 **Metric kinds**, how `naima metrics` reads a number
 

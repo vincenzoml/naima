@@ -26,3 +26,9 @@ item.
 This item is done when every fix and every design-decision feature from the
 review has been filed and linked to it, and stays open as a standing index;
 it is not itself something to "fix".
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/evidence-close-5
+
+Checked after this session's closings: 61 of 64 linked items closed, 1 withdrawn, 1 wontfix (settled, duplicate of an already-fixed bug) — effectively all done but one. The remaining blocker is features/host-leakage-installed-program-directory-holds-only, which this session reopened: its linked proving test verified the now-removed dist-branch mechanism (src/dist.test.ts no longer exists), not the copy-on-install approach that actually shipped (aebd210). Not a proof. This umbrella stays open until that item gets a real proving test and closes.
