@@ -22,7 +22,6 @@ import {
   filesAt,
   type Finding,
   gitOrNull,
-  type Item,
   label,
   mustGit,
   parse,
@@ -54,6 +53,7 @@ import {
   worktreesDir,
   writeThroughGit,
 } from "./worktrees.ts"
+import { claimsUiView, notesUiView } from "./ui.ts"
 import { eventCommand, EVENTS, timelineUiView, timelineView } from "./timeline.ts"
 
 export { type Timeline, type TimelineEvent, timelineOf } from "./timeline.ts"
@@ -252,29 +252,61 @@ const release: Command = {
   },
 }
 
+/** Who holds what, as `naima claims --json` prints it and the window's claims panel shows it. */
+export interface ClaimsData {
+  claims: { branch: string; here: boolean; local: boolean; claimedAt: string; note?: string; preparing?: true; items: ClaimEntry[] }[]
+  /** The items more than one branch claims — allowed, and worth knowing. */
+  contested: { id: string; ref: string; branches: string[] }[]
+}
+
+/** Every claim, recombined from every branch now — only `only`'s when given — and the items more than one holds. */
+export function claimsData(ctx: Context, only?: string): ClaimsData {
+  const here = currentBranch(ctx.root)
+  const list = readClaims(ctx).filter((c) => !only || c.branch === only)
+  const holders = new Map<string, Set<string>>()
+  for (const c of list) for (const e of c.items) holders.set(e.id, (holders.get(e.id) ?? new Set()).add(c.branch))
+  return {
+    claims: list.map((c) => ({
+      branch: c.branch,
+      here: c.branch === here,
+      local: c.local,
+      claimedAt: c.claimedAt,
+      ...(c.note ? { note: c.note } : {}),
+      ...(c.preparing ? { preparing: true as const } : {}),
+      items: c.items,
+    })),
+    contested: [...holders].filter(([, b]) => b.size > 1).map(([id, b]) => {
+      const item = ctx.repo.byId.get(id)
+      return { id, ref: item ? label(item) : id, branches: [...b] }
+    }),
+  }
+}
+
 const claims: Command = {
   name: "claims",
   says: "who holds what, recombined from every branch",
   enforces: "nothing: it only reads",
-  usage: "claims [--branch <b>]",
-  options: [{ name: "--branch", says: "only the claim of this branch" }],
-  examples: ["claims", "claims --branch fix/export-alpha"],
+  usage: "claims [--branch <b>] [--json]",
+  options: [
+    { name: "--branch", says: "only the claim of this branch" },
+    { name: "--json", says: "print the claims as JSON: each branch's items, note and marks, and the items more than one branch holds" },
+  ],
+  examples: ["claims", "claims --branch fix/export-alpha", "claims --json"],
   run(args, ctx) {
-    const p = parse(args, { branch: { type: "string" } })
-    const only = str(p, "branch")
-    const here = currentBranch(ctx.root)
-    const list = readClaims(ctx).filter((c) => !only || c.branch === only)
-    if (!list.some((c) => c.items.length)) ctx.out("no claims")
-    for (const c of list) {
-      ctx.out(`${c.branch}${c.branch === here ? "  ← here" : ""}${c.local ? "  (working tree)" : ""}${c.note ? `  — ${c.note}` : ""}`)
+    const p = parse(args, { branch: { type: "string" }, json: { type: "boolean" } })
+    const d = claimsData(ctx, str(p, "branch"))
+    if (bool(p, "json")) {
+      ctx.out(JSON.stringify(d, null, 2))
+      return 0
+    }
+    if (!d.claims.some((c) => c.items.length)) ctx.out("no claims")
+    for (const c of d.claims) {
+      ctx.out(`${c.branch}${c.here ? "  ← here" : ""}${c.local ? "  (working tree)" : ""}${c.note ? `  — ${c.note}` : ""}`)
       for (const e of c.items) ctx.out(`  ${e.ref}  ${e.title}`)
     }
-    const holders = new Map<string, Set<string>>()
-    for (const c of list) for (const e of c.items) holders.set(e.id, (holders.get(e.id) ?? new Set()).add(c.branch))
-    const contested = [...holders].filter(([, b]) => b.size > 1)
-    if (contested.length) {
+    if (d.contested.length) {
       ctx.out("\nclaimed by more than one branch (allowed):")
-      for (const [id, b] of contested) ctx.out(`  ${ctx.repo.byId.get(id) ? label(ctx.repo.byId.get(id) as Item) : id} → ${[...b].join(", ")}`)
+      for (const c of d.contested) ctx.out(`  ${c.ref} → ${c.branches.join(", ")}`)
     }
     return 0
   },
@@ -372,17 +404,23 @@ const pass: Command = {
   name: "pass",
   says: "write this session's note (one new file), or list the newest",
   enforces: "a session note is one new file: earlier ones are never rewritten",
-  usage: 'pass "<what changed, what is proven, what is left>" | pass --file <f> | pass --list [n]',
+  usage: 'pass "<what changed, what is proven, what is left>" | pass --file <f> | pass --list [n] [--json]',
   options: [
     { name: "--file", says: "read the note from a file instead of the arguments" },
     { name: "--list", says: "print the newest n notes across every branch instead of writing one", default: "5" },
+    { name: "--json", says: "with --list, print the notes as JSON: each one's date, instant, branch, file and text" },
   ],
-  examples: ['pass "Exporter keeps alpha; proof owed: tests/export-keeps-alpha"', "pass --file note.md", "pass --list 3"],
+  examples: ['pass "Exporter keeps alpha; proof owed: tests/export-keeps-alpha"', "pass --file note.md", "pass --list 3", "pass --list 3 --json"],
   run(args, ctx) {
-    const p = parse(args, { file: { type: "string" }, list: { type: "boolean" } })
+    const p = parse(args, { file: { type: "string" }, list: { type: "boolean" }, json: { type: "boolean" } })
+    if (bool(p, "json") && !bool(p, "list")) throw usageError(this)
     if (bool(p, "list")) {
       const n = positiveInt(p.positionals[0], 5, "pass --list")
       const passes = readPasses(ctx).slice(0, n)
+      if (bool(p, "json")) {
+        ctx.out(JSON.stringify(passes, null, 2))
+        return 0
+      }
       if (!passes.length) ctx.out("no session notes")
       for (const s of passes) ctx.out(`── ${s.date}  ${s.branch}${s.local ? "  (working tree)" : ""}\n${s.body}\n`)
       return 0
@@ -593,8 +631,8 @@ export default function coordination(options: Record<string, unknown> = {}): Plu
     checks: [claimsResolve, worktreePolicy(policy), trunkMoved, closedNotClaimed],
     commands: [openCommand(policy), claim, release, claims, prune, pass, eventCommand],
     views: [timelineView(readPasses)],
-    contributes: { "ui-views": [timelineUiView(readPasses)] },
-    // The timeline is a tab of naima ui when the ui plugin is loaded; without it, still a view.
+    contributes: { "ui-views": [claimsUiView(claimsData), timelineUiView(readPasses), notesUiView(readPasses)] },
+    // The claims are a panel of naima ui, the timeline and the session notes tabs, when the ui plugin is loaded; without it, still commands and a view.
     optional: ["ui-views"],
     summary: [whereWeWere, inHand],
     hooks: [noClosingOwnWork],

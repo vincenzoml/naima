@@ -131,13 +131,27 @@ opened and finished, each release and session, derived from the items and git);
 
 ## The window
 
-`naima ui` opens a window. Its first screen, **Home**, shows three panels:
+`naima ui` opens a window. Its first screen, **Home**, shows four panels:
 the summary (what `naima summary` prints), the gates and whether each holds,
-with the items blocking it (what `naima gates` prints), and what is next (what
-`naima view next` ranks). They are the same data the commands print, read
-from the files each time the page loads, so the window and the terminal never
-disagree. The other views are tabs: the metrics, the timeline, the coverage
-of the project's declared lists, and any a plugin adds. Every command: [reference](../reference/reference.md).
+with the items blocking it (what `naima gates` prints), what is next (what
+`naima view next` ranks), and the claims, who holds what on every branch
+(what `naima claims` prints). The other views are tabs:
+
+- **Boards**: one type's board, picked from a list, with the done items when
+  you tick the box (what `naima board <type>` prints).
+- **Session notes**: the newest notes, from every branch (what
+  `naima pass --list` prints).
+- **Item**: one item, picked by its reference — first its evidence, the files
+  attached to it and the tests that can prove it, each marked proves, refutes
+  or not yet; then its fields, its other links and its page (what
+  `naima show <item>` prints). Every item reference elsewhere in the window
+  links here.
+- the metrics, the timeline, the coverage of the project's declared lists, and
+  any a plugin adds.
+
+Each is the same data its command prints, read from the files each time the
+page loads, so the window and the terminal never disagree. Every command:
+[reference](../reference/reference.md).
 
 ## How long a `now` item has waited
 

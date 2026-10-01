@@ -63,10 +63,14 @@ with its token and one line per request, and `/data/metrics?metric=…&from=…&
 answers the same view as JSON. Where the window cannot open it falls back to
 the browser and says why in one line: report that line, it is the diagnosis.
 
-The window's first screen holds the summary, the gates and what is next;
-their data, `/data/summary`, `/data/gates` and `/data/next`, is exactly what
-`naima summary --json`, `naima gates --json` and `naima view --json next`
-print, so read the commands rather than the window.
+The window's first screen holds the summary, the gates, what is next and the
+claims; its other views include the boards, the session notes and one item
+with its evidence. Each view's data, `/data/<view>`, is exactly what its
+command prints with `--json` — `naima summary --json`, `naima gates --json`,
+`naima view --json next`, `naima claims --json`, `naima board <type> --json`
+(`/data/board?type=<type>`), `naima pass --list [n] --json`
+(`/data/notes?n=<n>`), `naima show <item> --json` (`/data/item?item=<item>`) —
+so read the commands rather than the window.
 
 A plugin adds a tab to that window by contributing a view to the `ui-views`
 extension point — `name`, `title`, `says`, `order`, `panel` (true puts it on
