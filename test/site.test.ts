@@ -39,16 +39,20 @@ test("the site serves what the page points at: the installers, llms.txt, the fav
 const AGENT_LINE =
   "This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them."
 
-test("the agent prompt is five lines: what Naima is, llms.txt, naima check, the skill, the line for the host's agent file", () => {
-  const lines = prompt.split("\n")
-  assert.equal(lines.length, 5, prompt)
-  assert.match(lines[0] as string, /^Naima is a project tracker/, "it opens by saying what Naima is")
-  assert.ok(prompt.includes(`${BASE}llms.txt`))
-  assert.match(prompt, /naima-tracker\/naima\/naima\.ts check/)
-  assert.match(prompt, /naima-tracker\/naima\/skills\/naima\/SKILL\.md/)
-  assert.match(prompt, /AGENTS\.md, CLAUDE\.md/)
-  assert.equal(lines[4], AGENT_LINE, "the line to paste is the last line, alone, verbatim")
-  assert.ok(read("llms.txt").includes(AGENT_LINE), "llms.txt gives the same line")
+test("the agent prompt is one line naming the site, and the site tells an agent everything: llms.txt and the page", () => {
+  assert.equal(prompt, `Please install ${BASE} in this repository.`)
+  assert.match(page, /<link rel="alternate" type="text\/plain" href="llms\.txt"/, "the page points an agent at llms.txt")
+  const hidden = /<section class="sr" aria-label="For AI agents">([\s\S]*?)<\/section>/.exec(page)?.[1] ?? ""
+  const llms = read("llms.txt")
+  for (const [where, text] of [["the page's block for agents", hidden], ["llms.txt", llms]] as const) {
+    assert.ok(text.includes(`${BASE}llms.txt`) || where === "llms.txt", `${where} names llms.txt`)
+    assert.match(text, /naima-tracker\/naima\/naima\.ts check/, where)
+    assert.match(text, /naima-tracker\/naima\/skills\/naima\/SKILL\.md/, where)
+    assert.match(text, /AGENTS\.md, CLAUDE\.md/, where)
+    assert.ok(text.includes(AGENT_LINE), `${where} gives the line to paste, verbatim`)
+  }
+  assert.match(llms, /install\.sh \| sh[\s\S]*naima rules --audience agents/)
+  assert.match(page, /<p class="about">Naima keeps/, "the page says what Naima is, for people")
   assert.ok(existsSync(join(NAIMA, RUNTIME_DIR, "skills", "naima", "SKILL.md")), "the skill the prompt names ships")
 })
 
@@ -59,6 +63,9 @@ test("the logo is NAIMA on one line, named for assistive technology, its AI lit;
   assert.deepEqual([...mark.matchAll(/class="ai">(\w)/g)].map((m) => m[1]), ["A", "I"])
   assert.match(page, /<span class="word branch" aria-hidden="true">/)
   assert.match(page, /site\/vertical-logo/, "the page says where the vertical logo is kept")
+  assert.match(page, /site\/horizontal-maain/, "and where the main → maain intro is kept")
+  const word = /<span class="letters">([\s\S]*?)<\/span>/.exec(page)?.[1] ?? ""
+  assert.equal(word.replace(/<[^>]+>/g, ""), "main", "the intro starts from main, nothing inserted")
   assert.match(page, /prefers-reduced-motion: reduce/)
   assert.doesNotMatch(page, /<(?:script|link)[^>]+(?:src|href)="https?:/, "no external script or stylesheet")
   const tokens = tokensOf(page)

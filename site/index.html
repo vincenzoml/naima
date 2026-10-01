@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Naima</title>
-<meta name="description" content="Naima, a project tracker kept as files in your repository, for software built by people and AI agents. We put the AI in your main.">
+<meta name="description" content="Naima, a project tracker kept as files in your repository, for software built by people and AI agents. We put the AI in your main. AI agents: the install procedure is https://vincenzoml.github.io/naima/llms.txt">
 <meta name="color-scheme" content="dark light">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="text/plain" href="llms.txt" title="Naima, for AI agents: how to install it">
 <script>
   // Decided before the first paint, so the final logo never flashes before its own animation.
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches && "animate" in document.documentElement) {
@@ -98,6 +99,8 @@
   /* The tagline, the install, the prompt. */
   .rest { display: grid; gap: var(--s-6); }
   .rest > * { min-width: 0; }
+  .hero { display: grid; gap: var(--s-3); justify-items: center; }
+  .about { margin: 0; max-width: 34em; text-align: center; font-size: 17px; line-height: 1.6; color: var(--muted); text-wrap: pretty; }
   .tagline { margin: 0; text-align: center; font-size: var(--t-lead); font-weight: 650; letter-spacing: -.015em; line-height: 1.35; }
   .tagline .ai { color: var(--accent); }
   .tagline .branch { font-size: .82em; padding: .26em .55em .3em .45em; vertical-align: .08em; }
@@ -117,6 +120,7 @@
     font: var(--t-code)/1.6 var(--mono); white-space: pre;
   }
   .box.prompt pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .box.prompt pre code { color: var(--fg); }
   @media (max-width: 520px) {
     .box pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 48px var(--s-4) var(--s-4); font-size: 12.5px; }
     .box pre .p { display: none; }
@@ -147,9 +151,18 @@
 </head>
 <body>
 <main>
+  <section class="sr" aria-label="For AI agents">
+    <h2>For AI agents</h2>
+    <p>If you were asked to install Naima in a repository, the whole procedure is at <a href="https://vincenzoml.github.io/naima/llms.txt">https://vincenzoml.github.io/naima/llms.txt</a>; read it and follow it.
+    In short, from the root of the git repository: run the installer one-liner for this system (below), run <code>deno run -A naima-tracker/naima/naima.ts check</code> until it passes,
+    read <code>naima-tracker/naima/skills/naima/SKILL.md</code> and work by it, and add this line, verbatim, to the repository’s agent instruction file (AGENTS.md, CLAUDE.md, or the one you read; if none, create AGENTS.md):</p>
+    <p>This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them.</p>
+  </section>
   <!-- The logo. A vertical variant, N / AI / MA stacked, is kept at the git tag
        site/vertical-logo; it was replaced by this one-line mark because it was too
-       big: the logo is a mark, and the tagline is the page's message. -->
+       big: the logo is a mark, and the tagline is the page's message. The intro
+       main → maain → NAIMA, which inserted an a, is kept at site/horizontal-maain;
+       it was replaced by main → naim → naima, letters rearranged, then the last a. -->
   <div class="stage">
     <h1>
       <span class="sr">Naima</span>
@@ -157,12 +170,15 @@
     </h1>
     <span class="word branch" aria-hidden="true">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25Zm-6 0a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Zm8.25-.75a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"/></svg>
-      <span class="letters"><i data-k="m">m</i><i data-k="a1" class="new">a</i><i data-k="a2" class="ai">a</i><i data-k="i" class="ai">i</i><i data-k="n">n</i></span>
+      <span class="letters"><i data-k="m">m</i><i data-k="a2" class="ai">a</i><i data-k="i" class="ai">i</i><i data-k="n">n</i></span>
     </span>
   </div>
 
   <div class="rest">
-    <p class="tagline">We put the <span class="ai">AI</span> in your <span class="branch"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25Zm-6 0a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Zm8.25-.75a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"/></svg><span class="sr">branch </span>main</span>.</p>
+    <div class="hero">
+      <p class="tagline">We put the <span class="ai">AI</span> in your <span class="branch"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25Zm-6 0a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Zm8.25-.75a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"/></svg><span class="sr">branch </span>main</span>.</p>
+      <p class="about">Naima keeps a project’s to-dos, bugs and plans as plain files inside its own repository, right next to the code. People and AI agents read and change the same files, review them the same way, and nothing lives anywhere else.</p>
+    </div>
 
     <section aria-label="Install">
       <div class="os" role="group" aria-label="Your system">
@@ -184,11 +200,7 @@
     <section aria-label="Or ask your agent">
       <p class="label">Or ask your agent:</p>
       <div class="box prompt">
-        <pre><code id="prompt">Naima is a project tracker whose items are files in this git repository, for software built by people and AI agents: install it here.
-Read https://vincenzoml.github.io/naima/llms.txt, the whole procedure, and from the repository root run the one-liner it gives for this OS.
-Run `deno run -A naima-tracker/naima/naima.ts check` (it must pass), then read naima-tracker/naima/skills/naima/SKILL.md and work by it.
-Add this line, verbatim, to the agent instruction file this repository has (AGENTS.md, CLAUDE.md, or the one you read; if none, create AGENTS.md):
-This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them.</code></pre>
+        <pre><code id="prompt">Please install https://vincenzoml.github.io/naima/ in this repository.</code></pre>
         <button type="button" class="copy" data-copy="prompt">Copy</button>
       </div>
     </section>
@@ -227,13 +239,12 @@ This repository tracks its work with Naima: at the start of every session read n
     })
   }
 
-  // The intro: main → maain → NAIMA, by FLIP, then still.
+  // The intro: main → naim by FLIP, then the last A and the rest of the page together, then still.
   const root = document.documentElement
   if (!root.classList.contains("intro")) return
   const word = document.querySelector(".word")
   const letters = [...word.querySelectorAll("i")]
   const marks = Object.fromEntries([...document.querySelectorAll(".mark i")].map((e) => [e.dataset.k, e]))
-  const fresh = word.querySelector(".new")
   const rest = [...document.querySelectorAll(".rest > *")]
   const out = "cubic-bezier(.16, 1, .3, 1)"
   const inOut = "cubic-bezier(.76, 0, .24, 1)"
@@ -244,26 +255,15 @@ This repository tracks its work with Naima: at the start of every session read n
   let over = false
   const play = async () => {
     // 1. The branch: main, the "ai" in it lit.
-    fresh.style.width = "0"
-    fresh.style.opacity = "0"
     await done(word.animate([{ opacity: 0, transform: "translate(-50%, -38%) scale(.96)", filter: "blur(6px)" }, { opacity: 1, transform: "translate(-50%, -50%)", filter: "blur(0)" }], { duration: 440, easing: out, fill: "both" }))
-    await wait(120)
+    await wait(260)
     if (over) return
 
-    // 2. maain: a second a drops in beside the m.
-    fresh.style.width = ""
-    const w = box(fresh).width
-    fresh.style.width = "0"
-    fresh.animate([{ width: "0px" }, { width: `${w}px` }], { duration: 340, easing: inOut, fill: "forwards" })
-    await done(fresh.animate([{ opacity: 0, transform: "translateY(-.9em) scale(.6)" }, { opacity: 1, transform: "none" }], { duration: 400, delay: 70, easing: out, fill: "forwards" }))
-    await wait(160)
-    if (over) return
-
-    // 3. Its letters travel into the line, N A I M A: those moving left arc over, those moving right
-    //    dip under, so no two cross on the same path.
+    // 2. Its letters travel into N A I M: those moving left arc over, those moving right dip under,
+    //    so no two cross on the same path.
     word.animate([{ borderColor: "var(--accent-line)", backgroundColor: "var(--surface)" }, { borderColor: "transparent", backgroundColor: "transparent" }], { duration: 360, easing: "ease-out", fill: "forwards" })
     word.querySelector("svg").animate([{ opacity: 1 }, { opacity: 0, transform: "scale(.5)" }], { duration: 260, easing: "ease-in", fill: "forwards" })
-    const order = { n: 0, a2: 1, i: 2, m: 3, a1: 4 }
+    const order = { n: 0, a2: 1, i: 2, m: 3 }
     const flights = letters.map((from) => {
       const to = marks[from.dataset.k]
       const a = box(from), b = box(to)
@@ -291,9 +291,10 @@ This repository tracks its work with Naima: at the start of every session read n
     await Promise.all(flights)
     if (over) return
 
-    // 4. Then the rest, and stillness.
+    // 3. naima: the last A fades in, and the rest of the page with it, at once; then stillness.
     word.remove()
-    await Promise.all(rest.map((e, i) => done(e.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], { duration: 520, delay: i * 70, easing: out, fill: "both" }))))
+    const last = done(marks.a1.animate([{ opacity: 0, transform: "translateX(-.12em)", filter: "blur(4px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 520, easing: out, fill: "both" }))
+    await Promise.all([last, ...rest.map((e, i) => done(e.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], { duration: 520, delay: i * 50, easing: out, fill: "both" })))])
   }
 
   const finish = () => {

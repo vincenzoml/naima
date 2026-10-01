@@ -4,6 +4,9 @@
 > naima-tracker/, for software built by people and AI agents. It runs from a
 > clone of Naima's dist branch, locked to one commit; Deno runs it.
 
+If you were asked to "install https://vincenzoml.github.io/naima/" in a
+repository, this file is the whole procedure: do steps 1 to 5 below, in order.
+
 ## Install it in a repository
 
 Work from the root of the git repository to track (`git rev-parse --show-toplevel`).
@@ -25,7 +28,8 @@ Work from the root of the git repository to track (`git rev-parse --show-topleve
 3. Commit it: `git add naima-tracker && git commit -m "Track this project with Naima"`.
 
 4. Learn the workflow: read `naima-tracker/naima/skills/naima/SKILL.md` and
-   follow it; every tracker change goes through the CLI. In it, `naima` means
+   follow it, and the project's rules, `naima rules --audience agents`; every
+   tracker change goes through the CLI. In it, `naima` means
    `deno run -A naima-tracker/naima/naima.ts`.
 
 5. Make every later session know it: add this line, verbatim, to the agent
