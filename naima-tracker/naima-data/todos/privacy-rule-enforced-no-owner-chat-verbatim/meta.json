@@ -1,7 +1,7 @@
 {
   "id": "d500536b-8b51-4d73-bc8d-a6b40c113e9f",
   "title": "Privacy rule, enforced: no owner-chat verbatim in items; attachments need explicit consent",
-  "status": "open",
+  "status": "partial",
   "created": "2026-10-01",
   "impact": "high",
   "priority": "now",
