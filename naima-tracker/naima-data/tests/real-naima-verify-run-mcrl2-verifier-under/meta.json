@@ -1,7 +1,7 @@
 {
   "id": "70f54810-ffa8-4fca-b2b2-0e8dc4294015",
   "title": "A real naima verify run of the mCRL2 verifier, under the launcher's fence, reaches the mCRL2 tools and returns a verdict other than error",
-  "status": "open",
+  "status": "passed",
   "created": "2026-10-01",
   "links": [
     {
@@ -14,5 +14,6 @@
   "priority": "now",
   "confidence": "measured",
   "triagedOn": "2026-10-01",
-  "effort": "S"
+  "effort": "S",
+  "redSeen": "2026-10-01"
 }

@@ -1,7 +1,7 @@
 {
   "id": "c8259401-3093-4ed2-a227-6fcca381ae28",
   "title": "mCRL2 model of the coordination protocol complete and checked, with the negative experiment (drop the fast-forward rule or the no-shared-file rule, showing the counterexample)",
-  "status": "partial",
+  "status": "done",
   "created": "2026-10-01",
   "links": [
     {
@@ -16,5 +16,12 @@
   "triagedOn": "2026-10-01",
   "runBy": "human",
   "humanBecause": "decision",
-  "effort": "XL"
+  "effort": "XL",
+  "attached": {
+    "negative-experiment-mcrl2-202607.0.txt": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  }
 }

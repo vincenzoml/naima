@@ -17,5 +17,6 @@
   "priority": "now",
   "confidence": "measured",
   "triagedOn": "2026-10-01",
-  "effort": "S"
+  "effort": "S",
+  "fixedOn": "2026-10-01"
 }

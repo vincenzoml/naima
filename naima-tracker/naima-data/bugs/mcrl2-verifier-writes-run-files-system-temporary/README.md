@@ -14,3 +14,9 @@ launcher sets and fences in), in `verifier-mcrl2/`; the system temporary
 directory only when there is no cache. `workBase` in
 `naima/src/plugins/verifier-mcrl2/index.ts`, tested in
 `test/plugins/verifier-mcrl2/mcrl2.test.ts`.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/mcrl2-coordination-check
+
+Fixed in 2c3a166 (run files under the per-user cache); proven by tests/real-naima-verify-run-mcrl2-verifier-under, passed.
