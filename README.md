@@ -46,7 +46,16 @@ branches, formal verifiers, the documentation rule — is a plugin.
 Requires [Deno](https://deno.com) and git. No dependencies, no releases, no
 binaries: a project carries one folder, `naima-tracker/`, and runs a clone of
 Naima's `dist` branch inside it — only the files that run Naima — locked to
-one commit. In any git repository:
+one commit. In the root of any git repository, one line does it all
+(it installs Deno too, when it is missing):
+
+```sh
+curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh     # macOS, Linux
+irm https://vincenzoml.github.io/naima/install.ps1 | iex          # Windows PowerShell
+```
+
+Those lines, and a prompt that has an agent do it, are on [the site](https://vincenzoml.github.io/naima/)
+(its source is `site/`). By hand, the same:
 
 ```sh
 git clone --branch dist https://github.com/vincenzoml/naima.git naima-tracker/naima

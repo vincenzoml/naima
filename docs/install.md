@@ -21,7 +21,26 @@ two projects on one machine never share one, and never clash.
 
 ## Bootstrap a project
 
-In a git repository that does not use Naima yet:
+In the root of a git repository, one line, from [the site](https://vincenzoml.github.io/naima/):
+
+```sh
+curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh     # macOS, Linux
+irm https://vincenzoml.github.io/naima/install.ps1 | iex          # Windows PowerShell
+```
+
+The installer (`site/install.sh`, `site/install.ps1` on `main`) refuses
+outside a git repository and needs git. When Deno is missing it installs it
+with Deno's official installer, saying so; with `NAIMA_NO_DENO_INSTALL` set it
+prints that command instead, and stops. Then it does the steps below, the
+commit aside: it clones the `dist` branch into `naima-tracker/naima/`, runs
+`init` and `naima check`, and prints what to do next. Run again in a project
+that has Naima, it only says so and runs `naima check`: it never moves the
+lock, which is `naima update`'s job. `NAIMA_SOURCE` and `NAIMA_REF` name
+another repository and branch to clone — a fork, or a path on this disk, as
+the installer's own tests do. For an agent, the site's `llms.txt` says the
+same.
+
+By hand, in a git repository that does not use Naima yet:
 
 ```sh
 git clone --branch dist https://github.com/vincenzoml/naima.git naima-tracker/naima

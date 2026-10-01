@@ -6,5 +6,6 @@
   "impact": "medium",
   "priority": "now",
   "confidence": "measured",
-  "triagedOn": "2026-09-30"
+  "triagedOn": "2026-10-01",
+  "effort": "M"
 }

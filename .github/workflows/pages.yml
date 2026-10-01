@@ -1,0 +1,41 @@
+# The project site: site/ as it is on main, published to GitHub Pages
+# (https://vincenzoml.github.io/naima/). Only the files under site/; nothing
+# is built. Pages must be enabled in the repository settings, with GitHub
+# Actions as its source.
+#
+# Pinned by major version: the official Pages actions, whose majors GitHub
+# keeps compatible.
+
+name: pages
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write # publish the site; nothing else
+      id-token: write # the deployment's proof that it comes from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

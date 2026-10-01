@@ -1,0 +1,99 @@
+# The installers the site serves (site/install.sh, site/install.ps1), run for
+# real on Linux, macOS and Windows: into a fresh git repository, again
+# (it only checks), and outside a repository (it refuses). The source is this
+# checkout, with its dist branch built here by scripts/dist.ts, so no network
+# is needed for Naima itself and the dist on GitHub is not involved.
+#
+# Actions pinned by commit like ci.yml; Deno by version.
+
+name: install
+on:
+  push:
+    paths: ["site/install.*", "scripts/dist.ts", "dist.json", "naima.ts", "src/**", ".github/workflows/install.yml"]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+env:
+  DENO_VERSION: v2.9.7
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Build the dist branch here
+        shell: bash
+        run: |
+          git config --global user.name ci && git config --global user.email ci@naima.invalid
+          deno run -A scripts/dist.ts
+
+      - name: install.sh
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          NAIMA_SOURCE: ${{ github.workspace }}
+          NAIMA_NO_DENO_INSTALL: "1"
+        run: |
+          set -eu
+          p="$RUNNER_TEMP/project"; o="$RUNNER_TEMP/outside"
+          mkdir -p "$p" "$o"; git -C "$p" init -q -b main
+          (cd "$p" && sh "$GITHUB_WORKSPACE/site/install.sh") | tee fresh.log
+          grep -q "all invariants hold" fresh.log
+          test -f "$p/naima-tracker/naima-data/naima.json"
+          test "$(find "$p/naima-tracker/naima" -name '*.test.ts' | wc -l)" -eq 0
+          test ! -e "$p/naima-tracker/naima/naima-tracker"
+          (cd "$p" && sh "$GITHUB_WORKSPACE/site/install.sh") | tee again.log
+          grep -q "already installed" again.log
+          if (cd "$o" && GIT_CEILING_DIRECTORIES="$RUNNER_TEMP" sh "$GITHUB_WORKSPACE/site/install.sh") 2> refused.log; then exit 1; fi
+          grep -q "not a git repository" refused.log
+
+      - name: install.ps1
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          NAIMA_SOURCE: ${{ github.workspace }}
+          NAIMA_NO_DENO_INSTALL: "1"
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $p = Join-Path $env:RUNNER_TEMP 'project'; $o = Join-Path $env:RUNNER_TEMP 'outside'
+          New-Item -ItemType Directory -Force $p, $o | Out-Null
+          git -C $p init -q -b main
+          $script = Join-Path $env:GITHUB_WORKSPACE 'site/install.ps1'
+          Push-Location $p
+          $fresh = & pwsh -NoProfile -File $script *>&1 | Out-String
+          if ($LASTEXITCODE -ne 0) { throw "fresh install failed:`n$fresh" }
+          Write-Host $fresh
+          if ($fresh -notmatch 'all invariants hold') { throw 'naima check did not pass' }
+          if (-not (Test-Path 'naima-tracker/naima-data/naima.json')) { throw 'no naima.json' }
+          if (Get-ChildItem -Recurse -Filter '*.test.ts' 'naima-tracker/naima') { throw 'tests reached the project' }
+          if (Test-Path 'naima-tracker/naima/naima-tracker') { throw "Naima's own items reached the project" }
+          $again = & pwsh -NoProfile -File $script *>&1 | Out-String
+          if ($LASTEXITCODE -ne 0) { throw "rerun failed:`n$again" }
+          if ($again -notmatch 'already installed') { throw "rerun did not say it is installed:`n$again" }
+          Pop-Location
+          Push-Location $o
+          $env:GIT_CEILING_DIRECTORIES = $env:RUNNER_TEMP
+          $refused = & pwsh -NoProfile -File $script *>&1 | Out-String
+          if ($LASTEXITCODE -eq 0) { throw "it did not refuse outside a repository:`n$refused" }
+          if ($refused -notmatch 'not a git repository') { throw "wrong refusal:`n$refused" }
+          Pop-Location
+          # The one-liner's own form: the script read as text and run in this session.
+          $q = Join-Path $env:RUNNER_TEMP 'piped'; New-Item -ItemType Directory -Force $q | Out-Null
+          git -C $q init -q -b main
+          Push-Location $q
+          Get-Content -Raw $script | Invoke-Expression
+          if (-not (Test-Path 'naima-tracker/naima-data/naima.json')) { throw 'the piped form did not install' }
+          Pop-Location

@@ -1,0 +1,43 @@
+# Naima
+
+> A project tracker whose items are files in your git repository, under
+> naima-tracker/, for software built by people and AI agents. It runs from a
+> clone of Naima's dist branch, locked to one commit; Deno runs it.
+
+## Install it in a repository
+
+Work from the root of the git repository to track (`git rev-parse --show-toplevel`).
+
+1. Run the installer for this system:
+   - macOS, Linux: `curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh`
+   - Windows (PowerShell): `irm https://vincenzoml.github.io/naima/install.ps1 | iex`
+
+   It needs git. It installs Deno with Deno's official installer when Deno is
+   missing (set `NAIMA_NO_DENO_INSTALL=1` to be told how instead). It clones
+   https://github.com/vincenzoml/naima.git, branch `dist`, into
+   `naima-tracker/naima/` (ignored by git), runs `naima init`, which writes
+   `naima-tracker/` and nothing else, and runs `naima check`. Run again, it
+   only checks. It refuses, in one line, outside a git repository.
+
+2. Check it: `deno run -A naima-tracker/naima/naima.ts check` must end with
+   `all invariants hold`.
+
+3. Commit it: `git add naima-tracker && git commit -m "Track this project with Naima"`.
+
+4. Learn the workflow: read `naima-tracker/naima/skills/naima/SKILL.md` and
+   follow it; every tracker change goes through the CLI. In it, `naima` means
+   `deno run -A naima-tracker/naima/naima.ts`.
+
+## By hand, without the installer
+
+```sh
+git clone --branch dist https://github.com/vincenzoml/naima.git naima-tracker/naima
+deno run -A naima-tracker/naima/naima.ts init
+deno run -A naima-tracker/naima/naima.ts check
+```
+
+## More
+
+- Installing and updating: https://github.com/vincenzoml/naima/blob/main/docs/install.md
+- Using Naima in a project: https://github.com/vincenzoml/naima/blob/main/docs/using-naima.md
+- Source: https://github.com/vincenzoml/naima

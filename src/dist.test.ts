@@ -50,6 +50,7 @@ const DEV_ONLY = [
   /^package\.json$/,
   /^dist\.json$/,
   /^scripts\//,
+  /^site\//,
   /^naima-tracker\//,
 ]
 

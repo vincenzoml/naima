@@ -1,0 +1,17 @@
+{
+  "id": "1bb2e34a-c6b3-48ac-8d19-f998be70ee25",
+  "title": "The install workflow passes on Ubuntu, macOS and Windows",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "3dd0fe64-8218-4d82-b870-fd66564f7a8c"
+    }
+  ],
+  "impact": "medium",
+  "priority": "now",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01"
+}
