@@ -1,0 +1,13 @@
+{
+  "id": "cfc41a94-a312-4a1a-8f20-1fc2be1f7d7b",
+  "title": "Installing a tagged release (NAIMA_REF=v1.0.0) is refused: init accepts only a commit on the source's main",
+  "status": "open",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "effort": "S",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "area": "install",
+  "gate": "release-1.1"
+}
