@@ -9,6 +9,7 @@ import { formatCheck } from "./format.ts"
 import { appliesTo, fieldError, fieldsOf, isOpenList, offList } from "./fields.ts"
 import { isUuid, README, titleWords } from "./item.ts"
 import { label } from "./lifecycle.ts"
+import { brokenEntryLinks } from "./pointer.ts"
 import { storedLinks } from "./repo.ts"
 import type { Check, Context, Finding, Item } from "./types.ts"
 
@@ -154,7 +155,14 @@ const duplicates: Check = {
   },
 }
 
-export const coreChecks: Check[] = [readable, identity, fields, values, links, layout, duplicates, formatCheck()]
+const entryPointers: Check = {
+  name: "entry-pointers",
+  says:
+    "every agent-harness entry file naima.json configures (entryFiles; sensible defaults absent it) names no path or link, plain-text or markdown, that is missing from disk",
+  run: (ctx) => brokenEntryLinks(ctx.root, ctx.config.entryFiles).map((b) => problem(`${b.file}: names ${JSON.stringify(b.target)}, which does not exist`)),
+}
+
+export const coreChecks: Check[] = [readable, identity, fields, values, links, layout, duplicates, entryPointers, formatCheck()]
 
 export interface CheckReport {
   problems: Finding[]

@@ -389,6 +389,8 @@ export interface Config {
   rename: Record<string, Record<string, string>>
   /** The project's own additive changes to the loaded plugins' types and fields. */
   extends: Extension[]
+  /** The agent-harness entry files `check` and `init --write-agent-pointer` act on, project-root relative. Absent: sensible defaults (`DEFAULT_ENTRY_FILES`). */
+  entryFiles: string[]
 }
 
 /** One contribution as the registry holds it: whose it is, the name it goes by, and its qualified id. */

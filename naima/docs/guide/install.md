@@ -117,9 +117,10 @@ configuration. `init` prints one line for each configuration it finds:
 
 With `naima init --write-excludes` it writes them: into the list a JSON file
 already has, or a new one; a file with comments (JSONC) is left as it is, and
-the line printed to add by hand. It is the only way Naima writes outside
-`naima-tracker/`, and the launcher grants exactly these files, for that
-command only. Test runners need nothing: the copy holds no tests.
+the line printed to add by hand. Along with `--write-agent-pointer`
+([below](#the-agent-harness-entry-point)), it is the only way Naima writes
+outside `naima-tracker/`, and the launcher grants exactly these files, for
+that command only. Test runners need nothing: the copy holds no tests.
 
 A long command is worth an alias:
 
@@ -128,6 +129,22 @@ alias naima='deno run -A "$(git rev-parse --show-toplevel)/naima-tracker/naima/n
 ```
 
 The rest of the documentation writes `naima <command>` for it.
+
+## The agent-harness entry point
+
+Each agent tool reads its own always-on file — `CLAUDE.md`, `AGENTS.md`, and
+the other sensible defaults `DEFAULT_ENTRY_FILES` names, or a project's own
+`entryFiles` in `naima.json` — mostly to point at the project's own rulebook.
+If the pointer names a file that was moved or deleted, nothing errors: the
+agent is simply taught nothing. `naima check` reports it: every plain-text
+path and markdown link a configured entry file holds, that exists, is
+resolved against disk, and one naming a missing file is a problem.
+
+`naima init --write-agent-pointer` additionally points each configured entry
+file that exists at Naima's own agent docs — `naima-tracker/naima/docs/agents/README.md`
+— with a one-line pointer, appended when the file does not already link
+there; without the flag the line is only printed, the same way
+`--write-excludes` prints its lines.
 
 ## Every run aligns the program
 

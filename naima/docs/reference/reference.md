@@ -27,7 +27,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 
 | Command | Plugin | What it does |
 |---|---|---|
-| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given |
+| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given |
 | [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
 | [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change |
 | [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files |
@@ -110,21 +110,23 @@ An item is a directory under `<tracker>/<TYPE>/<slug>/`: `README.md` for the pro
 
 ### naima init
 
-Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given.
+Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given.
 
 ```sh
-naima init [--write-excludes]
+naima init [--write-excludes] [--write-agent-pointer]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--write-excludes` |  | also write those lines into the host's own files: deno.json and tsconfig.json when they are plain JSON, .prettierignore; a file with comments is left to be edited by hand |
+| `--write-agent-pointer` |  | also write the one-line pointer into each configured entry file that exists and does not already have it |
 
 Examples:
 
 ```sh
 naima init
 naima init --write-excludes
+naima init --write-agent-pointer
 ```
 
 ### naima update
@@ -504,6 +506,7 @@ naima runs --json
 | `links` | every link uses a declared relation and names an existing item other than its own |
 | `layout` | every directory under the tracker root belongs to an item type or a plugin |
 | `duplicates` | items of one type with the same title are linked as duplicates, or reported |
+| `entry-pointers` | every agent-harness entry file naima.json configures (entryFiles; sensible defaults absent it) names no path or link, plain-text or markdown, that is missing from disk |
 | `one-format` | no item is still in a shape a format migration, the core's or a plugin's own, replaced: a tracker never mixes formats |
 
 **Summary sections**: `items`.
