@@ -16,5 +16,6 @@
   "effort": "M",
   "docs": [
     "naima/docs/agents/release.md"
-  ]
+  ],
+  "fixedOn": "2026-10-01"
 }

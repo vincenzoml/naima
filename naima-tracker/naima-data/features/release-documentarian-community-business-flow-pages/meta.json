@@ -22,5 +22,6 @@
     "naima/docs/agents/documentarian.md",
     "naima/docs/agents/community.md",
     "naima/docs/agents/business.md"
-  ]
+  ],
+  "fixedOn": "2026-10-01"
 }
