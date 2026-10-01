@@ -9,5 +9,9 @@
   "priority": "next",
   "effort": "L",
   "confidence": "diagnosed",
-  "triagedOn": "2026-09-29"
+  "triagedOn": "2026-09-29",
+  "fixedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/guide/prove-and-close.md"
+  ]
 }

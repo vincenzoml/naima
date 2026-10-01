@@ -14,3 +14,9 @@ printed as the counterexample. Each ships as its own plugin that contributes
 - [ ] VoxLogicA: spatial model checking over images; verdict per query
 - [ ] a fixture per adapter that runs in CI when the tool is present and is
       skipped, visibly, when it is not
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u16-adapters
+
+Built on claude/u16-adapters, commit 1605dc7: two opt-in plugins, verifier-mcrl2 and verifier-voxlogica, each off until naima.json names it. Counterexample for mCRL2 is the pbessolve evidence printed by lps2lts. The commits field is not in the locked tracker yet, so the commit is named here. Proof: tests/mcrl2-voxlogica-adapters-suites-red-then-green.
