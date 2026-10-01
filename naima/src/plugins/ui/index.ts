@@ -113,6 +113,7 @@ const uiCommand: Command = {
   name: "ui",
   says:
     "show the views the plugins contribute — the project's metrics first — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it",
+  enforces: "the views are served only on the loopback interface, and every request without this run's token is refused",
   usage: "ui [--browser | --no-open] [--log]",
   options: [
     { name: "--browser", says: "show it in the default browser instead of the window; Ctrl-C stops the server" },

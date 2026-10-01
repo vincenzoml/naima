@@ -125,12 +125,14 @@ export function renderReference(ctx: Context): string {
     "",
     "## Commands at a glance",
     "",
-    "| Command | Plugin | What it does |",
-    "|---|---|---|",
-    ...cliCommands.map((c) => `| [${code(c.name)}](#${anchor("naima " + c.name)}) | core | ${cell(c.says)} |`),
+    "Every command: what it does, and the policy or invariant it enforces — or nothing, and what it does instead. Each command's manifest says both, and `documented` fails on one that does not.",
+    "",
+    "| Command | Plugin | What it does | What it enforces |",
+    "|---|---|---|---|",
+    ...cliCommands.map((c) => `| [${code(c.name)}](#${anchor("naima " + c.name)}) | core | ${cell(c.says)} | ${cell(c.enforces ?? "")} |`),
     ...r.contributions("commands").map((c) => {
       const cmd = c.value as Command
-      return `| [${code(cmd.name)}](#${anchor("naima " + cmd.name)}) | ${c.plugin} | ${cell(cmd.says)} |`
+      return `| [${code(cmd.name)}](#${anchor("naima " + cmd.name)}) | ${c.plugin} | ${cell(cmd.says)} | ${cell(cmd.enforces ?? "")} |`
     }),
     "",
     "## Extension points",
@@ -315,6 +317,7 @@ export default function docs(options: Record<string, unknown> = {}): Plugin {
   const command: Command = {
     name: "docs",
     says: "print the reference generated from the loaded manifests; write it, or check that a file matches it",
+    enforces: "with --check, the file is what the manifests generate and every loaded contribution is documented, this field included: exit 1 otherwise",
     usage: "docs [--write [path]] [--check [path]]",
     options: [
       { name: "--write", says: "write the reference to the path; without one, to the reference option, or docs/reference.md" },

@@ -1,0 +1,11 @@
+{
+  "branch": "claude/f-u5-policy-map",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "464a6b4b-0eda-4942-adb0-c4e1a6082152",
+      "ref": "todos/operational-docs-what-each-command-does-what",
+      "title": "Operational docs: what each command does, what policies exist, how each is enforced"
+    }
+  ]
+}

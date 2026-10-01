@@ -137,6 +137,7 @@ export default function betaMarkers(options: Record<string, unknown> = {}): Plug
   const command: Command = {
     name: "beta",
     says: "list what is marked as shipped without proof, and the state of each proof",
+    enforces: "nothing: it only reads",
     usage: "beta [--check]",
     options: [{ name: "--check", says: "exit 1 when a marker is stale or dangling" }],
     examples: ["beta", "beta --check"],

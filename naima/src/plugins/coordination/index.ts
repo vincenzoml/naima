@@ -174,6 +174,7 @@ function freshClaim(ctx: Context, branch: string): Claim {
 const claim: Command = {
   name: "claim",
   says: "record that this branch is working on items (writes one file on this branch)",
+  enforces: "a claim belongs to a branch, never to a detached HEAD, and is one file on that branch",
   usage: 'claim <item>... [--note "why"] [--preparing | --not-preparing]',
   options: [
     { name: "--note", says: "why this branch holds the items; replaces the previous note" },
@@ -225,6 +226,7 @@ const claim: Command = {
 const release: Command = {
   name: "release",
   says: "drop this branch's claim on items; the last one removes the file, unless the branch is being prepared (claim --preparing)",
+  enforces: "only this branch's own claim is dropped, and only on items it holds; while the branch is being prepared, the emptied file is kept",
   usage: "release <item>...",
   examples: ["release export-drops"],
   run(args, ctx) {
@@ -253,6 +255,7 @@ const release: Command = {
 const claims: Command = {
   name: "claims",
   says: "who holds what, recombined from every branch",
+  enforces: "nothing: it only reads",
   usage: "claims [--branch <b>]",
   options: [{ name: "--branch", says: "only the claim of this branch" }],
   examples: ["claims", "claims --branch fix/export-alpha"],
@@ -324,6 +327,7 @@ const prune: Command = {
   name: "prune",
   says:
     "list (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds",
+  enforces: "the trunk is never pruned, and a branch with unmerged commits that no archive/<branch> tag holds is refused; nothing is removed without --write",
   usage: "prune [--write] | prune --branch <b> [--archive] [--write]",
   options: [
     { name: "--write", says: "remove the stale claim files, or the branch and its worktree, instead of listing what would go" },
@@ -367,6 +371,7 @@ const prune: Command = {
 const pass: Command = {
   name: "pass",
   says: "write this session's note (one new file), or list the newest",
+  enforces: "a session note is one new file: earlier ones are never rewritten",
   usage: 'pass "<what changed, what is proven, what is left>" | pass --file <f> | pass --list [n]',
   options: [
     { name: "--file", says: "read the note from a file instead of the arguments" },
@@ -402,6 +407,7 @@ function openCommand(policy: Policy): Command {
   return {
     name: "open",
     says: "start a piece of work: a worktree <worktrees>/<what> on a new branch <who>/<what> from the trunk, and its claim on the items, in one step",
+    enforces: "work happens on its own branch and worktree from the trunk, and its claim on the items is recorded in the same step",
     usage: 'open <item>... [--as <who>] [--name <what>] [--note "why"]',
     options: [
       { name: "--as", says: "who works: the branch's first segment", ...(policy.who ? { default: policy.who } : {}) },

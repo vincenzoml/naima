@@ -117,6 +117,8 @@ export function likelyDuplicatesOf(ctx: Context, type: string, title: string): I
 const newCommand: Command = {
   name: "new",
   says: "open an item",
+  enforces:
+    "every field is validated against its type's declarations before the item exists, and every write hook runs: a typo or a refusal leaves nothing behind; an archive type takes no new item",
   usage: 'new <type> "<title>" [--section <s>] [--set field=value]... [--dedupe]',
   options: [
     { name: "--section", says: "the heading the item is grouped under on its board" },
@@ -153,6 +155,7 @@ const newCommand: Command = {
 const show: Command = {
   name: "show",
   says: "print one item: fields, links in both directions, attachments, prose",
+  enforces: "nothing: it only reads",
   usage: "show <item>",
   examples: ["show export-drops", "show bugs/export-drops-alpha-channel"],
   run(args, ctx) {
@@ -179,6 +182,7 @@ const show: Command = {
 const list: Command = {
   name: "list",
   says: "list items, most urgent first",
+  enforces: "nothing: it only reads",
   usage: "list [type] [--open]",
   options: [{ name: "--open", says: "only items whose status is in the open category" }],
   examples: ["list", "list bugs --open"],
@@ -196,6 +200,8 @@ const list: Command = {
 const set: Command = {
   name: "set",
   says: "set fields on an item; an empty value removes the field",
+  enforces:
+    "every pair is validated against the declared fields and passes every write hook (a status moves only along its type's transitions, and each plugin's own hooks); nothing is written unless all pass",
   usage: "set <item> field=value...",
   examples: ["set export-drops status=partial area=export", "set export-drops area="],
   run(args, ctx) {
@@ -211,6 +217,7 @@ const set: Command = {
 const link: Command = {
   name: "link",
   says: "link two items; only this direction is stored, the inverse is derived",
+  enforces: "the relation is a declared one and an item never links to itself; only one direction is stored",
   usage: "link <from> <relation> <to>",
   examples: ["link export-keeps verifies export-drops", "link export-drops blocked-by release-notes"],
   run(args, ctx) {
@@ -226,6 +233,7 @@ const link: Command = {
 const unlink: Command = {
   name: "unlink",
   says: "remove a stored link",
+  enforces: "only a stored link is removed: an inverse is derived, never stored",
   usage: "unlink <from> <relation> <to>",
   examples: ["unlink export-keeps verifies export-drops"],
   run(args, ctx) {
@@ -271,6 +279,7 @@ const note: Command = {
   name: "note",
   says:
     "append a dated, attributed note to an item's Notes section: the writer's own words, never a person's message pasted in; earlier notes are never rewritten",
+  enforces: "notes are append-only and attributed: the writer is named, earlier notes are never rewritten, and a note holds no heading of its own",
   usage: 'note <item> "<text>" [--by <who>] | note <item> --file <f> [--by <who>]',
   options: [
     { name: "--by", says: "who writes the note; without it, git's user.name" },
@@ -297,6 +306,7 @@ const note: Command = {
 const describe: Command = {
   name: "describe",
   says: "replace an item's description, keeping its title line and its Notes section",
+  enforces: "the title line and the Notes section stay as they are: a description holding a title or a Notes section is refused",
   usage: 'describe <item> "<text>" | describe <item> --file <f>',
   options: [{ name: "--file", says: "read the description from a file instead of the arguments" }],
   examples: ['describe export-drops "Export to PNG loses the alpha channel; done when every bit depth keeps it."', "describe export-drops --file triaged.md"],
@@ -319,6 +329,7 @@ const describe: Command = {
 const move: Command = {
   name: "move",
   says: "move an item to another type, keeping its id and links; refuses a status or field the new type does not declare",
+  enforces: "the id and links are kept; a status or field the new type does not declare is refused unless --force",
   usage: "move <item> <type> [--force]",
   options: [{ name: "--force", says: "move it even with a status or a field the new type does not declare, kept as they are" }],
   examples: ["move export-drops features", "move export-drops features --force"],
@@ -352,6 +363,7 @@ const move: Command = {
 const check: Command = {
   name: "check",
   says: "run every invariant; exit 1 on any problem",
+  enforces: "every invariant the loaded plugins declare (their checks): exit 1 on any problem; with --staged, the ones the pre-commit hook runs",
   usage: "check [--staged] [--all-worktrees]",
   options: [
     { name: "--staged", says: "run only the checks that read the change staged for the next commit: what the pre-commit hook runs" },
@@ -410,6 +422,7 @@ export async function alongside(ctx: Context): Promise<string[]> {
 const board: Command = {
   name: "board",
   says: "print a type's board, grouped by section, most urgent first; at its foot, the summary sections that stand beside the work, such as the metrics",
+  enforces: "nothing: it prints derived state, never stored",
   usage: "board <type> [--all]",
   options: [{ name: "--all", says: "also list the items whose status is done" }],
   examples: ["board bugs", "board todos --all"],
@@ -437,6 +450,7 @@ function formatOf(args: string[]): { format: Format; rest: string[] } {
 const view: Command = {
   name: "view",
   says: "print a plugin view — as text, its data as JSON, or markdown; without a name, list them",
+  enforces: "nothing: it prints derived state, never stored",
   usage: "view [--json | --markdown] [name] [args...]",
   options: [
     { name: "--json", says: "print the view's data as JSON, as the view derived it" },
@@ -460,6 +474,7 @@ const view: Command = {
 const summary: Command = {
   name: "summary",
   says: "where the project stands, in one screen: every plugin's section",
+  enforces: "nothing: it prints derived state, never stored",
   usage: "summary [--json | --markdown]",
   options: [
     { name: "--json", says: "print the sections as one JSON object, section name to the data it rendered" },
@@ -495,6 +510,7 @@ const plugins: Command = {
   name: "plugins",
   says:
     "list loaded plugins, the extension points each declares, what each uses of the others, and what each contributes to every point; a contribution's qualified id is <plugin>/<name>, shown when its short name is shared or renamed",
+  enforces: "nothing: it only reads",
   usage: "plugins",
   examples: ["plugins"],
   run(_args, ctx) {
@@ -530,6 +546,7 @@ export const declaredRuns = (ctx: Context): string[] => [...new Set(starting(ctx
 const runs: Command = {
   name: "runs",
   says: "list the external programs the loaded contributions declare they start (a model checker, say), which the launcher allows besides git",
+  enforces: "nothing: it lists the programs the launcher allows besides git; the launcher refuses any other",
   usage: "runs [--json]",
   options: [{ name: "--json", says: "print them as one JSON list: what the launcher reads" }],
   examples: ["runs", "runs --json"],
@@ -571,6 +588,7 @@ function valueLines(ctx: Context, def: FieldDef): string[] {
 const types: Command = {
   name: "types",
   says: "list item types, their statuses and fields, then every field's list of values with how many items hold each",
+  enforces: "nothing: it only reads",
   usage: "types",
   examples: ["types"],
   run(_args, ctx) {

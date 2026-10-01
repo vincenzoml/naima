@@ -296,6 +296,8 @@ function readExcusePhrases(options: Record<string, unknown>): string[] {
 const close: Command = {
   name: "close",
   says: "archive a resolved item: fixed, and proven by an item that has passed",
+  enforces:
+    "an item is archived only when fixed and proven: fixedOn set and a verified-by item that has passed, with every write hook agreeing; --force takes a hook's refusal on, for the one who owns the evidence",
   usage: "close <item> [--force]",
   options: [{
     name: "--force",
@@ -332,6 +334,7 @@ const close: Command = {
 const bugs: Command = {
   name: "bugs",
   says: "how many bugs have no code written, and how many are fixed but unproven",
+  enforces: "nothing: it only counts",
   usage: "bugs",
   examples: ["bugs"],
   run(_args, ctx) {

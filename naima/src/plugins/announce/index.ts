@@ -109,6 +109,7 @@ export default function announce(options: Record<string, unknown> = {}): Plugin 
     name: "announce",
     says:
       "the features that may be announced — user-facing, shipped, documented and checked by a person or end to end — major first: the source of release notes",
+    enforces: "nothing: it only lists, and only features user-facing, shipped, documented and checked by a person or end to end",
     usage: "announce [--since <date>] [--gate <gate>] [--all] [--json]",
     options: [
       { name: "--since", says: "only features shipped (fixedOn) on or after the date, YYYY-MM-DD" },

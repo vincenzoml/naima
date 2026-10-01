@@ -416,6 +416,8 @@ export default function hooks(options: PluginOptions = {}): Plugin {
     name: "hooks",
     says:
       "the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it",
+    enforces:
+      "the installed pre-commit hook runs the staged checks and the companion rules before every commit; install refuses to take over a core.hooksPath that is not Naima's unless --force",
     usage: "hooks [list] | hooks install [--force] | hooks uninstall",
     options: [{ name: "--force", says: "install even when core.hooksPath already names another directory, whose hooks then stop running" }],
     examples: ["hooks", "hooks install", "hooks uninstall"],

@@ -256,6 +256,7 @@ export default function loop(options: Record<string, unknown> = {}): Plugin {
     name: "loop",
     says:
       "the non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his",
+    enforces: "the loop runs only on a target chosen before starting — a work list, an epic or a gate —; with --check, exit 1 while it is not stopped",
     usage: "loop <target> [--every <minutes>] [--json] [--check]",
     options: [
       { name: "--every", says: `the wake-up cadence in minutes, for this run; default the plugin's option every (${DEFAULT_EVERY})` },

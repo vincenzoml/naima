@@ -22,6 +22,7 @@ const PLUGIN = (contract: number, greeting = "open") =>
   commands: [{
     name: "count-open",
     says: "count the open items",
+    enforces: "nothing: it only counts",
     usage: "count-open",
     examples: ["count-open"],
     run: (_args, ctx) => { ctx.out(api.plugin + ": " + ctx.repo.items.filter((i) => api.isOpen(ctx, i)).length + " ${greeting}" + (options.suffix ?? "")); return 0 },
