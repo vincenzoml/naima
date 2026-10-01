@@ -23,3 +23,7 @@ ci.yml now runs bun test --timeout 30000 ./test/, the flag the local gates use, 
 ### 2026-10-01 — Vincenzo Ciancia, on claude/no-dist
 
 ci.yml is removed (owner's decision, 2026-10-01); the note above no longer applies. The gate is local: bun test --timeout 30000 ./test/, in AGENTS.md.
+
+### 2026-10-01 — Claude, on claude/file-bun-timeout
+
+Root cause of why plain `bun test ./test/` (no flag) still timed out: bunfig.toml's `[test] timeout` key does not exist in Bun — Bun's bunfig parser silently drops it, so it never applied despite looking like valid config. Confirmed empirically (a throwaway slow test still failed at the 5000ms default with the same bunfig.toml present and no `--timeout`) and against public reports of the same gap in Bun 1.4.x. Fix: per-test `{ timeout: 30_000 }` (the existing `SLOW` constant) on every test slow enough to graze the default, not only the one named in the original report — added to the three remaining slow tests in test/init.test.ts and to four in test/distribution.test.ts (a new local `SLOW` constant there, same shape). bunfig.toml is left in place as documentation of intent but is inert; AGENTS.md's gate (`bun test --timeout 30000 ./test/`) still stands as the belt to this suspenders. Proof: `bun test ./test/` (no flags) red before (7 fail, all 5000ms timeouts in init.test.ts/distribution.test.ts) then green (258 pass/0 fail) after, logged in the session scratchpad; `deno task verify` and `node --test "test/**/*.test.ts"` both green.

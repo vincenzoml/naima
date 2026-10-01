@@ -66,7 +66,7 @@ test("init refuses to lock a commit its origin lacks, or a Naima with uncommitte
   }
 })
 
-test("init strips the credentials from an origin URL before it writes the lock", async () => {
+test("init strips the credentials from an origin URL before it writes the lock", SLOW, async () => {
   const w = world()
   try {
     git(w.program, "remote", "set-url", "origin", "https://someone:ghp_secret@example.invalid/naima.git")
@@ -81,7 +81,7 @@ test("init strips the credentials from an origin URL before it writes the lock",
   }
 })
 
-test("init's next step names a type the loaded plugins really create, not a hard-coded one", async () => {
+test("init's next step names a type the loaded plugins really create, not a hard-coded one", SLOW, async () => {
   const w = world()
   try {
     const tasks: Plugin = {
@@ -100,7 +100,7 @@ test("init's next step names a type the loaded plugins really create, not a hard
   }
 })
 
-test("init prints the exclude line for each host tool configuration it finds, and writes them only with --write-excludes", async () => {
+test("init prints the exclude line for each host tool configuration it finds, and writes them only with --write-excludes", SLOW, async () => {
   const w = world()
   try {
     writeFileSync(join(w.root, "deno.json"), JSON.stringify({ tasks: { test: "deno test" } }, null, 2) + "\n")

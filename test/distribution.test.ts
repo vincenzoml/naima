@@ -19,6 +19,12 @@ const NAIMA = join(dirname(dirname(fileURLToPath(import.meta.url))), "naima")
 
 if (spawnSync("deno", ["--version"]).status !== 0) throw new Error("deno is not on PATH: these tests run Naima through its launcher, under Deno")
 
+// bugs/bun-s-5-second-default-test-timeout: these tests clone the whole checkout and run
+// several `naima` invocations through the launcher — slow enough, under load, to graze Bun's
+// 5 second per-test default. Node's test runner honors the same option; Deno's test shim
+// ignores it.
+const SLOW = { timeout: 30_000 }
+
 /** A world on disk: Naima's source as a git repository, its runtime in naima/, a host project, and the user's cache. */
 function world() {
   const base = mkdtempSync(join(tmpdir(), "naima-dist-"))
@@ -131,7 +137,7 @@ test("bootstrap, init, new, check: the only addition is naima-tracker/, and git 
   }
 })
 
-test("a second clone of the host, a new worktree and another project copy the locked commit from the user's cache, with the source gone", () => {
+test("a second clone of the host, a new worktree and another project copy the locked commit from the user's cache, with the source gone", SLOW, () => {
   const w = world()
   try {
     bootstrap(w)
@@ -170,7 +176,7 @@ test("a second clone of the host, a new worktree and another project copy the lo
   }
 })
 
-test("naima update pulls, migrates and records the new commit; a normal run never pulls", () => {
+test("naima update pulls, migrates and records the new commit; a normal run never pulls", SLOW, () => {
   const w = world()
   try {
     bootstrap(w)
@@ -424,7 +430,7 @@ test("under the launcher, the trunk reads another worktree's uncommitted claim f
   }
 })
 
-test("naima carry round-trips copy → vendored → submodule → copy, the checks passing and the same commit running in each mode", () => {
+test("naima carry round-trips copy → vendored → submodule → copy, the checks passing and the same commit running in each mode", SLOW, () => {
   const w = world()
   try {
     bootstrap(w)
@@ -483,7 +489,7 @@ function distOf(source: string, main: string, parent?: string): string {
   return commit
 }
 
-test("a project locked to a dist commit keeps running its clone; naima update moves it to main, by its Source-Commit trailer, as a copy", () => {
+test("a project locked to a dist commit keeps running its clone; naima update moves it to main, by its Source-Commit trailer, as a copy", SLOW, () => {
   const w = world()
   try {
     cacheOf = w.cache
