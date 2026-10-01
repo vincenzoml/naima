@@ -11,7 +11,7 @@ import { isUuid, README, titleWords } from "./item.ts"
 import { label } from "./lifecycle.ts"
 import { brokenEntryLinks } from "./pointer.ts"
 import { storedLinks } from "./repo.ts"
-import type { Check, Context, Finding, Item } from "./types.ts"
+import type { Check, CheckOptions, Context, Finding, Item } from "./types.ts"
 
 const problem = (message: string, item?: Finding["item"]): Finding => (item ? { level: "problem", message, item } : { level: "problem", message })
 const note = (message: string): Finding => ({ level: "note", message })
@@ -173,12 +173,12 @@ export interface CheckReport {
  * Run every check, in load order, awaiting the ones that are async — with `staged`, only those that read the
  * change staged for the next commit. A check that throws or rejects is itself a problem, never a crash.
  */
-export async function runChecks(ctx: Context, opts: { staged?: boolean } = {}): Promise<CheckReport> {
+export async function runChecks(ctx: Context, options: CheckOptions = {}): Promise<CheckReport> {
   const findings: Finding[] = []
   for (const check of ctx.registry.checks) {
-    if (opts.staged && check.staged !== true) continue
+    if (options.staged && check.staged !== true) continue
     try {
-      findings.push(...await check.run(ctx))
+      findings.push(...await check.run(ctx, options))
     } catch (e) {
       findings.push(problem(`check "${check.name}" failed to run: ${message(e)}`))
     }
