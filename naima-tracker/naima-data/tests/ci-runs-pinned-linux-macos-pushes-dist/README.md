@@ -26,3 +26,7 @@ performed: the workflow has not run; nothing is pushed.
 ### 2026-10-01 — Claude, on claude/evidence-close-2
 
 Evidence-close-2: not run. .github/workflows/ now holds only pages.yml — no ci.yml exists to inspect or push to, and the dist branch this test checks for is being replaced by copy-on-install (features/copy-install-program-plain-copy-naima-from). The gesture as written no longer applies; left open for whoever updates or retires it alongside the dist removal.
+
+### 2026-10-01 — Claude, on claude/evidence-close-3
+
+Withdrawn: references both CI runs and the dist job, neither of which exist any more — ci.yml was removed (AGENTS.md: 'No CI runs them... .github/ holds only pages.yml') and the dist branch was replaced by copy-on-install (see closed/copy-install-program-plain-copy-naima-from). What this test would prove no longer applies. Re-enabling CI, if ever prioritized, is tracked at todos/re-enable-test-suites-ci.

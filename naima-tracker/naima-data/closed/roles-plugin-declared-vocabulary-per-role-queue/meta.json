@@ -1,7 +1,7 @@
 {
   "id": "ad82fbef-7401-4f0a-baac-231d358c09db",
   "title": "Roles plugin: declared vocabulary and a per-role queue view",
-  "status": "requested",
+  "status": "closed",
   "created": "2026-10-01",
   "impact": "low",
   "priority": "later",
@@ -25,5 +25,7 @@
   "docs": [
     "naima/docs/guide/read-the-board.md#a-roles-queue",
     "naima/docs/agents/coordinator-and-workers.md#the-jobs"
-  ]
+  ],
+  "closedFrom": "features",
+  "closedOn": "2026-10-01"
 }

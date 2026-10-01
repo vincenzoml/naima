@@ -1,0 +1,20 @@
+{
+  "id": "ee37aa77-1ce2-42fa-831d-78abfa6f54d0",
+  "title": "plain bun test ./test/ passes under load (verifies bun-test-ignores-bunfig-toml-s-30)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "diff",
+  "area": "testing",
+  "priority": "now",
+  "impact": "medium",
+  "effort": "S",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "bbdc3275-754a-46bb-9170-6d40f9ed1fbd"
+    }
+  ]
+}
