@@ -171,3 +171,17 @@ every write hook that would refuse it has a check counterpart, so the hand
 edit fails `naima check` — `closed-not-claimed` on an archived item the
 branch you stand on still claims, `property-evidence` on a `holds` with no
 current run.
+
+## Safety rules
+
+- **No attachment with no consent record.** Enforced by the check
+  `attachment-consent`: it fails a file copied in by hand, a record whose
+  file is gone, and the owner's file with no recorded yes.
+- **No secret in an item or an attachment.** Enforced by the check `secrets`.
+- **A fixed item is never closed without a passing proof.** Enforced by
+  `naima close` and the check `closed-carries-proof`.
+- **No write a command would refuse, made by hand.** Enforced by the check
+  counterpart of every write hook that protects a state: `closed-not-claimed`,
+  `property-evidence` and `epics`.
+- **Evidence against a claim outweighs evidence for it.** Enforced by `naima
+  close`, which refuses an item a verifying item refutes.

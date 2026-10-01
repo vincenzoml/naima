@@ -58,3 +58,14 @@ and that holds none.
 A scratch file for what you are doing right now (for example an untracked
 `WIP.md`) is fine, and goes with the worktree. A defect, a task, a
 verification or a rule written there is lost with it: those are items.
+
+## Safety rules
+
+- **Every worktree carries a claim.** Enforced by the check `worktree-policy`:
+  a worktree made by hand with `git worktree add` still fails it if it holds
+  no claim file.
+- **A worktree and its branch are named by one scheme.** Enforced by the same
+  check: a name off the `<who>/<what>` scheme fails.
+- **`open` never reuses a name or a branch already in use.** Enforced:
+  `naima open` refuses a branch that exists and a folder that exists, before
+  touching either.

@@ -103,3 +103,42 @@ Stop. Make it a directory of uuid-named files.
 - **Reading any branch.** That is how the views work.
 - **Several branches claiming one item.** `naima claim` says who else holds
   it rather than refusing: the point is to know, not to lock.
+
+## The shared-stash hazard
+
+`git stash` is one stack **per repository**, not per worktree: every worktree
+shares it. A bare `git stash pop` run in your checkout can apply another
+session's stash, landing its half-finished work in your files; a stash taken
+just to measure a clean baseline can swap files out from under a process that
+is reading them right now.
+
+- **Prefer a temporary WIP commit** over a stash: `git commit -m "WIP: not
+  reviewed"`, undone later with `git reset --soft HEAD^` or amended away. A
+  commit is yours alone; the stash stack is not.
+- **If a stash is unavoidable**, push it with a unique message (`git stash
+  push -m "<branch>-<why>"`), apply it by its sha
+  (`git stash apply stash@{n}` only right after pushing it, or
+  `git apply "$(git stash show -p <sha>)"`), and never bare `pop`. Drop it by
+  finding the entry again with the message, not by position — position shifts
+  as other sessions push and pop.
+- **Never stash to measure a baseline while a resource is running.** A
+  baseline is recorded once and read back
+  ([closing a worktree](closing-a-worktree.md#5-run-the-gates-and-read-what-breaks)),
+  not re-measured by temporarily removing someone else's changes.
+
+## Safety rules
+
+- **A worktree writes to its own branch and nowhere else.** Enforced: no
+  command in Naima writes to a path outside the worktree it was invoked in.
+- **Nobody commits on the trunk while a branch is being prepared.** Convention
+  while `preparing` is unset; checked once set (`naima claim --preparing`,
+  [closing a worktree](closing-a-worktree.md#0-say-the-branch-is-being-prepared)).
+- **Every merge to the trunk is a fast-forward.** Convention: `git merge
+  --ff-only` refuses on its own when it is not one; nothing papers over the
+  refusal with `--no-ff` or a force.
+- **No shared mutable file.** Convention, kept by the one-file-per-session
+  shape above; nothing yet fails a hand-rolled shared log filed outside the
+  tracker — candidate property for a later model.
+- **Never `git stash pop` in a shared worktree set.** Candidate property for
+  a later model: nothing yet checks that a stash was applied by sha rather
+  than popped; until then this is read, not verified.
