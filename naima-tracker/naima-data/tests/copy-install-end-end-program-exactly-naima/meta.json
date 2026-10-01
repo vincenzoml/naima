@@ -1,7 +1,7 @@
 {
   "id": "505baf13-7c98-482d-b4d7-3887c0978cb8",
   "title": "Copy-on-install end to end: the program is exactly naima/ plus its copy record, copied from the per-user cache offline, updated to main, a dist lock moved by its trailer (on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-10-01",
   "runBy": "agent",
   "effort": "S",
@@ -11,5 +11,6 @@
       "rel": "verifies",
       "id": "18a6662b-aab1-4833-80c0-63b109e48736"
     }
-  ]
+  ],
+  "confidence": "measured"
 }

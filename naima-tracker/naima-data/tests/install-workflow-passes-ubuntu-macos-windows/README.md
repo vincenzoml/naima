@@ -22,3 +22,9 @@ then exit 0). The same three cases run in `src/site.test.ts` on Deno, Node
 and Bun. Windows: not run anywhere yet — no PowerShell on this machine, and
 Naima itself has never been exercised on Windows (docs/install.md, other
 runtimes).
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/no-dist
+
+On claude/no-dist (copy-on-install, no dist branch): the install workflow passed on ubuntu-latest, macos-latest and windows-latest at aebd210 (run 36833695025) and at 096548f (run 36834341457): install.sh and install.ps1 clone main shallow into a temporary folder, run its init, which copies naima/ through the runner's default per-user cache; the program has no .git, no *.test.ts, no tracker items, no AGENTS.md or CLAUDE.md, and holds .naima-copy.json; rerun says already installed; outside a repository it refuses.
