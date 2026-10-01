@@ -183,3 +183,18 @@ test("install.sh installs Naima in a git repository, says so when run again, and
     removeTemp(base)
   }
 })
+
+// bugs/install-ps1-fails-machine-without-deno-after: Deno's Windows installer puts deno.exe in
+// ~\.deno\bin and adds it to the user's PATH, not to the running session's, so a lookup on the
+// path alone fails right after a fresh install. No test runs PowerShell, so this reads the script:
+// the one lookup, path then the installer's folder, is made both before and after installing.
+test("install.ps1 looks for Deno where its installer puts it, before and after installing it", () => {
+  const ps1 = read("install.ps1")
+  const install = ps1.indexOf("Invoke-RestMethod https://deno.land/install.ps1 | Invoke-Expression")
+  assert.ok(install > 0, "install.ps1 runs Deno's official installer")
+  const find = /function Find-Deno \{[\s\S]*?\n {2}\}/.exec(ps1)?.[0] ?? ""
+  assert.ok(find.includes("Get-Command deno") && find.includes("'.deno'") && find.includes("'deno.exe'"), "Find-Deno looks on the path, then in the installer's folder")
+  const after = ps1.slice(install)
+  assert.match(after.split("\n").slice(0, 3).join("\n"), /\$Deno = Find-Deno/, "after installing, the same lookup runs again")
+  assert.ok(!/\$Deno = Get-Command deno/.test(after), "never the path alone after installing")
+})

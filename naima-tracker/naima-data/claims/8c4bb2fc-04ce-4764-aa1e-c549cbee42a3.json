@@ -1,0 +1,22 @@
+{
+  "branch": "claude/windows-proof",
+  "claimedAt": "2026-10-01",
+  "note": "Prove install.ps1 and naima init on a real Windows machine",
+  "items": [
+    {
+      "id": "5a847fdc-30f8-48c7-9e4f-9f58d8912aa7",
+      "ref": "tests/install-ps1-installs-naima-windows-machine-fresh",
+      "title": "install.ps1 installs Naima on a Windows machine: fresh, again, refusing outside a repository, and the piped form"
+    },
+    {
+      "id": "0c72d1bb-a5c6-4244-9657-8c4d99ff1c44",
+      "ref": "bugs/fresh-naima-init-fails-windows-git-s",
+      "title": "Fresh naima init fails on Windows: git's forward-slash toplevel never matched real()'s backslash path"
+    },
+    {
+      "id": "2f7f1eb6-2886-43a1-9dde-48222fc0dde3",
+      "ref": "bugs/install-ps1-fails-machine-without-deno-after",
+      "title": "install.ps1 fails on a machine without Deno: after Deno's installer runs it looks only on the session path, not in ~/.deno/bin"
+    }
+  ]
+}

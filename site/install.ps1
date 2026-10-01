@@ -44,20 +44,25 @@ function Install-Naima {
   $Root = (Resolve-Path $Root).Path
   if ($Root -ne (Get-Location).Path) { Say "installing at the top of this repository: $Root" }
 
-  $Deno = Get-Command deno -ErrorAction SilentlyContinue
-  if (-not $Deno) {
+  # On the path, else where Deno's installer puts it: that installer adds its folder to the
+  # user's PATH, not to this session's, so right after installing only the folder finds it.
+  function Find-Deno {
+    $found = Get-Command deno -ErrorAction SilentlyContinue
+    if ($found) { return $found }
     $Home_ = if ($env:DENO_INSTALL) { $env:DENO_INSTALL } else { Join-Path $HOME '.deno' }
     $Candidate = Join-Path (Join-Path $Home_ 'bin') 'deno.exe'
-    if (Test-Path $Candidate) { $Deno = Get-Item $Candidate }
+    if (Test-Path $Candidate) { return Get-Item $Candidate }
+    return $null
   }
+  $Deno = Find-Deno
   if (-not $Deno) {
     if ($env:NAIMA_NO_DENO_INSTALL) {
       throw "naima: Deno is missing. Install it once with its official installer, then run this again:`n    irm https://deno.land/install.ps1 | iex"
     }
     Say 'Deno is missing: installing it with its official installer (https://deno.land/install.ps1)'
     Invoke-RestMethod https://deno.land/install.ps1 | Invoke-Expression
-    $Deno = Get-Command deno -ErrorAction SilentlyContinue
-    if (-not $Deno) { throw 'naima: Deno was installed but is not on the path: open a new terminal and run this again' }
+    $Deno = Find-Deno
+    if (-not $Deno) { throw 'naima: Deno was installed but is not where its installer puts it (~\.deno\bin): open a new terminal and run this again' }
   }
   $DenoExe = if ($Deno.Source) { $Deno.Source } else { $Deno.FullName }
 
