@@ -1,7 +1,9 @@
 # Installing and updating Naima
 
-How Naima reaches a project and stays the same for everyone on it. Just
-updating: [update Naima](update-naima.md). Terms: [glossary](glossary.md).
+How Naima reaches a project and stays the same for everyone on it. An agent
+does all of this for you; this page is what it follows, for anyone who wants
+to see or do it by hand. Just updating: [update Naima](update-naima.md).
+Terms: [glossary](glossary.md).
 
 Naima has no releases, no version numbers and no compiled binaries. A
 project runs Naima from a git clone of its `dist` branch,
@@ -10,6 +12,8 @@ Deno runs the TypeScript directly.
 
 ## Deno, once per machine
 
+Besides git, which an agent installs when it is missing
+([git, handled for the owner](../agents/git-for-the-owner.md#1-have-git)),
 Deno is the only thing installed on the machine, once, by its official
 installer:
 
