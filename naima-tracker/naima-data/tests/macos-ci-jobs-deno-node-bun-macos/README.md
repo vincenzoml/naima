@@ -15,3 +15,9 @@ The gesture that proves it, step by step, and what a pass looks like.
 ## Result
 
 What was seen, when, and by whom.
+
+## Notes
+
+### 2026-10-01 — Claude, on claude/evidence-close-3
+
+Withdrawn: references macOS CI jobs and the dist job, neither of which exist any more — ci.yml was removed and the dist branch was replaced by copy-on-install. Re-enabling CI, if ever prioritized, is tracked at todos/re-enable-test-suites-ci.

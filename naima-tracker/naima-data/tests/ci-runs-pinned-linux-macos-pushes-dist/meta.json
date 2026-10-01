@@ -1,7 +1,7 @@
 {
   "id": "a70ffafd-f355-4845-858c-7e27c001454e",
   "title": "CI runs pinned on Linux and macOS and pushes the dist from main",
-  "status": "open",
+  "status": "withdrawn",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",
