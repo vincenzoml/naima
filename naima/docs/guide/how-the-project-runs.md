@@ -97,9 +97,10 @@ because everything is written down in files:
 - **One coordinator** talks to you; workers do the work in the background
   and report to it ([the coordinator and the workers](../agents/coordinator-and-workers.md)).
 
-A naming policy for worktrees with a check that each carries a claim file,
-and a way of working that keeps going until only your work is left, are
-[planned](../planned.md#worktree-names-and-claim-files).
+Worktrees and branches follow one naming scheme, and each worktree carries
+a claim file: `naima open` makes both, and `naima check` fails what breaks
+them. A way of working keeps going until only your work is left
+([while you are away](while-you-are-away.md)).
 
 ## Decisions
 

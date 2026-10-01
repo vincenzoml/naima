@@ -43,14 +43,6 @@ closing have one. Missing today:
   the field and leaves the title line of `README.md` as it was. **Today:** that
   line is edited by hand.
 
-## Worktree names and claim files
-
-- **A naming policy** for [worktrees](guide/glossary.md#worktree) and
-  branches, checked: who works, and on what.
-- **A check that every worktree carries a [claim file](guide/glossary.md#claim-file).**
-- **Today:** the [opening flow](agents/opening-a-worktree.md) names the
-  branch `<who>/<what>` and claims before any work, by convention.
-
 ## Model checkers and the strength of evidence
 
 - **Real [model checkers](guide/glossary.md#model-checker) as verifiers**:

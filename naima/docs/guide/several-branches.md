@@ -8,17 +8,21 @@ stepping on each other, through git alone. Each piece of work has its own
 ## Start a piece of work
 
 ```sh
-git worktree add -b ada/export-alpha ../worktrees/export-alpha
-cd ../worktrees/export-alpha
-naima claim export-drops --note "fixing the alpha channel"
+naima open export-drops --as ada --name export-alpha --note "fixing the alpha channel"
+cd ../project-worktrees/export-alpha
 git add naima-tracker && git commit -m "Claim export-drops"
 ```
 
-- `git worktree add` makes a second checkout in its own folder, on a new
-  branch. Install the project's dependencies there before running anything.
+- `naima open` makes a second checkout in its own folder, on a new branch
+  from the [trunk](glossary.md#trunk), and claims the item there. The branch
+  is `<who>/<what>` (`ada/export-alpha`); the folder is `<what>` in the
+  worktrees directory, `<project>-worktrees` beside the main checkout. A
+  worktree or branch off this scheme, or a worktree with work and no claim,
+  fails `naima check` ([the rule](rules.md#worktrees-and-branches-are-named-by-one-scheme-and-every-worktree-carries-a-claim)).
+  Install the project's dependencies there before running anything.
 - The first `naima` command in it fetches its own copy of Naima from the main
   checkout's, at the same locked commit.
-- `naima claim` writes one file of this branch's own, saying what it works on.
+- The claim is one file of this branch's own, saying what it works on; `naima claim` adds items.
   Others see it at once; nobody is locked out — several branches may claim
   one [item](glossary.md#item), and `claim` says who else holds it.
 
@@ -38,6 +42,7 @@ once it is fetched and checked out.
 From inside the worktree:
 
 ```sh
+naima claim --preparing     # told when the trunk moves under the branch
 naima release export-drops
 naima pass "Fixed export of the alpha channel; proven by tests/export-keeps-alpha; layered PSD files not tried"
 naima check
@@ -56,8 +61,12 @@ Then, on the trunk:
 
 ```sh
 git merge --ff-only ada/export-alpha
-git worktree remove ../worktrees/export-alpha
+naima prune --branch ada/export-alpha --write   # the worktree and the branch
 ```
+
+`prune --branch` deletes a branch only when the trunk holds its commits, or
+an `archive/<branch>` tag does: `--archive` makes the tag, for work set
+aside rather than merged.
 
 If `--ff-only` refuses, stop: the trunk moved. Merge it into the branch
 again, on the branch ([the rule](rules.md#every-merge-to-the-trunk-is-a-fast-forward)).
