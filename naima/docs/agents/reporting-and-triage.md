@@ -163,5 +163,11 @@ The proof must also be **current**. `naima close` refuses when:
 - an item verifying it **refutes** it — a test that `failed`, a property
   that is `violated`: evidence against outweighs any evidence for;
 - `naima check` finds a problem on an item verifying it — a property that
-  holds on a model, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
+  holds on a model, an included file, a tool version, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
   the gesture again (`naima verify`), then close.
+
+Never close, or set `holds`, by editing `meta.json` or moving a directory:
+every write hook that would refuse it has a check counterpart, so the hand
+edit fails `naima check` — `closed-not-claimed` on an archived item the
+branch you stand on still claims, `property-evidence` on a `holds` with no
+current run.

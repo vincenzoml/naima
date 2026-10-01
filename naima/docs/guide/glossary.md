@@ -353,7 +353,10 @@ every one does.
 ### Write hook
 
 A rule run on every change to an item, which can refuse it: a branch closing
-its own claimed items, a property set to `holds` by hand.
+its own claimed items, a property set to `holds` by hand. A hand edit of
+`meta.json` never meets a write hook, so each one that protects a state of the
+tracker has a [check](#check) counterpart that `naima check` runs on the
+tracker as it is.
 
 ### Derived
 

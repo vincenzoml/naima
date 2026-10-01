@@ -27,7 +27,14 @@ editing `meta.json` by hand. An item's page, `README.md`, is written with
 `naima describe` (the description) and `naima note` (a dated, attributed,
 append-only note); a person may also write it as a file.
 **Enforced by** the checks `readable`, `identity`, `fields` and `links`,
-which fail on what a hand edit typically breaks; the rest is convention.
+which fail on what a hand edit typically breaks, and by the check counterpart
+of every write hook that protects a state — `property-evidence` for
+`holds-only-by-verify` and `property-reopens-when-changed`,
+`closed-not-claimed` for `no-closing-own-claims` — so a hand edit that a
+command would have refused fails `naima check`. The hooks that guard a move
+rather than a state (`status-moves`, `notes-append-only`) and the ones that
+only fill in a value (`triage-stamps-its-date`, `planning-stamps`) have none;
+the rest is convention.
 
 ### Run `naima check` before every commit
 
@@ -70,8 +77,9 @@ never fails: [prove and close](prove-and-close.md).
 ### A proof is current, and evidence against it wins
 
 An item whose verifying item [refutes](glossary.md#refutes) it, or whose
-proof `naima check` reports as no longer current (a property run on a model
-changed since), cannot be closed. **Enforced by** `naima close` and the check
+proof `naima check` reports as no longer current (a property run on a model,
+a file the model includes, or a tool version that has changed since), cannot
+be closed. **Enforced by** `naima close` and the check
 `property-evidence`; a property becomes `holds` only through `naima verify`
 (the write hook `holds-only-by-verify`).
 
@@ -124,7 +132,10 @@ A branch does not close its own items on the strength of its own tests:
 someone else checks the proof, from the [trunk](glossary.md#trunk), after the
 merge. **Enforced by** the write hook `no-closing-own-claims`: `naima close`
 refuses an item the current branch [claims](glossary.md#claim-file), unless
-`--force`, which is for the one who owns the evidence.
+`--force`, which is for the one who owns the evidence; and the check
+`closed-not-claimed` fails on an archived item the current branch still
+claims, however it got there — release the claim once the evidence owner has
+closed it.
 
 ### The owner's chat stays private
 
