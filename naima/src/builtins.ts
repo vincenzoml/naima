@@ -6,6 +6,7 @@
 import { apiFor, type FirstParty, type Plugin, type PluginOptions } from "./core/internal.ts"
 import betaMarkers from "./plugins/beta-markers/index.ts"
 import docs from "./plugins/docs/index.ts"
+import epics from "./plugins/epics/index.ts"
 import coordination from "./plugins/coordination/index.ts"
 import gates from "./plugins/gates/index.ts"
 import rules from "./plugins/rules/index.ts"
@@ -19,6 +20,7 @@ export const firstParty: readonly FirstParty[] = [
   { name: "coordination", factory: coordination },
   { name: "triage", factory: triage },
   { name: "gates", factory: gates },
+  { name: "epics", factory: epics },
   { name: "beta-markers", factory: betaMarkers },
   { name: "verifier", factory: verifier },
   { name: "rules", factory: rules },

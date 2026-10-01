@@ -12,6 +12,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [coordination](#coordination) — claims and session notes, one file per session, recombined from every branch
 - [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them
 - [gates](#gates) — named release conditions backed by items
+- [epics](#epics) — epics: bodies of work that group items, their status and progress derived from them
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
@@ -48,7 +49,9 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`pass`](#naima-pass) | coordination | write this session's note (one new file), or list the newest |
 | [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves |
 | [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not |
+| [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks |
 | [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs |
+| [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out |
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
@@ -61,18 +64,18 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, beta-markers, verifier, rules, docs |
-| `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, verifier, rules |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, beta-markers, verifier, rules, docs |
+| `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, verifier, rules |
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, verifier, rules, docs |
-| `relations` | core | link relations between items, each naming its inverse | core, trackers |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, beta-markers, verifier, rules, docs |
+| `relations` | core | link relations between items, each naming its inverse | core, trackers, epics |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, beta-markers, verifier, rules, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination |
-| `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, beta-markers |
+| `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
 | `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to |  |
-| `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, verifier |
+| `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, verifier |
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }` | verifier |
@@ -752,13 +755,13 @@ Named release conditions backed by items.
 
 Its contributions' qualified ids are `gates/<name>`.
 
-A gate is the set of items that must be settled before something may happen — a release, a merge. An item joins a gate by carrying `gate: <name>`. Gates are configured, never hard-coded, and any plugin may contribute one through the contract; `naima gates` lists them all.
+A gate is the set of items that must be settled before something may happen — a release, a merge. An item joins a gate by carrying `gate: <name>`. Gates are configured, never hard-coded, and any plugin may contribute one through the contract; `naima gates` lists them all. `naima gate new` declares one in the project's configuration and `naima gate add` puts items on it, so nobody edits naima.json by hand. A gate with a `due` date (and, optionally, a `version`) is a milestone: `naima gates` and `naima queue` say the days left, and a check warns once it is overdue. An item whose type carries the `group` trait — an epic — stands on a gate for the items it groups.
 
 Options, each with the default it takes when nothing sets it:
 
 | Option | Default | What it does |
 |---|---|---|
-| `gates` | `{}` | `plugins.gates.options.gates` in `naima-tracker/naima-data/naima.json`: gate name → { "title", "says", "holdsOn" }. holdsOn "code" (the default) waits for code, not proof: a fixed item that owes only its proving gesture, and the gestures themselves, are owed but do not block. holdsOn "proof": every open item on the gate blocks it. |
+| `gates` | `{}` | `plugins.gates.options.gates` in `naima-tracker/naima-data/naima.json`, written by `naima gate new`: gate name → { "title", "says", "holdsOn", "due", "version" }. due (YYYY-MM-DD) makes the gate a milestone; version is what it ships as. holdsOn "code" (the default) waits for code, not proof: a fixed item that owes only its proving gesture, and the gestures themselves, are owed but do not block. holdsOn "proof": every open item on the gate blocks it. |
 
 **Extension points** it declares: `gates`.
 
@@ -781,6 +784,33 @@ Examples:
 ```sh
 naima gates
 naima gates first-public --check
+```
+
+### naima gate
+
+Declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks.
+
+```sh
+naima gate new <name> "<title>" [--says <s>] [--due YYYY-MM-DD] [--version <v>] [--holds-on code|proof]
+naima gate add <gate> <item>...
+naima gate remove <gate> <item>...
+naima gate show <gate>
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--says` |  | gate new: what the gate is for, in one sentence |
+| `--due` |  | gate new: the date it is due, YYYY-MM-DD, which makes it a milestone |
+| `--version` |  | gate new: the version it ships as |
+| `--holds-on` |  | gate new: "code" (the default) waits for code and lets proof be owed; "proof" waits for every proof too |
+
+Examples:
+
+```sh
+naima gate new beta "Public beta" --says "the first outside users" --due 2026-12-01 --version 0.9
+naima gate add beta bugs/export-drops-alpha epics/onboarding
+naima gate remove beta bugs/export-drops-alpha
+naima gate show beta
 ```
 
 ### naima queue
@@ -813,6 +843,7 @@ naima queue first-public --human
 | Check | What it holds |
 |---|---|
 | `gated-proof-is-gated` | an open item that verifies an open gated item carries a gate itself |
+| `milestone-overdue` | warns when a gate with a due date is past it and does not hold |
 
 **Summary sections**: `gates`.
 
@@ -821,6 +852,72 @@ naima queue first-public --human
 **Migrations** of its own data, run by `naima update` after the core's; its format is 2:
 
 - format 1 → 2: the top-level gates key of naima.json moves to plugins.gates.options.gates
+
+## epics
+
+Epics: bodies of work that group items, their status and progress derived from them.
+
+Its contributions' qualified ids are `epics/<name>`.
+
+An epic groups items: `naima epic add <epic> <item>...` links each item `part-of` the epic (the inverse, `has-part`, is derived). Its status is derived, never set: open while any item it groups is open, done when every one is closed. `naima epic` shows each open epic with its progress — n of m closed — what it waits for, and whose hands. An epic can carry a gate (`naima gate add <gate> <epic>`): its type carries the `group` trait, so the gate stands for the items it groups.
+
+**Uses**, declared by other plugins: fields `runBy`, `gate`; relations `verified-by`.
+
+### naima epic
+
+Each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out.
+
+```sh
+naima epic [<epic>...] [--all] [--json]
+naima epic add <epic> <item>...
+naima epic remove <epic> <item>...
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--all` |  | list the done epics too |
+| `--json` |  | print each epic's progress as JSON: epic, title, status, closed, total, open, gates, hands |
+
+Examples:
+
+```sh
+naima epic
+naima epic onboarding --json
+naima epic add onboarding bugs/export-drops-alpha todos/first-run-copy
+naima epic remove onboarding todos/first-run-copy
+```
+
+### type: epics
+
+Epics: a body of work that groups items: its status follows them, and a gate on it stands for them. Items live in `naima-tracker/naima-data/epics/`; a new one starts as `open`.
+
+Traits: `group`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `open` | open |  | some item it groups is still open, or it groups none yet |
+| `done` | done |  | every item it groups is closed |
+
+**Link relations** — only the direction written is stored; the inverse is derived when read.
+
+| Relation | Inverse | Reads as |
+|---|---|---|
+| `part-of` | `has-part` | is part of |
+| `has-part` | `part-of` | groups |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `epics` | an item is part of an epic, never of an item of another type; an open epic groups at least one item |
+
+**Summary sections**: `epics`.
+
+**Write hooks**, run on every item write
+
+| Hook | What it does |
+|---|---|
+| `epic-status` | an epic's status follows its items: set on every write of the epic, and of an item it groups; setting it against them is refused |
 
 ## beta-markers
 

@@ -12,10 +12,19 @@
 //                 gestures themselves, are owed but do not block — unless
 //                 refuted: a failed test, a violated property, blocks.
 // holdsOn "proof" every open item on the gate blocks it.
+// due, version    a gate with a date is a milestone: `naima gates` and
+//                 `naima queue` say the days left, a check warns once it is
+//                 past its date and does not hold.
+//
+// `naima gate new|add|remove|show` declares a gate and puts items on it, so
+// nobody edits naima.json by hand. An item whose type carries the `group`
+// trait (an epic) stands on a gate for the items it groups (`has-part`).
 //
 // Any plugin may contribute gates through the contract; `naima gates` lists
 // them all, whoever declared them.
 
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import {
   bool,
   type Check,
@@ -31,6 +40,7 @@ import {
   fieldValues,
   type Finding,
   groupBy,
+  hasTrait,
   isEvidenceType,
   isOpen,
   type Item,
@@ -41,8 +51,13 @@ import {
   type Plugin,
   refutes,
   rendered,
+  setFields,
+  str,
   type SummarySection,
   table,
+  today,
+  usageError,
+  writeJson,
 } from "../../core/api.ts"
 
 export interface GateResult {
@@ -62,6 +77,10 @@ export interface GateDef {
   decides?: string
   /** Declared by the project's configuration, not the program: the program's reference leaves it out. */
   configured?: boolean
+  /** A milestone's date, YYYY-MM-DD: `naima gates` says the days left. */
+  due?: string
+  /** The version a milestone ships as. */
+  version?: string
   /** May be async: a gate backed by an external tool awaits it. */
   evaluate(ctx: Context): GateResult | Promise<GateResult>
 }
@@ -99,7 +118,16 @@ export interface GateConfig {
   title: string
   says?: string
   holdsOn?: "code" | "proof"
+  /** A milestone's date, YYYY-MM-DD. */
+  due?: string
+  /** The version a milestone ships as. */
+  version?: string
 }
+
+const DATE = /^\d{4}-\d{2}-\d{2}$/
+const isDate = (v: unknown): v is string => typeof v === "string" && DATE.test(v) && new Date(`${v}T00:00:00Z`).toISOString().slice(0, 10) === v
+/** A gate's name: what items carry as `gate=<name>`. */
+const GATE_NAME = /^[a-z0-9][a-z0-9._-]*$/
 
 function readOptions(options: Record<string, unknown>): Record<string, GateConfig> {
   const gates = options["gates"] ?? {}
@@ -108,6 +136,9 @@ function readOptions(options: Record<string, unknown>): Record<string, GateConfi
     const c = g as Partial<GateConfig> | null
     if (!c || typeof c.title !== "string") throw new Error(`gates: gate "${name}" needs a title`)
     if (c.holdsOn !== undefined && c.holdsOn !== "code" && c.holdsOn !== "proof") throw new Error(`gates: gate "${name}": holdsOn is "code" or "proof"`)
+    if (c.says !== undefined && typeof c.says !== "string") throw new Error(`gates: gate "${name}": says is a sentence`)
+    if (c.due !== undefined && !isDate(c.due)) throw new Error(`gates: gate "${name}": due is a date, YYYY-MM-DD, got ${JSON.stringify(c.due)}`)
+    if (c.version !== undefined && (typeof c.version !== "string" || !c.version.trim())) throw new Error(`gates: gate "${name}": version is a non-empty string`)
   }
   return gates as Record<string, GateConfig>
 }
@@ -142,8 +173,43 @@ const refuted = (ctx: Context, item: Item): boolean => refutes(ctx, item) || lin
 /** Fixed but unproven, or itself a proving gesture — and not refuted: owed, not blocking, under holdsOn "code". */
 const owesOnlyProof = (ctx: Context, item: Item): boolean => !refuted(ctx, item) && (fieldValue(item, FIXED_ON) !== undefined || isEvidenceType(ctx, item.type))
 
+/** The trait of a type whose items group others (an epic): on a gate, such an item stands for what it groups. */
+export const GROUP = "group"
+const HAS_PART = "has-part"
+
+/** What an item stands for on a gate: itself, or — a group with members — its members, a nested group's too. */
+function standsFor(ctx: Context, item: Item, seen: Set<Item> = new Set()): Item[] {
+  if (seen.has(item)) return []
+  seen.add(item)
+  if (!hasTrait(ctx, item, GROUP)) return [item]
+  const members = linked(ctx, item, HAS_PART)
+  return members.length ? members.flatMap((m) => standsFor(ctx, m, seen)) : [item]
+}
+
+/** The items a gate waits for — those on it, a group standing for its members — or, with no gate named, every gate's. */
+export function gatedItems(ctx: Context, name?: string): Item[] {
+  const on = ctx.repo.items.filter((i) => (name === undefined ? onGates(i).length > 0 : onGates(i).includes(name)))
+  return [...new Set(on.flatMap((i) => standsFor(ctx, i)))]
+}
+
+const DAY = 86_400_000
+/** Whole days from today to `due`: negative once it is past. */
+export const daysLeft = (ctx: Context, due: string): number => Math.round((Date.parse(`${due}T00:00:00Z`) - Date.parse(`${today(ctx)}T00:00:00Z`)) / DAY)
+const days = (n: number): string => `${n} day${n === 1 ? "" : "s"}`
+
+/** A milestone's date and version, in words — "version 0.9; due 2026-02-01, 17 days left" — or "" for a gate with neither. */
+export function timing(ctx: Context, g: Pick<GateDef, "due" | "version">): string {
+  const parts: string[] = []
+  if (g.version) parts.push(`version ${g.version}`)
+  if (g.due) {
+    const n = daysLeft(ctx, g.due)
+    parts.push(`due ${g.due}, ${n > 0 ? `${days(n)} left` : n === 0 ? "today" : `${days(-n)} overdue`}`)
+  }
+  return parts.join("; ")
+}
+
 export function evaluateGate(ctx: Context, name: string, holdsOn: "code" | "proof"): GateResult {
-  const open = ctx.repo.items.filter((i) => onGates(i).includes(name) && isOpen(ctx, i))
+  const open = gatedItems(ctx, name).filter((i) => isOpen(ctx, i))
   const blocking = holdsOn === "proof" ? open : open.filter((i) => !owesOnlyProof(ctx, i))
   const owed = open.filter((i) => !blocking.includes(i))
   return { holds: blocking.length === 0, blocking, owed }
@@ -158,6 +224,18 @@ export function runByOf(ctx: Context, item: Item): string {
     if (theirs !== undefined) return theirs
   }
   return ""
+}
+
+function printGate(ctx: Context, gate: GateDef, r: GateResult, hands = false): void {
+  const when = timing(ctx, gate)
+  ctx.out(
+    `${gate.name} — ${gate.title}${when ? ` (${when})` : ""}: ${r.holds ? "HOLDS" : `BLOCKED by ${r.blocking.length}`}${
+      r.owed.length ? `, ${r.owed.length} owed` : ""
+    }`,
+  )
+  const who = (i: Item) => (hands ? `  (${runByOf(ctx, i) || "unclassified"})` : "")
+  for (const i of r.blocking) ctx.out(`  ✗ ${label(i)}  ${i.meta.title}${who(i)}`)
+  for (const i of r.owed) ctx.out(`  · ${label(i)}  ${i.meta.title}${who(i)}`)
 }
 
 const gatesCommand: Command = {
@@ -176,9 +254,7 @@ const gatesCommand: Command = {
       if (!gate) throw new Error(`no gate "${name}" — gates: ${names.join(", ") || "none configured"}`)
       const r = await gate.evaluate(ctx)
       if (!r.holds) failed++
-      ctx.out(`${gate.name} — ${gate.title}: ${r.holds ? "HOLDS" : `BLOCKED by ${r.blocking.length}`}${r.owed.length ? `, ${r.owed.length} owed` : ""}`)
-      for (const i of r.blocking) ctx.out(`  ✗ ${label(i)}  ${i.meta.title}`)
-      for (const i of r.owed) ctx.out(`  · ${label(i)}  ${i.meta.title}`)
+      printGate(ctx, gate, r)
     }
     return bool(p, "check") && failed ? 1 : 0
   },
@@ -193,14 +269,18 @@ const queue: Command = {
   run(args, ctx) {
     const p = parse(args, { human: { type: "boolean" } })
     const gate = p.positionals[0]
-    const open = ctx.repo.items.filter((i) => isOpen(ctx, i) && (gate ? onGates(i).includes(gate) : onGates(i).length > 0))
+    const def = gate === undefined ? undefined : ctx.registry.find<GateDef>("gates", gate)?.value
+    const when = def ? timing(ctx, def) : ""
+    const open = gatedItems(ctx, gate).filter((i) => isOpen(ctx, i))
     const by = groupBy(open, (i) => {
       const who = runByOf(ctx, i)
       return who === "agent" || who === "agent-hands" ? "agent" : who || "unclassified"
     })
     const noCode = open.filter((i) => !owesOnlyProof(ctx, i)).length
     ctx.out(
-      `${gate ?? "all gates"}: ${open.length} open — ${["agent", "human", "build", "unclassified"].map((b) => `${b} ${by.get(b)?.length ?? 0}`).join(", ")}`,
+      `${gate ?? "all gates"}${when ? ` (${when})` : ""}: ${open.length} open — ${
+        ["agent", "human", "build", "unclassified"].map((b) => `${b} ${by.get(b)?.length ?? 0}`).join(", ")
+      }`,
     )
     ctx.out(`  with no code yet: ${noCode}; owing only proof: ${open.length - noCode}`)
     if (bool(p, "human")) {
@@ -230,6 +310,115 @@ const gatedProofIsGated: Check = {
   },
 }
 
+/** The gates the project configures, as they stand in its naima.json. */
+const DATA_PATH = (ctx: Context): string => join(ctx.trackerRoot, DATA_FILE)
+
+/** Declare a gate in naima.json, validated as the next load will read it; refused when one by that name exists. */
+function declareGate(ctx: Context, name: string, gate: GateConfig): void {
+  if (!GATE_NAME.test(name)) {
+    throw new Error(`a gate's name is lowercase letters, digits, dots, dashes and underscores, starting with a letter or digit: got ${JSON.stringify(name)}`)
+  }
+  if (ctx.registry.find("gates", name)) throw new Error(`a gate "${name}" already exists — naima gate show ${name}`)
+  const raw = JSON.parse(readFileSync(DATA_PATH(ctx), "utf8")) as Record<string, unknown>
+  const plugins = isObject(raw["plugins"]) ? raw["plugins"] : {}
+  const entry = isObject(plugins["gates"]) ? plugins["gates"] : {}
+  const options = isObject(entry["options"]) ? entry["options"] : {}
+  const current = isObject(options["gates"]) ? options["gates"] : {}
+  if (Object.hasOwn(current, name)) throw new Error(`a gate "${name}" already exists — naima gate show ${name}`)
+  const next = { ...options, gates: { ...current, [name]: gate } }
+  readOptions(next)
+  writeJson(DATA_PATH(ctx), { ...raw, plugins: { ...plugins, gates: { ...entry, options: next } } })
+}
+
+const findGate = (ctx: Context, name: string | undefined): GateDef => {
+  const gate = name === undefined ? undefined : ctx.registry.find<GateDef>("gates", name)?.value
+  if (!gate) throw new Error(`no gate "${name}" — gates: ${gatesOf(ctx).map((g) => g.name).join(", ") || 'none yet: naima gate new <name> "<title>"'}`)
+  return gate
+}
+
+const gateCommand: Command = {
+  name: "gate",
+  says:
+    "declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks",
+  usage:
+    'gate new <name> "<title>" [--says <s>] [--due YYYY-MM-DD] [--version <v>] [--holds-on code|proof] | gate add <gate> <item>... | gate remove <gate> <item>... | gate show <gate>',
+  options: [
+    { name: "--says", says: "gate new: what the gate is for, in one sentence" },
+    { name: "--due", says: "gate new: the date it is due, YYYY-MM-DD, which makes it a milestone" },
+    { name: "--version", says: "gate new: the version it ships as" },
+    { name: "--holds-on", says: 'gate new: "code" (the default) waits for code and lets proof be owed; "proof" waits for every proof too' },
+  ],
+  examples: [
+    'gate new beta "Public beta" --says "the first outside users" --due 2026-12-01 --version 0.9',
+    "gate add beta bugs/export-drops-alpha epics/onboarding",
+    "gate remove beta bugs/export-drops-alpha",
+    "gate show beta",
+  ],
+  async run(args, ctx) {
+    const p = parse(args, { says: { type: "string" }, due: { type: "string" }, version: { type: "string" }, "holds-on": { type: "string" } })
+    const [sub, name, ...rest] = p.positionals
+    if (sub === "new") {
+      const title = rest[0]
+      if (!name || !title?.trim() || rest.length > 1) throw usageError(this)
+      const says = str(p, "says"), due = str(p, "due"), version = str(p, "version"), holdsOn = str(p, "holds-on")
+      const gate = {
+        title: title.trim(),
+        ...(says !== undefined ? { says } : {}),
+        ...(due !== undefined ? { due } : {}),
+        ...(version !== undefined ? { version } : {}),
+        ...(holdsOn !== undefined ? { holdsOn } : {}),
+      } as GateConfig
+      declareGate(ctx, name, gate)
+      ctx.out(`gate ${name} declared in ${ctx.trackerDir}/${DATA_FILE} — put items on it: naima gate add ${name} <item>...`)
+      return 0
+    }
+    if (sub === "add" || sub === "remove") {
+      if (!rest.length) throw usageError(this)
+      const gate = findGate(ctx, name)
+      const items = rest.map((ref) => ctx.repo.resolve(ref))
+      for (const item of items) {
+        const on = onGates(item)
+        if (sub === "add" && on.includes(gate.name)) continue
+        if (sub === "remove" && !on.includes(gate.name)) throw new Error(`${label(item)} is not on gate ${gate.name}`)
+        const next = sub === "add" ? [...on, gate.name] : on.filter((g) => g !== gate.name)
+        setFields(ctx, item, [[GATE.name, next.join(",")]])
+        ctx.out(`${label(item)}: ${sub === "add" ? "on" : "off"} gate ${gate.name}`)
+      }
+      return 0
+    }
+    if (sub === "show") {
+      if (rest.length) throw usageError(this)
+      const gate = findGate(ctx, name)
+      const r = await gate.evaluate(ctx)
+      printGate(ctx, gate, r, true)
+      if (gate.says) ctx.out(`  for: ${gate.says}`)
+      if (gate.decides) ctx.out(`  decides: ${gate.decides}`)
+      return r.holds ? 0 : 1
+    }
+    throw usageError(this)
+  },
+}
+
+const overdue: Check = {
+  name: "milestone-overdue",
+  says: "warns when a gate with a due date is past it and does not hold",
+  async run(ctx) {
+    const out: Finding[] = []
+    for (const { value: g } of gatesOf(ctx)) {
+      if (!g.due || daysLeft(ctx, g.due) >= 0) continue
+      const r = await g.evaluate(ctx)
+      if (r.holds) continue
+      out.push({
+        level: "note",
+        message: `milestone ${g.name} (${g.title}) was due on ${g.due}, ${
+          days(-daysLeft(ctx, g.due))
+        } ago, and is blocked by ${r.blocking.length} — naima gate show ${g.name}`,
+      })
+    }
+    return out
+  },
+}
+
 export default function gates(options: Record<string, unknown> = {}): Plugin {
   const configured = readOptions(options)
   const defs: GateDef[] = Object.entries(configured).map(([name, c]) => ({
@@ -237,9 +426,13 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
     configured: true,
     title: c.title,
     says: c.says ?? "",
-    decides: (c.holdsOn ?? "code") === "code"
-      ? `blocked by every open item with gate=${name} that still owes code: no fixedOn, and not itself a proving gesture. Fixed items and open proving gestures are owed, not blocking — unless refuted: one whose status refutes (a failed test, a violated property), or one verified by such an item, blocks.`
-      : `blocked by every open item with gate=${name}, proof included.`,
+    ...(c.due !== undefined ? { due: c.due } : {}),
+    ...(c.version !== undefined ? { version: c.version } : {}),
+    decides:
+      ((c.holdsOn ?? "code") === "code"
+        ? `blocked by every open item with gate=${name} that still owes code: no fixedOn, and not itself a proving gesture. Fixed items and open proving gestures are owed, not blocking — unless refuted: one whose status refutes (a failed test, a violated property), or one verified by such an item, blocks.`
+        : `blocked by every open item with gate=${name}, proof included.`) +
+      " An item whose type groups others (an epic) stands for the items it groups.",
     evaluate: (ctx) => evaluateGate(ctx, name, c.holdsOn ?? "code"),
   }))
   const status: SummarySection = {
@@ -248,13 +441,17 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
       const data = await Promise.all(
         gatesOf(ctx).map(async ({ value: g }) => {
           const r = await g.evaluate(ctx)
-          return { gate: g.name, holds: r.holds, blocking: r.blocking.map(label), owed: r.owed.map(label) }
+          return { gate: g.name, when: timing(ctx, g), holds: r.holds, blocking: r.blocking.map(label), owed: r.owed.map(label) }
         }),
       )
       return rendered(
         data,
         (gs) =>
-          gs.map((g) => `  ${g.gate.padEnd(16)} ${g.holds ? "holds" : `blocked by ${g.blocking.length}`}${g.owed.length ? `, ${g.owed.length} owed` : ""}`),
+          gs.map((g) =>
+            `  ${g.gate.padEnd(16)} ${g.holds ? "holds" : `blocked by ${g.blocking.length}`}${g.owed.length ? `, ${g.owed.length} owed` : ""}${
+              g.when ? ` (${g.when})` : ""
+            }`
+          ),
       )
     },
   }
@@ -264,12 +461,15 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
     says: "named release conditions backed by items",
     about:
       "A gate is the set of items that must be settled before something may happen — a release, a merge. An item joins a gate by carrying `gate: <name>`. " +
-      "Gates are configured, never hard-coded, and any plugin may contribute one through the contract; `naima gates` lists them all.",
+      "Gates are configured, never hard-coded, and any plugin may contribute one through the contract; `naima gates` lists them all. " +
+      "`naima gate new` declares one in the project's configuration and `naima gate add` puts items on it, so nobody edits naima.json by hand. " +
+      "A gate with a `due` date (and, optionally, a `version`) is a milestone: `naima gates` and `naima queue` say the days left, and a check warns once it is overdue. " +
+      "An item whose type carries the `group` trait — an epic — stands on a gate for the items it groups.",
     options: [
       {
         name: "gates",
         says:
-          `\`plugins.gates.options.gates\` in \`${DEFAULT_DATA}/${DATA_FILE}\`: gate name → { "title", "says", "holdsOn" }. holdsOn "code" (the default) waits for code, not proof: a fixed item that owes only its proving gesture, and the gestures themselves, are owed but do not block. holdsOn "proof": every open item on the gate blocks it.`,
+          `\`plugins.gates.options.gates\` in \`${DEFAULT_DATA}/${DATA_FILE}\`, written by \`naima gate new\`: gate name → { "title", "says", "holdsOn", "due", "version" }. due (YYYY-MM-DD) makes the gate a milestone; version is what it ships as. holdsOn "code" (the default) waits for code, not proof: a fixed item that owes only its proving gesture, and the gestures themselves, are owed but do not block. holdsOn "proof": every open item on the gate blocks it.`,
         default: "{}",
       },
     ],
@@ -289,8 +489,8 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
     contributes: { gates: defs },
     migrations: [moveGates],
     rank: [{ name: "gate", score: (i) => (onGates(i).length ? 0 : 4) }],
-    checks: [gatedProofIsGated],
-    commands: [gatesCommand, queue],
+    checks: [gatedProofIsGated, overdue],
+    commands: [gatesCommand, gateCommand, queue],
     summary: [status],
   }
 }
