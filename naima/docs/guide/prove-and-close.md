@@ -57,7 +57,18 @@ naima set export-keeps status=passed      # or failed, or partial
 | `failed` | it does not hold — this [refutes](glossary.md#refutes), and blocks closing |
 | `partial` | performed in part; the page lists what is left as `- [ ]` lines |
 
-## 4. Close it
+## 4. Name the commit
+
+```sh
+naima set export-drops commits=3f2c1a9
+```
+
+`commits` is a list of git commit hashes — the code that fixed it, from the
+trunk. A hash never named here was never retrofitted by guessing: if the fix
+predates this field, the item is grandfathered (below), not patched with a
+guess.
+
+## 5. Close it
 
 ```sh
 naima close export-drops
@@ -69,12 +80,19 @@ It moves to `closed/`, carrying its [proof](glossary.md#proof). Naima refuses wh
 - something that verifies it refutes it — a failed test;
 - its proof is no longer current (a property whose model changed since its
   run: run `naima verify` again);
+- none of its `commits` is a real commit reachable from the trunk;
 - the branch you stand on [claims](glossary.md#claim-file) it. Close it from the
   [trunk](glossary.md#trunk), after the merge, once someone other than the fixer has checked the
   proof ([the rule](rules.md#whoever-fixes-does-not-also-close)).
 
-`naima close --force` overrides the last one, for the person who owns the
+`naima close --force` overrides the last two, for the person who owns the
 [evidence](glossary.md#evidence) — a proof someone else performed, recorded here.
+
+An item closed before `commits` existed is not checked for one: the rule
+applies from a date (`plugins.trackers.options.commitsRequiredFrom` in
+`naima-tracker/naima-data/naima.json`, default 2026-10-01). `naima check`
+reports a closed item from on or after that date with no commit, and any item
+whose `commits` names a hash git does not have.
 
 ## Properties, proven by a tool
 

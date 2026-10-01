@@ -13,8 +13,9 @@ const project = (gates: Record<string, unknown> = {}) => tempProject(firstPartyP
 test("a branch does not close an item it claims on its own tests; --force, from the evidence owner, does", async () => {
   const p = project()
   try {
+    const base = p.git("rev-parse", "HEAD")
     p.git("checkout", "-q", "-b", "fix/x")
-    assert.equal(await p.run("new", "bugs", "X broken", "--set", "fixedOn=2026-01-15"), 0)
+    assert.equal(await p.run("new", "bugs", "X broken", "--set", "fixedOn=2026-01-15", "--set", `commits=${base}`), 0)
     assert.equal(await p.run("claim", "x-broken"), 0)
     assert.equal(await p.run("new", "tests", "X works", "--set", "status=passed"), 0)
     assert.equal(await p.run("link", "x-works", "verifies", "x-broken"), 0)
@@ -36,6 +37,10 @@ test("an item another branch claims, or nobody does, closes from here", async ()
     assert.equal(await p.run("link", "x-works", "verifies", "x-broken"), 0)
     p.git("add", "-A")
     p.git("commit", "-q", "-m", "items")
+    const base = p.git("rev-parse", "HEAD")
+    assert.equal(await p.run("set", "x-broken", `commits=${base}`), 0)
+    p.git("add", "-A")
+    p.git("commit", "-q", "-m", "commits")
     p.git("checkout", "-q", "-b", "fix/x")
     assert.equal(await p.run("claim", "x-broken"), 0)
     p.git("add", "-A")
@@ -77,6 +82,8 @@ test("close refuses an item whose proof no longer holds: a property that holds o
     assert.equal(await p.run("verify", "has-alpha"), 0)
     assert.equal(await p.run("new", "bugs", "No alpha", "--set", "fixedOn=2026-01-15"), 0)
     assert.equal(await p.run("link", "has-alpha", "verifies", "no-alpha"), 0)
+    p.git("commit", "--allow-empty", "-q", "-m", "the fix")
+    assert.equal(await p.run("set", "no-alpha", `commits=${p.git("rev-parse", "HEAD")}`), 0)
     writeFileSync(join(p.root, "model.txt"), "beta\n")
     await assert.rejects(
       p.run("close", "no-alpha"),

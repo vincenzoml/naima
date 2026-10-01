@@ -1,0 +1,12 @@
+{
+  "branch": "claude/u9-commits",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "aac5a3ee-d323-4919-a394-1b50fdc98746",
+      "ref": "features/fix-tied-code-commits-field-naima-close",
+      "title": "Fix tied to code: a `commits` field, and `naima close` refuses without one"
+    }
+  ],
+  "note": "U9"
+}

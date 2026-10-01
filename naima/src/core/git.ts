@@ -83,6 +83,16 @@ export function isGitRepo(root: string): boolean {
   return gitOrNull(root, "rev-parse", "--is-inside-work-tree") === "true"
 }
 
+/** Whether `commit` names an object git has, and that object is a commit. */
+export function commitExists(root: string, commit: string): boolean {
+  return runGit(root, ["cat-file", "-e", `${commit}^{commit}`]).ok
+}
+
+/** Whether `commit` is `ref` or one of its ancestors. False when either does not exist. */
+export function isAncestor(root: string, commit: string, ref: string): boolean {
+  return runGit(root, ["merge-base", "--is-ancestor", commit, ref]).ok
+}
+
 /** The root of the git working tree holding `dir`, or null outside git. */
 export function toplevel(dir: string): string | null {
   return gitOrNull(dir, "rev-parse", "--show-toplevel")

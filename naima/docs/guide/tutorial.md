@@ -257,10 +257,29 @@ $ naima set greet-sh-greets status=passed
 tests/greet-sh-greets-hello: status=passed
 ```
 
-## 9. Close it
+## 9. Name the commit, then close it
 
-The bug is [resolved](glossary.md#resolved): fixed, and proven by a test that
-passed. Close it, which moves it to the archive with its proof:
+Commit the fix (and the tracker's record of it) together, as one change, and
+name that commit on the bug: a fix is tied to the code that made it, not only
+to a date.
+
+```console
+$ git add -A && git commit -qm "Fix the greeting"
+$ naima set greet-sh-says commits=$(git rev-parse HEAD)
+bugs/greet-sh-says-helo-instead-hello: commits=802f1664a18a5bce71f6d46245feafd297fd056d
+```
+
+Without it, `naima close` refuses — a fix with no commit reachable from the
+trunk is not a fix that landed:
+
+```console
+$ naima close greet-sh-says
+naima: bugs/greet-sh-says-helo-instead-hello cannot be closed: none of its commits is a real commit reachable from the trunk — set commits, or close --force
+```
+
+The bug is now [resolved](glossary.md#resolved): fixed, proven by a test that
+passed, and tied to the commit that fixed it. Close it, which moves it to the
+archive with its proof:
 
 ```console
 $ naima close greet-sh-says
@@ -276,7 +295,8 @@ $ naima check
 all invariants hold
 ```
 
-The closed item keeps everything, including what proves it:
+The closed item keeps everything, including what proves it and what commit
+fixed it:
 
 ```console
 $ naima show greet-sh-says
@@ -289,6 +309,7 @@ closed/greet-sh-says-helo-instead-hello  f7c43c69-d654-49e5-9c1f-c9c30488afff  [
   triagedOn: 2026-10-01
   fixedOn: 2026-10-01
   effort: S
+  commits: ["802f1664a18a5bce71f6d46245feafd297fd056d"]
   closedFrom: bugs
   closedOn: 2026-10-01
   is proven by tests/greet-sh-greets-hello [passed]  (inverse)
@@ -298,10 +319,12 @@ closed/greet-sh-says-helo-instead-hello  f7c43c69-d654-49e5-9c1f-c9c30488afff  [
 `sh greet.sh Ada` prints `Helo, Ada`. Anyone who runs the greeting sees the typo.
 ```
 
-Commit the fix and the tracker together, as one change:
+A bug closed before `commits` existed is not retrofitted by guessing which
+commit it was: `naima check` only asks for one from the date set in
+[`plugins.trackers.options.commitsRequiredFrom`](prove-and-close.md#4-name-the-commit).
 
 ```console
-$ git add -A && git commit -qm "Fix the greeting, prove it, close the bug"
+$ git add -A && git commit -qm "Close the bug, with its proof"
 $ git status --short
 ```
 
@@ -313,7 +336,8 @@ $ git status --short
 - **Read** the board, the bug count, the queue and the summary — all worked
   out when asked, never stored.
 - **Fixed** it, **proved** it with a test item that passed, kept the evidence,
-  and **closed** it. Naima refused to close it until the proof existed.
+  **named the commit**, and **closed** it. Naima refused to close it until the
+  proof existed, and again until a real commit, reachable from the trunk, was named.
 
 ## Next
 

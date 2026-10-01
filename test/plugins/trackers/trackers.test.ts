@@ -7,7 +7,7 @@ import { tempProject } from "../../core/testing.ts"
 import trackers, { lifecycle } from "../../../naima/src/plugins/trackers/index.ts"
 
 test("fixed, resolved, closed are three states, and closing needs the proof", async () => {
-  const p = tempProject([trackers()])
+  const p = tempProject([trackers()], { git: true })
   try {
     const { ctx } = p
     const bug = createItem(ctx, typeOrThrow(ctx, "bugs"), "Export drops alpha")
@@ -28,6 +28,12 @@ test("fixed, resolved, closed are three states, and closing needs the proof", as
     ctx.reload()
     assert.equal(lifecycle(ctx, ctx.repo.resolve(bug.slug)), "resolved")
     assert.match((await runChecks(ctx)).notes.map((n) => n.message).join(), /is resolved/)
+
+    await assert.rejects(() => p.run("close", bug.slug), /reachable from the trunk/)
+    p.git("commit", "--allow-empty", "-q", "-m", "the fix")
+    const hash = p.git("rev-parse", "HEAD")
+    setFields(ctx, ctx.repo.resolve(bug.slug), [["commits", hash]])
+    ctx.reload()
 
     assert.equal(await p.run("close", bug.slug), 0)
     const closed = ctx.repo.resolve(bug.meta.id)

@@ -607,6 +607,7 @@ Traits: `fixable`.
 | `humanBecause` | enum | tests, bugs, todos | why only a person can perform the proof, when runBy is human | `judgement` how it looks, sounds or feels: no instrument can settle it; `decision` a decision reserved to the owner; `credential` a secret, an account or a signature only a person holds; `physical` a physical act or a machine only a person has at hand |
 | `area` | string | every type | where it lives: the surface somebody would have open while working on it |  |
 | `kind` | string | every type | the mode of work it demands: code, decision, research, writing… |  |
+| `commits` | strings | any type tagged `fixable` | the git commit hashes that fixed it, each reachable from the trunk — never retrofitted by guessing on an item fixed before this existed |  |
 
 **Link relations** — only the direction written is stored; the inverse is derived when read.
 
@@ -624,6 +625,8 @@ Traits: `fixable`.
 | `fix-names-its-gesture` | a fixed item names the gesture that would prove it |
 | `closed-carries-proof` | every archived item is verified by an item that has passed |
 | `human-says-why` | an open item whose proof needs a person (runBy human) says why in humanBecause |
+| `commits-are-real` | every hash an item's commits field names is a commit git has |
+| `closed-names-its-commits` | an item closed on or after 2026-10-01 names a commit reachable from the trunk |
 
 **Summary sections**: `bugs`.
 
