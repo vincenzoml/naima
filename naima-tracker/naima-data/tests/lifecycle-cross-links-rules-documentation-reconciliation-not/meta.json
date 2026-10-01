@@ -1,0 +1,27 @@
+{
+  "id": "09778844-6e04-4d60-bba2-0e58454b797e",
+  "title": "lifecycle cross-links, the rules/documentation reconciliation note, and the triage-sequence review verdict are all on the page",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "diff",
+  "confidence": "measured",
+  "impact": "medium",
+  "priority": "next",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "3e352158-e577-4b98-a812-3705d2a2b0fe"
+    },
+    {
+      "rel": "verifies",
+      "id": "9001519e-43e8-49c8-969a-4cba764cbe9e"
+    },
+    {
+      "rel": "verifies",
+      "id": "8fc0d415-f372-4f56-80da-e1adba03e8db"
+    }
+  ]
+}

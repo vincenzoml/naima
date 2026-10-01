@@ -1,0 +1,23 @@
+{
+  "id": "cf5cc66d-49ab-48bc-81e7-dc7b9ddd44ef",
+  "title": "extending-naima.md: a docs field on all 14 proven features, a plugin-author walk-through and a researcher's worked example, linked from the docs map",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "diff",
+  "confidence": "measured",
+  "impact": "medium",
+  "priority": "next",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "9b58e71a-c0dd-4e74-b5a0-57bd446ec6ec"
+    },
+    {
+      "rel": "verifies",
+      "id": "ef2d51c5-4a60-4896-b1d3-c9c8dba15c04"
+    }
+  ]
+}

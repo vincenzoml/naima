@@ -7,5 +7,9 @@
   "priority": "next",
   "effort": "M",
   "confidence": "measured",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "a6d10cc"
+  ]
 }
