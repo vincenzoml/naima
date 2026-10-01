@@ -7,7 +7,7 @@ step: [configure the project](configure-the-project.md). Terms:
 ## The automatic principle
 
 Naima is automatic first. Every first-party plugin — `trackers`,
-`coordination`, `triage`, `gates`, `beta-markers`, `verifier`, `docs` — is
+`coordination`, `triage`, `gates`, `beta-markers`, `verifier`, `docs`, `rules` — is
 loaded, and every default is inferred from the repository: beta markers are
 looked for in every file git tracks (or would track), and the docs check
 follows the links of every tracked markdown file. The program in

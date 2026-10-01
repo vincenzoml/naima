@@ -469,7 +469,7 @@ views. Almost everything is a plugin; the small core only loads them.
 ### First-party plugin
 
 A plugin that ships with Naima: `trackers`, `coordination`, `triage`,
-`gates`, `beta-markers`, `verifier`, `docs`. All are on unless the project
+`gates`, `beta-markers`, `verifier`, `docs`, `rules`. All are on unless the project
 switches one off.
 
 ### Third-party plugin
