@@ -136,14 +136,23 @@ is never reported done on an unrun gate set.
 
 ## Reporting
 
-Workers report to the coordinator, never to the owner. The coordinator's
-reply has a fixed order:
+Workers report to the coordinator, never to the owner, in the shape
+[the worker protocol](worker-protocol.md) fixes: what changed, red shown
+before green, the gate numbers, the queue after the change, one question or
+none. The coordinator's own reply to the owner keeps the same order and the
+same restraint — never a preamble, never the number before the work, never a
+restatement of what was just committed or filed: if it is worth explaining,
+it is worth committing.
 
-1. **what changed** — the work, in its own words, a line or two;
-2. **the number** — the queue after the change (`naima queue`), which may go
-   up, and that is why it is announced;
-3. **what the owner must decide** — one question, or nothing.
+## Safety rules
 
-Never a preamble, never the number before the work, and never a restatement of
-what was just committed or filed: if it is worth explaining, it is worth
-committing.
+- **A worker never merges.** Candidate property for a later model: nothing
+  yet checks that a trunk-merging commit came from the lead developer's
+  session rather than a worker's; read from [the jobs table](#the-jobs)
+  today, not verified.
+- **A branch never closes its own items.** Enforced by `naima close`
+  ([closing a worktree](closing-a-worktree.md#not-part-of-closing)).
+- **The owner is never the reason work resumes.** Convention:
+  [the non-stop loop](the-non-stop-loop.md) sets a timer instead of waiting
+  on a reply.
+- **One question at a time.** Convention: [asking the human](asking-the-human.md).
