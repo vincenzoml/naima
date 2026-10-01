@@ -12,5 +12,14 @@
       "rel": "relates-to",
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
     }
+  ],
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "7b59b86d960b42a1acfbb135e25f548ec22d6eba"
+  ],
+  "effort": "M",
+  "docs": [
+    "naima/docs/guide/announce.md",
+    "naima/docs/agents/announcer.md"
   ]
 }

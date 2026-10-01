@@ -1,0 +1,20 @@
+{
+  "id": "833396e9-28c9-465a-9266-52c264425628",
+  "title": "Roles: roles suite red then green, queue --role",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "diff",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "redSeen": "2026-10-01",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "ad82fbef-7401-4f0a-baac-231d358c09db"
+    }
+  ]
+}
