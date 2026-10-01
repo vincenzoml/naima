@@ -37,6 +37,7 @@ then any project, with its own checks in place of tests.
 | say what must hold, how it must behave, and what I decided | [Plan with requirements, specifications and decisions](plan-with-requirements-specs-and-decisions.md) |
 | leave agents working and come back to only my part | [What happens while you are away](while-you-are-away.md) |
 | prove a fix and close it | [Prove and close](prove-and-close.md) |
+| know what may be announced, and keep the README true | [Announce only what is true](announce.md) |
 | measure the work — test time, coverage, warnings, complexity — hold it to a budget, and see how your code's quality moves over time | [Metrics and budgets](metrics-and-budgets.md) |
 | work on several things at once | [Work on several branches at once](several-branches.md) |
 | make sure a fix never lands without its test, or a change without its note | [Commit hooks and companion records](commit-hooks.md) |

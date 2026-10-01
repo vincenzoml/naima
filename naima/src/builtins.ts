@@ -4,6 +4,7 @@
 // composition root: the only modules that see both the core and the plugins.
 
 import { apiFor, type FirstParty, type Plugin, type PluginOptions } from "./core/internal.ts"
+import announce from "./plugins/announce/index.ts"
 import betaMarkers from "./plugins/beta-markers/index.ts"
 import docs from "./plugins/docs/index.ts"
 import epics from "./plugins/epics/index.ts"
@@ -14,6 +15,7 @@ import loop from "./plugins/loop/index.ts"
 import metrics from "./plugins/metrics/index.ts"
 import planning from "./plugins/planning/index.ts"
 import privacy from "./plugins/privacy/index.ts"
+import roles from "./plugins/roles/index.ts"
 import rules from "./plugins/rules/index.ts"
 import trackers from "./plugins/trackers/index.ts"
 import triage from "./plugins/triage/index.ts"
@@ -30,6 +32,8 @@ export const firstParty: readonly FirstParty[] = [
   { name: "gates", factory: gates },
   { name: "epics", factory: epics },
   { name: "planning", factory: planning },
+  { name: "roles", factory: roles },
+  { name: "announce", factory: announce },
   { name: "loop", factory: loop },
   { name: "beta-markers", factory: betaMarkers },
   { name: "verifier", factory: verifier },

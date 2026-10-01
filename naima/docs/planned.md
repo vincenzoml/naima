@@ -72,18 +72,3 @@ paper.
 **Today:** bugs, todos, features and tests fit most of this already ("figure
 3 uses last year's data" is a bug), and a project can add its own types with
 a [plugin](guide/add-a-plugin.md).
-
-## Roles
-
-The jobs in [the company of agents](purpose.md#the-company-and-its-roles)
-not yet written as practice:
-
-- **Release manager**: proposes a release when the gates hold; never decides
-  it.
-- **Documentarian**: writes the documentation with the feature. The rule it
-  serves is already a check
-  ([features are documented](guide/rules.md#features-are-documented-as-part-of-their-implementation)).
-- **Announcer**: release notes, changelog, site, announcements, only for
-  what shipped and was checked.
-- **Business**: options for licence, funding, sponsorship and adoption, for
-  the owner to decide.
