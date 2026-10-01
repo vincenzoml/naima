@@ -11,6 +11,14 @@
     {
       "rel": "relates-to",
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    },
+    {
+      "rel": "verified-by",
+      "id": "24dedd75-192f-4f4b-8957-703398cbedac"
     }
+  ],
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "ab72b8d"
   ]
 }

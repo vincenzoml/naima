@@ -9,3 +9,7 @@ Done: a docs page maps every command to what it does and the policy or invariant
 ### 2026-10-01 — Vincenzo Ciancia, on claude/d2-people-docs
 
 Partially met already: naima --help and naima docs (the generated reference) state what each command does and, for many, the invariant or policy it enforces (close: 'fixed, and proven by an item that has passed'; carry, update, etc.). A full command-to-policy map, generated so it cannot drift, belongs in naima/docs/reference/reference.md — outside this worktree's scope (naima/docs/guide/, README.md, planned.md only). Left open for whoever owns the reference generator (naima/src/plugins/docs).
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/f-u5-policy-map
+
+Landed on claude/f-u5-policy-map (commit ab72b8d): commands carry an enforces field, filled for all 52; the documented check fails on one without it, so an outside plugin's command needs it too; the reference's Commands at a glance table has a What it enforces column, linked from naima/docs/README.md. Proof: tests/every-command-maps-what-enforces-reference.
