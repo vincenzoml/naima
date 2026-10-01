@@ -39,7 +39,7 @@ const AGENT_LINE =
   "This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them."
 
 test("the agent prompt is one line naming the repository, whose README, llms.txt and the page all give the steps", () => {
-  assert.equal(prompt, "Please install https://github.com/vincenzoml/naima in this repository.")
+  assert.equal(prompt, "Please install https://github.com/vincenzoml/naima in the root of this repository; create a repository at the root if missing.")
   assert.match(page, /<link rel="alternate" type="text\/plain" href="llms\.txt"/, "the page points an agent at llms.txt")
   const hidden = /<section class="sr" aria-label="For AI agents">([\s\S]*?)<\/section>/.exec(page)?.[1] ?? ""
   assert.ok(hidden.includes("https://github.com/vincenzoml/naima"), "the page's block for agents names the repository")
@@ -49,6 +49,11 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
     assert.match(text, /naima-tracker\/naima\/naima\.ts check/, where)
     assert.match(text, /naima-tracker\/naima\/skills\/naima\/SKILL\.md/, where)
     assert.match(text, /AGENTS\.md/, where)
+    assert.match(
+      text,
+      /in the\s+root of this repository \(if it is not a git repository yet, create one\s+at the\s+root/,
+      `${where} says: in the root of this repository, creating one there if missing`,
+    )
     assert.ok(text.includes(AGENT_LINE), `${where} gives the line to paste, verbatim`)
   }
   for (const [where, text] of [["llms.txt", llms], ["README.md", readme]] as const) {
@@ -62,11 +67,15 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
   for (const [where, text] of [["README.md", readme], ["llms.txt", llms]] as const) {
     assert.match(text, /If git is not installed, install it[\s\S]*winget install Git\.Git/, where)
   }
-  assert.match(page, /<p class="need">You don’t need to know git, code or project management\./)
   assert.match(
     page,
-    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">Born for software: a silent software house of AI agents that turns vibe coding into an exact science[\s\S]*?Then any project/,
-    "the line under the tagline says what it is for: software first, then any project",
+    /<div class="more" id="more" hidden>[\s\S]*You don’t need to know git, code or project management/,
+    "the page says, under more, that no git or code knowledge is needed",
+  )
+  assert.match(
+    page,
+    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">State-of-the-art project management and <br>software engineering, seamless, automatic, transparent\. <button type="button" class="more-toggle"/,
+    "under the tagline: one line saying what Naima is, then a more toggle",
   )
   assert.doesNotMatch(page, /every claim comes with its evidence/, "the long passage is the README's, not the page's")
   assert.ok(existsSync(join(NAIMA, RUNTIME_DIR, "skills", "naima", "SKILL.md")), "the skill the prompt names ships")
@@ -165,6 +174,10 @@ test("install.sh installs Naima in a git repository, says so when run again, and
     const refused = run(outside)
     assert.equal(refused.status, 1)
     assert.match(refused.stderr, /not a git repository/)
+    assert.match(
+      refused.stderr,
+      /Is this the root of your project\? If so, ask your agent to create a repository here and install Naima from https:\/\/vincenzoml\.github\.io\/naima\//,
+    )
     assert.ok(!existsSync(join(outside, "naima-tracker")))
   } finally {
     removeTemp(base)
