@@ -4,6 +4,7 @@
 // composition root: the only modules that see both the core and the plugins.
 
 import { apiFor, type FirstParty, type Plugin, type PluginOptions } from "./core/internal.ts"
+import adopt from "./plugins/adopt/index.ts"
 import betaMarkers from "./plugins/beta-markers/index.ts"
 import docs from "./plugins/docs/index.ts"
 import epics from "./plugins/epics/index.ts"
@@ -40,6 +41,7 @@ export const firstParty: readonly FirstParty[] = [
   { name: "rules", factory: rules },
   { name: "commit-hooks", factory: hooks },
   { name: "privacy", factory: privacy },
+  { name: "adopt", factory: adopt },
   { name: "docs", factory: docs },
 ]
 

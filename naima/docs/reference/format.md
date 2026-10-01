@@ -25,11 +25,14 @@ naima-tracker/
     <type>/<slug>/          one directory per item
     claims/<uuid>.json      coordination: one file per branch that claims work
     passes/<date>-<uuid>.md coordination: one file per session note
+    adopted/<file>.json     naima adopt: one record per board brought in
 ```
 
-Naima writes nothing in the project outside this folder, with one exception
-that git itself imposes: `.gitmodules`, when the program is carried as a
-submodule. Outside the project it writes only the per-user cache the program
+Naima writes nothing in the project outside this folder, with two
+exceptions: `.gitmodules`, which git itself imposes when the program is
+carried as a submodule, and the marker lines `naima adopt propose --write`
+inserts into the board being adopted, which only add lines
+([adopt an existing board](../guide/adopt-an-existing-board.md)). Outside the project it writes only the per-user cache the program
 is copied from ([the copy](../guide/install.md#the-copy)).
 
 Both directories can move. The data directory is found by walking up from the
@@ -134,6 +137,19 @@ branch, recombined when read ([concepts](../guide/concepts.md)):
 
 - `claims/<uuid>.json`: `{ "branch", "claimedAt", "note"?, "items": [{ "id", "ref", "title" }] }`;
 - `passes/<date>-<uuid>.md`: front matter `date`, `at` (an ISO instant), `branch`, then the note.
+
+## Adoption records
+
+`adopted/<file>.json`, one per board `naima adopt split` brought in, the
+name the slug of the board's path: `{ "source", "at", "sha256", "items",
+"pieces" }`. `source` is the path from the project root; `at` the commit the
+board was last read at (12 characters), or `working-tree`; `sha256` the
+board's digest without its marker lines; `items` maps each marker's `key` to
+`{ "id", "sha256" }`, the item opened and its segment's digest as adopted;
+`pieces`, in order, is either `{ "prose" }`, the board's own text between
+segments, or `{ "key", "item", "text" }`, a segment as adopted. Joined, the
+pieces are the board without its markers, byte for byte. Each adopted item
+has `adoptedFrom`: `<source>#L<from>-L<to>@<at>`.
 
 ## Invariants
 

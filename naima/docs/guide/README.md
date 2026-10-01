@@ -28,6 +28,7 @@ then any project, with its own checks in place of tests.
 
 | I want to… | Page |
 |---|---|
+| bring in the TODO.md or issue list the project already keeps | [Adopt an existing board](adopt-an-existing-board.md) |
 | say something is broken | [File a bug](file-a-bug.md) |
 | ask for something new | [File a feature](file-a-feature.md) |
 | set a rule only this project has | [Write a project rule](write-a-project-rule.md) |

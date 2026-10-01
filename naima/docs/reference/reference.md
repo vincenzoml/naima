@@ -22,6 +22,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
 - [commit-hooks](#commit-hooks) — companion records required in the commit that makes a change, and the path-scoped pre-commit hook that holds them
 - [privacy](#privacy) — the owner's material enters the repository only with their recorded yes, and no secret enters it at all
+- [adopt](#adopt) — adopt a board the project already keeps as items, in reviewed phases, without losing a line of it or deleting it
 - [docs](#docs) — every feature is documented as part of its implementation, and naima check holds it
 
 ## Commands at a glance
@@ -73,6 +74,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
 | [`hooks`](#naima-hooks) | commit-hooks | the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it |
 | [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused |
+| [`adopt`](#naima-adopt) | adopt | adopt a board the project already keeps (a TODO.md, an issue list in markdown) as items, without losing a line: propose markers, split, audit, links — each a dry run until --write; the source is never deleted |
 | [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
 
 ## Extension points
@@ -81,13 +83,13 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, ui, metrics, rules, commit-hooks, privacy, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, ui, metrics, rules, commit-hooks, privacy, adopt, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
-| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, docs |
+| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, adopt, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
 | `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, beta-markers, verifier, metrics, rules, commit-hooks, privacy, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
-| `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics, commit-hooks |
+| `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics, commit-hooks, adopt |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers, metrics |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | triage, rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
@@ -1724,6 +1726,44 @@ naima attach export-drops test-run.out --own --as proof.out
 |---|---|
 | `attachment-consent` | every attachment a branch adds has a record of whose it is (naima attach), every record names a file that is there, and the owner's carry their yes; what the trunk already holds, and what a tool writes itself, is not asked |
 | `secrets` | no project file or attachment holds a private key with its body, or an AWS, GitHub, Slack, API-secret or Google key; an exception names its file, a reason and an item, and the list of exceptions only shrinks |
+
+## adopt
+
+Adopt a board the project already keeps as items, in reviewed phases, without losing a line of it or deleting it.
+
+Its contributions' qualified ids are `adopt/<name>`.
+
+`naima adopt` brings an existing board — a TODO.md, a notes file, an issue list in markdown — into the tracker without retyping it, in phases that are each a dry run until `--write`. `propose` inserts a pair of HTML-comment markers around each top-level list item (`<!-- naima: todos key=<key> -->` … `<!-- /naima -->`), with a type, a key and, for a ticked checkbox, `status=done`: the diff adds lines and deletes none, and a person reviews and edits the markers before anything else. `split` opens one item per marked segment; its page is the segment byte for byte under a title line, `section` is the nearest heading, and `adoptedFrom` says the file, the lines and the commit. The board's own prose — headings, paragraphs, everything between segments — is kept in `adopted/<file>.json` with each segment's text as adopted, so the source comes back byte for byte. A re-run opens only segments whose key is not adopted yet, and never overwrites an item or the text it was adopted with. `audit` re-reads every committed version of the source, following renames, and lists each line that no item and no board prose carries — a todo deleted before adoption is found in its old commit. `links` proposes `relates-to` only on hard evidence: a real commit both items name and at least two words their titles share; a shared commit alone, shared wording alone, and commands in fenced shell blocks (gate candidates) are printed for a person to decide. Nothing here deletes or empties the source: `propose --write` only inserts marker lines.
+
+### naima adopt
+
+Adopt a board the project already keeps (a TODO.md, an issue list in markdown) as items, without losing a line: propose markers, split, audit, links — each a dry run until --write; the source is never deleted.
+
+```sh
+naima adopt <propose|split|audit|links> <file> [--write]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--write` |  | with propose, split or links: do it, instead of printing what would be done |
+
+Examples:
+
+```sh
+naima adopt propose TODO.md
+naima adopt propose TODO.md --write
+naima adopt split TODO.md --write
+naima adopt audit TODO.md
+naima adopt links TODO.md
+```
+
+**Fields**
+
+| Field | Kind | Applies to | Meaning | Values |
+|---|---|---|---|---|
+| `adoptedFrom` | string | every type | where an adopted item came from: the source file, its lines, and the commit it was read at (`TODO.md#L8-L9@<commit>`), or `working-tree` when uncommitted |  |
+
+**Directories** it owns under the tracker root: `adopted/`.
 
 ## docs
 
