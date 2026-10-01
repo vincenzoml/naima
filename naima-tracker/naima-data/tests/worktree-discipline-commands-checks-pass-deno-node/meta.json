@@ -1,7 +1,7 @@
 {
   "id": "868ccfb3-b55b-48e7-9f96-25799a386e7a",
   "title": "Worktree discipline commands and checks pass on Deno, Node and Bun",
-  "status": "open",
+  "status": "passed",
   "created": "2026-10-01",
   "runBy": "agent",
   "links": [

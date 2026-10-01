@@ -24,3 +24,9 @@ Not yet performed. On the branch, the dry run on a copy of the tracker
 (working tree, `deno task dev`) seeded the five rules and printed them; the
 behaviours are tested in `src/plugins/rules/rules.test.ts` and
 `src/cli.test.ts`.
+
+## Notes
+
+### 2026-10-01 — Claude, on claude/evidence-close-2
+
+Evidence-close-2: the rules are already seeded on Naima's own tracker (commit 0c113c0, naima-tracker/naima-data/rules/, 8 rules). Verified: deno task naima check holds; deno task naima rules --audience agents prints each with its Why line; deno task naima guide prints them first. Negative half: blanked rules/quiet-mode/README.md to a bare title in the working tree, ran deno task naima check — failed naming it 'an active rule with no text', then restored the file with git checkout (no commit).

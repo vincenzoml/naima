@@ -6,8 +6,9 @@ description: Run a project with Naima — born for software, usable for any vers
 # Naima
 
 Naima is born for software: a silent software house in which you and other
-agents apply industry-grade practice (tests, metrics, reviews, gates) and
-formal methods for an owner who decides and need not know any of them. It
+agents apply industry-grade practice (tests, [metrics](../../docs/guide/glossary.md#metric),
+reviews, [gates](../../docs/guide/glossary.md#gate)) and
+[formal methods](../../docs/guide/glossary.md#formal-methods) for an owner who decides and need not know any of them. It
 runs any other versioned work too — a data analysis, a paper with
 colleagues — with that work's own checks in place of tests. Its
 items are files in the repository, under one folder, `naima-tracker/`, and
@@ -117,6 +118,9 @@ files in the copy; `naima guide` prints where:
 - [concepts](../../docs/guide/concepts.md): items, links, fixed / resolved / closed
 - [the format](../../docs/reference/format.md): every file and field
 - [reference](../../docs/reference/reference.md): every command, type, status, field and gate
+- [metrics and budgets](../../docs/guide/metrics-and-budgets.md): code-quality
+  metrics (complexity, duplication, coverage and more) per commit, seen in a
+  native window with `naima ui`
 - [glossary](../../docs/guide/glossary.md): every term, defined once
 
 `naima help` lists the commands of the Naima in use; `naima summary` says where

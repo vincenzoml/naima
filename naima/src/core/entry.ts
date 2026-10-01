@@ -11,14 +11,20 @@ export const cliCommands: Omit<Command, "run">[] = [
   {
     name: "init",
     says:
-      `make this git repository a Naima project: create ${TRACKER_DIR}/ — its README.md, its .gitignore and ${DATA_DIR}/${DATA_FILE}, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in ${TRACKER_DIR}/${PROGRAM_DIR}/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside ${TRACKER_DIR}/ is touched unless --write-excludes is given`,
-    usage: "init [--write-excludes]",
-    options: [{
-      name: "--write-excludes",
-      says:
-        "also write those lines into the host's own files: deno.json and tsconfig.json when they are plain JSON, .prettierignore; a file with comments is left to be edited by hand",
-    }],
-    examples: ["init", "init --write-excludes"],
+      `make this git repository a Naima project: create ${TRACKER_DIR}/ — its README.md, its .gitignore and ${DATA_DIR}/${DATA_FILE}, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in ${TRACKER_DIR}/${PROGRAM_DIR}/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside ${TRACKER_DIR}/ is touched unless --write-excludes or --write-agent-pointer is given`,
+    usage: "init [--write-excludes] [--write-agent-pointer]",
+    options: [
+      {
+        name: "--write-excludes",
+        says:
+          "also write those lines into the host's own files: deno.json and tsconfig.json when they are plain JSON, .prettierignore; a file with comments is left to be edited by hand",
+      },
+      {
+        name: "--write-agent-pointer",
+        says: "also write the one-line pointer into each configured entry file that exists and does not already have it",
+      },
+    ],
+    examples: ["init", "init --write-excludes", "init --write-agent-pointer"],
   },
   {
     name: "update",

@@ -1,0 +1,13 @@
+{
+  "id": "09ffae23-119b-4377-98ad-cfc4e4de9811",
+  "title": "Every relative link in naima/'s own docs resolves inside naima/, including the new role pages",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "77e9e459-c8a5-458b-8b5d-2a3815c1d192"
+    }
+  ]
+}

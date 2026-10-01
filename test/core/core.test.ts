@@ -10,6 +10,7 @@ import {
   createContext,
   createItem,
   DEFAULT_DATA,
+  DEFAULT_ENTRY_FILES,
   DEFAULT_PROGRAM,
   fieldError,
   findData,
@@ -73,6 +74,7 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
     plugins: {},
     rename: {},
     extends: [],
+    entryFiles: [...DEFAULT_ENTRY_FILES],
   })
   const c = parseConfig({
     format: FORMAT,
@@ -108,6 +110,16 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, plugins: { mine: { source: "a.ts", replacedBy: "b.ts" } } }), /not both/)
   assert.deepEqual(parseConfig({ format: FORMAT, formats: { gates: 2 }, ...LOCK }).formats, { gates: 2 })
   assert.throws(() => parseConfig({ format: FORMAT, formats: { gates: 0 }, ...LOCK }), /formats\.gates must be a format/)
+})
+
+test("naima.json: entryFiles overrides the sensible defaults for the agent-harness entry-point check", () => {
+  assert.deepEqual(parseConfig({ format: FORMAT, ...LOCK }).entryFiles, [...DEFAULT_ENTRY_FILES])
+  assert.deepEqual(parseConfig({ format: FORMAT, ...LOCK, entryFiles: ["AGENTS.md", ".github/copilot-instructions.md"] }).entryFiles, [
+    "AGENTS.md",
+    ".github/copilot-instructions.md",
+  ])
+  assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, entryFiles: "AGENTS.md" }), /entryFiles must be a list of paths/)
+  assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, entryFiles: [""] }), /entryFiles must be a list of paths/)
 })
 
 test("the data directory: --data or NAIMA_DATA, else the first naima-tracker/naima-data/ walking up", () => {
@@ -474,6 +486,25 @@ test("a directory check cannot read is a problem: a misspelled type, an _undersc
     assert.match(text, /NOTES\/_draft: not read as an item/)
     assert.match(text, /NOTES\/linked: a symbolic link, not read as an item/)
     assert.equal(p.ctx.repo.items.length, 1)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("entry-pointers: check reports a plain-text path or a markdown link in a configured entry file that names a missing file", async () => {
+  const p = tempProject([notes])
+  try {
+    writeFileSync(join(p.root, "AGENTS.md"), "Read [docs/rules.md](docs/rules.md) before anything else.\n")
+    writeFileSync(join(p.root, "CLAUDE.md"), "See AGENTS.md: naima-tracker/naima/docs/agents/README.md holds more.\n")
+    mkdirSync(join(p.root, "naima-tracker", "naima", "docs", "agents"), { recursive: true })
+    writeFileSync(join(p.root, "naima-tracker", "naima", "docs", "agents", "README.md"), "# Agents\n")
+    const text = messages(await runChecks(p.ctx))
+    assert.match(text, /AGENTS\.md: names "docs\/rules\.md", which does not exist/)
+    assert.doesNotMatch(text, /CLAUDE\.md:/, "every path CLAUDE.md names resolves")
+    writeFileSync(join(p.root, "AGENTS.md"), "Read [docs/rules.md](docs/rules.md) before anything else.\n")
+    mkdirSync(join(p.root, "docs"), { recursive: true })
+    writeFileSync(join(p.root, "docs", "rules.md"), "# Rules\n")
+    assert.equal(messages(await runChecks(p.ctx)).match(/AGENTS\.md:/), null, "fixed once the file exists")
   } finally {
     p.cleanup()
   }

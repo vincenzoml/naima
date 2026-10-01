@@ -17,3 +17,9 @@ it, and the trunk never pruned.
 Negative half: on the real repository, `deno run -A naima/src/cli.ts check`
 must fail a sibling worktree with unmerged commits and no claim, and stay
 quiet about branches on the scheme.
+
+## Notes
+
+### 2026-10-01 — Claude, on claude/evidence-close-2
+
+Evidence-close-2: ran test/plugins/coordination/worktrees.test.ts on Deno (5/5 pass), Node (--test, 0 fail) and Bun (5/5 pass). Logs: scratchpad/evidence-close-2/wt_{deno,node,bun}.txt.
