@@ -176,3 +176,14 @@ The proof must also be **current**. `naima close` refuses when:
 - `naima check` finds a problem on an item verifying it — a property that
   holds on a model, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
   the gesture again (`naima verify`), then close.
+
+## Safety rules
+
+- **No attachment with no consent record.** Enforced by the check
+  `attachment-consent`: it fails a file copied in by hand, a record whose
+  file is gone, and the owner's file with no recorded yes.
+- **No secret in an item or an attachment.** Enforced by the check `secrets`.
+- **A fixed item is never closed without a passing proof.** Enforced by
+  `naima close` and the check `closed-carries-proof`.
+- **Evidence against a claim outweighs evidence for it.** Enforced by `naima
+  close`, which refuses an item a verifying item refutes.
