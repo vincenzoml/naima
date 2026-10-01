@@ -64,12 +64,12 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
   }
   assert.match(
     page,
-    /<details class="more">[\s\S]*You don’t need git, code or project management/,
+    /<div class="more" id="more" hidden>[\s\S]*You don’t need to know git, code or project management/,
     "the page says, under more, that no git or code knowledge is needed",
   )
   assert.match(
     page,
-    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">State-of-the-art project management and software engineering in your repo\.<\/p>\s*<details class="more">/,
+    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">State-of-the-art project management and <br>software engineering, seamless, automatic, transparent\. <button type="button" class="more-toggle"/,
     "under the tagline: one line saying what Naima is, then a more toggle",
   )
   assert.doesNotMatch(page, /every claim comes with its evidence/, "the long passage is the README's, not the page's")
