@@ -6,5 +6,9 @@
   "impact": "high",
   "priority": "now",
   "confidence": "measured",
-  "effort": "M"
+  "effort": "M",
+  "docs": [
+    "docs/rules-as-data.md",
+    "docs/reference.md#rules"
+  ]
 }
