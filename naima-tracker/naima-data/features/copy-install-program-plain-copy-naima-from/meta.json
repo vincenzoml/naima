@@ -9,5 +9,11 @@
   "priority": "now",
   "confidence": "diagnosed",
   "effort": "L",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/guide/install.md#the-copy",
+    "naima/docs/guide/install.md#how-the-program-is-carried",
+    "naima/docs/reference/format.md#how-the-program-is-carried",
+    "develop/bootstrap.md"
+  ]
 }

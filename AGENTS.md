@@ -33,7 +33,7 @@ These apply only to this repository; the general ones are on
 [the rules page](naima/docs/guide/rules.md).
 
 - **Naima tracks itself, and the tracker is managed by the locked commit.**
-  `deno task naima <command>` runs the gitignored clone in
+  `deno task naima <command>` runs the gitignored copy of `naima/` in
   `naima-tracker/naima/`, locked to a commit of `main` by
   `naima-tracker/naima-data/naima.json`; `deno task dev <command>` runs the
   working tree, as a test, and never writes the tracker. Every tracker change

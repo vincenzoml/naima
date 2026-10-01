@@ -26,9 +26,10 @@ If git is not installed, install it (macOS: `xcode-select --install`, or `brew i
 (`git rev-parse --show-toplevel`; `git init` makes one), and do these steps in
 order.
 
-1. Run the installer line above for this system. It clones Naima into
-   `naima-tracker/naima/` (ignored by git), writes `naima-tracker/` and nothing
-   else, and checks it. Outside a git repository it refuses.
+1. Run the installer line above for this system. It copies Naima's `naima/`
+   folder into `naima-tracker/naima/` (ignored by git), writes
+   `naima-tracker/` and nothing else, and checks it. Outside a git repository
+   it refuses.
 2. Check it: `deno run -A naima-tracker/naima/naima.ts check` must end with
    `all invariants hold`.
 3. Commit it: `git add naima-tracker && git commit -m "Track this project with Naima"`.
@@ -46,8 +47,9 @@ order.
 By hand, without the installer:
 
 ```sh
-git clone --branch dist https://github.com/vincenzoml/naima.git naima-tracker/naima
-deno run -A naima-tracker/naima/naima.ts init
+git clone --depth 1 https://github.com/vincenzoml/naima.git /tmp/naima
+deno run -A /tmp/naima/naima/naima.ts init
+rm -rf /tmp/naima
 deno run -A naima-tracker/naima/naima.ts check
 ```
 

@@ -18,8 +18,8 @@ A project carries one folder, `naima-tracker/`, at its root:
 ```
 naima-tracker/
   README.md                 one line: what Naima is, and a link to it
-  .gitignore                /naima/ — when the program is carried as a clone
-  naima/                    the program: Naima itself, at the locked commit
+  .gitignore                /naima/ — when the program is carried as a copy, the default
+  naima/                    the program: a copy of Naima's naima/ folder, at the locked commit
   naima-data/               the data
     naima.json              the anchor: the format, the lock, the project's facts
     <type>/<slug>/          one directory per item
@@ -27,8 +27,10 @@ naima-tracker/
     passes/<date>-<uuid>.md coordination: one file per session note
 ```
 
-Naima writes nothing outside this folder, with one exception that git itself
-imposes: `.gitmodules`, when the program is carried as a submodule.
+Naima writes nothing in the project outside this folder, with one exception
+that git itself imposes: `.gitmodules`, when the program is carried as a
+submodule. Outside the project it writes only the per-user cache the program
+is copied from ([the copy](../guide/install.md#the-copy)).
 
 Both directories can move. The data directory is found by walking up from the
 current directory to the first `naima-tracker/naima-data/naima.json`, or is
@@ -45,7 +47,6 @@ the one whose `naima.json` carries `format`.
   "formats": { "gates": 2 },
   "source": "https://github.com/vincenzoml/naima.git",
   "commit": "0123456789abcdef0123456789abcdef01234567",
-  "carry": "clone",
   "plugins": {
     "gates": { "options": { "gates": { "v1": { "title": "First release", "says": "What v1 needs.", "holdsOn": "code" } } } }
   }
@@ -57,8 +58,8 @@ the one whose `naima.json` carries `format`.
 | `format` | yes | the data format, an integer: this page is format 2 |
 | `formats` | no, `{}` | each plugin's own data format, by plugin name: only the plugins whose format has moved past 1 appear; one absent is at format 1 ([migrations](#migrations)) |
 | `source` | yes | the git URL, or absolute path, of the Naima the project runs: Naima's own repository, or a fork; never starting with `-`, and a path on this disk is absolute |
-| `commit` | yes | the full hash of the `source` commit the project runs: **the lock**; a commit of its [`dist` branch](../guide/install.md#the-dist-branch), or of `main` for a source without one |
-| `carry` | no, `clone` | how the program is carried: `clone`, `vendored` or `submodule` (below) |
+| `commit` | yes | the full hash of the `source` commit the project runs: **the lock**; a commit of its `main` ([the copy](../guide/install.md#the-copy)) |
+| `carry` | no, `copy` | how the program is carried: `copy`, `vendored` or `submodule` (below); the default is recorded by leaving `carry` out, and `clone` is read as `copy` |
 | `verify` | no | `"signed"`: run a locked commit only when git verifies its signature ([install](../guide/install.md#every-run-aligns-the-program)) |
 | `program` | no, `../naima` | the program directory, relative to the data directory |
 | `plugins` | no, `{}` | plugin name → `{ "options", "enabled", "replacedBy", "source", "checks" }`, first-party plugins included: their options (the project's gates are the `gates` plugin's), switched off, replaced, added from a pinned source — a path inside the program, `{ "path", "sha256" }` or `{ "git", "commit", "path" }` — their checks weighed ([configuration](../guide/config.md#the-plugins-table)) |
@@ -86,9 +87,13 @@ inside the program, and a project that wants one carries it in its fork.
 
 | `carry` | The program is | The lock is |
 |---|---|---|
-| `clone` | a clone of `source`, ignored by `naima-tracker/.gitignore` | `commit` |
-| `vendored` | committed into the project as plain files | the committed tree; `commit` records where it came from |
-| `submodule` | a git submodule | the submodule pointer, which is `commit` |
+| `copy` | a copy of `naima/` at `commit`, as plain files, ignored by `naima-tracker/.gitignore` | `commit` |
+| `vendored` | the same copy, committed into the project | the committed tree; `commit` records where it came from |
+| `submodule` | a git submodule: all of `commit`, its runtime in its `naima/` | the submodule pointer, which is `commit` |
+
+A copy holds `.naima-copy.json` beside the runtime files: the `source`, the
+`commit` and each file's git blob id it is a copy of, which alignment reads to
+know what is on disk and whether a file was changed.
 
 `naima carry <mode>` switches between them as one staged change.
 

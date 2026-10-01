@@ -37,7 +37,7 @@ naima/src/
     project.ts     opening a project: naima.json, the plugins, their formats, the registry, the context
     entry.ts       the commands the entry point answers before any plugin loads
     excludes.ts    the host tool configurations init prints, or writes, an exclusion for
-    program.ts     the program directory: alignment, update, carry — all through git
+    program.ts     the program directory: the copy through the per-user cache, alignment, update, carry
     base.ts        the core's own contributions: generic fields, relations, commands
     cli.ts         dispatch, and the commands that move the program
   plugins/<name>/  one directory per first-party plugin:
@@ -48,7 +48,7 @@ naima/src/
 ```
 
 ```
-naima/                    the runtime: what a dist commit, and so a project's program directory, holds
+naima/                    the runtime: what a project's program directory is a copy of
   naima.ts                the launcher's executable: deno run -A naima.ts <command>
   src/                    the program, above; no test
   skills/naima/           the agent skill, and the flow commands in commands/flow/
@@ -57,12 +57,11 @@ naima/                    the runtime: what a dist commit, and so a project's pr
   README.md LICENSE NOTICE
 test/                     every test, mirroring naima/src/, and the test helper core/testing.ts
 develop/                  the pages for people changing Naima's code: this one, bootstrap, documentation
-deno.json                 the tasks: naima, dev, typecheck, lint, fmt, test, docs, verify, dist, coverage
-scripts/dist.ts           builds the dist commit of a main commit: a copy of naima/ (install.md#the-dist-branch)
+deno.json                 the tasks: naima, dev, typecheck, lint, fmt, test, docs, verify, coverage
 scripts/coverage.ts       coverage of the whole test run, the launched copies of the program counted as the files they copy
 site/                     the project site
 .claude/commands/         a link to naima/skills/naima/commands/, for this repository's own agents
-.github/workflows/        CI: verify on Deno, the tests on Node and Bun, on Linux and macOS; the dist on main
+.github/workflows/        CI: verify on Deno, the tests on Node and Bun, on Linux and macOS; the installers on three systems
 ```
 
 What ships is only what runs: the contents of `naima/`, and nothing else.

@@ -136,9 +136,9 @@ program](../naima/docs/guide/install.md#every-run-aligns-the-program)). Held by:
 
 **runtime-only-distribution.** A project receives only what runs Naima: no
 tests, no CI, no development agent rules, none of Naima's own tracker items
-([the dist branch](../naima/docs/guide/install.md#the-dist-branch)). Held by: the runtime
-folder `naima/`, which the dist copies and nothing else, and
-`test/dist.test.ts`, which holds the dist to it.
+([the copy](../naima/docs/guide/install.md#the-copy)). Held by: the runtime
+folder `naima/`, which a project's program is a copy of and nothing else, and
+`test/runtime-folder.test.ts` and `test/site.test.ts`, which hold the copy to it.
 
 **forward-migration.** The data has a format number; it moves only with a
 migration, forward only and deterministic; newer data is refused and left
@@ -202,8 +202,9 @@ same data. It serves **fork-friendly**.
 
 **The installed program holds nothing but what runs Naima.** Test runners,
 type-checkers and agent harnesses that walk a project's files would pick up
-Naima's tests, CI or agent rules if they were there. So a project clones a
-runtime-only branch, and Naima's own development stays on `main`. It serves
+Naima's tests, CI or agent rules if they were there. So a project copies
+only the runtime folder of a `main` commit, and Naima's own development stays
+beside it. It serves
 **runtime-only-distribution** and **contained**.
 
 **A host's own material lives organised in its naima-data.** Everything a
