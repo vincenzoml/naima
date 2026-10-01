@@ -99,8 +99,8 @@ because everything is written down in files:
 
 Worktrees and branches follow one naming scheme, and each worktree carries
 a claim file: `naima open` makes both, and `naima check` fails what breaks
-them. A way of working that keeps going until only your work is left is
-[planned](../planned.md#the-non-stop-method).
+them. A way of working keeps going until only your work is left
+([while you are away](while-you-are-away.md)).
 
 ## Decisions
 

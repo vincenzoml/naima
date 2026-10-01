@@ -225,6 +225,11 @@ export interface Write {
   before: Meta | null
   /** For a move: the type it moves to. */
   to?: TypeDef
+  /**
+   * For a write of an item's prose (saveProse: naima note, naima describe): the README as it is about to be written.
+   * A `beforeWrite` hook may change it; what it leaves is what is written. Absent on every other write.
+   */
+  prose?: string
   /** The command's `--force`: whoever gave it takes on what a hook would otherwise refuse. A hook decides whether it lets it through. */
   force: boolean
 }

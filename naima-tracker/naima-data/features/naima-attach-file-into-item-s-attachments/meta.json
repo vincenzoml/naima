@@ -1,0 +1,12 @@
+{
+  "id": "426f67fc-f722-4f57-8329-ee16544fa596",
+  "title": "naima attach: a file into an item's attachments, with the owner's consent recorded",
+  "status": "requested",
+  "created": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "3ee04aab-cac6-449c-b841-2815c2d05bae"
+    }
+  ]
+}

@@ -167,8 +167,8 @@ edit the same file.
 claim file names items that exist, and one naming scheme for worktrees and
 branches — `naima open` makes the worktree, the branch and the claim in one
 step, and a check fails a worktree off the scheme or holding work without a
-claim. A working method that keeps going until only your items are left is
-[planned](planned.md#the-non-stop-method).
+claim. A working method keeps going until only your items are left
+([while you are away](guide/while-you-are-away.md)).
 
 ### Decisions
 

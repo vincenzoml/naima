@@ -265,7 +265,7 @@ Every hook receives a `Context`: the project `root`, the data directory
 `config`, the merged `registry`, the `repo` (items, `byId`, `resolve`,
 `linksOf` with inverses), `reload()` for a change made on disk without the
 helpers, `out`/`err`, and `now()`. Write through the public helpers
-(`createItem`, `saveMeta`, `setFields`, `addLink`, `moveItem`, `writeJson`,
+(`createItem`, `saveMeta`, `saveProse`, `setFields`, `addLink`, `moveItem`, `writeJson`,
 `writeFileAtomic`) so that ids and validation stay consistent, every plugin's
 [write hooks](#write-hooks) run, and no crash leaves a file half written. Read a field through
 `fieldValue(item, { name: "fixedOn", kind: "date" } as const)`, typed by its
@@ -295,8 +295,9 @@ Render anything caught with `message(e)`, never `(e as Error).message`.
 ## Write hooks
 
 Every item write the core's helpers make — `createItem`, `saveMeta`,
-`setFields`, `addLink`, `moveItem`, and so every command built on them (`new`,
-`set`, `link`, `unlink`, `close`, `verify`, `triage`) — runs every plugin's
+`saveProse`, `setFields`, `addLink`, `moveItem`, and so every command built on
+them (`new`, `set`, `note`, `describe`, `link`, `unlink`, `close`, `verify`,
+`triage`) — runs every plugin's
 write hooks, in plugin load order:
 
 ```ts
@@ -311,11 +312,14 @@ hooks: [{
 }]
 ```
 
-A `Write` is `{ kind, item, before, to?, force }`: `kind` is `create`,
+A `Write` is `{ kind, item, before, to?, prose?, force }`: `kind` is `create`,
 `update` or `move`; `item` is the item as it is about to be written (on a
 create its directory does not exist yet); `before` its fields as they are on
-disk, `null` for a create; `to` the type a move goes to; `force` the command's
-`--force`, which a hook may honour.
+disk, `null` for a create; `to` the type a move goes to; `prose`, on an
+`update` that `saveProse` makes, the page (`README.md`) about to be written,
+which a hook may change or refuse — `splitProse` cuts it into title,
+description and the Notes section, which the core's `notes-append-only` hook
+keeps append-only; `force` the command's `--force`, which a hook may honour.
 
 - **Order.** `beforeWrite` runs in load order, each hook seeing the changes
   of the hooks before it; then the write; then `afterWrite`, in the same

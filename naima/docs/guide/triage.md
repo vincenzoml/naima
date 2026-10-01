@@ -23,6 +23,23 @@ honest outcome ([the rule](rules.md#effort-is-never-guessed)).
 
 Every change to these fields stamps `triagedOn` with today's date.
 
+## Rewrite the description, note what you checked
+
+Triage often rewrites a report so the next reader can act on it, and records
+what was checked. Both are commands, so they are dated, attributed and
+checked like every other write:
+
+```sh
+naima describe export-drops "Export to PNG loses the alpha channel on 16-bit images."
+naima note export-drops "Reproduced with sample.png; 8-bit images keep alpha." --by "Ada"
+```
+
+`naima describe` replaces the description and keeps the title and the notes.
+`naima note` adds a dated entry, with its author and branch, at the end of the
+item's **Notes** section; earlier notes are never rewritten. Both read a
+longer text from `--file`. Write in your own words: a person's message goes
+in verbatim only with their yes ([the rule](rules.md#the-owners-chat-stays-private)).
+
 ## See what is missing
 
 ```console

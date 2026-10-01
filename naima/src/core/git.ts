@@ -72,6 +72,13 @@ export function mustGit(cwd: string, ...args: string[]): string {
 /** A path as git reads and writes it: forward slashes, whatever the platform's separator. */
 export const gitPath = (path: string, separator: string = sep): string => path.split(separator).join("/")
 
+/**
+ * The inverse of `gitPath`: an absolute path git printed (`rev-parse --show-toplevel`, always
+ * forward slashes, even on Windows) turned into the given platform's own separator, so it can be
+ * compared against one built by `node:path` or `node:fs` (which use the native separator there).
+ */
+export const nativePath = (path: string, separator: string = sep): string => path.split("/").join(separator)
+
 export function isGitRepo(root: string): boolean {
   return gitOrNull(root, "rev-parse", "--is-inside-work-tree") === "true"
 }
