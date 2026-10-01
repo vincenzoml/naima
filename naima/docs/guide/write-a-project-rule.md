@@ -38,6 +38,29 @@ A rule starts `active`. One no longer in force is `retired`
 stays as history and is shown nowhere. A rule is not work, so no board of
 open work lists it.
 
+## Ready-made templates
+
+A handful of lessons recur across projects: a predicate checked in two
+places, a "do not restore" comment nobody acts on, user data written into a
+file the next update overwrites, a cache keyed by an id that nothing ever
+reaps, and in-product migration code kept forever for a format no release
+still produces. The optional `rule-templates` plugin ships one rule for each,
+ready to write as your own:
+
+```json
+"plugins": { "rule-templates": {} }
+```
+
+```sh
+naima rule-templates                    # list what it ships, each with its id
+naima rule-templates add one-predicate  # writes it as an ordinary rules item
+```
+
+`add` writes exactly the item described above, at `audience: agents`; edit
+its text, field or status like any rule you typed yourself. Turning the
+plugin on adds nothing by itself — a template becomes a rule only when you
+ask for it.
+
 ## What `naima check` holds
 
 It fails on an active rule with no text (an empty page, or the template's

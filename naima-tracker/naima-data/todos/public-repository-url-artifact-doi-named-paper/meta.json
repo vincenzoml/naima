@@ -1,0 +1,17 @@
+{
+  "id": "0f2ad9a3-5495-4a45-b606-f0d4fe83187d",
+  "title": "Public repository URL and artifact DOI named in the paper",
+  "status": "open",
+  "created": "2026-10-01",
+  "links": [
+    {
+      "rel": "blocks",
+      "id": "6745e159-810e-4bfb-83f0-a53ffb421d7f"
+    }
+  ],
+  "gate": "paper-submission",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01"
+}

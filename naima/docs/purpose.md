@@ -374,8 +374,12 @@ co-evolved with the project, to hold them.
 
 **Today:** the built-in types fit most of this already, and a project can
 add its own types, checks and gates with a [plugin](guide/add-a-plugin.md)
-([extending Naima](guide/extending-naima.md)). Packs of item types for other
-kinds of work are [planned](planned.md#item-types-for-other-work).
+([extending Naima](guide/extending-naima.md)). One pack of item types for
+other work ships as a worked example: `pack-analyses`, an `analyses` type
+proven by a reproducible run rather than code
+([a worked example](guide/extending-naima.md#a-worked-example-adopting-naima-for-a-data-analysis)).
+A pack for a paper's sections and reviews is
+[planned](planned.md#item-types-for-other-work).
 
 ## What exists today
 

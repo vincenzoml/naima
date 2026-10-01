@@ -22,6 +22,7 @@ then any project, with its own checks in place of tests.
 | Page | What it gives you |
 |---|---|
 | [Tutorial](tutorial.md) | from an empty repository to a closed bug, every command with its real output |
+| [A second tutorial](tutorial-2.md) | the company running itself: a feature, the owner's go, a coordinator and a worker, a property proven by a verifier, a release gate holding |
 | [Install](install.md) | installing, the copy of Naima a project runs, keeping it aligned, the permissions |
 
 ## Everyday tasks
@@ -35,6 +36,7 @@ then any project, with its own checks in place of tests.
 | rank what is open | [Triage](triage.md) |
 | see where things stand | [Read the board, the queue and the gates](read-the-board.md) |
 | group work, declare a release, give it a date | [Plan with epics, milestones and gates](plan-with-epics-milestones-and-gates.md) |
+| run the first-commit checklist on a new project: language, modularity, data out of code | [Structuring a project from the start](structuring-a-project.md) |
 | say what must hold, how it must behave, and what I decided | [Plan with requirements, specifications and decisions](plan-with-requirements-specs-and-decisions.md) |
 | leave agents working and come back to only my part | [What happens while you are away](while-you-are-away.md) |
 | prove a fix and close it | [Prove and close](prove-and-close.md) |

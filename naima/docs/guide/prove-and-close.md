@@ -98,6 +98,25 @@ for are the option `excusePhrases` of the `trackers` plugin; any of these notes
 can be raised to a problem, or switched off, under `plugins.trackers.checks` in
 `naima.json`.
 
+## Optional: a session for the sitting itself
+
+Most of the time the test's own page and status say enough: what it proved,
+and the result. When a sitting is worth keeping on its own — several tests
+run together, or something was noticed beyond any one test's result — the
+`sessions` type (in the `planning` plugin) is a dated, append-only record of
+it:
+
+```sh
+naima new sessions "2026-11-03 export sitting"
+naima link sessions/2026-11-03-export-sitting records export-drops-test
+naima set sessions/2026-11-03-export-sitting sittingRun=export-sitting-1
+```
+
+`sittingRun` groups several sessions that were one sitting of several tests.
+A session is never edited to change what happened — a later sitting is a new
+session — and it is optional: not a daily habit to enforce, only a place to
+keep a sitting's own record when the test item alone would not carry it.
+
 ## 4. Name the commit
 
 ```sh

@@ -156,9 +156,32 @@ published study tracks it exactly like a codebase: `naima new todos "redo
 table 2 from the raw survey"`, triaged, claimed by whoever does the work in
 their own [worktree](glossary.md#worktree), and closed only once a test item
 proves it — here, a script that recomputes the table and a note recording
-that the new numbers match the paper's claim. A plugin is only needed when
-the built-in types stop fitting: a group that wants "figure" as its own
-tracked kind, with its own fields (which dataset, which script), writes a
-small plugin exactly as above, adding one item type and nothing else. Until
-then, bugs, todos and features already cover most of what a paper or an
-analysis needs ([what Naima is for](../purpose.md) has more examples).
+that the new numbers match the paper's claim. Bugs, todos and features
+already cover most of this ([what Naima is for](../purpose.md) has more
+examples).
+
+A plugin is only needed when the built-in types stop fitting — a group that
+wants its own tracked kind, with its own field naming the command that
+reproduces it. `pack-analyses` is a shipped, minimal example of exactly that
+plugin, one type and nothing else:
+
+```json
+"plugins": { "pack-analyses": {} }
+```
+
+```sh
+naima new analyses "Table 2, rebuilt from the raw survey" --set command="scripts/table2.sh"
+naima new tests "Rerun scripts/table2.sh and diff against table 2"
+naima link <the test> verifies <the analysis>
+naima set <the test> status=passed      # the rerun matched
+naima set <the analysis> status=confirmed
+```
+
+An `analyses` item is proven exactly like a requirement: `naima check` notes
+one confirmed without a passing test, and one already proven that is still
+`proposed`. Reading its source
+([`naima/src/plugins/pack-analyses/index.ts`](https://github.com/vincenzoml/naima/blob/main/naima/src/plugins/pack-analyses/index.ts))
+is the fastest way to see how little a non-software pack has to add: one
+type, one field, and a check that reuses `verifies`/`verified-by` rather than
+inventing its own proof machinery. A paper's sections and reviews, or another
+kind of non-software work, would be its own pack, built the same way.

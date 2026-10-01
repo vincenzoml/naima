@@ -1,7 +1,7 @@
 {
   "id": "05a90e97-2a1a-493e-812a-211d5ccd76d1",
   "title": "A second tutorial: let the company run, not just the ledger",
-  "status": "open",
+  "status": "done",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "later",
@@ -12,5 +12,10 @@
       "rel": "relates-to",
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
     }
-  ]
+  ],
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "20dd602"
+  ],
+  "effort": "M"
 }

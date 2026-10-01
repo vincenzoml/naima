@@ -14,7 +14,9 @@ import gates from "./plugins/gates/index.ts"
 import hooks from "./plugins/hooks/index.ts"
 import loop from "./plugins/loop/index.ts"
 import metrics from "./plugins/metrics/index.ts"
+import packAnalyses from "./plugins/pack-analyses/index.ts"
 import planning from "./plugins/planning/index.ts"
+import ruleTemplates from "./plugins/rule-templates/index.ts"
 import privacy from "./plugins/privacy/index.ts"
 import roles from "./plugins/roles/index.ts"
 import rules from "./plugins/rules/index.ts"
@@ -40,9 +42,11 @@ export const firstParty: readonly FirstParty[] = [
   { name: "verifier", factory: verifier },
   { name: "verifier-mcrl2", factory: verifierMcrl2, optIn: true },
   { name: "verifier-voxlogica", factory: verifierVoxlogica, optIn: true },
+  { name: "pack-analyses", factory: packAnalyses, optIn: true },
   { name: "ui", factory: ui },
   { name: "metrics", factory: metrics },
   { name: "rules", factory: rules },
+  { name: "rule-templates", factory: ruleTemplates, optIn: true },
   { name: "commit-hooks", factory: hooks },
   { name: "privacy", factory: privacy },
   { name: "adopt", factory: adopt },

@@ -541,6 +541,35 @@ const releasesCheck: Check = {
   },
 }
 
+// ── sessions ──────────────────────────────────────────────────────────────────
+
+// A dated, append-only record of one test sitting — optional, for a project
+// that wants the sitting itself kept (who ran it, what else was noticed),
+// not only the test's own result. Several sessions share a `run` name when
+// they are one sitting of several tests together.
+
+const sessionsType: TypeDef = {
+  id: "sessions",
+  dir: "sessions",
+  title: "Sessions",
+  says:
+    "a dated, append-only record of one test sitting: written once and never edited to change what happened — optional, not a daily habit to enforce; the test's own page is usually enough on its own",
+  statuses: {
+    recorded: { category: "done", says: "written; a session is never reopened — a later sitting is a new session" },
+  },
+  initialStatus: "recorded",
+  creatable: true,
+  template: (title) =>
+    `# ${title}\n\n## What was sat\n\nThe test or tests this session sat for (\`naima link\` them \`records\`).\n\n## What happened\n\nWritten once; append only. A later sitting is a new session, never an edit to this one.\n`,
+}
+
+const SITTING_RUN: FieldDef = {
+  name: "sittingRun",
+  kind: "string",
+  says: "the name shared by every session of one sitting, when several tests were sat together",
+  appliesTo: ["sessions"],
+}
+
 // ── hooks ─────────────────────────────────────────────────────────────────────
 
 const stamp: WriteHook = {
@@ -570,9 +599,10 @@ export default function planning(): Plugin {
       "A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. " +
       "A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. " +
       "Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again. " +
-      'A **release** opens at its first stage (`naima new releases "<name>"`); each stage\'s output is recorded with `naima note`, headed `Stage: <name>` (or `Stage: <name> — skipped, decided by <who>`), and the hook refuses `status=released` while a stage is unrecorded — `naima view releases` shows what each one still owes.',
-    types: [requirementsType, specsType, decisionsType, releasesType],
-    fields: [SPEC, VERSION, DECIDED_ON, STANDING],
+      'A **release** opens at its first stage (`naima new releases "<name>"`); each stage\'s output is recorded with `naima note`, headed `Stage: <name>` (or `Stage: <name> — skipped, decided by <who>`), and the hook refuses `status=released` while a stage is unrecorded — `naima view releases` shows what each one still owes. ' +
+      "A **session** is a dated, append-only record of one test sitting, linked `records` to the test or tests it was for; several share a `run` name when they were sat together. It is optional — most of the time the test's own page and status say enough — and is never edited once written: a later sitting is a new session.",
+    types: [requirementsType, specsType, decisionsType, releasesType, sessionsType],
+    fields: [SPEC, VERSION, DECIDED_ON, STANDING, SITTING_RUN],
     relations: [
       { name: "satisfies", inverse: "satisfied-by", says: "delivers or proves the requirement" },
       { name: "satisfied-by", inverse: "satisfies", says: "is delivered by" },
@@ -582,6 +612,8 @@ export default function planning(): Plugin {
       { name: "superseded-by", inverse: "supersedes", says: "is replaced by" },
       { name: "settles", inverse: "settled-by", says: "is the decision that answers" },
       { name: "settled-by", inverse: "settles", says: "is answered by the decision" },
+      { name: "records", inverse: "recorded-by", says: "is the session recording a sitting of" },
+      { name: "recorded-by", inverse: "records", says: "has a sitting recorded by the session" },
     ],
     // What it reads of others: who performs a proof and why, and what proves an item.
     uses: { fields: [RUN_BY.name, HUMAN_BECAUSE.name], relations: ["verified-by"] },

@@ -167,3 +167,19 @@ test("a release is marked released only once every stage is recorded, or skipped
     p.cleanup()
   }
 })
+
+test("a session records a test sitting: dated, append-only, and groups by run", () => {
+  const p = project()
+  try {
+    const { ctx } = p
+    const t = make(ctx, "tests", "Export keeps the alpha channel")
+    const session = make(ctx, "sessions", "2026-10-01 export sitting")
+    assert.equal(session.meta.status, "recorded")
+    setFields(ctx, fresh(ctx, session), [["sittingRun", "export-sitting-1"]])
+    addLink(ctx, fresh(ctx, session), "records", fresh(ctx, t))
+    assert.equal(fresh(ctx, session).meta["sittingRun"], "export-sitting-1")
+    assert.deepEqual(ctx.repo.linksOf(fresh(ctx, session)).filter((l) => l.rel === "records").map((l) => l.id), [t.meta.id])
+  } finally {
+    p.cleanup()
+  }
+})

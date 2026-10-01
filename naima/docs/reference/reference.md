@@ -1182,7 +1182,7 @@ Requirements proven by tests, specifications versioned name-vN, and the owner's 
 
 Its contributions' qualified ids are `planning/<name>`.
 
-Planning as items, so each is proven or checked rather than implied by a test. A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again. A **release** opens at its first stage (`naima new releases "<name>"`); each stage's output is recorded with `naima note`, headed `Stage: <name>` (or `Stage: <name> — skipped, decided by <who>`), and the hook refuses `status=released` while a stage is unrecorded — `naima view releases` shows what each one still owes.
+Planning as items, so each is proven or checked rather than implied by a test. A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again. A **release** opens at its first stage (`naima new releases "<name>"`); each stage's output is recorded with `naima note`, headed `Stage: <name>` (or `Stage: <name> — skipped, decided by <who>`), and the hook refuses `status=released` while a stage is unrecorded — `naima view releases` shows what each one still owes. A **session** is a dated, append-only record of one test sitting, linked `records` to the test or tests it was for; several share a `run` name when they were sat together. It is optional — most of the time the test's own page and status say enough — and is never edited once written: a later sitting is a new session.
 
 **Uses**, declared by other plugins: fields `runBy`, `humanBecause`; relations `verified-by`.
 
@@ -1268,6 +1268,14 @@ Releases: a release in progress, staged from pre-release checks to announcing: e
 | `released` | done |  | every stage is recorded, or skipped and said by whom; published and announced |
 | `rolled-back` | done |  | a stage found an issue serious enough to stop the release; the page says why |
 
+### type: sessions
+
+Sessions: a dated, append-only record of one test sitting: written once and never edited to change what happened — optional, not a daily habit to enforce; the test's own page is usually enough on its own. Items live in `naima-tracker/naima-data/sessions/`; a new one starts as `recorded`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `recorded` | done |  | written; a session is never reopened — a later sitting is a new session |
+
 **Fields**
 
 | Field | Kind | Applies to | Meaning | Values |
@@ -1276,6 +1284,7 @@ Releases: a release in progress, staged from pre-release checks to announcing: e
 | `version` | number | specs | the specification's version, N in name-vN; set from the title (`… v2`), else 1 |  |
 | `decidedOn` | date | decisions | when the owner decided; stamped with today when the decision is recorded |  |
 | `standing` | boolean | decisions | a standing permission: the action it names may be taken again, every time, without asking |  |
+| `sittingRun` | string | sessions | the name shared by every session of one sitting, when several tests were sat together |  |
 
 **Link relations** — only the direction written is stored; the inverse is derived when read.
 
@@ -1289,6 +1298,8 @@ Releases: a release in progress, staged from pre-release checks to announcing: e
 | `superseded-by` | `supersedes` | is replaced by |
 | `settles` | `settled-by` | is the decision that answers |
 | `settled-by` | `settles` | is answered by the decision |
+| `records` | `recorded-by` | is the session recording a sitting of |
+| `recorded-by` | `records` | has a sitting recorded by the session |
 
 **Checks**, run by `naima check`
 
