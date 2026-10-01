@@ -2,7 +2,7 @@
 
 The rules every project that uses Naima holds to, for people and
 [agents](glossary.md#agent) alike. This is the only place they are written:
-the flows, the skill and every other page link here instead of repeating
+the [flows](glossary.md#flow), the skill and every other page link here instead of repeating
 them.
 
 Each rule is marked:
@@ -46,16 +46,16 @@ what lacks [effort](glossary.md#effort): [triage](triage.md).
 
 ### Effort is never guessed
 
-Only someone who has looked at the code sets `effort`. **Convention**: no
+Only someone who has looked at the work to be done sets `effort`. **Convention**: no
 tool infers it (`naima triage derive` never touches it).
 
 ### Fixed, resolved and closed are three states
 
-[Fixed](glossary.md#fixed) (the code exists), [resolved](glossary.md#resolved)
+[Fixed](glossary.md#fixed) (the change exists), [resolved](glossary.md#resolved)
 (fixed and proven) and [closed](glossary.md#closed) (resolved and archived)
 are never confused or added into one number. **Enforced by** `naima close`,
 which refuses anything not resolved, and the checks `closed-carries-proof`
-(every archived item carries a passed proof) and `proven-but-open` (a note:
+(every archived item carries a passed [proof](glossary.md#proof)) and `proven-but-open` (a note:
 an open item whose proof passed, ready to close).
 
 ### Every fix names the gesture that proves it
@@ -103,7 +103,7 @@ something looks or feels, a decision reserved to the
 
 A request is not a work order. First its item says what "done" is: for a
 feature, its behaviour, its boundaries and how it is documented; for a defect,
-its triage fields and the gesture that proves the fix. Then implementation
+its [triage](glossary.md#triage) fields and the gesture that proves the fix. Then implementation
 waits for the owner's explicit go; until then the only work is writing and
 refining that definition. A requirement that arrives while work is running
 goes into the definition, never into the running work. **Convention**.
@@ -120,8 +120,25 @@ reasons it is in `humanBecause`. **Enforced by** the check `human-says-why`;
 A branch does not close its own items on the strength of its own tests:
 someone else checks the proof, from the [trunk](glossary.md#trunk), after the
 merge. **Enforced by** the write hook `no-closing-own-claims`: `naima close`
-refuses an item the current branch [claims](glossary.md#claim), unless
+refuses an item the current branch [claims](glossary.md#claim-file), unless
 `--force`, which is for the one who owns the evidence.
+
+### The owner's chat stays private
+
+The conversation between the [owner](glossary.md#owner) and an agent is
+private. Nothing from it is copied into the repository verbatim: the agent
+writes the report, the description or the note in its own words. The owner's
+own words are quoted, and a file or screenshot the owner shared becomes an
+attachment, only after the owner's explicit yes. **Convention**:
+[reporting and triage](../agents/reporting-and-triage.md#3-what-a-report-carries).
+
+### Git is the agent's job, done safely
+
+The owner never has to learn git. Agents install it when it is missing,
+start a repository when there is none, keep secrets and private data out of
+it with a `.gitignore`, and save work in small commits; they never
+force-push, never rewrite history, and never commit a secret.
+**Convention**: [git, handled for the owner](../agents/git-for-the-owner.md).
 
 ## Branches and worktrees
 
@@ -136,7 +153,7 @@ Each piece of work has its own [worktree](glossary.md#worktree) and its own
 
 Two sessions never edit one file to register, announce or log something;
 a collection is a directory of one file per session, named by a uuid.
-**Convention** for the project's own files; Naima's claims and session notes
+**Convention** for the project's own files; Naima's claims and [session notes](glossary.md#session-note)
 are built this way.
 
 ### A claim names real items
@@ -192,7 +209,7 @@ feature item in status `shipped` names its pages in `docs`.
 |---|---|
 | `features-documented` | a shipped feature names no page in `docs`, or names a file or heading that does not exist |
 | `links-resolve` | a relative link in any markdown file the project tracks points at nothing |
-| `documented` | a loaded plugin's command, type, field, check or gate carries no documentation in its manifest |
+| `documented` | a loaded plugin's command, type, field, check or [gate](glossary.md#gate) carries no documentation in its manifest |
 | `reference-current` | with the `docs` plugin's `reference` option set, the reference file differs from what `naima docs` generates |
 
 How to set `docs` on a feature: [file a feature](file-a-feature.md#when-it-ships).

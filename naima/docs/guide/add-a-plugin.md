@@ -76,7 +76,7 @@ included.
 
 ## Removing it
 
-Delete its entry from `plugins`. Its items, if it added a type, stay on disk;
+Delete its entry from `plugins`. Its [items](glossary.md#item), if it added a type, stay on disk;
 `naima check` reports a folder no loaded plugin owns (the check `layout`).
 
 Writing a plugin of your own: [plugin contract](../reference/plugin-contract.md).

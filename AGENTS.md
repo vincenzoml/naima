@@ -51,5 +51,11 @@ deno task verify    # typecheck, lint, format, tests, check (working tree and lo
 node --test "test/**/*.test.ts" && bun test ./test/     # the same tests on Node and Bun
 ```
 
+What Naima is for — an enabling technology and decision support system for
+any versioned work, run by agents for an owner who only decides — is
+[the purpose](naima/docs/purpose.md); what it does not do yet is
+[planned](naima/docs/planned.md), and a page describes nothing planned as if
+it existed. Requirements and design principles:
+[requirements](develop/requirements.md).
 Architecture and the dependency rule: [architecture](develop/architecture.md).
 Everything else: [the documentation map](naima/docs/README.md).

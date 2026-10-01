@@ -1,6 +1,6 @@
 # Triage
 
-[Triage](glossary.md#triage) ranks an item against everything else, so the
+[Triage](glossary.md#triage) ranks an [item](glossary.md#item) against everything else, so the
 list "most urgent first" means something. Four fields; three are set when the
 item is opened ([the rule](rules.md#triage-what-you-touch)).
 

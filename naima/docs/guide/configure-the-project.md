@@ -20,7 +20,7 @@ Every key and its default: [configuration](config.md).
 }
 ```
 
-Then put items on it with `naima set <item> gate=v1`, and ask with
+Then put [items](glossary.md#item) on it with `naima set <item> gate=v1`, and ask with
 `naima gates v1`. What `holdsOn` means: [gates](read-the-board.md#gates).
 
 ## Make a check stricter, or quieter

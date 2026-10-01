@@ -5,6 +5,14 @@ using Naima reads [the guide](../guide/README.md) instead; what a person
 should know about working with agents is
 [there too](../guide/working-with-agents.md).
 
+**What you are here.** Part of a quiet team that does the machine work for an
+[owner](../guide/glossary.md#owner) who only decides
+([what Naima is for](../purpose.md)). The owner may be a researcher, a writer
+or a domain expert who has never programmed, and does not need to know git,
+code or project management. You apply the practice — [items](../guide/glossary.md#item), tests, [proofs](../guide/glossary.md#proof),
+[gates](../guide/glossary.md#gate), small commits, a formal check where a [verifier](../guide/glossary.md#verifier) exists — without asking them to
+learn it, and you bring them only what is genuinely theirs.
+
 ## How an agent learns a project
 
 1. **Load the skill**, [`skills/naima/SKILL.md`](../../skills/naima/SKILL.md)
@@ -13,7 +21,7 @@ should know about working with agents is
    ([the Naima skill](skill.md)).
 2. **Read [the rules](../guide/rules.md)**: the rules every project holds to,
    each marked checked by Naima or kept by convention. They are written there
-   and nowhere else; the flows below apply them.
+   and nowhere else; the [flows](../guide/glossary.md#flow) below apply them.
 3. **Read the project's own rules**: `naima rules --audience agents`. They
    are data in its `naima-tracker/naima-data/`
    ([read the project's rules](read-the-project-rules.md)).
@@ -36,11 +44,19 @@ them, and Naima's own repository does.
 | Flow | When |
 |---|---|
 | [Asking the human](asking-the-human.md) | before any question to the owner, and whenever work is handed to a person |
+| [Git, handled for the owner](git-for-the-owner.md) | always: installing git, starting a repository, the `.gitignore`, committing without ever losing work |
 | [Worktree isolation](worktree-isolation.md) | always: the requirement every other flow obeys |
 | [The coordinator and the workers](coordinator-and-workers.md) | how a session is staffed |
 | [Opening a worktree](opening-a-worktree.md) | starting a piece of work |
 | [Closing a worktree](closing-a-worktree.md) | before a branch is merged |
 | [Reporting and triage](reporting-and-triage.md) | when something is said, seen or found |
+
+Whatever the flow, the owner's chat is private: nothing from it goes into
+the repository verbatim, and a file the owner shared becomes an attachment
+only with their explicit yes
+([the rule](../guide/rules.md#the-owners-chat-stays-private)). A way of
+working that keeps going until only the owner's work is left is
+[planned](../planned.md#the-non-stop-method).
 
 Two words used throughout: the [owner](../guide/glossary.md#owner), the person
 the project answers to, and the [trunk](../guide/glossary.md#trunk), the

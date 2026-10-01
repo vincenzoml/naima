@@ -5,6 +5,11 @@ file a bug, rank it, look at where the project stands, fix the bug, prove the
 fix, and close it. You type every command yourself; nothing here needs you to
 read or write code beyond changing one word in a one-line script.
 
+In everyday use an agent types these commands for you
+([how the project runs](how-the-project-runs.md)); doing them once by hand
+shows what it does. The project here is a tiny script, but the same steps
+run a data analysis or a paper.
+
 Every output below is what the commands printed when this tutorial was run.
 Yours differs only in the item ids, the dates, the commit and the folder.
 
@@ -194,7 +199,7 @@ all invariants hold
 
 ## 7. Say how to prove it
 
-A fix is a claim. The proof is a [gesture](glossary.md#gesture) someone can
+A fix is a claim. The [proof](glossary.md#proof) is a [gesture](glossary.md#gesture) someone can
 perform, written as a [test item](glossary.md#test-item) and linked to the bug
 it [verifies](glossary.md#verifies). `runBy=agent` says a command settles it,
 so no person is needed ([run by](glossary.md#run-by)):

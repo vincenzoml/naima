@@ -7,7 +7,7 @@ step: [configure the project](configure-the-project.md). Terms:
 ## The automatic principle
 
 Naima is automatic first. Every first-party plugin — `trackers`,
-`coordination`, `triage`, `gates`, `beta-markers`, `verifier`, `docs` — is
+`coordination`, `triage`, `gates`, `beta-markers`, `verifier`, `docs`, `rules` — is
 loaded, and every default is inferred from the repository: beta markers are
 looked for in every file git tracks (or would track), and the docs check
 follows the links of every tracked markdown file. The program in
@@ -19,7 +19,7 @@ committed. A project that needs nothing else configures nothing.
 - the **formats** of the data, and the **lock**: which Naima runs the project
   (`source`, `commit`, optionally `verify`), and how it is carried (`carry`, `program`);
 - the **`plugins` table**: what the project decides about a plugin — its
-  options (the project's gates are the `gates` plugin's), a plugin switched
+  options (the project's [gates](glossary.md#gate) are the `gates` plugin's), a plugin switched
   off or replaced, a third-party plugin added, a check weighed differently.
 
 - the project's own **extensions** of the loaded plugins' types and fields,

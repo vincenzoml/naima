@@ -1,13 +1,14 @@
 # Concepts
 
-The ideas behind every command, for anyone using Naima. Each term is defined
-once in the [glossary](glossary.md); the rules built on these ideas are on
+The ideas behind every command, for anyone using Naima. How they are used
+day to day is on [how the project runs](how-the-project-runs.md). Each term
+is defined once in the [glossary](glossary.md); the rules built on these ideas are on
 [the rules page](rules.md).
 
 ## Items
 
-Every item — a bug, a task, a feature, a test, a property — is a directory
-under the tracker:
+Every [item](glossary.md#item) — a bug, a todo, a feature, a test, a
+property, a rule — is a directory under the tracker:
 
 ```
 naima-tracker/naima-data/<type>/<slug>/README.md       the prose
@@ -27,7 +28,7 @@ exactly one item.
 
 Which types, statuses and fields exist depends on the loaded plugins:
 [reference](../reference/reference.md). Each status is in the `open` or the `done`
-category; a status may also `prove` — count as evidence for whatever the item
+category; a status may also `prove` — count as [evidence](glossary.md#evidence) for whatever the item
 `verifies`.
 
 ## Links
@@ -40,15 +41,16 @@ Only the direction written is stored; the inverse (`verifies` ↔ `verified-by`,
 
 Three states that are not synonyms:
 
-- **fixed** — the code exists: `fixedOn` is set. Nothing is proven.
+- **fixed** — the change exists (the code, the corrected table, the
+  rewritten paragraph): `fixedOn` is set. Nothing is proven.
 - **resolved** — fixed, and proven by an item that `verifies` it and whose
   status proves: a test that passed, a property that holds.
 - **closed** — resolved, and moved to the archive by `naima close`, carrying
-  its proof.
+  its [proof](glossary.md#proof).
 
 A status may instead **refute** — a failed test, a violated property: then
 the item it verifies is not resolved whatever else proves it, and it blocks
-every gate the two are on. `naima close` also refuses a proof `naima check`
+every [gate](glossary.md#gate) the two are on. `naima close` also refuses a proof `naima check`
 reports as no longer current.
 
 "How many bugs are left" is the unfixed count (`naima bugs`); fixed-but-
@@ -59,7 +61,7 @@ unproven is a different number, and the two are never added.
 Evidence travels with the claim, in the item's `attachments/`. A property
 checked by a formal-methods tool is evidence exactly as a passed test is:
 `naima verify` attaches the run and the hash of the model it ran on, and
-`naima check` fails when the model, or the property, verifier or options it
+`naima check` fails when the model, or the property, [verifier](glossary.md#verifier) or options it
 was run with, has changed since.
 
 ## Derived, never stored
@@ -78,8 +80,8 @@ joins a gate by carrying `gate: <name>`. How each gate decides is in the
 
 State that belongs to no single branch — who is working on what, where each
 session left off — is written as one file per session on that session's own
-branch, and recombined when read from every local branch: the trunk and every
-unmerged branch, each read from the disk of the worktree that stands on it,
+branch, and recombined when read from every local branch: the [trunk](glossary.md#trunk) and every
+unmerged branch, each read from the disk of the [worktree](glossary.md#worktree) that stands on it,
 uncommitted files included, or from its ref when none does. Remote-tracking
-refs are not read. Two sessions never edit one file. The flows
+refs are not read. Two sessions never edit one file. The [flows](glossary.md#flow)
 that go with it: [flows](../agents/README.md).

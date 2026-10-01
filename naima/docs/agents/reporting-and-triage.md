@@ -1,12 +1,19 @@
 # Reporting and triage
 
-How something said, seen or found becomes an item someone can act on months
+How something said, seen or found becomes an [item](../guide/glossary.md#item) someone can act on months
 later, and how that item earns its place in the ranking.
+
+**Who and when.** Whoever hears or finds it — usually the coordinator, in
+the [owner](../guide/glossary.md#owner)'s chat — files it at once, before investigating (step 2). The
+filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–6): it rewrites the
+description in its own words, records what it checked, links duplicates and
+sets the fields. The owner may also write an item directly as a file; it is
+triaged the same way. A report written by the owner is never overwritten:
+the triage adds to it.
 
 ## 1. Route it
 
-Every sentence the owner says while using the software is one of a few
-things, and each has one place. In the wrong place it is lost, and a lost
+Every sentence the owner says about the work is one of a few things, and each has one place. In the wrong place it is lost, and a lost
 report has to be said again.
 
 | When they say… | It goes in |
@@ -16,7 +23,7 @@ report has to be said again.
 | "I'd like it to do X" — it does not exist | `features`, status `requested` |
 | "this exists now" | `features`, status `shipped`, with its `docs` |
 | "this still has to be tried" | `tests` |
-| "the behaviour must be Z" | the project's specification |
+| "the behaviour must be Z" | the page of the feature it constrains; requirement and specification items are [planned](../planned.md#requirements-specifications-and-decisions) |
 
 A defect does not go in `todos`. A request is not a feature until the code
 exists. If an earlier request is reversed, record the reversal — never
@@ -34,14 +41,17 @@ naima new bugs "<what happened, in one line>"
   never wrong.
 - An item opened late competes with whatever you are doing instead of being
   ranked against everything else.
-- The report is evidence; your reconstruction is not.
+- The report is [evidence](../guide/glossary.md#evidence); your reconstruction is not.
 
 The title says what happened, not what to do.
 
 ## 3. What a report carries
 
-1. **The words, verbatim**, in the language they were said in — the phrasing
-   carries what a paraphrase drops.
+1. **What happened, in your own words**: what happens, what should happen,
+   and how to see it. The owner's chat is private: quote the owner's words,
+   or attach a file or screenshot they shared, only after their explicit yes
+   ([the rule](../guide/rules.md#the-owners-chat-stays-private)). A report a
+   person wrote as a file is kept as they wrote it.
 2. **The evidence**: a log line, a number, a command with its output, a file
    in `attachments/`. Evidence travels with the claim.
 3. **What is measured and what is inferred, marked apart.** "Read in the
@@ -71,6 +81,11 @@ naima triage set <item> impact=high priority=next confidence=reported
 reporting or fixing an item means leaving its fields set. `naima triage` prints coverage per type; do not add to what it
 says is missing.
 
+**Notes of what you checked** go on the item's page, under a dated heading
+with who wrote them. A command to add a dated comment, and one to rewrite the
+description, are [planned](../planned.md#commands-for-every-action); until
+then, edit the page, `README.md`, and never `meta.json`.
+
 ## 5. Cross-reference instead of repeating
 
 Items name each other by permanent id (`naima link`), never by a slug in
@@ -97,7 +112,7 @@ up, and both mistakes are expensive.
 
 A fix is not a close. Closing takes the fix (`fixedOn`), the gesture that
 proves it as an item linked `verifies`, and the gesture performed and passed —
-then `naima close` moves the item to the archive, carrying its proof, so a
+then `naima close` moves the item to the archive, carrying its [proof](../guide/glossary.md#proof), so a
 regression is recognised when it comes back. Fixed but unproven stays open:
 the shape of a result is not its behaviour.
 
@@ -106,5 +121,5 @@ The proof must also be **current**. `naima close` refuses when:
 - an item verifying it **refutes** it — a test that `failed`, a property
   that is `violated`: evidence against outweighs any evidence for;
 - `naima check` finds a problem on an item verifying it — a property that
-  holds on a model, property, verifier or options changed since its run. Run
+  holds on a model, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
   the gesture again (`naima verify`), then close.

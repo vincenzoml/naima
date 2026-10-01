@@ -1,19 +1,24 @@
 # Documentation
 
-Start from who you are.
+Start with [what Naima is for](purpose.md): an enabling technology and a
+decision support system for any versioned work — software, a data analysis,
+a paper with colleagues — run by AI agents for an owner who only decides.
+Then start from who you are.
 
 | You are… | Start at | Then |
 |---|---|---|
-| **new to Naima** | [Purpose](purpose.md): why it exists, whom it serves | [the tutorial](guide/tutorial.md) |
-| **a person using Naima on a project** | [the guide](guide/README.md): tasks, concepts, rules | [questions](guide/faq.md), [glossary](guide/glossary.md) |
+| **new to Naima** | [What Naima is for](purpose.md): what it is, what it manages, what exists and what is planned | [how the project runs](guide/how-the-project-runs.md), then [the tutorial](guide/tutorial.md) |
+| **a person whose project Naima runs** | [the guide](guide/README.md): how the project runs first, then a page per task | [questions](guide/faq.md), [glossary](guide/glossary.md) |
 | **an AI agent working on a project** | [the pages for agents](agents/README.md): the skill, the flows | [the rules](guide/rules.md) |
 | **looking something up** | [the reference](reference/reference.md): every command, type, field, check, gate, generated from the code | [the format](reference/format.md): every file and field on disk |
-| **changing Naima's own code** | [developing Naima](https://github.com/vincenzoml/naima/blob/main/develop/README.md): architecture, plugins, documentation | [the rules](guide/rules.md) |
+| **changing Naima's own code, or studying how it works** | [developing Naima](https://github.com/vincenzoml/naima/blob/main/develop/README.md): requirements, architecture, plugins, documentation | [the rules](guide/rules.md) |
 
 ## Where each thing is
 
-- **[guide/](guide/README.md)** — for people. No code assumed. The tutorial,
-  a page per everyday task, concepts, the [rules](guide/rules.md) (the only
+- **[purpose](purpose.md)** — what Naima is, and **[planned](planned.md)** —
+  everything it does not do yet, in one list.
+- **[guide/](guide/README.md)** — for people. No code assumed. How the
+  project runs, the tutorial, a page per everyday task, concepts, the [rules](guide/rules.md) (the only
   page that states them), a project's own rules
   ([write one](guide/write-a-project-rule.md)), installing, configuration,
   questions, glossary.

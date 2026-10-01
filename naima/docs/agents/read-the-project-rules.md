@@ -17,7 +17,7 @@ naima rules                  # every active rule, whatever its audience
 naima rules --json           # as data: item, title, audience, strength, enforcedBy, text
 ```
 
-A rule is an item of the project's tracker; a person writes it
+A rule is an [item](../guide/glossary.md#item) of the project's tracker; a person writes it
 ([write a project rule](../guide/write-a-project-rule.md)). A rule marked
-`enforcedBy` is held by that check or gate as well; the others are kept by
+`enforcedBy` is held by that check or [gate](../guide/glossary.md#gate) as well; the others are kept by
 whoever reads them.

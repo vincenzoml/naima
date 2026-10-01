@@ -12,10 +12,12 @@ Something is broken. Write it down first, before anyone tries to fix it
    ```
 
    It prints the folder it made, `naima-tracker/naima-data/bugs/<slug>/`, and
-   the item's permanent [id](glossary.md#id).
+   the [item](glossary.md#item)'s permanent [id](glossary.md#id).
 
 2. **Write the page**: open `README.md` in that folder and put down
-   - **the words, verbatim**, as they were said or written, in their language;
+   - **what happened**: what happens, what should happen, how to see it. An
+     agent writes this in its own words; your chat with it is never copied
+     in without your yes ([the rule](rules.md#the-owners-chat-stays-private));
    - **the evidence**: what you ran and what it printed, a number, a
      screenshot — files go in `attachments/` next to it;
    - **what you saw and what you only suppose**, kept apart;
@@ -50,7 +52,7 @@ Something is broken. Write it down first, before anyone tries to fix it
 
 If an item for it already exists (`naima list bugs`), add what you saw to that
 item's page. If two items turn out to be one, link them, and keep the
-evidence on the one that stays:
+[evidence](glossary.md#evidence) on the one that stays:
 
 ```sh
 naima link export-drops-2 duplicate-of export-drops

@@ -1,7 +1,7 @@
 # Closing a worktree
 
 Everything that has to be true before a branch is merged, in the order that
-makes each step possible. Several steps cannot be done from the trunk
+makes each step possible. Several steps cannot be done from the [trunk](../guide/glossary.md#trunk)
 afterwards, and the first is the one most often skipped.
 
 The rules it applies are on [the rules page](../guide/rules.md#branches-and-worktrees);
@@ -13,7 +13,7 @@ ships.
 
 The fix feels finished when the tests are green. It is not resolved until
 something proves it, and that something must be visible to the board: a test
-item linked `verifies`, not a checkbox inside the fixed item's own page.
+[item](../guide/glossary.md#item) linked `verifies`, not a checkbox inside the fixed item's own page.
 
 ```sh
 naima new tests "Export keeps the alpha channel" --set runBy=agent
@@ -26,9 +26,9 @@ the fix has one, because a rule that always fires is the same defect the
 other way round. Set `runBy` by the instrument that settles it; a person's
 gesture also says `humanBecause` ([asking the human](asking-the-human.md)).
 
-A test nobody can find is a test nobody runs: triage it like any item.
+A test nobody can find is a test nobody runs: [triage](../guide/glossary.md#triage) it like any item.
 
-The proof is the gesture as it stands, not as it once stood: `naima close`
+The [proof](../guide/glossary.md#proof) is the gesture as it stands, not as it once stood: `naima close`
 refuses an item that a verifying item refutes (a failed test, a violated
 property), and one whose verifying item `naima check` reports — a property
 that holds on a model changed since its run
@@ -52,12 +52,12 @@ naima release <item>...
 
 `release` acts on the branch you are standing on. Run from the trunk after
 the merge, it would release the trunk's claims and leave the branch's behind.
-It deletes your own claim file and commits nothing: commit the deletion on the
+It deletes your own [claim file](../guide/glossary.md#claim-file) and commits nothing: commit the deletion on the
 branch, so it rides the same fast-forward as the work.
 
 Claims outlive their work when someone forgets. Release another branch's claim
 only when both hold: nothing is being worked on there, and nothing is
-unlanded. Neither test alone is enough — a gone worktree can still have an
+unlanded. Neither test alone is enough — a gone [worktree](../guide/glossary.md#worktree) can still have an
 unmerged branch, and a merged branch can still have a live session working on
 it. The one mechanical case is a claim naming a branch git no longer has:
 
@@ -80,10 +80,10 @@ never number yours.
 
 ## 5. Run the gates, and read what breaks
 
-The project's full gate set, including `naima check`. A red result that
+The project's full [gate](../guide/glossary.md#gate) set, including `naima check`. A red result that
 arrives with the trunk is not yours to absorb silently: prove where it comes
 from (a detached worktree at the trunk settles it in one command), and if it
-is the trunk's, open an item and say so in the session note.
+is the trunk's, open an item and say so in the [session note](../guide/glossary.md#session-note).
 
 ## 6. Merge the trunk into the branch
 
@@ -121,5 +121,5 @@ git worktree remove <path>
   refuses anything that is not resolved, and refuses an item the branch you
   stand on claims: close it from the trunk, after the merge, once someone
   else has checked the proof. `naima close --force` is for the one who owns
-  the evidence — a proof someone else performed, recorded here.
+  the [evidence](../guide/glossary.md#evidence) — a proof someone else performed, recorded here.
 - **Deleting the scratchpad.** It was never tracked.

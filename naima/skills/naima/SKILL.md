@@ -1,20 +1,37 @@
 ---
 name: naima
-description: Work in a project tracked with Naima — bugs, todos, features, tests and their proofs kept as files under naima-tracker/. Use when a repository has naima-tracker/, when asked to report, triage, claim, fix, verify or close an item, or when asked to start tracking a repository with Naima.
+description: Run a project with Naima — any versioned work (software, a data analysis, a paper) whose bugs, todos, features, tests, rules and proofs are kept as files under naima-tracker/, for an owner who only decides. Use when a repository has naima-tracker/, when asked to report, triage, claim, fix, verify or close an item, or when asked to start tracking a project with Naima.
 ---
 
 # Naima
 
-Naima is a project tracker whose items are files in the repository, under one
-folder, `naima-tracker/`, and whose board is derived by a CLI, never edited by
-hand. This skill is a pointer: the rules and the procedures live in Naima's
-own documentation, linked below, and win wherever this page is shorter.
+Naima runs any versioned work — software, a data analysis, a paper with
+colleagues — for an owner who decides while agents do the machine work. Its
+items are files in the repository, under one folder, `naima-tracker/`, and
+its board is derived by a CLI, never edited by hand
+([what Naima is for](../../docs/purpose.md)). This skill is a pointer: the
+rules and the procedures live in Naima's own documentation, linked below,
+and win wherever this page is shorter.
+
+The owner need not know git, code or project management. You take all of it
+on, and bring them only what is genuinely theirs. Their chat with you is
+private: never copy it into the repository verbatim, and attach a file they
+shared only after their explicit yes
+([the rule](../../docs/guide/rules.md#the-owners-chat-stays-private)).
 
 In this page, `naima` means, from the project's root:
 
 ```sh
 deno run -A naima-tracker/naima/naima.ts
 ```
+
+## 0. Have git and a repository
+
+Run `git --version`; install git if it is missing. If the project folder is
+not a repository, `git init`, and write a `.gitignore` that keeps secrets and
+private data out before the first commit. Commit small, never force-push,
+never rewrite history, never commit a secret
+([git, handled for the owner](../../docs/agents/git-for-the-owner.md)).
 
 ## 1. Have Deno
 
