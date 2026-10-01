@@ -1,0 +1,11 @@
+{
+  "branch": "claude/no-dist",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "18a6662b-aab1-4833-80c0-63b109e48736",
+      "ref": "features/copy-install-program-plain-copy-naima-from",
+      "title": "Copy-on-install: the program is a plain copy of naima/ from a per-user cache, locked to a main commit; no dist branch"
+    }
+  ]
+}
