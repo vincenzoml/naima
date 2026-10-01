@@ -41,14 +41,16 @@ a [plugin](guide/add-a-plugin.md).
 ## Commands for every action
 
 Every action an agent takes on an item has a command, so each is recorded
-the same way and can be checked. Missing today:
+the same way and can be checked. Opening, fields and title, triage, links,
+the description (`naima describe`), notes (`naima note`), claims, proof and
+closing have one. Missing today:
 
-- **Editing an item's description** from the command line.
-- **A dated, attributed comment** on an item, appended and never rewritten
-  (for example `naima note <item> "…"`).
-- **Today:** the agent edits the item's page, `README.md`, by hand, which
-  [the rules](guide/rules.md#change-the-tracker-only-through-the-cli) allow
-  for the page and not for the fields.
+- **Attaching a file** to an item's `attachments/`, with the consent of whoever
+  owns it recorded on the item when it is the owner's material. **Today:** the
+  file is copied in by hand.
+- **Moving an item to another type** (a bug that turns out to be a request).
+  **Today:** a new item is opened in the right type and the old one linked
+  `duplicate-of` it.
 
 ## Worktree names and claim files
 
