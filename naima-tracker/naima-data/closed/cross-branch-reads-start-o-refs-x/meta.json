@@ -1,0 +1,14 @@
+{
+  "id": "5bcaa514-0643-4e61-a49e-b9ce20a1ddae",
+  "title": "Cross-branch reads start O(refs x files) git subprocesses on every call",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
+}

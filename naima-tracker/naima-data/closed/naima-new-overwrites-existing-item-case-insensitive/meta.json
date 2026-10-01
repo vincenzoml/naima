@@ -1,0 +1,14 @@
+{
+  "id": "1c60ddc2-9d73-4a07-880f-ca1c05ab9c00",
+  "title": "`naima new` overwrites an existing item on a case-insensitive filesystem or under concurrent runs",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "M",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

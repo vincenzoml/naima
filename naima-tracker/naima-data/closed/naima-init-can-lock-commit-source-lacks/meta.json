@@ -1,0 +1,14 @@
+{
+  "id": "872a5b0c-1250-4199-82ea-ab23da1b0e13",
+  "title": "`naima init` can lock a commit the source lacks, and may commit a credential token",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

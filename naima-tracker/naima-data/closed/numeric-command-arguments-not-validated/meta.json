@@ -1,0 +1,14 @@
+{
+  "id": "134bcbe2-bf9f-4e61-a230-d9463fe66370",
+  "title": "Numeric command arguments are not validated",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

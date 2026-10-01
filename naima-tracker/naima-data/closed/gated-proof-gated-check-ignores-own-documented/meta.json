@@ -1,0 +1,14 @@
+{
+  "id": "3c07928f-3d90-4bb8-8556-813757430f9a",
+  "title": "The gated-proof-is-gated check ignores its own documented \"or ranks below\" clause",
+  "status": "closed",
+  "created": "2026-09-30",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "fixedOn": "2026-09-30",
+  "effort": "S",
+  "triagedOn": "2026-09-30",
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}
