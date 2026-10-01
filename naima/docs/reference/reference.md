@@ -17,6 +17,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
+- [ui](#ui) — the views plugins contribute, shown by `naima ui` in a native window, or the browser, from a server on this machine only
 - [metrics](#metrics) — named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
 - [privacy](#privacy) — the owner's material enters the repository only with their recorded yes, and no secret enters it at all
@@ -66,6 +67,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
+| [`ui`](#naima-ui) | ui | show the views the plugins contribute — the project's metrics first — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it |
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
 | [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused |
@@ -77,7 +79,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, metrics, rules, privacy, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, ui, metrics, rules, privacy, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
@@ -92,6 +94,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier |
+| `ui-views` | ui | a view `naima ui` shows as a tab: `name` (its path), `title`, `says`, `render(params, ctx) → { data, html, css? }`, rendered at each request | metrics |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
 | `metrics` | metrics | a named measurement: `run` (a program and its arguments) and `kind`, or a code `measure`; a bound — `atMost`, `atLeast` or `equals` — and `better` |  |
 | `code-measures` | metrics | a code-quality number taken in process from the files: `measure({ files, source }, metric) → number \| { error }`, with its `unit` and `better` | metrics |
@@ -1385,6 +1388,38 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 |---|---|
 | `example-regex` | line-regex properties over a text file: "some <re>" or "never <re>" |
 
+## ui
+
+The views plugins contribute, shown by `naima ui` in a native window, or the browser, from a server on this machine only.
+
+Its contributions' qualified ids are `ui/<name>`.
+
+`naima ui` starts a server bound to the loopback interface, on a free port, that refuses every request without the token of its run, and opens it in a native window titled Naima. Each tab is a view a plugin contributes to `ui-views` — the metrics plugin's is the first — rendered from the files at each request, so the window shows what the files hold now; `/data/<view>` answers the same view's data as JSON. Closing the window stops the server. The window is a webview, loaded from JSR at a pinned version, only by `naima ui`, and in a process of its own: the rest of Naima has no dependency. Where it cannot open — on Node or Bun, on a system it does not run on, offline on its first run, when it fetches its library — the default browser opens instead, and `naima ui` says so in one line; `--browser` asks for the browser. Only `ui` is granted, by the launcher, the loopback network and the programs that show it.
+
+**Extension points** it declares: `ui-views`.
+
+### naima ui
+
+Show the views the plugins contribute — the project's metrics first — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it.
+
+```sh
+naima ui [--browser
+naima --no-open] [--log]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--browser` |  | show it in the default browser instead of the window; Ctrl-C stops the server |
+| `--no-open` |  | show it nowhere: print the address, with its token, and serve until Ctrl-C |
+| `--log` |  | print one line per request on stderr: its status, method, path and user agent |
+
+Examples:
+
+```sh
+naima ui
+naima ui --browser
+```
+
 ## metrics
 
 Named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline.
@@ -1455,6 +1490,12 @@ naima metrics presets
 **Directories** it owns under the tracker root: `metrics/`.
 
 **Summary sections**: `metrics`.
+
+**UI views**, the tabs of `naima ui`
+
+| View | Title | What it shows |
+|---|---|---|
+| `metrics` | Metrics | the project's metrics along the commit timeline: a chart and a table of each, for the metrics and the commits picked |
 
 **Metric kinds**, how `naima metrics` reads a number
 

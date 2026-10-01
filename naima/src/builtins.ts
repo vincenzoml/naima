@@ -16,6 +16,7 @@ import privacy from "./plugins/privacy/index.ts"
 import rules from "./plugins/rules/index.ts"
 import trackers from "./plugins/trackers/index.ts"
 import triage from "./plugins/triage/index.ts"
+import ui from "./plugins/ui/index.ts"
 import verifier from "./plugins/verifier/index.ts"
 
 /** Every first-party plugin: its name, and the factory that makes it from its options. */
@@ -29,6 +30,7 @@ export const firstParty: readonly FirstParty[] = [
   { name: "loop", factory: loop },
   { name: "beta-markers", factory: betaMarkers },
   { name: "verifier", factory: verifier },
+  { name: "ui", factory: ui },
   { name: "metrics", factory: metrics },
   { name: "rules", factory: rules },
   { name: "privacy", factory: privacy },

@@ -214,7 +214,20 @@ under Deno with only these:
 | write | `naima-tracker/` only, the data or program directory if moved out of it, and the per-user cache | items, claims, notes, the program's own alignment, the commits fetched for it; nothing else in the project |
 | run | `git`, and the programs the loaded contributions declare | alignment, update and carry, and reading claims and notes across branches; a [verifier](glossary.md#verifier)'s model checker (its `runs`, [the contract](../reference/plugin-contract.md#the-verifier-contract)); a declared [metric](metrics-and-budgets.md)'s program, the first word of its `run` |
 | env | an allow-list: `HOME`, `PATH`, the user, shell, terminal, locale and temporary-directory variables, the proxy variables, Windows' system ones, and every `NAIMA_*`, `GIT_*`, `SSH_*`, `LC_*` and `DENO_*` | what git needs to reach a source, and Naima's own; nothing else of the environment reaches the program, nor the git it runs |
-| net | none | the network is git's, in alignment and update |
+| net | none, but the loopback interface for `naima ui` | the network is git's, in alignment and update; `naima ui` serves its window from this machine only |
+
+**`naima ui`, and no other command,** is granted three things more: listening
+on the loopback interface (`127.0.0.1`), for its server; reading and running
+the Deno that runs it, to open its window; and running the program that opens
+the default browser (`open`, `xdg-open` or `rundll32`), for its fallback.
+The window is a process of its own, `src/plugins/ui/window.ts`, which the
+program starts with only what the webview needs: native code from, and
+writing in, the webview's cache (`plug/` in Deno's directory), reading Deno's
+directory, the network to GitHub to fetch the webview's library on its first
+run, and the environment. The program itself never calls native code nor
+loads code over the network. Running Deno is a wide grant — Deno can be
+asked for any permission — and is why only `ui` has it. The grant is
+`uiGrant` in `src/launcher.ts`.
 
 The list is `ENV` in `src/launcher.ts`. Deno cannot grant a named list of
 variables and still let the program hand git its environment, so the

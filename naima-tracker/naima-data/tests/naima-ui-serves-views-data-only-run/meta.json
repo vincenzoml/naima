@@ -1,0 +1,18 @@
+{
+  "id": "46cad2d1-6b33-445a-9a79-9e2ce5144182",
+  "title": "naima ui serves views and data only with the run's token, on the loopback interface only, and picks the window, the browser fallback or --browser (test/plugins/ui/ui.test.ts, on Deno, Node and Bun)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "be498dfe-f0a7-456b-9f13-16985398556f"
+    }
+  ]
+}

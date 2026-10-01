@@ -52,8 +52,10 @@ these choices in chat, and the owner's answers become
   interface.
 - **Skills from GitHub**: an item or flow points to a
   [skill](guide/glossary.md#skill) published on GitHub instead of copying it.
-- **A dashboard**: a visual page of the project's state. **Today:** `naima
-  summary --markdown` prints it as text you can paste anywhere.
+- **A dashboard**: a visual page of the project's state — boards, gates, the
+  ranked queue, claims and notes. **Today:** `naima ui` opens a window with
+  one view, the project's metrics, which plugins can add views beside; and
+  `naima summary --markdown` prints the state as text you can paste anywhere.
 
 ## A pointer in the agent's instruction file
 

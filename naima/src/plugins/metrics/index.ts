@@ -74,7 +74,7 @@ import {
   STATISTICS,
   workingTreeSource,
 } from "./code.ts"
-import { htmlReport, plotSvg, type Series } from "./plot.ts"
+import { htmlReport, plotSvg, REPORT_CSS, selectionPage, type Series } from "./plot.ts"
 import { PRESETS } from "./presets.ts"
 
 export type { CodeMeasure, CodeSource, FunctionInfo, Language } from "./code.ts"
@@ -742,6 +742,52 @@ export function seriesOf(ctx: Context, m: MetricDef, last?: number): Series {
   }
 }
 
+/** A view of `naima ui`: the shape the `ui-views` point takes, declared here since plugins never import each other. */
+interface UiView {
+  name: string
+  title: string
+  says: string
+  render(params: Record<string, string[]>, ctx: Context): { data: unknown; html: string; css?: string }
+}
+
+/**
+ * The metrics, picked and over a range of commits, as `naima ui` shows them: rendered from the records at each
+ * request. `metric` names the metrics (all when absent), `from` and `to` the first and last commit, by any prefix.
+ */
+export const metricsView: UiView = {
+  name: "metrics",
+  title: "Metrics",
+  says: "the project's metrics along the commit timeline: a chart and a table of each, for the metrics and the commits picked",
+  render(params, ctx) {
+    const all = metricsOf(ctx)
+    const wanted = params["metric"]?.filter((n) => all.some((m) => m.name === n)) ?? []
+    const picked = wanted.length ? all.filter((m) => wanted.includes(m.name)) : all
+    const commits = historyTable(ctx, all.map((m) => m.name)).map(({ commit, date }) => ({ commit, date }))
+    const at = (ref: string | undefined, fallback: number): number => {
+      const i = ref ? commits.findIndex((c) => c.commit.startsWith(ref)) : -1
+      return i < 0 ? fallback : i
+    }
+    let lo = at(params["from"]?.[0], 0)
+    let hi = at(params["to"]?.[0], commits.length - 1)
+    if (lo > hi) [lo, hi] = [hi, lo]
+    const inRange = new Set(commits.slice(lo, hi + 1).map((c) => c.commit))
+    const series = picked.map((m) => {
+      const s = seriesOf(ctx, m)
+      return { ...s, points: s.points.filter((p) => inRange.has(p.commit)) }
+    })
+    const from = commits[lo]?.commit
+    const to = commits[hi]?.commit
+    const sel = {
+      metrics: all.map((m) => ({ name: m.name, ...(m.says ? { says: m.says } : {}) })),
+      picked: picked.map((m) => m.name),
+      commits,
+      ...(from ? { from } : {}),
+      ...(to ? { to } : {}),
+    }
+    return { data: { ...sel, series }, html: selectionPage(sel, series), css: REPORT_CSS }
+  },
+}
+
 const measureUnit = (id: string): string | undefined => builtinMeasures.find((x) => x.id === id)?.unit || undefined
 
 const csvCell = (v: string | number | null): string => (v === null ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v))
@@ -1138,9 +1184,10 @@ export default function metrics(options: Record<string, unknown> = {}): Plugin {
       "code-languages": builtinLanguages,
       metrics: defs,
       gates: defs.length ? [gate] : [],
+      "ui-views": [metricsView],
     },
-    // The gate is for the gates plugin, when it is loaded: without it the metrics still run.
-    optional: ["gates"],
+    // The gate is for the gates plugin, the view for the ui plugin, when each is loaded: without them the metrics still run.
+    optional: ["gates", "ui-views"],
     checks: [boundReasons],
     commands: [metricsCommand],
     summary: [summarySection],

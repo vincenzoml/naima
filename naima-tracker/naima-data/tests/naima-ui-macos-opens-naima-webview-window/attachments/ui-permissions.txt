@@ -1,0 +1,13 @@
+--allow-read=<scratch>/demo,<scratch>/demo/naima-tracker/naima-data,<scratch>/demo/naima-tracker/naima,~/Library/Caches/naima,~/.deno/bin/deno
+--allow-write=<scratch>/demo/naima-tracker,<scratch>/demo/naima-tracker/naima-data,<scratch>/demo/naima-tracker/naima,~/Library/Caches/naima
+--allow-run=git,~/.deno/bin/deno,open
+--allow-env
+--allow-net=127.0.0.1
+<scratch>/demo/naima-tracker/naima/src/cli.ts
+ui
+--allow-ffi=~/Library/Caches/deno/plug
+--allow-read=~/Library/Caches/deno
+--allow-write=~/Library/Caches/deno/plug
+--allow-net=github.com,objects.githubusercontent.com,release-assets.githubusercontent.com
+--allow-env
+<scratch>/demo/naima-tracker/naima/src/plugins/ui/window.ts
