@@ -206,7 +206,8 @@ const hook: WriteHook = {
 
 const check: Check = {
   name: "epics",
-  says: "an item is part of an epic, never of an item of another type; an open epic groups at least one item",
+  says:
+    "an item is part of an epic, never of an item of another type; an open epic groups at least one item; an epic's status is the one its items give it, as the epic-status hook writes it, hand edits included",
   run(ctx) {
     const out: Finding[] = []
     for (const item of ctx.repo.items) {
@@ -217,6 +218,17 @@ const check: Check = {
           level: "problem",
           item,
           message: `${label(member)} is part of ${label(group)}, which is not an epic — naima unlink ${label(item)} ${l.rel} ${l.id}`,
+        })
+      }
+      // The check counterpart of the epic-status hook: a hand edit of an epic's meta.json never meets it.
+      if (isEpic(ctx, item) && item.meta.status !== derivedStatus(ctx, item)) {
+        const derived = derivedStatus(ctx, item)
+        out.push({
+          level: "problem",
+          item,
+          message: `${
+            label(item)
+          } is ${item.meta.status}, but its items make it ${derived}: an epic's status follows its items — naima set ${item.slug} status=${derived}`,
         })
       }
       if (isEpic(ctx, item) && isOpen(ctx, item) && !membersOf(ctx, item).length) {

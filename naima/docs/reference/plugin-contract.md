@@ -347,7 +347,7 @@ state to another, and not a value it fills in — comes with a
 check (a `checks` [contribution](#contributions)) that asserts the same state on the tracker as it is, so
 `naima check` fails where the command would have refused:
 `holds-only-by-verify` and `property-reopens-when-changed` with
-`property-evidence`, `no-closing-own-claims` with `closed-not-claimed`.
+`property-evidence`, `no-closing-own-claims` with `closed-not-claimed`, `epic-status` with `epics`.
 
 ## Cooperation without imports
 

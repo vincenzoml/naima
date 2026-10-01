@@ -30,7 +30,7 @@ append-only note); a person may also write it as a file.
 which fail on what a hand edit typically breaks, and by the check counterpart
 of every write hook that protects a state — `property-evidence` for
 `holds-only-by-verify` and `property-reopens-when-changed`,
-`closed-not-claimed` for `no-closing-own-claims` — so a hand edit that a
+`closed-not-claimed` for `no-closing-own-claims`, `epics` for `epic-status` — so a hand edit that a
 command would have refused fails `naima check`. The hooks that guard a move
 rather than a state (`status-moves`, `notes-append-only`) and the ones that
 only fill in a value (`triage-stamps-its-date`, `planning-stamps`) have none;

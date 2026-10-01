@@ -1025,7 +1025,7 @@ Traits: `group`.
 
 | Check | What it holds |
 |---|---|
-| `epics` | an item is part of an epic, never of an item of another type; an open epic groups at least one item |
+| `epics` | an item is part of an epic, never of an item of another type; an open epic groups at least one item; an epic's status is the one its items give it, as the epic-status hook writes it, hand edits included |
 
 **Summary sections**: `epics`.
 
