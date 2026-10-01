@@ -1,6 +1,6 @@
 # Prove and close
 
-A fix is a claim. An item is closed only once something proves it
+A fix is a claim. An [item](glossary.md#item) is closed only once something proves it
 ([three states](rules.md#fixed-resolved-and-closed-are-three-states)). The
 whole path, run for real, is in [the tutorial](tutorial.md#6-fix-it).
 
@@ -63,18 +63,18 @@ naima set export-keeps status=passed      # or failed, or partial
 naima close export-drops
 ```
 
-It moves to `closed/`, carrying its proof. Naima refuses when:
+It moves to `closed/`, carrying its [proof](glossary.md#proof). Naima refuses when:
 
 - it is not fixed, or nothing that verifies it has passed;
 - something that verifies it refutes it — a failed test;
 - its proof is no longer current (a property whose model changed since its
   run: run `naima verify` again);
 - the branch you stand on [claims](glossary.md#claim-file) it. Close it from the
-  trunk, after the merge, once someone other than the fixer has checked the
+  [trunk](glossary.md#trunk), after the merge, once someone other than the fixer has checked the
   proof ([the rule](rules.md#whoever-fixes-does-not-also-close)).
 
 `naima close --force` overrides the last one, for the person who owns the
-evidence — a proof someone else performed, recorded here.
+[evidence](glossary.md#evidence) — a proof someone else performed, recorded here.
 
 ## Properties, proven by a tool
 

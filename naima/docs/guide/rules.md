@@ -2,7 +2,7 @@
 
 The rules every project that uses Naima holds to, for people and
 [agents](glossary.md#agent) alike. This is the only place they are written:
-the flows, the skill and every other page link here instead of repeating
+the [flows](glossary.md#flow), the skill and every other page link here instead of repeating
 them.
 
 Each rule is marked:
@@ -55,7 +55,7 @@ tool infers it (`naima triage derive` never touches it).
 (fixed and proven) and [closed](glossary.md#closed) (resolved and archived)
 are never confused or added into one number. **Enforced by** `naima close`,
 which refuses anything not resolved, and the checks `closed-carries-proof`
-(every archived item carries a passed proof) and `proven-but-open` (a note:
+(every archived item carries a passed [proof](glossary.md#proof)) and `proven-but-open` (a note:
 an open item whose proof passed, ready to close).
 
 ### Every fix names the gesture that proves it
@@ -103,7 +103,7 @@ something looks or feels, a decision reserved to the
 
 A request is not a work order. First its item says what "done" is: for a
 feature, its behaviour, its boundaries and how it is documented; for a defect,
-its triage fields and the gesture that proves the fix. Then implementation
+its [triage](glossary.md#triage) fields and the gesture that proves the fix. Then implementation
 waits for the owner's explicit go; until then the only work is writing and
 refining that definition. A requirement that arrives while work is running
 goes into the definition, never into the running work. **Convention**.
@@ -153,7 +153,7 @@ Each piece of work has its own [worktree](glossary.md#worktree) and its own
 
 Two sessions never edit one file to register, announce or log something;
 a collection is a directory of one file per session, named by a uuid.
-**Convention** for the project's own files; Naima's claims and session notes
+**Convention** for the project's own files; Naima's claims and [session notes](glossary.md#session-note)
 are built this way.
 
 ### A claim names real items
@@ -209,7 +209,7 @@ feature item in status `shipped` names its pages in `docs`.
 |---|---|
 | `features-documented` | a shipped feature names no page in `docs`, or names a file or heading that does not exist |
 | `links-resolve` | a relative link in any markdown file the project tracks points at nothing |
-| `documented` | a loaded plugin's command, type, field, check or gate carries no documentation in its manifest |
+| `documented` | a loaded plugin's command, type, field, check or [gate](glossary.md#gate) carries no documentation in its manifest |
 | `reference-current` | with the `docs` plugin's `reference` option set, the reference file differs from what `naima docs` generates |
 
 How to set `docs` on a feature: [file a feature](file-a-feature.md#when-it-ships).

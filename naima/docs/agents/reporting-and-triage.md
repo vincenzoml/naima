@@ -1,11 +1,11 @@
 # Reporting and triage
 
-How something said, seen or found becomes an item someone can act on months
+How something said, seen or found becomes an [item](../guide/glossary.md#item) someone can act on months
 later, and how that item earns its place in the ranking.
 
 **Who and when.** Whoever hears or finds it — usually the coordinator, in
-the owner's chat — files it at once, before investigating (step 2). The
-filer then triages it, in the same sitting (steps 3–6): it rewrites the
+the [owner](../guide/glossary.md#owner)'s chat — files it at once, before investigating (step 2). The
+filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–6): it rewrites the
 description in its own words, records what it checked, links duplicates and
 sets the fields. The owner may also write an item directly as a file; it is
 triaged the same way. A report written by the owner is never overwritten:
@@ -41,7 +41,7 @@ naima new bugs "<what happened, in one line>"
   never wrong.
 - An item opened late competes with whatever you are doing instead of being
   ranked against everything else.
-- The report is evidence; your reconstruction is not.
+- The report is [evidence](../guide/glossary.md#evidence); your reconstruction is not.
 
 The title says what happened, not what to do.
 
@@ -112,7 +112,7 @@ up, and both mistakes are expensive.
 
 A fix is not a close. Closing takes the fix (`fixedOn`), the gesture that
 proves it as an item linked `verifies`, and the gesture performed and passed —
-then `naima close` moves the item to the archive, carrying its proof, so a
+then `naima close` moves the item to the archive, carrying its [proof](../guide/glossary.md#proof), so a
 regression is recognised when it comes back. Fixed but unproven stays open:
 the shape of a result is not its behaviour.
 
@@ -121,5 +121,5 @@ The proof must also be **current**. `naima close` refuses when:
 - an item verifying it **refutes** it — a test that `failed`, a property
   that is `violated`: evidence against outweighs any evidence for;
 - `naima check` finds a problem on an item verifying it — a property that
-  holds on a model, property, verifier or options changed since its run. Run
+  holds on a model, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
   the gesture again (`naima verify`), then close.

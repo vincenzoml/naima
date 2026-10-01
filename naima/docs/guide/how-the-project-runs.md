@@ -38,7 +38,7 @@ Three things are checked, not trusted:
 
 **Example (a paper with colleagues).** A co-author writes "section 4
 contradicts the abstract". The agent files a bug and writes which sentence
-contradicts which; triage finds an older report of the same problem and
+contradicts which; [triage](glossary.md#triage) finds an older report of the same problem and
 links it `duplicate-of`; a worker claims it, rewrites the paragraph on its own
 branch, and files a test item "every claim in the abstract appears in the
 body", which another agent performs and marks `passed`; then the item is

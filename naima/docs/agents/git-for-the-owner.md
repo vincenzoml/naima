@@ -74,7 +74,7 @@ add the project's own data folders. `naima init` writes its own
   branch while branches are being prepared
   ([worktree isolation](worktree-isolation.md)).
 - **Push only where the owner has set a remote**, and only what passed its
-  gates. With no remote, the work stays safely local.
+  [gates](../guide/glossary.md#gate). With no remote, the work stays safely local.
 
 ## 5. Tell the owner nothing about git
 

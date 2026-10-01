@@ -37,8 +37,8 @@ says `naima: locked commit moved <a> → <b>` once, and follows it.
 
 ### On a branch opened before the update
 
-`naima check` fails with `one-format` when a branch's new items are in the old
-format and the trunk's in the new one. Merge the trunk into the branch, then
+`naima check` fails with `one-format` when a branch's new [items](glossary.md#item) are in the old
+format and the [trunk](glossary.md#trunk)'s in the new one. Merge the trunk into the branch, then
 run `naima update` again: it finishes the migration of the branch's items, or
 does nothing.
 

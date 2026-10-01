@@ -25,7 +25,7 @@ anything.
 
 ## 3. Claim what you work on, before you start
 
-From inside the worktree, never from the trunk:
+From inside the [worktree](../guide/glossary.md#worktree), never from the [trunk](../guide/glossary.md#trunk):
 
 ```sh
 naima claim <item> [<item>...] --note "why"
@@ -34,7 +34,7 @@ naima claim <item> [<item>...] --note "why"
 It writes one [claim file](../guide/glossary.md#claim-file),
 `naima-tracker/naima-data/claims/<uuid>.json`, in this worktree and
 stops: nothing staged, nothing committed, no other branch touched. Commit it
-with the work. Several branches may claim one item, and one branch several —
+with the work. Several branches may claim one [item](../guide/glossary.md#item), and one branch several —
 `claim` says who else holds it.
 
 ## 4. A scratchpad is not a tracker

@@ -24,7 +24,7 @@ coordinator does not do the work; it holds the conversation.**
 
 ### What the coordinator does, and only this
 
-- Talks to the owner — **one question at a time**, and only questions that
+- Talks to the [owner](../guide/glossary.md#owner) — **one question at a time**, and only questions that
   are the owner's ([asking the human](asking-the-human.md)).
 - Holds whatever only one actor may drive at a time: a running application, a
   device, a deployment. A worker never drives it unless it is handed over
@@ -41,7 +41,7 @@ coordinator does not do the work; it holds the conversation.**
 
 Everything it needs to work without asking, because it cannot ask:
 
-- **its own worktree** off the trunk, its own branch, and its dependencies
+- **its own worktree** off the [trunk](../guide/glossary.md#trunk), its own branch, and its dependencies
   installed (a fresh checkout has none);
 - **the item already filed** — a worker reads a tracker page, it does not
   invent scope — and it claims what it takes (`naima claim`);
@@ -49,7 +49,7 @@ Everything it needs to work without asking, because it cannot ask:
   the single biggest saving available;
 - **the gates**, with their current numbers, to run at the end;
 - **the constraints**: which resources it may not touch, that it does not
-  commit on the trunk or touch another worktree, which sibling branches'
+  commit on the trunk or touch another [worktree](../guide/glossary.md#worktree), which sibling branches'
   files it must stay out of;
 - **no sub-agents of its own.** A worker that spawns workers loses all of
   their work when it stops.
@@ -59,10 +59,10 @@ Everything it needs to work without asking, because it cannot ask:
 | Job | Owns | Refuses |
 |---|---|---|
 | **Coordinator** | the conversation, locked resources, the timer, spawning and merging | work a worker could do; more than one question at a time |
-| **Lead developer** | the queue: sweeping fixed-but-unproven items, preparing branches, the merge train | merging without the gates; closing an item on reasoning; closing its own branch's items |
+| **Lead developer** | the queue: sweeping fixed-but-unproven [items](../guide/glossary.md#item), preparing branches, the merge train | merging without the [gates](../guide/glossary.md#gate); closing an item on reasoning; closing its own branch's items |
 | **Implementer** | one item, one cause, one branch | widening scope; spawning workers; touching the trunk |
 | **Tester** | performing gestures on the running software and writing down what happened | fixing what it finds; testing what it just wrote |
-| **Filer** | classification, triage fields, reports routed to the right tracker | inventing scope; deciding whether something is proven |
+| **Filer** | classification, [triage](../guide/glossary.md#triage) fields, reports routed to the right tracker | inventing scope; deciding whether something is proven |
 | **Evidence owner** | whether a gesture proves the claim | performing the gesture it then judges |
 
 Work passes between them in one direction:
@@ -86,7 +86,7 @@ where work gets lost.
 
 ### The lead developer's three jobs
 
-1. **The sweep.** Items whose fix already landed but whose proof was never
+1. **The sweep.** Items whose fix already landed but whose [proof](../guide/glossary.md#proof) was never
    linked. Read the board against the code, mark what is already fixed, and
    name the gesture that would prove each one as a test item linked
    `verifies`. Without the sweep, several sessions each open the same item and

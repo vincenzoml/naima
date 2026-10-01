@@ -9,7 +9,7 @@ when to use it.
 
 - **Git, for the owner.** Install git if it is missing, `git init` when
   there is no repository, a `.gitignore` that keeps secrets and private data
-  out, and safe commits, so the owner never learns git
+  out, and safe commits, so the [owner](../guide/glossary.md#owner) never learns git
   ([git, handled for the owner](git-for-the-owner.md)).
 - **Privacy.** The owner's chat is never copied into the repository
   verbatim; their files are attached only with an explicit yes
@@ -23,11 +23,11 @@ when to use it.
   source's dist has moved, `naima update`, the checks, and one commit
   ([updating](../guide/install.md#updating)). Running it is the agent's job.
 - **Read the project's rules.** `naima rules --audience agents`, before
-  anything else: the project's own rules, kept as items of its tracker
+  anything else: the project's own rules, kept as [items](../guide/glossary.md#item) of its tracker
   ([read the project's rules](read-the-project-rules.md)).
 - **Work by the rules and the flows.** Read [the rules](../guide/rules.md),
   then the [flow](README.md#the-flows) that applies.
-- **Read the corpus as files.** The flows, the rules, the format and the docs
+- **Read the corpus as files.** The [flows](../guide/glossary.md#flow), the rules, the format and the docs
   are plain markdown in the clone; `naima guide` prints where they are.
 
 It is a thin pointer, never a second copy: the rules are on

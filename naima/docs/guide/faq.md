@@ -6,7 +6,7 @@ No, nor know git or project management. An AI agent runs the `naima`
 commands and git for you; you say what you want in plain words and decide
 what is yours to decide ([working with AI agents](working-with-agents.md)).
 If you like, everything in [the guide](README.md) can also be done by hand,
-with `naima` commands and plain text on an item's page.
+with `naima` commands and plain text on an [item](glossary.md#item)'s page.
 
 ## Is Naima only for software?
 
@@ -41,7 +41,7 @@ The configuration, `naima.json`: yes, by hand
 
 ## Why won't Naima close my item?
 
-Closing needs the fix and a proof that passed. `naima close` says which is
+Closing needs the fix and a [proof](glossary.md#proof) that passed. `naima close` says which is
 missing; [prove and close](prove-and-close.md#4-close-it) lists every reason.
 
 ## Why does `naima check` fail after I pulled?
@@ -49,7 +49,7 @@ missing; [prove and close](prove-and-close.md#4-close-it) lists every reason.
 Usually one of:
 
 - someone updated Naima and your branch has items in the old format (the
-  check `one-format`): merge the trunk and run `naima update`
+  check `one-format`): merge the [trunk](glossary.md#trunk) and run `naima update`
   ([update Naima](update-naima.md#on-a-branch-opened-before-the-update));
 - `naima.json` now names a different source: review why, then
   `naima update --accept-source`;
@@ -74,7 +74,7 @@ of a session. Nothing updates by itself ([update Naima](update-naima.md)).
 
 ## Can two people, or two agents, work at once?
 
-Yes, each on its own branch and worktree; claims and session notes are files
+Yes, each on its own branch and [worktree](glossary.md#worktree); claims and [session notes](glossary.md#session-note) are files
 of each branch's own, so nobody edits the same file
 ([work on several branches at once](several-branches.md)).
 

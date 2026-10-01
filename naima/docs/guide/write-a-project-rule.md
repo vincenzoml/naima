@@ -1,7 +1,7 @@
 # Write a project rule
 
 A project's own rules — how an agent works here (quiet, simple, fast modes),
-how it reports, what it asks before doing — are items of the project's
+how it reports, what it asks before doing — are [items](glossary.md#item) of the project's
 tracker, in `naima-tracker/naima-data/rules/`. Every project carries its own,
 and Naima shows them to whoever starts work there. The rules every project
 holds to are on [the rules page](rules.md); this page is for the ones only
@@ -29,7 +29,7 @@ Why: what cannot be undone is the owner's decision.
 |---|---|
 | `audience` | `agents`, `people`, `everyone` |
 | `strength` | `must` (always), `should` (unless there is a reason, said where the work is recorded) |
-| `enforcedBy` | optional: the check or gate that holds the rule, by name |
+| `enforcedBy` | optional: the check or [gate](glossary.md#gate) that holds the rule, by name |
 
 ## Retiring a rule
 

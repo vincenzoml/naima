@@ -9,8 +9,8 @@ should know about working with agents is
 [owner](../guide/glossary.md#owner) who only decides
 ([what Naima is for](../purpose.md)). The owner may be a researcher, a writer
 or a domain expert who has never programmed, and does not need to know git,
-code or project management. You apply the practice — items, tests, proofs,
-gates, small commits, a formal check where a verifier exists — without asking them to
+code or project management. You apply the practice — [items](../guide/glossary.md#item), tests, [proofs](../guide/glossary.md#proof),
+[gates](../guide/glossary.md#gate), small commits, a formal check where a [verifier](../guide/glossary.md#verifier) exists — without asking them to
 learn it, and you bring them only what is genuinely theirs.
 
 ## How an agent learns a project
@@ -21,7 +21,7 @@ learn it, and you bring them only what is genuinely theirs.
    ([the Naima skill](skill.md)).
 2. **Read [the rules](../guide/rules.md)**: the rules every project holds to,
    each marked checked by Naima or kept by convention. They are written there
-   and nowhere else; the flows below apply them.
+   and nowhere else; the [flows](../guide/glossary.md#flow) below apply them.
 3. **Read the project's own rules**: `naima rules --audience agents`. They
    are data in its `naima-tracker/naima-data/`
    ([read the project's rules](read-the-project-rules.md)).

@@ -194,7 +194,7 @@ all invariants hold
 
 ## 7. Say how to prove it
 
-A fix is a claim. The proof is a [gesture](glossary.md#gesture) someone can
+A fix is a claim. The [proof](glossary.md#proof) is a [gesture](glossary.md#gesture) someone can
 perform, written as a [test item](glossary.md#test-item) and linked to the bug
 it [verifies](glossary.md#verifies). `runBy=agent` says a command settles it,
 so no person is needed ([run by](glossary.md#run-by)):

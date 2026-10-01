@@ -17,7 +17,7 @@ starts:
 - **how it is documented**: which page a person reads, and what an agent
   needs.
 
-Then [triage](triage.md) it like any item.
+Then [triage](triage.md) it like any [item](glossary.md#item).
 
 ## Its life
 
@@ -25,7 +25,7 @@ Then [triage](triage.md) it like any item.
 |---|---|
 | `requested` | asked for; no code exists |
 | `planned` | agreed and scheduled |
-| `shipped` | on the trunk, with its documentation |
+| `shipped` | on the [trunk](glossary.md#trunk), with its documentation |
 | `withdrawn` | decided against |
 
 ```sh

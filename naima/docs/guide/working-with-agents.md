@@ -32,23 +32,23 @@ change the tracker only through the commands, and to follow the
 
 ## What to ask of an agent
 
-Ask in plain words; the agent turns them into items and commands.
+Ask in plain words; the agent turns them into [items](glossary.md#item) and commands.
 
 | You say | The agent does |
 |---|---|
-| "This is broken: …" | files a bug in its own words, then triages it ([file a bug](file-a-bug.md)) |
+| "This is broken: …" | files a bug in its own words, then [triages](glossary.md#triage) it ([file a bug](file-a-bug.md)) |
 | "I'd like it to …" | files a feature, `requested`, and writes what done means for you to confirm ([file a feature](file-a-feature.md)) |
 | "Where are we?" | `naima summary`, and tells you the one thing you need to decide |
-| "Fix the next thing" | takes the most urgent open item, in its own worktree, claims it, fixes it, writes the test that proves it |
+| "Fix the next thing" | takes the most urgent open item, in its own [worktree](glossary.md#worktree), claims it, fixes it, writes the test that proves it |
 | "What do you need from me?" | `naima queue --human`: the items only you can do, each with why |
-| "Close what is proven" | closes, from the trunk, what someone other than the fixer has checked |
+| "Close what is proven" | closes, from the [trunk](glossary.md#trunk), what someone other than the fixer has checked |
 
 Two things worth knowing:
 
 - **Say what "done" is before work starts.** A request is not a work order:
   an agent writes the definition on the item and waits for your go.
 - **A fix the agent made is not proven by the agent's own tests.** Someone
-  else checks the proof before the item closes
+  else checks the [proof](glossary.md#proof) before the item closes
   ([the rule](rules.md#whoever-fixes-does-not-also-close)).
 
 ## What an agent will ask you
