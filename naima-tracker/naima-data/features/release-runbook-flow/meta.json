@@ -1,7 +1,7 @@
 {
   "id": "90f25e70-b3de-41a2-bf46-48bafd66ca4d",
   "title": "Release runbook flow",
-  "status": "requested",
+  "status": "shipped",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "next",
@@ -12,5 +12,9 @@
       "rel": "relates-to",
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
     }
+  ],
+  "effort": "M",
+  "docs": [
+    "naima/docs/agents/release.md"
   ]
 }

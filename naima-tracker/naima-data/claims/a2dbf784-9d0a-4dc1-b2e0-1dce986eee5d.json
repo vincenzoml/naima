@@ -1,0 +1,17 @@
+{
+  "branch": "claude/u17-release",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "90f25e70-b3de-41a2-bf46-48bafd66ca4d",
+      "ref": "features/release-runbook-flow",
+      "title": "Release runbook flow"
+    },
+    {
+      "id": "77e9e459-c8a5-458b-8b5d-2a3815c1d192",
+      "ref": "features/release-documentarian-community-business-flow-pages",
+      "title": "Release, documentarian, community and business flow pages"
+    }
+  ],
+  "note": "U17: release runbook flow, four role flow pages, releases type"
+}

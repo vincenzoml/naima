@@ -1,7 +1,7 @@
 {
   "id": "77e9e459-c8a5-458b-8b5d-2a3815c1d192",
   "title": "Release, documentarian, community and business flow pages",
-  "status": "requested",
+  "status": "shipped",
   "created": "2026-10-01",
   "impact": "medium",
   "priority": "later",
@@ -16,5 +16,11 @@
       "rel": "relates-to",
       "id": "90f25e70-b3de-41a2-bf46-48bafd66ca4d"
     }
+  ],
+  "effort": "M",
+  "docs": [
+    "naima/docs/agents/documentarian.md",
+    "naima/docs/agents/community.md",
+    "naima/docs/agents/business.md"
   ]
 }
