@@ -100,7 +100,14 @@ because everything is written down in files:
 
 Worktrees and branches follow one naming scheme, and each worktree carries
 a claim file: `naima open` makes both, and `naima check` fails what breaks
-them. A way of working keeps going until only your work is left
+them
+([the enforced rule](rules.md#worktrees-and-branches-are-named-by-one-scheme-and-every-worktree-carries-a-claim)).
+Full lifecycle of a piece of work, start to finish, each step naming its
+command: [the tutorial](tutorial.md) walks it for a single worktree; opening
+one and finishing it are their own pages, for agents:
+[opening a worktree](../agents/opening-a-worktree.md),
+[closing a worktree](../agents/closing-a-worktree.md). A way of working
+keeps going until only your work is left
 ([while you are away](while-you-are-away.md)).
 
 ## Decisions
