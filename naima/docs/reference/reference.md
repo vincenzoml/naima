@@ -10,7 +10,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [core](#core) — items, fields, links and the invariants every project has
 - [trackers](#trackers) — bugs, todos, features, tests, and the archive of closed bugs
 - [coordination](#coordination) — claims and session notes, one file per session, recombined from every branch
-- [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them
+- [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them; parked, wontfix and dropped deferrals; authoritative documents
 - [gates](#gates) — named release conditions backed by items
 - [epics](#epics) — epics: bodies of work that group items, their status and progress derived from them
 - [planning](#planning) — requirements proven by tests, specifications versioned name-vN, and the owner's decisions recorded once
@@ -81,11 +81,11 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, gates, epics, planning, beta-markers, verifier, metrics, rules, privacy, docs |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, beta-markers, verifier, metrics, rules, privacy, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers |
-| `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | rules |
+| `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | triage, rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
 | `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to |  |
 | `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, planning, verifier |
@@ -807,11 +807,11 @@ naima pass --list 3
 
 ## triage
 
-Priority, impact, effort, confidence; the urgency ranking built from them.
+Priority, impact, effort, confidence; the urgency ranking built from them; parked, wontfix and dropped deferrals; authoritative documents.
 
 Its contributions' qualified ids are `triage/<name>`.
 
-Four fields rank an item, and no more. `effort` is never derived: nothing in a report says what a fix costs, and a size guessed from the wording is how an XL hides inside an S. `triage derive` infers only `confidence`, from the page's own words — an evidence verb negated up to three words before it ("could not be reproduced") reads as `unclear`, never `measured` — and stamps `triagedBy: derived` so a value a person set is never overwritten. Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks.
+Four fields rank an item, and no more. `effort` is never derived: nothing in a report says what a fix costs, and a size guessed from the wording is how an XL hides inside an S. `triage derive` infers only `confidence`, from the page's own words — an evidence verb negated up to three words before it ("could not be reproduced") reads as `unclear`, never `measured` — and stamps `triagedBy: derived` so a value a person set is never overwritten. Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks. A parked priority, or a wontfix or dropped status, is a deferral: `reopensWhen` says what would make it worth re-arguing, `naima view parked` lists every one, and a page still left as its unfilled template is a problem. `options.documents` in naima.json (`plugins.triage.options.documents`) names which documents are authoritative and which are retired — path → { "says", "retired" }; `naima guide` prints the list, and a check notes a retired one still named from a current one.
 
 ### naima triage
 
@@ -847,14 +847,29 @@ naima triage derive --write
 | `confidence` | enum | every type | do we understand the item | `measured` reproduced and measured; `diagnosed` the cause is known; `reported` as reported, not yet looked at; `unclear` nobody knows yet |
 | `triagedBy` | enum | every type | set to derived when a tool inferred the fields | `derived` inferred by naima triage derive |
 | `triagedOn` | date | every type | when a person last triaged the item |  |
+| `reopensWhen` | string | every type | on a parked, wontfix or dropped item: what would make it worth re-arguing — prose, or a link to the item or document that would |  |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `deferred-says-why` | a parked, wontfix or dropped item's page says why — not left as the template it was created with |
+| `retired-document-still-linked` | no current authoritative document still names a retired one |
 
 **Views**, printed by `naima view <name>`
 
 | View | What it shows |
 |---|---|
 | `next` | open items, most urgent first |
+| `parked` | every parked, wontfix or dropped item, with what would reopen it |
 
 **Summary sections**: `next up`.
+
+**Guide sections**, printed first by `naima guide`
+
+| Section | What it shows |
+|---|---|
+| `authoritative-documents` | which documents are authoritative, and which are retired |
 
 **Rank terms**, added to every item's urgency: `impact`, `priority`, `effort`.
 
