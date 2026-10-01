@@ -1,0 +1,19 @@
+{
+  "id": "80866ef4-155d-4861-bd9f-d029d981bbf7",
+  "title": "The coordinator page and the coordinate command state the owner as a resource holder",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "f1d68726-7476-40cd-a4f4-91fa68f45ec6"
+    }
+  ],
+  "evidenceKind": "observation"
+}

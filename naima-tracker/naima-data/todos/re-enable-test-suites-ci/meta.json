@@ -6,6 +6,8 @@
   "priority": "parked",
   "impact": "low",
   "confidence": "reported",
+  "runBy": "human",
+  "humanBecause": "decision",
   "effort": "S",
   "triagedOn": "2026-10-01"
 }

@@ -19,3 +19,7 @@ U1 implementer, on claude/f-u1-bun: checked whether the file-bun-timeout fix (co
 ### 2026-10-01 — triage agent, on claude/effort-triage
 
 Read the item's notes and commit 9968ca0 (test/init.test.ts, test/distribution.test.ts): per-test timeout overrides, a small and already-shipped fix.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/final-sweep
+
+Measured in the final sweep (claude/final-sweep, 2026-10-01): plain bun test ./test/ run alongside deno task verify, node --test and another worktree's verify gave 4 failures at about 5.2 s, all in test/launcher.test.ts (allow-listed environment, init --write-excludes, init --write-agent-pointer, ui on loopback): the per-test overrides of 9968ca0 do not cover the launcher tests. Run alone it gave 363 pass, 0 fail. The evidence owner should weigh this against tests/plain-bun-test-test-passes-under-load before closing.

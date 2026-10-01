@@ -15,3 +15,7 @@ Checked after this session's closings: of its linked items, 32 closed, 2 done, 2
 ### 2026-10-01 — triage agent, on claude/effort-triage
 
 Read the item and its ~65 links: an umbrella whose own remaining work is a periodic owner check that linked items stay triaged, not implementation.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/final-sweep
+
+Final sweep (claude/final-sweep): measured from the meta.json files, all 58 items linked to this one in either direction carry impact, priority and confidence — the Done line holds. Eight are still open; each is routed: agent proofs added this sweep, or owner judgements on gate first-public.

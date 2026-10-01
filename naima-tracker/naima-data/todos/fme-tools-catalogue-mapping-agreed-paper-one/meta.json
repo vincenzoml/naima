@@ -14,5 +14,7 @@
   "priority": "later",
   "confidence": "reported",
   "triagedOn": "2026-10-01",
+  "runBy": "human",
+  "humanBecause": "decision",
   "effort": "L"
 }

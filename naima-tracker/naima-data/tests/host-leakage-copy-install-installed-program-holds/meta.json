@@ -1,0 +1,20 @@
+{
+  "id": "3a3024b8-06d0-4632-8da4-d9e9c46f6a23",
+  "title": "Host leakage, copy-on-install: an installed program holds no test, tracker item or agent rule, though its source holds all three (test/runtime-folder.test.ts, on Deno, Node and Bun)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "6eb94426-09df-4a11-a0dd-36fce97a398b"
+    }
+  ],
+  "redSeen": "2026-10-01",
+  "evidenceKind": "diff"
+}

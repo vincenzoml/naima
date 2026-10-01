@@ -17,5 +17,10 @@
     "naima/docs/guide/rules.md",
     "naima/docs/agents/README.md",
     "develop/documentation.md"
+  ],
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "610abf1",
+    "d210a37"
   ]
 }
