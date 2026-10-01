@@ -54,6 +54,9 @@ import {
   worktreesDir,
   writeThroughGit,
 } from "./worktrees.ts"
+import { eventCommand, EVENTS, timelineUiView, timelineView } from "./timeline.ts"
+
+export { type Timeline, type TimelineEvent, timelineOf } from "./timeline.ts"
 
 export const CLAIMS = "claims"
 export const PASSES = "passes"
@@ -560,7 +563,7 @@ export default function coordination(options: Record<string, unknown> = {}): Plu
   return {
     name: "coordination",
     contract: CONTRACT,
-    says: "claims and session notes, one file per session, recombined from every branch",
+    says: "claims and session notes, one file per session, recombined from every branch; the timeline, derived from the items and git",
     about:
       "No session writes a file another session writes. A claim is one file per branch, `claims/<uuid>.json`; a session note is one file per session, `passes/<date>-<uuid>.md`. " +
       "Both are written on the writer's own branch and never staged or committed by the tool: commit them with the work. " +
@@ -568,7 +571,9 @@ export default function coordination(options: Record<string, unknown> = {}): Plu
       "The trunk is the branch origin's HEAD names, else `main`, else `master`; without one, every local branch is read. A claim belongs to a branch, so on a detached HEAD `claim` is refused. " +
       "Several branches may claim one item: `claim` says who else holds it rather than refusing. " +
       "Work happens by one scheme, checked: the worktree `<worktrees>/<what>` stands on the branch `<who>/<what>` and carries a claim; `open` makes all three in one step. " +
-      "A claim marked `--preparing` is told when the trunk moves under it, and which commits were made on the trunk directly; `prune --branch` deletes a branch only when the trunk or an `archive/<branch>` tag holds its commits.",
+      "A claim marked `--preparing` is told when the trunk moves under it, and which commits were made on the trunk directly; `prune --branch` deletes a branch only when the trunk or an `archive/<branch>` tag holds its commits. " +
+      "`naima view timeline` derives every event, with nothing stored: a gate opened is its first item reported (`created`), a gate passed its last item resolved (`closedOn`, else `fixedOn`) once none is open; an epic the same, from the items it groups; a release is a version tag, dated by its commit; a session is its note. " +
+      "What has no date is counted at the foot, never placed at a guess. Only what nothing derives — a decision taken elsewhere, a build handed out, a policy, an outside fact — is a record, one file per event, `events/<date>-<uuid>.md`, written by `naima event`.",
     options: [
       { name: "who", says: "who works, when `naima open` is given no `--as`: the branch's first segment" },
       {
@@ -578,9 +583,13 @@ export default function coordination(options: Record<string, unknown> = {}): Plu
       },
       { name: "exempt", says: "branches the naming scheme does not apply to: names, or patterns with *", default: "[]" },
     ],
-    dirs: [CLAIMS, PASSES],
+    dirs: [CLAIMS, PASSES, EVENTS],
     checks: [claimsResolve, worktreePolicy(policy), trunkMoved, closedNotClaimed],
-    commands: [openCommand(policy), claim, release, claims, prune, pass],
+    commands: [openCommand(policy), claim, release, claims, prune, pass, eventCommand],
+    views: [timelineView(readPasses)],
+    contributes: { "ui-views": [timelineUiView(readPasses)] },
+    // The timeline is a tab of naima ui when the ui plugin is loaded; without it, still a view.
+    optional: ["ui-views"],
     summary: [whereWeWere, inHand],
     hooks: [noClosingOwnWork],
   }

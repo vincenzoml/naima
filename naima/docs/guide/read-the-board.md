@@ -103,5 +103,8 @@ has set yet. Without a gate name, `naima queue` covers every gate.
 ## Other views
 
 `naima view` lists the named views the loaded plugins offer, such as `next`
-(open items, most urgent first); `naima view next --json` gives the data
-behind it. Every command: [reference](../reference/reference.md).
+(open items, most urgent first), or `timeline` (when each gate and epic
+opened and finished, each release and session, derived from the items and git);
+`naima view next --json` gives the data behind it. `naima ui` shows the views
+plugins contribute as tabs of one window: the metrics, the timeline, the
+coverage of the project's declared lists. Every command: [reference](../reference/reference.md).

@@ -9,7 +9,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 
 - [core](#core) — items, fields, links and the invariants every project has
 - [trackers](#trackers) — bugs, todos, features, tests, and the archive of closed bugs
-- [coordination](#coordination) — claims and session notes, one file per session, recombined from every branch
+- [coordination](#coordination) — claims and session notes, one file per session, recombined from every branch; the timeline, derived from the items and git
 - [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them; parked, wontfix and dropped deferrals; authoritative documents
 - [gates](#gates) — named release conditions backed by items
 - [epics](#epics) — epics: bodies of work that group items, their status and progress derived from them
@@ -57,10 +57,12 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`claims`](#naima-claims) | coordination | who holds what, recombined from every branch |
 | [`prune`](#naima-prune) | coordination | list (or with --write remove) claim files naming a branch git no longer has; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds |
 | [`pass`](#naima-pass) | coordination | write this session's note (one new file), or list the newest |
+| [`event`](#naima-event) | coordination | record an event the timeline cannot derive — a decision taken elsewhere, a build handed out, a policy, an outside fact — as one new file; everything else on `naima view timeline` is derived |
 | [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves |
 | [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not |
 | [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks |
 | [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics |
+| [`coverage`](#naima-coverage) | gates | each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST |
 | [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out |
 | [`spec`](#naima-spec) | planning | each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version |
 | [`decisions`](#naima-decisions) | planning | search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first |
@@ -86,7 +88,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
 | `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, beta-markers, verifier, metrics, rules, commit-hooks, privacy, docs |
-| `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
+| `views` | core | `naima view <name>`: a named rendering of derived state | coordination, triage, planning |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics, commit-hooks |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers, metrics |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | triage, rules |
@@ -96,7 +98,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier |
-| `ui-views` | ui | a view `naima ui` shows as a tab: `name` (its path), `title`, `says`, `render(params, ctx) → { data, html, css? }`, rendered at each request | metrics |
+| `ui-views` | ui | a view `naima ui` shows as a tab: `name` (its path), `title`, `says`, `order` (lower first, 0 when absent), `render(params, ctx) → { data, html, css? }`, rendered at each request | coordination, gates, metrics |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
 | `metrics` | metrics | a named measurement: `run` (a program and its arguments) and `kind`, or a code `measure`; a bound — `atMost`, `atLeast` or `equals` — and `better` |  |
 | `code-measures` | metrics | a code-quality number taken in process from the files: `measure({ files, source }, metric) → number \| { error }`, with its `unit` and `better` | metrics |
@@ -702,11 +704,11 @@ Traits: `fixable`.
 
 ## coordination
 
-Claims and session notes, one file per session, recombined from every branch.
+Claims and session notes, one file per session, recombined from every branch; the timeline, derived from the items and git.
 
 Its contributions' qualified ids are `coordination/<name>`.
 
-No session writes a file another session writes. A claim is one file per branch, `claims/<uuid>.json`; a session note is one file per session, `passes/<date>-<uuid>.md`. Both are written on the writer's own branch and never staged or committed by the tool: commit them with the work. `claims`, `pass --list` and `summary` recombine them at read time from every local branch — the trunk, every branch not merged into it, whatever each worktree stands on — each read from the disk of the worktree that stands on it, uncommitted files included, or from its ref when none does; remote-tracking refs are not read. The trunk is the branch origin's HEAD names, else `main`, else `master`; without one, every local branch is read. A claim belongs to a branch, so on a detached HEAD `claim` is refused. Several branches may claim one item: `claim` says who else holds it rather than refusing. Work happens by one scheme, checked: the worktree `<worktrees>/<what>` stands on the branch `<who>/<what>` and carries a claim; `open` makes all three in one step. A claim marked `--preparing` is told when the trunk moves under it, and which commits were made on the trunk directly; `prune --branch` deletes a branch only when the trunk or an `archive/<branch>` tag holds its commits.
+No session writes a file another session writes. A claim is one file per branch, `claims/<uuid>.json`; a session note is one file per session, `passes/<date>-<uuid>.md`. Both are written on the writer's own branch and never staged or committed by the tool: commit them with the work. `claims`, `pass --list` and `summary` recombine them at read time from every local branch — the trunk, every branch not merged into it, whatever each worktree stands on — each read from the disk of the worktree that stands on it, uncommitted files included, or from its ref when none does; remote-tracking refs are not read. The trunk is the branch origin's HEAD names, else `main`, else `master`; without one, every local branch is read. A claim belongs to a branch, so on a detached HEAD `claim` is refused. Several branches may claim one item: `claim` says who else holds it rather than refusing. Work happens by one scheme, checked: the worktree `<worktrees>/<what>` stands on the branch `<who>/<what>` and carries a claim; `open` makes all three in one step. A claim marked `--preparing` is told when the trunk moves under it, and which commits were made on the trunk directly; `prune --branch` deletes a branch only when the trunk or an `archive/<branch>` tag holds its commits. `naima view timeline` derives every event, with nothing stored: a gate opened is its first item reported (`created`), a gate passed its last item resolved (`closedOn`, else `fixedOn`) once none is open; an epic the same, from the items it groups; a release is a version tag, dated by its commit; a session is its note. What has no date is counted at the foot, never placed at a guess. Only what nothing derives — a decision taken elsewhere, a build handed out, a policy, an outside fact — is a record, one file per event, `events/<date>-<uuid>.md`, written by `naima event`.
 
 Options, each with the default it takes when nothing sets it:
 
@@ -838,6 +840,25 @@ naima pass --file note.md
 naima pass --list 3
 ```
 
+### naima event
+
+Record an event the timeline cannot derive — a decision taken elsewhere, a build handed out, a policy, an outside fact — as one new file; everything else on `naima view timeline` is derived.
+
+```sh
+naima event <YYYY-MM-DD> "<what happened>" [--kind <kind>]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--kind` | `fact` | what sort of event: decision, build, policy, fact, or any word |
+
+Examples:
+
+```sh
+naima event 2026-09-14 "Build 3 handed to the testers" --kind build
+naima event 2026-09-20 "The vendor ended support for v1"
+```
+
 **Checks**, run by `naima check`
 
 | Check | What it holds |
@@ -847,7 +868,13 @@ naima pass --list 3
 | `trunk-moved-while-preparing` | a branch whose claim is marked preparing is told every commit the trunk took that it lacks, and which of them the trunk's reflog records as committed on the trunk directly |
 | `closed-not-claimed` | no archived item (one in a type that is not creatable, where naima close moves it) is claimed by the branch you stand on: what no-closing-own-claims refuses on a write, asserted on the tracker as it is, hand edits included |
 
-**Directories** it owns under the tracker root: `claims/`, `passes/`.
+**Views**, printed by `naima view <name>`
+
+| View | What it shows |
+|---|---|
+| `timeline` | when each gate opened and passed, each epic began and finished, each release and session — derived from the items and git, nothing stored; undated ones counted at the foot |
+
+**Directories** it owns under the tracker root: `claims/`, `passes/`, `events/`.
 
 **Summary sections**: `where we were`, `in hand`.
 
@@ -856,6 +883,12 @@ naima pass --list 3
 | Hook | What it does |
 |---|---|
 | `no-closing-own-claims` | archiving an item (a move to a type that is not creatable, as naima close does) that the branch you stand on claims is refused unless --force: a branch does not close its own items on the strength of its own tests |
+
+**UI views**, the tabs of `naima ui`
+
+| View | Title | What it shows |
+|---|---|---|
+| `timeline` | Timeline | the project's events — gates, epics, releases, sessions, records — derived from the items and git, oldest first |
 
 ## triage
 
@@ -937,13 +970,14 @@ Named release conditions backed by items.
 
 Its contributions' qualified ids are `gates/<name>`.
 
-A gate is the set of items that must be settled before something may happen — a release, a merge. An item joins a gate by carrying `gate: <name>`. Gates are configured, never hard-coded, and any plugin may contribute one through the contract; `naima gates` lists them all. `naima gate new` declares one in the project's configuration and `naima gate add` puts items on it, so nobody edits naima.json by hand. A gate with a `due` date (and, optionally, a `version`) is a milestone: `naima gates` and `naima queue` say the days left, and a check warns once it is overdue. An item whose type carries the `group` trait — an epic — stands on a gate for the items it groups.
+A gate is the set of items that must be settled before something may happen — a release, a merge. An item joins a gate by carrying `gate: <name>`. Gates are configured, never hard-coded, and any plugin may contribute one through the contract; `naima gates` lists them all. `naima gate new` declares one in the project's configuration and `naima gate add` puts items on it, so nobody edits naima.json by hand. A gate with a `due` date (and, optionally, a `version`) is a milestone: `naima gates` and `naima queue` say the days left, and a check warns once it is overdue. An item whose type carries the `group` trait — an epic — stands on a gate for the items it groups. A coverage list is a normative list the project keeps elsewhere — paid features, limits, API endpoints — named by its source, a JSON file and a path in it, or files and a regular expression, and read from it on every run, never copied. A proving item names the entry it proves in `covers`; `naima coverage` prints every entry with its test or NO TEST, `--check` exits 1 on one, and a gate that lists it in `coverage` is blocked by each.
 
 Options, each with the default it takes when nothing sets it:
 
 | Option | Default | What it does |
 |---|---|---|
 | `gates` | `{}` | `plugins.gates.options.gates` in `naima-tracker/naima-data/naima.json`, written by `naima gate new`: gate name → { "title", "says", "holdsOn", "due", "version" }. due (YYYY-MM-DD) makes the gate a milestone; version is what it ships as. holdsOn "code" (the default) waits for code, not proof: a fixed item that owes only its proving gesture, and the gestures themselves, are owed but do not block. holdsOn "proof": every open item on the gate blocks it. |
+| `coverage` | `{}` | `plugins.gates.options.coverage` in `naima-tracker/naima-data/naima.json`: list name → { "says", and one source: "json" (a file from the project root) with "path" (keys joined by dots, * for every element or value) and "key" (the field naming an entry when elements are objects, default id); or "files" (paths or patterns with * and **) with "pattern" (a regular expression; each match is an entry, its first group when it has one) }. A gate requires lists with "coverage": [names]. |
 
 **Extension points** it declares: `gates`.
 
@@ -973,7 +1007,7 @@ naima gates first-public --check
 Declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks.
 
 ```sh
-naima gate new <name> "<title>" [--says <s>] [--due YYYY-MM-DD] [--version <v>] [--holds-on code|proof]
+naima gate new <name> "<title>" [--says <s>] [--due YYYY-MM-DD] [--version <v>] [--holds-on code|proof] [--coverage <list>,...]
 naima gate add <gate> <item>...
 naima gate remove <gate> <item>...
 naima gate show <gate>
@@ -985,6 +1019,7 @@ naima gate show <gate>
 | `--due` |  | gate new: the date it is due, YYYY-MM-DD, which makes it a milestone |
 | `--version` |  | gate new: the version it ships as |
 | `--holds-on` |  | gate new: "code" (the default) waits for code and lets proof be owed; "proof" waits for every proof too |
+| `--coverage` |  | gate new: the coverage lists it requires, comma-separated: each entry with NO TEST blocks it |
 
 Examples:
 
@@ -1014,10 +1049,31 @@ naima queue
 naima queue first-public --human
 ```
 
+### naima coverage
+
+Each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST.
+
+```sh
+naima coverage [list...] [--check] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--check` |  | exit 1 when an entry has NO TEST, or a list's source cannot be read |
+| `--json` |  | print each list as JSON: list, says, entries (entry, tests), error |
+
+Examples:
+
+```sh
+naima coverage
+naima coverage paid --check
+```
+
 **Fields**
 
 | Field | Kind | Applies to | Meaning | Values |
 |---|---|---|---|---|
+| `covers` | strings | every type | the entries of the coverage lists this proving item proves: `<entry>`, or `<list>:<entry>` to say which list; comma-separated |  |
 | `gate` | enum | every type | the gates this item is what is waited for: any gate a loaded plugin contributes — the project's own, or a plugin's — one, or a list of several | the name of any contribution to `gates`; one, or a list of several |
 
 **Checks**, run by `naima check`
@@ -1026,6 +1082,7 @@ naima queue first-public --human
 |---|---|
 | `gated-proof-is-gated` | an open item that verifies an open gated item carries a gate itself |
 | `milestone-overdue` | warns when a gate with a due date is past it and does not hold |
+| `coverage-lists` | a coverage list's source can be read; an item's covers names an entry its list holds |
 
 **Summary sections**: `gates`.
 
@@ -1034,6 +1091,12 @@ naima queue first-public --human
 **Migrations** of its own data, run by `naima update` after the core's; its format is 2:
 
 - format 1 → 2: the top-level gates key of naima.json moves to plugins.gates.options.gates
+
+**UI views**, the tabs of `naima ui`
+
+| View | Title | What it shows |
+|---|---|---|
+| `coverage` | Coverage | each normative list the project declares, read from its source now, every entry with the test that proves it or NO TEST |
 
 ## epics
 
