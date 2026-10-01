@@ -28,3 +28,7 @@ The validation of `--set` values runs after the item is written, not before.
 ### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
 
 U4 proof run: withdrawn as a duplicate of bugs/naima-new-set-bad-fails-but-leaves (already fixed; today's repro left no item behind). Leaving status as-is for the evidence owner to close.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u10-proof-integrity
+
+Duplicate of the closed bug about naima new --set leaving a half-made item, which was fixed and proven before U8 (papercuts session note). Linked duplicate-of it; the twin keeps the evidence. Set to wontfix: nothing left to fix here.

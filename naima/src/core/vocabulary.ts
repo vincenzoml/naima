@@ -25,6 +25,24 @@ export interface Lookup {
 const union = (a: readonly string[] | undefined, b: readonly string[] | undefined): string[] | undefined =>
   a || b ? [...new Set([...(a ?? []), ...(b ?? [])])] : undefined
 
+/** The kinds a list of values applies to: an enum's is fixed, a string's or strings' open. */
+const LISTED: readonly string[] = ["enum", "string", "strings"]
+
+/** An extension's values as meanings and titles: each is what it means, or { title, says }. */
+export function valuesOf(raw: Record<string, unknown>, by: string): { values: Record<string, string>; titles: Record<string, string> } {
+  const values: Record<string, string> = {}
+  const titles: Record<string, string> = {}
+  for (const [v, d] of Object.entries(raw)) {
+    const def = d as { title?: unknown; says?: unknown } | null
+    if (typeof d === "string") values[v] = d
+    else if (def && typeof def === "object" && typeof def.says === "string" && (def.title === undefined || typeof def.title === "string")) {
+      values[v] = def.says
+      if (def.title) titles[v] = def.title
+    } else throw new Error(`${by}: value "${v}" is what it means, or { "title", "says" }`)
+  }
+  return { values, titles }
+}
+
 /** A status's flags, its `proves` and `refutes` keys included. */
 export const flagsOf = (s: StatusDef): string[] => [...new Set([...(s.flags ?? []), ...(s.proves ? ["proves"] : []), ...(s.refutes ? ["refutes"] : [])])]
 
@@ -124,13 +142,17 @@ export function vocabulary(look: Lookup): Vocabulary {
     const name = look.find<FieldDef>("fields", e.field)?.name
     const f = name === undefined ? undefined : fields.get(name)
     if (!f) throw new Error(`"${plugin}" extends field "${e.field}", which no plugin declares`)
-    if (e.values && f.kind !== "enum") throw new Error(`"${plugin}" extends field "${f.name}" with values, and it is a ${f.kind}, not an enum`)
-    const values = e.values ? { ...f.values, ...e.values } : f.values
+    if (e.values && !LISTED.includes(f.kind)) {
+      throw new Error(`"${plugin}" extends field "${f.name}" with values, and it is a ${f.kind}, not an enum, a string or strings`)
+    }
+    const added = valuesOf(e.values ?? {}, `"${plugin}" extending field "${f.name}"`)
+    const values = e.values ? { ...f.values, ...added.values } : f.values
+    const titles = Object.keys(added.titles).length ? { ...f.titles, ...added.titles } : f.titles
     // A field that applies to every type already applies to whatever an extension would add.
     const appliesTo = f.appliesTo && (e.appliesTo || e.traits)
       ? union(f.appliesTo, concrete(typesNamed(plugin, e.appliesTo, `"${plugin}" extending field "${f.name}"`), e.traits))
       : f.appliesTo
-    fields.set(f.name, { ...f, ...(values ? { values } : {}), ...(appliesTo ? { appliesTo } : {}) })
+    fields.set(f.name, { ...f, ...(values ? { values } : {}), ...(titles ? { titles } : {}), ...(appliesTo ? { appliesTo } : {}) })
   }
   // Values taken from a point: every contribution's name, meaning its title, or what it says.
   for (const f of fields.values()) {

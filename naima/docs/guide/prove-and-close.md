@@ -108,8 +108,8 @@ It moves to `closed/`, carrying its [proof](glossary.md#proof). Naima refuses wh
 
 - it is not fixed, or nothing that verifies it has passed;
 - something that verifies it refutes it — a failed test;
-- its proof is no longer current (a property whose model changed since its
-  run: run `naima verify` again);
+- its proof is no longer current (a property whose model, an included file
+  or the tool's version changed since its run: run `naima verify` again);
 - the branch you stand on [claims](glossary.md#claim-file) it. Close it from the
   [trunk](glossary.md#trunk), after the merge, once someone other than the fixer has checked the
   proof ([the rule](rules.md#whoever-fixes-does-not-also-close)).
@@ -123,3 +123,10 @@ A [property](glossary.md#property) is proven by a [verifier](glossary.md#verifie
 — a model checker — instead of by hand. `naima verifiers` lists the ones
 available; `naima verify <property>` runs it and attaches the run. A property
 becomes `holds` only that way, never with `naima set`.
+
+The run records every file the tool read — the model and each file it
+includes, as the adapter declares them — with one digest over all of them
+and the tool's version. When any of them changes, or the model comes to
+read other files, `naima check` reports the property no longer current:
+run `naima verify` again. The example adapter reads `#include <path>` lines,
+so a model split across files shows it.

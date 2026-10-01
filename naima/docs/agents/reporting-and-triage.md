@@ -89,6 +89,17 @@ naima triage set <item> impact=high priority=next confidence=reported
 | `confidence` | do we understand it? `measured` · `diagnosed` · `reported` · `unclear` |
 | `effort` | **never guessed.** Nothing in a report says what a fix costs; leave it empty until someone has looked at the code. An unsized item sinks in the ranking, which is the honest outcome |
 
+**Classifiers take the project's values.** `area` (where it lives) and
+`kind` (the mode of work; a role's name is a kind) take the values the
+project lists, if it lists any: `naima types` prints each list with how many
+items hold each value, and marks a value off the list. Pick a value from the
+list. A new value is defined in `naima.json`'s `extends`, title and meaning,
+in the same commit that first uses it; an off-list value already in the
+tracker is a note from `naima check` (the check `values`) naming its items —
+report it, never rewrite those items to make the note go away. `gate` and
+`epic` are fixed lists: a gate no plugin contributes, or `part-of` an item that is
+not an epic, fails the check.
+
 [Triage what you touch](../guide/rules.md#triage-what-you-touch): opening,
 reporting or fixing an item means leaving its fields set. `naima triage` prints coverage per type; do not add to what it
 says is missing.
@@ -195,8 +206,14 @@ The proof must also be **current**. `naima close` refuses when:
 - an item verifying it **refutes** it — a test that `failed`, a property
   that is `violated`: evidence against outweighs any evidence for;
 - `naima check` finds a problem on an item verifying it — a property that
-  holds on a model, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
+  holds on a model, an included file, a tool version, property, [verifier](../guide/glossary.md#verifier) or options changed since its run. Run
   the gesture again (`naima verify`), then close.
+
+Never close, or set `holds`, by editing `meta.json` or moving a directory:
+every write hook that would refuse it has a check counterpart, so the hand
+edit fails `naima check` — `closed-not-claimed` on an archived item the
+branch you stand on still claims, `property-evidence` on a `holds` with no
+current run.
 
 ## Safety rules
 
@@ -206,5 +223,8 @@ The proof must also be **current**. `naima close` refuses when:
 - **No secret in an item or an attachment.** Enforced by the check `secrets`.
 - **A fixed item is never closed without a passing proof.** Enforced by
   `naima close` and the check `closed-carries-proof`.
+- **No write a command would refuse, made by hand.** Enforced by the check
+  counterpart of every write hook that protects a state: `closed-not-claimed`,
+  `property-evidence` and `epics`.
 - **Evidence against a claim outweighs evidence for it.** Enforced by `naima
   close`, which refuses an item a verifying item refutes.

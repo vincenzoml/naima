@@ -45,7 +45,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`view`](#naima-view) | core | print a plugin view — as text, its data as JSON, or markdown; without a name, list them |
 | [`summary`](#naima-summary) | core | where the project stands, in one screen: every plugin's section |
 | [`plugins`](#naima-plugins) | core | list loaded plugins, the extension points each declares, what each uses of the others, and what each contributes to every point; a contribution's qualified id is <plugin>/<name>, shown when its short name is shared or renamed |
-| [`types`](#naima-types) | core | list item types, their statuses and fields |
+| [`types`](#naima-types) | core | list item types, their statuses and fields, then every field's list of values with how many items hold each |
 | [`runs`](#naima-runs) | core | list the external programs the loaded contributions declare they start (a model checker, say), which the launcher allows besides git |
 | [`close`](#naima-close) | trackers | archive a resolved item: fixed, and proven by an item that has passed |
 | [`bugs`](#naima-bugs) | trackers | how many bugs have no code written, and how many are fixed but unproven |
@@ -91,7 +91,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, planning, verifier |
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
-| `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }` | verifier |
+| `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
 | `metrics` | metrics | a named measurement: `run` (a program and its arguments), `kind`, and a bound — `atMost`, `atLeast` or `equals` |  |
 
@@ -440,7 +440,7 @@ naima plugins
 
 ### naima types
 
-List item types, their statuses and fields.
+List item types, their statuses and fields, then every field's list of values with how many items hold each.
 
 ```sh
 naima types
@@ -495,6 +495,7 @@ naima runs --json
 | `readable` | every item directory has a README.md and a meta.json that parses to an object whose id, title and status are strings; no symbolic link or _-prefixed directory sits unread among the items |
 | `identity` | every item has a permanent uuid, a title and a status its type declares; ids are unique |
 | `fields` | every declared field holds a value of its declared kind |
+| `values` | every value of a field with an open list of values — area or kind, once the project declares their values — is on its list; a value off it is a note naming the items that hold it, which are never rewritten |
 | `links` | every link uses a declared relation and names an existing item other than its own |
 | `layout` | every directory under the tracker root belongs to an item type or a plugin |
 | `duplicates` | items of one type with the same title are linked as duplicates, or reported |
@@ -826,6 +827,7 @@ naima pass --list 3
 | `claims-resolve` | a claim written in this worktree names items that exist |
 | `worktree-policy` | every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem |
 | `trunk-moved-while-preparing` | a branch whose claim is marked preparing is told every commit the trunk took that it lacks, and which of them the trunk's reflog records as committed on the trunk directly |
+| `closed-not-claimed` | no archived item (one in a type that is not creatable, where naima close moves it) is claimed by the branch you stand on: what no-closing-own-claims refuses on a write, asserted on the tracker as it is, hand edits included |
 
 **Directories** it owns under the tracker root: `claims/`, `passes/`.
 
@@ -1071,7 +1073,7 @@ Traits: `group`.
 
 | Check | What it holds |
 |---|---|
-| `epics` | an item is part of an epic, never of an item of another type; an open epic groups at least one item |
+| `epics` | an item is part of an epic, never of an item of another type; an open epic groups at least one item; an epic's status is the one its items give it, as the epic-status hook writes it, hand edits included |
 
 **Summary sections**: `epics`.
 
@@ -1294,7 +1296,7 @@ Properties checked by formal-methods tools, with each run attached as evidence.
 
 Its contributions' qualified ids are `verifier/<name>`.
 
-A `properties` item names a `verifier` (an adapter any plugin can contribute), a `model` file (a path from the project root) and a `property` in the verifier's own language. `naima verify` runs the adapter and attaches the run — verdict, output, the model's sha256 — and the counterexample as its own file, then sets the status from the verdict. A property that holds is evidence exactly as a passed test is: it can `verify` a bug and close it. A verdict is only as good as what it was reached on, so `naima check` fails when a property claims to hold and its property, verifier, model path, `verifierOptions` or model contents have changed since the run. The shipped adapter, `example-regex`, is a stand-in that shows the shape of a real one.
+A `properties` item names a `verifier` (an adapter any plugin can contribute), a `model` file (a path from the project root) and a `property` in the verifier's own language. `naima verify` runs the adapter and attaches the run — verdict, output, the model's sha256, and one digest over every file the run read (the model and what the adapter's `inputs` says it includes) and the tool's version (the adapter's `version`) — and the counterexample as its own file, then sets the status from the verdict. A property that holds is evidence exactly as a passed test is: it can `verify` a bug and close it. A verdict is only as good as what it was reached on, so `naima check` fails when a property claims to hold and its property, verifier, model path, `verifierOptions`, model contents, any file it includes, the set of files it reads, or the tool's version have changed since the run. The shipped adapter, `example-regex`, is a stand-in that shows the shape of a real one.
 
 **Extension points** it declares: `verifiers`.
 
@@ -1357,7 +1359,7 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 
 | Check | What it holds |
 |---|---|
-| `property-evidence` | a property names a known verifier and an existing model; one that holds carries a run of its current property, verifier, model and options, on the model as it is now |
+| `property-evidence` | a property names a known verifier and an existing model; one that holds carries a run of its current property, verifier, model and options, on every file it reads as it is now and the tool's version as it is now |
 
 **Write hooks**, run on every item write
 

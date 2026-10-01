@@ -24,7 +24,9 @@ committed. A project that needs nothing else configures nothing.
 
 - the project's own **extensions** of the loaded plugins' types and fields,
   under `extends`: a status added to a type, a type made `fixable`, an enum
-  value added ([extending](../reference/plugin-contract.md#extending-another-plugins-types-and-fields)).
+  value added, the list of values `area` or `kind` takes
+  ([extending](../reference/plugin-contract.md#extending-another-plugins-types-and-fields);
+  [value lists](configure-the-project.md#define-the-values-a-field-takes)).
 
 `naima init` writes the formats and the lock; nothing else is needed. Every
 key, with its default: [the format](../reference/format.md#naimajson).

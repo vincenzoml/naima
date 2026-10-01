@@ -60,7 +60,8 @@ requirement with no passing proof.
 The [proof](../guide/glossary.md#proof) is the gesture as it stands, not as it once stood: `naima close`
 refuses an item that a verifying item refutes (a failed test, a violated
 property), and one whose verifying item `naima check` reports — a property
-that holds on a model changed since its run
+that holds on a model, an included file or a tool version changed since its
+run
 ([closing](reporting-and-triage.md#8-closing)).
 
 ## 2. Triage what is left open

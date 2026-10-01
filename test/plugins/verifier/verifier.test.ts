@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { test } from "node:test"
@@ -239,6 +239,74 @@ test("holds set by hand is refused; naima verify still writes it", async () => {
     assert.throws(() => createItem(ctx, type, "born holding", { status: "holds" }), /holds is written by naima verify/)
     assert.equal(await p.run("verify", prop.slug), 0)
     assert.equal(ctx.repo.resolve(prop.slug).meta.status, "holds")
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("a hand edit of meta.json to holds, with no run, fails naima check as naima set would have refused it", async () => {
+  const p = tempProject([verifier()])
+  try {
+    const { ctx } = p
+    writeFileSync(join(p.root, "model.txt"), "alpha\n")
+    const prop = createItem(ctx, ctx.registry.types.get("properties")!, "has alpha", { verifier: "example-regex", model: "model.txt", property: "some alpha" })
+    const path = join(prop.dir, "meta.json")
+    writeFileSync(path, JSON.stringify({ ...JSON.parse(readFileSync(path, "utf8")), status: "holds" }))
+    p.ctx.reload()
+    assert.match((await runChecks(ctx)).problems.map((f) => f.message).join("\n"), /has-alpha: holds, but carries no run/)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("the run keeps one digest over every input and the tool version: a change to an included file reopens the property", async () => {
+  const p = tempProject([verifier()])
+  try {
+    const { ctx } = p
+    writeFileSync(join(p.root, "model.txt"), "#include parts/part.txt\nalpha\n")
+    rmSync(join(p.root, "parts"), { recursive: true, force: true })
+    mkdirSync(join(p.root, "parts"))
+    writeFileSync(join(p.root, "parts", "part.txt"), "beta\n")
+    const prop = createItem(ctx, ctx.registry.types.get("properties")!, "has beta", { verifier: "example-regex", model: "model.txt", property: "some beta" })
+    assert.equal(await p.run("verify", prop.slug), 0, "the included file's lines are the model's")
+    const run = readRun(ctx.repo.resolve(prop.slug))!
+    assert.deepEqual(run.inputs?.map((i) => i.path), ["model.txt", "parts/part.txt"])
+    assert.equal(typeof run.toolVersion, "string")
+    assert.match(run.inputsSha256 ?? "", /^[0-9a-f]{64}$/)
+    const problems = async () => (await runChecks(ctx)).problems.map((f) => f.message).join("\n")
+    assert.equal(await problems(), "")
+
+    writeFileSync(join(p.root, "parts", "part.txt"), "gamma\n")
+    assert.match(await problems(), /has-beta: holds on inputs that have changed since: parts\/part\.txt — run naima verify again/)
+    assert.equal(await p.run("verify", prop.slug), 1)
+    assert.equal(ctx.repo.resolve(prop.slug).meta.status, "violated")
+    assert.equal(await problems(), "")
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("a property run by another version of its tool is reported stale", async () => {
+  let version = "1.0"
+  const tool: Verifier = {
+    id: "tool",
+    says: "a stand-in with a version",
+    version: () => Promise.resolve(version),
+    verify: () => Promise.resolve({ verdict: "holds", output: "ok" }),
+  }
+  const p = tempProject([verifier(), { name: "extra", says: "", contributes: { verifiers: [tool] } }])
+  try {
+    const { ctx } = p
+    writeFileSync(join(p.root, "m"), "x\n")
+    const prop = createItem(ctx, ctx.registry.types.get("properties")!, "fine", { verifier: "tool", model: "m", property: "anything" })
+    assert.equal(await p.run("verify", prop.slug), 0)
+    assert.equal(readRun(ctx.repo.resolve(prop.slug))?.toolVersion, "1.0")
+    const problems = async () => (await runChecks(ctx)).problems.map((f) => f.message).join("\n")
+    assert.equal(await problems(), "")
+    version = "2.0"
+    assert.match(await problems(), /fine: holds by tool version "1\.0", not "2\.0" — run naima verify again/)
+    assert.equal(await p.run("verify", prop.slug), 0)
+    assert.equal(await problems(), "")
   } finally {
     p.cleanup()
   }

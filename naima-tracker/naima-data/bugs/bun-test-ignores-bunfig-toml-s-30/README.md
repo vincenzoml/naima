@@ -1,0 +1,13 @@
+# bun test ignores bunfig.toml's 30-second timeout: spawn-heavy init and update tests fail at 5 seconds under load
+
+What happened, what was seen, and what is still open.
+
+## Evidence
+
+Attach screenshots and logs in attachments/.
+
+## Notes
+
+### 2026-10-01 — U11 implementer, on claude/u11-value-lists
+
+Measured on claude/u11-value-lists after merging main, Bun 1.4.2, machine load average 8 to 12 from sibling worktrees: bun test ./test/ gave 249 pass / 4 fail, every failure an init or update test stopped at about 5.1 s (init strips credentials, init's next step, second clone aligns, naima update pulls). The same tree with bun test --timeout 30000 ./test/ gave 253/0. So the [test] timeout = 30000 in bunfig.toml is not reaching these tests (they are node:test style); the earlier fix (bugs/bun-s-5-second-default-test-timeout) does not hold under load.
