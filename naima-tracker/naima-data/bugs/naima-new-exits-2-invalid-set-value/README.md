@@ -22,3 +22,9 @@ untriaged, and the right one. An agent that trusts the exit code never knows.
 ## Inferred, not checked
 
 The validation of `--set` values runs after the item is written, not before.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
+
+U4 proof run: withdrawn as a duplicate of bugs/naima-new-set-bad-fails-but-leaves (already fixed; today's repro left no item behind). Leaving status as-is for the evidence owner to close.

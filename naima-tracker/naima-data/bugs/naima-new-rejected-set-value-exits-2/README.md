@@ -23,3 +23,9 @@ directory, or remove it on failure.
 
 A test: `naima new` with an invalid `--set` value exits 2 and the tracker's
 item count is unchanged.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
+
+U4 proof run: withdrawn as a duplicate of bugs/naima-new-set-bad-fails-but-leaves (same underlying bug, same fix). Leaving status as-is for the evidence owner to close.
