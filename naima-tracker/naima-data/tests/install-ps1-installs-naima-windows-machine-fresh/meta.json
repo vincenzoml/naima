@@ -1,0 +1,16 @@
+{
+  "id": "5a847fdc-30f8-48c7-9e4f-9f58d8912aa7",
+  "title": "install.ps1 installs Naima on a Windows machine: fresh, again, refusing outside a repository, and the piped form",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "human",
+  "humanBecause": "physical",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "18a6662b-aab1-4833-80c0-63b109e48736"
+    }
+  ]
+}

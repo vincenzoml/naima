@@ -14,7 +14,7 @@ import { GUIDE_PAGES } from "../naima/src/core/cli.ts"
 import { gitIn, removeTemp } from "./core/testing.ts"
 import { ABOUT, FORMAT, runCli, RUNTIME_DIR, TRACKER_README } from "../naima/src/core/internal.ts"
 
-/** The runtime folder of this checkout: what a dist commit, and so a program directory, holds. */
+/** The runtime folder of this checkout: what a program directory holds a copy of. */
 const NAIMA = join(dirname(dirname(fileURLToPath(import.meta.url))), "naima")
 /** This checkout: the repository a project clones. */
 const REPO = dirname(NAIMA)
@@ -68,7 +68,6 @@ test("init writes naima-tracker/ and nothing else, locked to the Naima that runs
       formats: { gates: 2 },
       source: git("remote", "get-url", "origin"),
       commit: git("rev-parse", "HEAD"),
-      carry: "clone",
     })
     assert.equal(readFileSync(join(h.root, "naima-tracker", "README.md"), "utf8"), TRACKER_README)
     assert.equal(readFileSync(join(h.root, "naima-tracker", ".gitignore"), "utf8"), "/naima/\n")
