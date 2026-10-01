@@ -32,6 +32,8 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`show`](#naima-show) | core | print one item: fields, links in both directions, attachments, prose |
 | [`list`](#naima-list) | core | list items, most urgent first |
 | [`set`](#naima-set) | core | set fields on an item; an empty value removes the field |
+| [`note`](#naima-note) | core | append a dated, attributed note to an item's Notes section: the writer's own words, never a person's message pasted in; earlier notes are never rewritten |
+| [`describe`](#naima-describe) | core | replace an item's description, keeping its title line and its Notes section |
 | [`link`](#naima-link) | core | link two items; only this direction is stored, the inverse is derived |
 | [`unlink`](#naima-unlink) | core | remove a stored link |
 | [`check`](#naima-check) | core | run every invariant; exit 1 on any problem |
@@ -243,6 +245,47 @@ naima set export-drops status=partial area=export
 naima set export-drops area=
 ```
 
+### naima note
+
+Append a dated, attributed note to an item's Notes section: the writer's own words, never a person's message pasted in; earlier notes are never rewritten.
+
+```sh
+naima note <item> "<text>" [--by <who>]
+naima note <item> --file <f> [--by <who>]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--by` |  | who writes the note; without it, git's user.name |
+| `--file` |  | read the note from a file instead of the arguments |
+
+Examples:
+
+```sh
+naima note export-drops "Reproduced on a 16-bit PNG; 8-bit keeps alpha." --by "triage agent"
+naima note export-drops --file finding.md
+```
+
+### naima describe
+
+Replace an item's description, keeping its title line and its Notes section.
+
+```sh
+naima describe <item> "<text>"
+naima describe <item> --file <f>
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--file` |  | read the description from a file instead of the arguments |
+
+Examples:
+
+```sh
+naima describe export-drops "Export to PNG loses the alpha channel; done when every bit depth keeps it."
+naima describe export-drops --file triaged.md
+```
+
 ### naima link
 
 Link two items; only this direction is stored, the inverse is derived.
@@ -432,6 +475,7 @@ naima runs --json
 | Hook | What it does |
 |---|---|
 | `status-moves` | a status moves only to one its type's transitions allow from the status it has; a status the transitions do not name moves to any, and --force takes the move on |
+| `notes-append-only` | a write of an item's prose keeps its Notes section as it was and may only add after it; --force takes a rewrite on |
 
 ## trackers
 
