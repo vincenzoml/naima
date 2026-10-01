@@ -278,15 +278,48 @@ const gatesCommand: Command = {
   },
 }
 
+/** What `queue --role` reads of a role another plugin contributes to the `roles` point. */
+interface RoleView {
+  title: string
+  refuses: string[]
+  queue(ctx: Context): Item[]
+}
+
+const KIND = { name: "kind", kind: "string" } as const
+
+function roleQueue(ctx: Context, name: string, gate: string | undefined): number {
+  if (!ctx.registry.points.has("roles")) throw new Error("no roles in this project: the roles plugin is not loaded")
+  const found = ctx.registry.find<RoleView>("roles", name)
+  if (!found) throw new Error(`no role "${name}" — roles: ${ctx.registry.contributions("roles").map((c) => c.name).join(", ")}`)
+  const on = gate === undefined ? undefined : new Set(gatedItems(ctx, gate))
+  const items = found.value.queue(ctx).filter((i) => !on || on.has(i))
+  ctx.out(`${found.name} — ${found.value.title}${gate ? ` on ${gate}` : ""}: ${items.length} open`)
+  ctx.out(`  refuses: ${found.value.refuses.join("; ")}`)
+  for (const i of items) {
+    const kind = fieldValue(i, KIND)
+    ctx.out(`  ${label(i)}  ${i.meta.title}${kind ? `  (${kind})` : ""}`)
+  }
+  return 0
+}
+
 const queue: Command = {
   name: "queue",
-  says: "open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics",
-  usage: "queue [gate] [--human]",
-  options: [{ name: "--human", says: "also list the items that need a person or a build, with why" }],
-  examples: ["queue", "queue first-public --human"],
+  says:
+    "open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics. With --role, one role's queue instead",
+  usage: "queue [gate] [--human] [--role <role>]",
+  options: [
+    { name: "--human", says: "also list the items that need a person or a build, with why" },
+    {
+      name: "--role",
+      says: "list one role's open items, most urgent first — on the gate, when one is named, else every open item: a role any loaded plugin contributes",
+    },
+  ],
+  examples: ["queue", "queue first-public --human", "queue --role tester", "queue first-public --role implementer"],
   async run(args, ctx) {
-    const p = parse(args, { human: { type: "boolean" } })
+    const p = parse(args, { human: { type: "boolean" }, role: { type: "string" } })
     const gate = p.positionals[0]
+    const role = str(p, "role")
+    if (role !== undefined) return roleQueue(ctx, role, gate)
     const def = gate === undefined ? undefined : ctx.registry.find<GateDef>("gates", gate)?.value
     const when = def ? timing(ctx, def) : ""
     const open = gatedItems(ctx, gate).filter((i) => isOpen(ctx, i))

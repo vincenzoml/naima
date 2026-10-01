@@ -218,13 +218,19 @@ Each piece of work has its own [worktree](glossary.md#worktree) and its own
 The branch is `<who>/<what>`, each part lowercase letters, digits, dots and
 dashes; its worktree is the folder `<what>` of the worktrees directory
 (`<main checkout>-worktrees` beside the main checkout, unless configured).
-Every worktree carries a [claim file](glossary.md#claim-file). `naima open`
-makes the three in one step. **Enforced by** the check `worktree-policy`: a
-worktree outside the directory or misnamed, a branch off the scheme, and a
-worktree whose branch has commits the trunk lacks with no claim (now, or
-released in those commits) and no session note fail; a fresh worktree with
-no claim yet is a note. Branches the scheme does not cover are listed under
-the coordination plugin's `exempt` option.
+Every worktree carries a [claim file](glossary.md#claim-file), or, for one
+that only files items and claims none, a [session note](glossary.md#session-note)
+is enough. `naima open` makes the three in one step. **Enforced by** the
+check `worktree-policy`: a worktree outside the directory or misnamed, a
+branch off the scheme, and a worktree whose branch has commits the trunk
+lacks with no claim (now, or released in those commits) and no session note
+fail; a fresh worktree with no claim yet is a note. A gate judges its own
+tree: this failure is a problem only for the worktree being checked; for any
+other worktree in the same state it is a note, naming it, so one worker's
+missing claim never blocks another branch's gate. `naima check
+--all-worktrees` reports every worktree's state as a problem, for the
+coordinator. Branches the scheme does not cover are listed under the
+coordination plugin's `exempt` option.
 
 ### No shared mutable file
 

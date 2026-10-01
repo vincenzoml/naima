@@ -1,0 +1,89 @@
+{
+  "commit": "e87898dfc8deb1e7c260d6f6ac7f3052279d291c",
+  "dirty": false,
+  "at": "2026-10-01T12:20:09.972Z",
+  "date": "2026-10-01T09:03:59+02:00",
+  "backfill": true,
+  "values": {
+    "loc": {
+      "value": 6838,
+      "exit": 0,
+      "holds": true
+    },
+    "test-loc": {
+      "value": 5223,
+      "exit": 0,
+      "holds": true
+    },
+    "files": {
+      "value": 52,
+      "exit": 0,
+      "holds": true
+    },
+    "functions": {
+      "value": 1019,
+      "exit": 0,
+      "holds": true
+    },
+    "function-size": {
+      "value": 5.64,
+      "exit": 0,
+      "holds": true
+    },
+    "function-size-max": {
+      "value": 146,
+      "exit": 0,
+      "holds": true
+    },
+    "complexity": {
+      "value": 2.68,
+      "exit": 0,
+      "holds": true
+    },
+    "complexity-max": {
+      "value": 36,
+      "exit": 0,
+      "holds": true
+    },
+    "duplication": {
+      "value": 1.07,
+      "exit": 0,
+      "holds": true
+    },
+    "todos": {
+      "value": 0,
+      "exit": 0,
+      "holds": true
+    },
+    "dependencies": {
+      "value": 0,
+      "exit": 0,
+      "holds": true
+    },
+    "lint": {
+      "value": 0,
+      "exit": 0,
+      "holds": true
+    },
+    "type-errors": {
+      "value": 0,
+      "exit": 0,
+      "holds": true
+    },
+    "tests": {
+      "value": 220,
+      "exit": 0,
+      "holds": true
+    },
+    "test-time": {
+      "value": 67.491,
+      "exit": 0,
+      "holds": true
+    },
+    "coverage": {
+      "value": null,
+      "exit": 1,
+      "holds": false
+    }
+  }
+}

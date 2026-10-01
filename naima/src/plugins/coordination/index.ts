@@ -461,8 +461,8 @@ function worktreePolicy(policy: Policy): Check {
   return {
     name: "worktree-policy",
     says:
-      "every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem",
-    run: (ctx) => policyFindings(ctx.root, policy, holders(ctx)),
+      "every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem for the worktree being checked, and (unless naima check --all-worktrees) a note naming any other worktree in the same state",
+    run: (ctx, options) => policyFindings(ctx.root, policy, holders(ctx), options),
   }
 }
 

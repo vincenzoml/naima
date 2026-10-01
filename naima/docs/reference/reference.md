@@ -14,6 +14,8 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [gates](#gates) — named release conditions backed by items
 - [epics](#epics) — epics: bodies of work that group items, their status and progress derived from them
 - [planning](#planning) — requirements proven by tests, specifications versioned name-vN, and the owner's decisions recorded once
+- [roles](#roles) — the roles of the company of agents as data: what each owns and refuses, and the kinds of work on its queue
+- [announce](#announce) — announceability, computed: a feature may be announced only once user-facing, shipped, documented and checked by a person or end to end
 - [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
@@ -61,11 +63,13 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves |
 | [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not |
 | [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks |
-| [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics |
+| [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics. With --role, one role's queue instead |
 | [`coverage`](#naima-coverage) | gates | each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST |
 | [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out |
 | [`spec`](#naima-spec) | planning | each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version |
 | [`decisions`](#naima-decisions) | planning | search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first |
+| [`roles`](#naima-roles) | roles | every role: what it owns, what it refuses, the kinds and types on its queue, and how many open items are on it |
+| [`announce`](#naima-announce) | announce | the features that may be announced — user-facing, shipped, documented and checked by a person or end to end — major first: the source of release notes |
 | [`loop`](#naima-loop) | loop | the non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his |
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
@@ -83,20 +87,21 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, ui, metrics, rules, commit-hooks, privacy, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, roles, announce, loop, beta-markers, verifier, ui, metrics, rules, commit-hooks, privacy, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
-| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, docs |
+| `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, roles, announce, verifier, rules, privacy, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, beta-markers, verifier, metrics, rules, commit-hooks, privacy, docs |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, announce, beta-markers, verifier, metrics, rules, commit-hooks, privacy, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | coordination, triage, planning |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics, commit-hooks |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers, metrics |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | triage, rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
-| `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to |  |
+| `extends` | core | additive changes to another plugin's type — statuses (an existing one only with its category), traits, transitions — or field — enum values, more types or traits it applies to | roles |
 | `hooks` | core | hooks on every item write: `beforeWrite(write, ctx)` may change or refuse it, `afterWrite(write, ctx)` sees it done | core, coordination, triage, epics, planning, verifier |
 | `migrations` | core | a plugin's own data migrations, in order from its format 1, run by `naima update` after the core's | gates |
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
+| `roles` | roles | a role of the company of agents: `title`, what it `owns`, what it `refuses` (never empty), the `kinds` and `types` on its queue, and `queue(ctx)`, its open items most urgent first | roles |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier |
 | `ui-views` | ui | a view `naima ui` shows as a tab: `name` (its path), `title`, `says`, `order` (lower first, 0 when absent), `render(params, ctx) → { data, html, css? }`, rendered at each request | coordination, gates, metrics |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
@@ -363,18 +368,20 @@ naima move export-drops features --force
 Run every invariant; exit 1 on any problem.
 
 ```sh
-naima check [--staged]
+naima check [--staged] [--all-worktrees]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--staged` |  | run only the checks that read the change staged for the next commit: what the pre-commit hook runs |
+| `--all-worktrees` |  | the coordinator's view: every worktree's missing claim is a problem, not only the one being checked |
 
 Examples:
 
 ```sh
 naima check
 naima check --staged
+naima check --all-worktrees
 ```
 
 ### naima board
@@ -864,7 +871,7 @@ naima event 2026-09-20 "The vendor ended support for v1"
 | Check | What it holds |
 |---|---|
 | `claims-resolve` | a claim written in this worktree names items that exist |
-| `worktree-policy` | every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem |
+| `worktree-policy` | every worktree but the main one is <worktrees>/<what> on the branch <who>/<what>, every local branch but the trunk is <who>/<what>, and every worktree carries a claim — one with commits the trunk lacks and no claim, now or released in those commits, nor a session note, is a problem for the worktree being checked, and (unless naima check --all-worktrees) a note naming any other worktree in the same state |
 | `trunk-moved-while-preparing` | a branch whose claim is marked preparing is told every commit the trunk took that it lacks, and which of them the trunk's reflog records as committed on the trunk directly |
 | `closed-not-claimed` | no archived item (one in a type that is not creatable, where naima close moves it) is claimed by the branch you stand on: what no-closing-own-claims refuses on a write, asserted on the tracker as it is, hand edits included |
 
@@ -1032,21 +1039,24 @@ naima gate show beta
 
 ### naima queue
 
-Open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics.
+Open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics. With --role, one role's queue instead.
 
 ```sh
-naima queue [gate] [--human]
+naima queue [gate] [--human] [--role <role>]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--human` |  | also list the items that need a person or a build, with why |
+| `--role` |  | list one role's open items, most urgent first — on the gate, when one is named, else every open item: a role any loaded plugin contributes |
 
 Examples:
 
 ```sh
 naima queue
 naima queue first-public --human
+naima queue --role tester
+naima queue first-public --role implementer
 ```
 
 ### naima coverage
@@ -1300,6 +1310,128 @@ Releases: a release in progress, staged from pre-release checks to announcing: e
 |---|---|
 | `planning-stamps` | a new spec takes its name and version from its title (`Export format v2` is export-format, version 2) unless given; a new decision is dated today unless given |
 | `release-stages` | a release is marked released only once every stage is recorded, or skipped and said by whom |
+
+## roles
+
+The roles of the company of agents as data: what each owns and refuses, and the kinds of work on its queue.
+
+Its contributions' qualified ids are `roles/<name>`.
+
+A role is what it refuses: each one says what it owns and what it will not do, so no one marks their own homework. The roles are data — by default the thirteen of the company of agents (docs/purpose.md), and `plugins.roles.options.roles` adds a project's own or replaces one by name — and any plugin may contribute one to the `roles` point. Every kind a role takes is a value of the trackers' `kind` field, so the kinds are one vocabulary and a kind no role takes is a note. An item is on a role's queue by its `role` field when set, else by its `kind` or its type; `naima roles` lists the roles with their open counts, and `naima queue --role <role>` lists one's queue, most urgent first.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `roles` | `{}` | role name → { "title", "owns", "refuses": [...], "kinds": [...], "types": [...] }: adds a role, or replaces the default one of that name. refuses is never empty. |
+
+**Extension points** it declares: `roles`.
+
+**Uses**, declared by other plugins: fields `kind`.
+
+### naima roles
+
+Every role: what it owns, what it refuses, the kinds and types on its queue, and how many open items are on it.
+
+```sh
+naima roles [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--json` |  | print the roles as JSON: name, title, owns, refuses, kinds, types, flow, open |
+
+Examples:
+
+```sh
+naima roles
+naima roles --json
+```
+
+**Fields**
+
+| Field | Kind | Applies to | Meaning | Values |
+|---|---|---|---|---|
+| `role` | enum | every type | the role whose queue the item is on, when its kind or type does not say: any role a loaded plugin contributes | the name of any contribution to `roles`; one, or a list of several |
+
+**Extensions** of other plugins' types and fields
+
+- field `kind`: values `decision` work on the owner's queue; `coordination` work on the coordinator's queue; `review` work on the lead developer's queue; `design` work on the lead developer's queue; `research` work on the lead developer's queue; `code` work on the implementer's queue; `refactor` work on the implementer's queue; `test` work on the tester's queue; `evidence` work on the evidence owner's queue; `report` work on the filer's queue; `triage` work on the filer's queue; `model` work on the verification engineer's queue; `verification` work on the verification engineer's queue; `release` work on the release manager's queue; `writing` work on the documentarian's queue; `docs` work on the documentarian's queue; `announcement` work on the announcer's queue; `community` work on the community steward's queue; `business` work on the business's queue
+
+**Roles**, listed by `naima roles`; `naima queue --role <role>` shows one's queue
+
+| Role | Title | Owns | Refuses | Queue: kinds and types |
+|---|---|---|---|---|
+| `owner` | Owner | the decisions: judgement, a reserved decision, a credential, a physical act | any machine work; being asked what an agent can find out | `decision`, every `decisions` |
+| `coordinator` | Coordinator | the conversation with the owner, locked resources, the timer, spawning and merging workers | work a worker could do; more than one question at a time | `coordination` |
+| `lead-developer` | Lead developer | the queue: ranking it, sweeping fixed-but-unproven items, preparing branches, the merge train | merging without the gates; closing an item on reasoning; closing its own branch's items | `review`, `design`, `research` |
+| `implementer` | Implementer | one item, one cause, one branch: the code, analysis or text it asks for | widening scope; spawning workers; touching the trunk | `code`, `refactor` |
+| `tester` | Tester | performing gestures on the running software and writing down what happened | fixing what it finds; testing what it just wrote | `test`, every `tests` |
+| `evidence-owner` | Evidence owner | whether a gesture proves the claim, weighed by the evidence ranking and red-then-green | performing the gesture it then judges; accepting inspection as proof | `evidence` |
+| `filer` | Filer | classification, triage fields, reports routed to the right tracker | inventing scope; deciding whether something is proven | `report`, `triage` |
+| `verification-engineer` | Verification engineer | the formal models and properties, and running their verifiers | changing a model to make a property hold; calling a property proven past its expiry | `model`, `verification`, every `properties` |
+| `release-manager` | Release manager | opening a release item, running its stages in order, recording each stage's output | releasing off a gate that does not hold; deciding to release; judging whether the code is good enough | `release`, every `releases` |
+| `documentarian` | Documentarian | the words: docs pages with the feature, the changelog, the documentation map | documenting what does not exist in the code; deciding whether to announce | `writing`, `docs` |
+| `announcer` | Announcer | release notes, changelog entries, site and README copy, announcements | announcing a feature that is not announceable: user-facing, shipped, documented and checked by a person or end to end; deciding when to announce | `announcement` |
+| `community-steward` | Community steward | turning outside issues and pull requests into items, and keeping the link back | merging anything; promising a contributor an outcome | `community` |
+| `business` | Business | researching licence, funding, sponsorship, citation and adoption options, filed as decisions | acting on any of it before the owner decides; committing the project to anything | `business` |
+
+## announce
+
+Announceability, computed: a feature may be announced only once user-facing, shipped, documented and checked by a person or end to end.
+
+Its contributions' qualified ids are `announce/<name>`.
+
+What may be announced is computed, never declared. A feature is **announceable** when it is user-facing (`facing: user`), shipped (a status in `shippedStatuses`), documented (its `docs` field names a page) and checked: a passed item verifies it whose `runBy` is in `checkedBy` — a person, or an agent driving the running software, end to end — or whose `evidenceKind` is in `checkedEvidence`. A refuting proof outweighs any that proves. `naima announce` lists the announceable features, major ones (`major: true`) first, since a date or on a gate: the only source of release notes, changelog entries and announcements. With `--all` it adds every user-facing feature that is not announceable, with what it lacks. The check `copy-names-only-announceable` fails when a file of the `copy` option names, by its label or its full title, a feature that is not announceable, so the README and the site never promise what is not true.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `featureTypes` | `["features"]` | item types whose items are features |
+| `shippedStatuses` | `["shipped"]` | statuses in which a feature is shipped |
+| `checkedBy` | `["human", "agent-hands"]` | values of a proof's `runBy` that count as checked: by a person, or end to end on the running software |
+| `checkedEvidence` | `["owner-gesture"]` | values of a proof's `evidenceKind` that count as checked, whoever ran it |
+| `copy` | `["README.md"]` | files, from the project root, of public copy that may name only announceable features; one missing is skipped |
+
+**Uses**, declared by other plugins: types `features`; fields `docs`, `runBy`, `fixedOn`; relations `verified-by`.
+
+### naima announce
+
+The features that may be announced — user-facing, shipped, documented and checked by a person or end to end — major first: the source of release notes.
+
+```sh
+naima announce [--since <date>] [--gate <gate>] [--all] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--since` |  | only features shipped (fixedOn) on or after the date, YYYY-MM-DD |
+| `--gate` |  | only features on that gate: what a release off it announces |
+| `--all` |  | also every user-facing feature that is not announceable, with what it lacks |
+| `--json` |  | print each feature as JSON: item, title, major, shippedOn, announceable, lacks, checkedBy |
+
+Examples:
+
+```sh
+naima announce
+naima announce --since 2026-09-01
+naima announce --gate v1 --all
+naima announce --json
+```
+
+**Fields**
+
+| Field | Kind | Applies to | Meaning | Values |
+|---|---|---|---|---|
+| `facing` | enum | features | whom the feature is for: only a user-facing one is ever announced | `user` someone using the software sees it; `internal` only who works on the software sees it |
+| `major` | boolean | features | a feature an announcement leads with |  |
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `copy-names-only-announceable` | the project's public copy (the copy option: README.md by default) names no feature, by its label or its title, that is not announceable |
 
 ## loop
 
