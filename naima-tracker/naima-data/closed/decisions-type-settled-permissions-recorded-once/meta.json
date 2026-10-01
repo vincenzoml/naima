@@ -24,5 +24,8 @@
     "naima/docs/agents/asking-the-human.md"
   ],
   "closedFrom": "features",
-  "closedOn": "2026-10-01"
+  "closedOn": "2026-10-01",
+  "commits": [
+    "legacy"
+  ]
 }

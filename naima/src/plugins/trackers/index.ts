@@ -57,6 +57,14 @@ const RUN_BY = { name: "runBy", kind: "enum" } as const
 const HUMAN_BECAUSE = { name: "humanBecause", kind: "enum" } as const
 const COMMITS = { name: "commits", kind: "strings" } as const
 
+/**
+ * The one guessed value `commits` may hold: it marks an item closed before
+ * this field existed, grandfathered in by the migration that shipped it — not
+ * retrofitted with an invented hash. Never satisfies `naima close`'s own
+ * requirement: only a real commit, reachable from the trunk, does that.
+ */
+export const LEGACY_COMMIT = "legacy"
+
 /** The date, YYYY-MM-DD, from which an archived item is checked for a commit. Before it, nothing is retrofitted by guessing. */
 const DEFAULT_COMMITS_REQUIRED_FROM = "2026-10-01"
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
@@ -75,6 +83,9 @@ function hasCommitFromTrunk(ctx: Context, item: Item): boolean {
   if (!t) return false
   return (fieldValue(item, COMMITS) ?? []).some((h) => commitExists(ctx.root, h) && isAncestor(ctx.root, h, t))
 }
+
+/** Whether `item` is grandfathered: closed before `commits` existed, marked so by the migration, not by a guess. */
+const isGrandfathered = (item: Item): boolean => (fieldValue(item, COMMITS) ?? []).includes(LEGACY_COMMIT)
 
 export type Lifecycle = "unfixed" | "fixed" | "resolved" | "closed"
 
@@ -162,7 +173,7 @@ const commitsAreReal: Check = {
   says: "every hash an item's commits field names is a commit git has",
   run: (ctx) =>
     ctx.repo.items.flatMap((i): Finding[] => {
-      const bad = (fieldValue(i, COMMITS) ?? []).filter((h) => !commitExists(ctx.root, h))
+      const bad = (fieldValue(i, COMMITS) ?? []).filter((h) => h !== LEGACY_COMMIT && !commitExists(ctx.root, h))
       return bad.length ? [{ level: "problem", message: `${label(i)}: commits names ${bad.join(", ")}, which git does not have`, item: i }] : []
     }),
 }
@@ -238,7 +249,7 @@ export default function trackers(options: Record<string, unknown> = {}): Plugin 
     says: `an item closed on or after ${commitsRequiredFrom} names a commit reachable from the trunk`,
     run: (ctx) =>
       ctx.repo.items
-        .filter((i) => i.type === "closed" && (fieldValue(i, CLOSED_ON) ?? "") >= commitsRequiredFrom && !hasCommitFromTrunk(ctx, i))
+        .filter((i) => i.type === "closed" && (fieldValue(i, CLOSED_ON) ?? "") >= commitsRequiredFrom && !hasCommitFromTrunk(ctx, i) && !isGrandfathered(i))
         .map((i): Finding => ({ level: "problem", message: `${label(i)} is closed without a commit reachable from the trunk`, item: i })),
   }
   return {
@@ -349,7 +360,8 @@ export default function trackers(options: Record<string, unknown> = {}): Plugin 
       {
         name: "commits",
         kind: "strings",
-        says: "the git commit hashes that fixed it, each reachable from the trunk — never retrofitted by guessing on an item fixed before this existed",
+        says:
+          'the git commit hashes that fixed it, each reachable from the trunk — or "legacy" on an item closed before this field existed, set once by migration, never retrofitted by guessing',
         traits: [FIXABLE],
       },
     ],
