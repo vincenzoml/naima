@@ -1,0 +1,432 @@
+{
+  "branch": "claude/u4-proofs",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "d3537604-9172-4850-9257-fa7b185f9c9c",
+      "ref": "tests/adapter-outside-contract-gives-property-error-readable",
+      "title": "an adapter outside the contract gives a property in error with a readable output, never a status-less one (src/plugins/verifier/verifier.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "41417ec5-4c6b-4a4d-a8d7-76a13244a752",
+      "ref": "tests/agent-flows-exist-every-link-them-resolves",
+      "title": "The agent flows exist and every link to them resolves"
+    },
+    {
+      "id": "224083e8-a470-4de0-ad83-690dfddd115d",
+      "ref": "tests/bootstrap-fresh-repository-leaves-only-naima-tracker",
+      "title": "Bootstrap in a fresh repository leaves only naima-tracker/, with naima/ ignored"
+    },
+    {
+      "id": "4e647dd2-e00b-417e-9f32-b84c5213cc10",
+      "ref": "tests/branch-s-own-claim-read-from-branch",
+      "title": "a branch's own claim is read from its branch, not from a stale copy the reader's disk carries (src/plugins/coordination/coordination.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "2a2640a3-3f9e-4392-8e1e-ae17d7f13bf0",
+      "ref": "tests/changed-lock-source-refused-until-update-accept",
+      "title": "A changed lock source is refused until update --accept-source; a moved commit is followed and said; verify signed refuses an unsigned commit (src/distribution.test.ts, Deno)"
+    },
+    {
+      "id": "3dc6b0cb-a0f8-4dcc-985f-aa61f48b43dc",
+      "ref": "tests/count-that-not-positive-whole-number-usage",
+      "title": "a count that is not a positive whole number is a usage error, not an empty listing (src/plugins/coordination/coordination.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "01b6f44b-afa2-4015-b174-f2e72f89a307",
+      "ref": "tests/date-field-holds-only-real-calendar-date",
+      "title": "a date field holds only a real calendar date (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "1ed8e645-0e66-4e5f-b610-8b23ed4648d2",
+      "ref": "tests/deno-task-verify-runs-deno-lint-deno",
+      "title": "deno task verify runs deno lint and deno fmt --check, and both pass"
+    },
+    {
+      "id": "0b0371f3-57d7-4f4a-8d83-92ae7e527650",
+      "ref": "tests/deterministic-migration-newer-data-refused-one-line",
+      "title": "Deterministic migration; newer data refused in one line"
+    },
+    {
+      "id": "470ee27f-0e1d-4610-a2e6-ef636a42034e",
+      "ref": "tests/directory-check-cannot-read-problem-misspelled-type",
+      "title": "a directory check cannot read is a problem: a misspelled type, an _underscored or a symlinked item (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "394485b0-ad50-4bcb-9f99-0bfa65798a5c",
+      "ref": "tests/each-triage-subcommand-answers-misuse-own-usage",
+      "title": "each triage subcommand answers a misuse with its own usage (src/plugins/triage/triage.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "02921a89-16ac-4a08-89d2-acf048f5d5b6",
+      "ref": "tests/empty-item-reference-usage-error-never-only",
+      "title": "an empty item reference is a usage error, never the only item (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "6e8b379c-1cbf-4c49-b556-3e8f6e3caefa",
+      "ref": "tests/epics-milestones-gate-commands-pass-deno-node",
+      "title": "Epics, milestones and gate commands pass on Deno, Node and Bun"
+    },
+    {
+      "id": "6a7fceb5-2ff5-4989-b048-1b26c84cc83f",
+      "ref": "tests/every-item-write-runs-plugins-write-hooks",
+      "title": "Every item write runs the plugins' write hooks in load order; a refusal writes nothing and names its hook; a blank refusal is an internal error (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "84f5c0d4-860d-417e-be35-669492d1de11",
+      "ref": "tests/example-adapter-reads-lines-as-written-no",
+      "title": "the example adapter reads lines as written: no phantom last line, no trailing  (src/plugins/verifier/verifier.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "aba678b6-d903-4a77-b290-f9064337bf39",
+      "ref": "tests/exit-codes-tell-usage-error-2-from",
+      "title": "exit codes tell a usage error (2) from an internal one (70), and a command's own 75 is not a request to relaunch (src/cli.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "c7abc025-b15a-453f-bc3a-e9e33daeeadf",
+      "ref": "tests/failed-test-blocks-code-gate-close-fix",
+      "title": "A failed test blocks a code gate and the close of the fix it refutes; close refuses a property that holds on a changed model (src/lifecycle.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "b0b803ef-53e6-4ee7-8320-8d180437474a",
+      "ref": "tests/feature-s-docs-name-markdown-file-bare",
+      "title": "a feature's docs name a markdown file: a bare #heading, an empty entry or a directory is no documentation (src/plugins/docs/docs.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "49245a02-d9eb-459a-9b8b-d5e87c151b12",
+      "ref": "tests/fork-source-honoured-by-whole-project",
+      "title": "A fork source is honoured by the whole project"
+    },
+    {
+      "id": "bca9404f-33d9-4d80-934e-74034339d544",
+      "ref": "tests/gated-proof-gated-says-what-decides-ungated",
+      "title": "gated-proof-is-gated says what it decides: an ungated proof of a gated item is a problem, whatever it ranks (src/plugins/gates/gates.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "dd956bb7-0c2b-4df5-8b25-f701d9f5d292",
+      "ref": "tests/gates-option-names-file-configured-shape-written",
+      "title": "the gates option names the file it is configured in, in the shape it is written (src/plugins/gates/gates.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "1692e2aa-ae58-4d76-a272-3abec1f87fda",
+      "ref": "tests/groupby-keeps-key-item-order-linear-number",
+      "title": "groupBy keeps key and item order, and is linear in the number of items (src/core/collections.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "dd6eee23-3a10-4c27-b139-574ed779a088",
+      "ref": "tests/host-install-s-program-directory-exactly-naima",
+      "title": "A host install's program directory is exactly naima/"
+    },
+    {
+      "id": "98e9fb90-980b-48e9-87db-57f93370a65d",
+      "ref": "tests/init-locks-only-pushed-clean-commit-strips",
+      "title": "init locks only a pushed clean commit, strips credentials, names a real type"
+    },
+    {
+      "id": "91ba3a32-9785-45aa-801e-3b3f375e684e",
+      "ref": "tests/launcher-refuses-comma-path-hands-only-allow",
+      "title": "The launcher refuses a comma path, hands only allow-listed env, parses --data once"
+    },
+    {
+      "id": "880b24c7-dbec-4faa-b9bc-f2c7d432d58b",
+      "ref": "tests/launcher-s-permissions-confine-naima-naima-tracker",
+      "title": "The launcher's permissions confine Naima to naima-tracker/ and git"
+    },
+    {
+      "id": "6ae000f4-4ecb-4fd2-8c26-61dc364935e7",
+      "ref": "tests/link-stored-one-direction-only-inverse-already",
+      "title": "a link is stored in one direction only: its inverse is already the link (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "3d3e13d4-c25f-4c37-91fe-88a69e15f526",
+      "ref": "tests/list-unlink-view-types-help-each-do",
+      "title": "list, unlink, view, types and help each do what their usage says (src/cli.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "f64d06be-8e78-4945-a10d-50b639a1870e",
+      "ref": "tests/lock-source-git-would-read-as-option",
+      "title": "A lock source git would read as an option, or a relative path, is refused"
+    },
+    {
+      "id": "e0c2b259-6e7b-40b1-96b9-9882b008b081",
+      "ref": "tests/marker-naming-item-since-archived-found-through",
+      "title": "a marker naming an item since archived is found through the archive, and a bad reference says why (src/plugins/beta-markers/beta-markers.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "852a62b3-5a16-4864-9fa0-979d4b241a76",
+      "ref": "tests/meta-json-whose-id-title-status-not",
+      "title": "a meta.json whose id, title or status is not a string is unreadable, not a crash (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "00ea7614-64e6-40c4-af86-1d67b6ee4f8f",
+      "ref": "tests/misspelt-field-read-off-meta-does-not",
+      "title": "a misspelt field read off meta does not compile; the typed accessor does, with the field's type (src/core/typecheck.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "36554755-15e5-4cde-90ed-8ec4efe4d459",
+      "ref": "tests/naima-carry-round-trips-clone-vendored-submodule",
+      "title": "naima carry round-trips clone, vendored, submodule, clone"
+    },
+    {
+      "id": "b22be41d-5067-4efa-9525-1122acb2b6bf",
+      "ref": "tests/naima-close-refuses-item-current-branch-claims",
+      "title": "naima close refuses an item the current branch claims, and closes it with --force or from another branch (src/lifecycle.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "b5e5e672-1372-4ce2-b319-3b1feb4eadd4",
+      "ref": "tests/naima-loop-commands-pass-deno-node-bun",
+      "title": "Naima loop commands pass on Deno, Node and Bun"
+    },
+    {
+      "id": "e6dc9c2f-ff36-4183-b077-25a8e9db8948",
+      "ref": "tests/naima-note-naima-describe-pass-deno-node",
+      "title": "naima note and naima describe pass on Deno, Node and Bun"
+    },
+    {
+      "id": "d9694583-fa8e-4cc8-a6fc-79b92e73724a",
+      "ref": "tests/naima-s-own-tracker-managed-by-locked",
+      "title": "Naima's own tracker managed by a locked clone of itself"
+    },
+    {
+      "id": "4afa3cc9-4cf3-4d75-b608-a44488b8c204",
+      "ref": "tests/naima-skill-loads-agent-tool-links-resolve",
+      "title": "The Naima skill loads in an agent tool and its links resolve"
+    },
+    {
+      "id": "2de4ea3d-f064-4935-ba15-6e676288a81e",
+      "ref": "tests/naima-update-pulls-migrates-records-normal-run",
+      "title": "naima update pulls, migrates and records; a normal run never pulls"
+    },
+    {
+      "id": "4c3ef054-dcb1-460c-955e-d7b0093ecf94",
+      "ref": "tests/negated-evidence-not-evidence-page-that-could",
+      "title": "negated evidence is not evidence: a page that could not reproduce it is unclear, not measured (src/plugins/triage/triage.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "fd29aa6e-e742-4fe1-bb54-a6d869539d6d",
+      "ref": "tests/new-never-reuses-directory-slug-taken-another",
+      "title": "new never reuses a directory: a slug taken in another case, or by a concurrent run, is suffixed (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "9cc665d3-6615-4f29-9838-5e384b2c93c9",
+      "ref": "tests/new-validates-every-set-before-writes-anything",
+      "title": "new validates every --set before it writes anything (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "fce57a11-a2b9-4c08-a298-da71fa45fa23",
+      "ref": "tests/non-latin-titles-keep-their-letters-distinct",
+      "title": "non-Latin titles keep their letters: distinct slugs, and no false duplicates (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "500768d8-5783-43ac-a332-76187af39acc",
+      "ref": "tests/one-git-wrapper-missing-ref-missing-git",
+      "title": "one git wrapper: a missing ref and a missing git binary are told apart (src/core/git.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "90b5a3ba-2562-429e-992c-5be3ea22ab2c",
+      "ref": "tests/one-title-opened-three-branches-takes-three",
+      "title": "One title opened on three branches takes three slugs and merges without a conflict; a shallow clone suffixes the uuid (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "6abf6133-f0d0-4308-b0b5-ac948e55e64f",
+      "ref": "tests/paths-meet-git-posix-form-whatever-platform",
+      "title": "paths meet git in posix form, whatever the platform's separator (src/core/git.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "3c4168e6-8ac2-459a-8427-d639819eb9bc",
+      "ref": "tests/plugin-adds-type-status-value-field-by",
+      "title": "A plugin adds a type, a status, a value and a field by trait to another's vocabulary"
+    },
+    {
+      "id": "01308019-0dd2-433b-91d9-32fd3afc5e57",
+      "ref": "tests/plugin-cannot-take-name-entry-point-answers",
+      "title": "a plugin cannot take a name the entry point answers, nor a check, summary or rank name another declared (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "7a3292f3-d180-4877-8294-03a5410a3857",
+      "ref": "tests/plugin-declares-extension-point-another-contributes-no",
+      "title": "A plugin declares an extension point another contributes to, with no core edit"
+    },
+    {
+      "id": "d4962b4f-1dcb-43ba-a952-e1bb77aeadf6",
+      "ref": "tests/plugin-pinned-by-hash-commit-runs-injected",
+      "title": "A plugin pinned by hash or commit runs with the injected API, a newer contract is refused"
+    },
+    {
+      "id": "4de73c33-4f5c-405c-95f3-3f03c0b47d72",
+      "ref": "tests/plugin-s-own-migrations-run-after-core",
+      "title": "A plugin's own migrations run after the core's, record its format and are held by one-format"
+    },
+    {
+      "id": "9cdc8e1f-b1e9-4466-b5dc-54893fdf5a1d",
+      "ref": "tests/plugins-table-reaches-first-party-options-switches",
+      "title": "The plugins table reaches first-party options, switches off, replaces and weighs checks"
+    },
+    {
+      "id": "4e9412d6-03c2-4ce0-a1b5-d57ec63c5b09",
+      "ref": "tests/project-dist-holds-only-what-runs-naima",
+      "title": "A project on the dist holds only what runs Naima, in every worktree"
+    },
+    {
+      "id": "6eeb8e8d-3428-4867-994c-a169ffb91536",
+      "ref": "tests/project-s-files-regular-files-never-submodule",
+      "title": "a project's files are regular files: never a submodule's directory, never through a symbolic link (src/core/git.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "b4ee219a-4167-45c4-b07f-d3bbabcbdd16",
+      "ref": "tests/property-holds-only-what-was-run-changed",
+      "title": "a property holds only for what was run: a changed property, verifier, model path or options is reported (src/plugins/verifier/verifier.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "8e414e91-e852-44fc-b51e-ebb51ab0c893",
+      "ref": "tests/property-s-inputs-checked-options-declared-field",
+      "title": "a property's inputs are checked: its options are a declared field, its paths stay inside, its run record is read with care (src/plugins/verifier/verifier.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "c7f5d58e-ee97-4f99-a7fa-51f3f930e8bc",
+      "ref": "tests/prune-lists-stale-claim-another-ref-carries",
+      "title": "prune lists a stale claim another ref carries, naming the ref it must be dropped from (src/plugins/coordination/coordination.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "3b8c86e8-a6a3-4e1d-aeca-46ccd2b36b4b",
+      "ref": "tests/reading-across-branches-starts-bounded-number-git",
+      "title": "reading across branches starts a bounded number of git processes, however many branches and files (src/core/git.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "12da5004-85d2-4d93-a2fa-4949d4051c89",
+      "ref": "tests/reference-current-every-loaded-contribution-documented",
+      "title": "The reference is current and every loaded contribution is documented"
+    },
+    {
+      "id": "c303299c-9f1b-4b8c-9d50-b05989339dae",
+      "ref": "tests/reference-program-s-project-s-own-gates",
+      "title": "the reference is the program's: a project's own gates do not change it (src/cli.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "9c5e531f-3189-471b-9552-fa9b72c115a6",
+      "ref": "tests/registry-config-cannot-changed-once-project-loaded",
+      "title": "the registry and the config cannot be changed once the project is loaded (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "c320dfa6-2d92-43df-8b55-b19357d0957d",
+      "ref": "tests/released-claim-stays-released-trunk-s-copy",
+      "title": "a released claim stays released: the trunk's copy does not bring it back, and a new claim reuses the file (src/plugins/coordination/coordination.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "fb347a1a-75d1-4a1e-b63b-cf70fc20ba38",
+      "ref": "tests/scanner-sees-every-way-module-can-reach",
+      "title": "the scanner sees every way a module can reach another (src/arch.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "9cd405ee-722d-4efb-ad17-7eba19a027a8",
+      "ref": "tests/second-clone-new-worktree-align-program-lock",
+      "title": "A second clone and a new worktree align the program to the lock"
+    },
+    {
+      "id": "ff20c4d8-88b6-42ce-b387-e7a6629f2b71",
+      "ref": "tests/setext-heading-underlined-anchor-links-resolve-src",
+      "title": "a setext heading, underlined with === or ---, is an anchor links resolve to (src/plugins/docs/docs.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "5f016cf2-a5d7-48c3-9720-f100fa0dfa1f",
+      "ref": "tests/status-only-one-type-declares-itself-never",
+      "title": "a status is only one the type declares itself, never an Object.prototype key (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "ff7fc98c-92e4-4c03-bbd5-9bfcc59ee73d",
+      "ref": "tests/switching-off-plugin-whose-vocabulary-another-uses",
+      "title": "Switching off a plugin whose vocabulary another uses fails at load, named"
+    },
+    {
+      "id": "87e5579c-1839-4cfa-a793-c9c386e665cb",
+      "ref": "tests/triage-field-set-by-any-command-stamps",
+      "title": "A triage field set by any command stamps triagedOn, derive stamps nothing; a property reopens when what it was verified on changes; holds set by hand is refused (triage and verifier plugin tests, on Deno, Node and Bun)"
+    },
+    {
+      "id": "75efc397-8e2e-4e58-9077-4628a3e5a8ad",
+      "ref": "tests/trunk-each-worker-see-other-worktrees-uncommitted",
+      "title": "The trunk and each worker see the other worktrees' uncommitted claims, and not the ones deleted there; under the launcher too (src/core/git.test.ts, coordination.test.ts, distribution.test.ts)"
+    },
+    {
+      "id": "5f2c0b79-d9c0-4e00-b710-8d710cb56f04",
+      "ref": "tests/trunk-origin-s-head-main-master-without",
+      "title": "the trunk is origin's HEAD, main or master — and without any, every local branch is read; a detached HEAD is not a ref to read (src/core/git.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "c084327f-37b7-442c-97f5-37b696c64440",
+      "ref": "tests/two-plugins-declaring-one-name-coexist-by",
+      "title": "Two plugins declaring one name coexist by qualified id or a rename"
+    },
+    {
+      "id": "7b4e3f0e-c662-445f-a7c1-dac7e83d1f89",
+      "ref": "tests/unset-effort-ranks-as-largest-size-unset",
+      "title": "An unset effort ranks as the largest size and an unset impact or priority as the middle (src/plugins/triage/triage.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "6d7913be-5e30-4837-a208-7975e85dea21",
+      "ref": "tests/verifier-s-declared-runs-only-they-allowed",
+      "title": "A verifier's declared runs, and only they, are allowed besides git under the launcher; no first-party verifier declares one (src/distribution.test.ts, src/lifecycle.test.ts)"
+    },
+    {
+      "id": "90c67ef9-c8a6-44c8-b09b-9acc97f33259",
+      "ref": "tests/view-renders-data-once-as-text-json",
+      "title": "A view renders data once as text, JSON or markdown, and async checks are awaited"
+    },
+    {
+      "id": "20b43bac-6688-47a6-9644-1bb20de99929",
+      "ref": "tests/write-replaces-file-whole-new-content-lands",
+      "title": "a write replaces the file whole: new content lands beside it, then is renamed over it (src/core/files.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "41493076-c574-45ee-bb69-3f8d14811ecb",
+      "ref": "tests/write-seen-by-next-read-same-run",
+      "title": "a write is seen by the next read in the same run, with no reload (src/core/core.test.ts, on Deno, Node and Bun)"
+    },
+    {
+      "id": "bfa68f9f-57b6-44c4-a38c-afd710c96703",
+      "ref": "todos/remove-historical-narrative-from-docs-user-facing",
+      "title": "Remove historical narrative from docs and user-facing text: docs/bootstrap.md 'History' section and docs/format.md's pre-format-1 layout story. Owner's order: docs describe what is, not how it came to be."
+    },
+    {
+      "id": "d477c3f7-9e2c-41ac-b2c6-77715d6edc40",
+      "ref": "bugs/doc-names-milestones-type-that-does-not",
+      "title": "Doc names a 'milestones' type that does not exist (tracker-folder.md)"
+    },
+    {
+      "id": "772ad4d7-6084-4372-a661-eaf30481805e",
+      "ref": "bugs/naima-new-exits-2-invalid-set-value",
+      "title": "naima new exits 2 on an invalid --set value, yet leaves the item it refused behind"
+    },
+    {
+      "id": "2d1d6b7d-5a9f-4aeb-a53c-c4250cf6d199",
+      "ref": "bugs/naima-new-rejected-set-value-exits-2",
+      "title": "naima new with a rejected --set value exits 2 but leaves the item it refused on disk"
+    },
+    {
+      "id": "2aa741bf-f899-47fe-9dfe-c3417e63bacb",
+      "ref": "features/epics-milestones-as-dated-version-tagged-gate",
+      "title": "Epics, and milestones as a dated or version-tagged gate: restore as a HIGH-priority regression"
+    },
+    {
+      "id": "ca9f8759-25ba-4779-84b3-dc0d67a4a04f",
+      "ref": "features/real-verifier-adapter-tlc-beyond-regex-stand",
+      "title": "A real verifier adapter (TLC) beyond the regex stand-in"
+    },
+    {
+      "id": "da50cc74-1763-46ac-817c-2cd2c9cf0b86",
+      "ref": "todos/coordination-protocol-spec-verified-by-tlc-adapter",
+      "title": "Coordination protocol: a spec verified by the TLC adapter"
+    },
+    {
+      "id": "0fbd13d9-8fba-46e8-af55-30e3015feb4e",
+      "ref": "todos/seed-naima-s-own-tracker-rule-items",
+      "title": "Seed Naima's own tracker with rule items, each with its reason"
+    },
+    {
+      "id": "3e57f079-4879-4aec-8203-76180cd3c8a7",
+      "ref": "todos/deferral-reason-becomes-check-parked-wontfix-must",
+      "title": "Deferral-with-reason becomes a check (`parked`/`wontfix` must say why)"
+    }
+  ],
+  "note": "U4 proof run: record results of the full suite pass"
+}
