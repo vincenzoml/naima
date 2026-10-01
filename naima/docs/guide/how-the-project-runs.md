@@ -61,9 +61,10 @@ naima new features "Export to PDF with the figures in colour"
 naima board features
 ```
 
-Epics, milestones, requirements and specifications as items are
-[planned](../planned.md#epics-and-milestones); today a todo or a feature
-whose page lists its parts stands in for an epic.
+Grouping work as an [epic](glossary.md#epic), giving a release a date as a
+[milestone](glossary.md#milestone), and saying what must hold and how exactly
+([requirements, specifications and decisions](plan-with-requirements-specs-and-decisions.md))
+are items too: [plan with epics, milestones and gates](plan-with-epics-milestones-and-gates.md).
 
 ## Gates
 
