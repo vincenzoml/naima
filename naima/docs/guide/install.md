@@ -71,7 +71,7 @@ any credentials from the origin URL (`https://user:token@…` is written as
 
 ## The copy
 
-`main` is where Naima is developed: its tests, its CI, the rules for working
+`main` is where Naima is developed: its tests, its site, the rules for working
 on it (`AGENTS.md`, `.claude/`), and its own tracker. None of that belongs in
 a project, where test runners, type-checkers and agent harnesses that walk
 the file system would pick it up. So a project gets only the folder that
@@ -274,8 +274,8 @@ only.
 ## Other runtimes
 
 The code uses the standard APIs that Deno, Node and Bun share, and has no
-dependencies; its tests run on all three, on Linux and macOS. Windows is not
-exercised by CI. Deno is the documented runtime
+dependencies; its tests run on all three, on macOS and Linux. Windows is not
+exercised by the tests. Deno is the documented runtime
 because of its permissions. Run directly with Node or Bun (`node
 naima-tracker/naima/src/cli.ts <command>`), Naima works on the data, but it
 does not align, update, or carry, and nothing fences it in.

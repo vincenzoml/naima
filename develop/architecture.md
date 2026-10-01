@@ -61,7 +61,7 @@ deno.json                 the tasks: naima, dev, typecheck, lint, fmt, test, doc
 scripts/coverage.ts       coverage of the whole test run, the launched copies of the program counted as the files they copy
 site/                     the project site
 .claude/commands/         a link to naima/skills/naima/commands/, for this repository's own agents
-.github/workflows/        CI: verify on Deno, the tests on Node and Bun, on Linux and macOS; the installers on three systems
+.github/workflows/        pages.yml only: it builds and deploys the site; the tests run locally, before every push
 ```
 
 What ships is only what runs: the contents of `naima/`, and nothing else.

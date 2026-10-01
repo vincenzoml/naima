@@ -19,3 +19,7 @@ Fixed: added bunfig.toml at the repo root with [test] timeout = 30000, a project
 ### 2026-10-01 — Vincenzo Ciancia, on claude/no-dist
 
 ci.yml now runs bun test --timeout 30000 ./test/, the flag the local gates use, besides the per-test timeouts (claude/no-dist).
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/no-dist
+
+ci.yml is removed (owner's decision, 2026-10-01); the note above no longer applies. The gate is local: bun test --timeout 30000 ./test/, in AGENTS.md.

@@ -69,7 +69,7 @@ the trunk is a fast-forward is a flow, not code: not enforced by Naima.
 
 **checked-like-code.** The tracker has invariants, and `naima check` fails
 when one breaks, the way a test suite fails when the code breaks. Held by:
-`naima check` itself, run by `deno task verify` in this repository and by CI.
+`naima check` itself, run by `deno task verify` in this repository before every push.
 
 **documented-always.** Every feature is documented as part of its
 implementation ([the documentation rule](documentation.md)). Held by: the
@@ -94,9 +94,9 @@ that Deno, Node and Bun all provide. Nothing is installed. Held by:
 `test/arch.test.ts` ("the core imports nothing outside itself but node
 built-ins"), and `deno.json`, which has no imports.
 
-**portable-runtime.** The same code runs on Deno, Node and Bun. Held by: CI
-(`.github/workflows/ci.yml`), which runs the tests on all three, on Linux and
-macOS.
+**portable-runtime.** The same code runs on Deno, Node and Bun. Held by: the
+tests, run on all three before every push (`deno task verify`, `node --test`,
+`bun test`; [AGENTS.md](../AGENTS.md#before-pushing)).
 
 **small-fixed-core.** The core names no item type, field, relation, gate,
 verifier or plugin; everything above it is a plugin. Held by:

@@ -48,8 +48,11 @@ These apply only to this repository; the general ones are on
 
 ```sh
 deno task verify    # typecheck, lint, format, tests, check (working tree and lock), reference current
-node --test "test/**/*.test.ts" && bun test ./test/     # the same tests on Node and Bun
+node --test "test/**/*.test.ts" && bun test --timeout 30000 ./test/     # the same tests on Node and Bun
 ```
+
+No CI runs them: these are the gate, run locally before every push. `.github/`
+holds only `pages.yml`, which deploys the site.
 
 What Naima is for — an enabling technology and decision support system for
 any versioned work, run by agents for an owner who only decides — is

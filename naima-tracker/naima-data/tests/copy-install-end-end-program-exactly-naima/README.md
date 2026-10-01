@@ -18,3 +18,7 @@ Red then green. Red: the new test files run against main's code (902fb93's prede
 ### 2026-10-01 — Vincenzo Ciancia, on claude/no-dist
 
 Correction to the note above: the red run archived the trunk as it stood then (git archive main), not a named commit; 77d5ce4 is only where this branch started.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/no-dist
+
+The ci workflow named above is removed (owner's decision, 2026-10-01): the local gates are this test's evidence.
