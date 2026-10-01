@@ -27,12 +27,14 @@ import { fileURLToPath } from "node:url"
 import {
   cacheDir,
   DATA_FILE,
+  DEFAULT_ENTRY_FILES,
   EXCLUDE_FILES,
   findData,
   globalOptions,
   message,
   PROGRAM_DIR,
   programOf,
+  readConfig,
   real,
   RELAUNCH,
   runtimeOf,
@@ -226,10 +228,24 @@ function declaredRuns(entry: string, cwd: string, read: string, env: Record<stri
   }
 }
 
-/** The host files the run may write outside the tracker folder: only `init --write-excludes` has any. */
-function hostFiles(rest: string[], root: string): string[] {
+/** The project's configured `entryFiles`, or the sensible defaults: `data` may hold no naima.json yet, or one this Naima cannot parse. */
+function entryFilesOf(data: string | null): readonly string[] {
+  if (!data || !existsSync(join(data, DATA_FILE))) return DEFAULT_ENTRY_FILES
+  try {
+    return readConfig(data).entryFiles
+  } catch {
+    return DEFAULT_ENTRY_FILES
+  }
+}
+
+/** The host files the run may write outside the tracker folder: only `init --write-excludes` and `init --write-agent-pointer` have any. */
+function hostFiles(rest: string[], root: string, data: string | null): string[] {
   const [command, ...args] = rest
-  return command === "init" && args.includes("--write-excludes") ? EXCLUDE_FILES.map((f) => join(root, f)) : []
+  if (command !== "init") return []
+  return [
+    ...(args.includes("--write-excludes") ? EXCLUDE_FILES.map((f) => join(root, f)) : []),
+    ...(args.includes("--write-agent-pointer") ? entryFilesOf(data).map((f) => join(root, f)) : []),
+  ]
 }
 
 /**
@@ -269,7 +285,7 @@ export async function launch(args: string[], cwd: string): Promise<number> {
   for (let run = 0; run < MAX_RUNS; run++) {
     let flags: string[]
     try {
-      const fence = { root, tracker, data, program, entry, cache, hostFiles: hostFiles(parsed.rest, root), worktrees: others }
+      const fence = { root, tracker, data, program, entry, cache, hostFiles: hostFiles(parsed.rest, root, data), worktrees: others }
       const read = permissions(fence)[0] ?? ""
       flags = permissions({ ...fence, runs: mayRun(data) ? declaredRuns(entry, cwd, read, env) : [], ui })
     } catch (e) {

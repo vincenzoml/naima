@@ -10,6 +10,7 @@ import { FORMAT } from "../../naima/src/core/format.ts"
 import { mustGit } from "../../naima/src/core/git.ts"
 import { writeJson } from "../../naima/src/core/item.ts"
 import { DATA_FILE, DEFAULT_DATA, DEFAULT_PROGRAM } from "../../naima/src/core/layout.ts"
+import { DEFAULT_ENTRY_FILES } from "../../naima/src/core/pointer.ts"
 import { buildRegistry, type RegistryOptions } from "../../naima/src/core/registry.ts"
 import type { Command, Context, Plugin } from "../../naima/src/core/types.ts"
 
@@ -84,7 +85,7 @@ export function tempProject(plugins: Plugin[], opts: { git?: boolean; now?: Date
   const root = mkdtempSync(join(tmpdir(), "naima-"))
   const data = join(root, DEFAULT_DATA)
   const lock = { source: "https://example.invalid/naima.git", commit: "0".repeat(40), carry: "copy" as const, program: DEFAULT_PROGRAM }
-  const config = { format: FORMAT, formats: {}, ...lock, plugins: {}, rename: opts.rename ?? {}, extends: [] }
+  const config = { format: FORMAT, formats: {}, ...lock, plugins: {}, rename: opts.rename ?? {}, extends: [], entryFiles: [...DEFAULT_ENTRY_FILES] }
   writeJson(join(data, DATA_FILE), { format: FORMAT, source: lock.source, commit: lock.commit, carry: lock.carry })
   const output: string[] = []
   const errors: string[] = []

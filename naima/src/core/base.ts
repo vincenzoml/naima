@@ -352,11 +352,16 @@ const move: Command = {
 const check: Command = {
   name: "check",
   says: "run every invariant; exit 1 on any problem",
-  usage: "check",
-  examples: ["check"],
-  async run(_args, ctx) {
-    const { problems, notes } = await runChecks(ctx)
-    ctx.out(`${ctx.repo.items.length} items, ${ctx.registry.checks.length} checks`)
+  usage: "check [--staged]",
+  options: [{ name: "--staged", says: "run only the checks that read the change staged for the next commit: what the pre-commit hook runs" }],
+  examples: ["check", "check --staged"],
+  async run(args, ctx) {
+    const p = parse(args, { staged: { type: "boolean" } })
+    if (p.positionals.length) throw usageError(this)
+    const staged = bool(p, "staged")
+    const { problems, notes } = await runChecks(ctx, { staged })
+    const count = staged ? ctx.registry.checks.filter((c) => c.staged === true).length : ctx.registry.checks.length
+    ctx.out(`${ctx.repo.items.length} items, ${count} ${staged ? "staged-change " : ""}checks`)
     if (notes.length) {
       ctx.out("\nnotes (not failures):")
       for (const n of notes) ctx.out(`  · ${n.message}`)

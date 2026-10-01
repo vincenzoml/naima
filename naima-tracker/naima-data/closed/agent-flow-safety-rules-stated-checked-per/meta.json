@@ -1,0 +1,24 @@
+{
+  "id": "6ebc8158-c0e6-42d2-b502-462369a70b47",
+  "title": "Agent-flow safety rules stated and checked per flow page",
+  "status": "closed",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "now",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ],
+  "effort": "S",
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "df9f8f6",
+    "b6bf099"
+  ],
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
+}

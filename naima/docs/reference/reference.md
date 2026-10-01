@@ -20,6 +20,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [ui](#ui) — the views plugins contribute, shown by `naima ui` in a native window, or the browser, from a server on this machine only
 - [metrics](#metrics) — named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
+- [commit-hooks](#commit-hooks) — companion records required in the commit that makes a change, and the path-scoped pre-commit hook that holds them
 - [privacy](#privacy) — the owner's material enters the repository only with their recorded yes, and no secret enters it at all
 - [docs](#docs) — every feature is documented as part of its implementation, and naima check holds it
 
@@ -27,7 +28,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 
 | Command | Plugin | What it does |
 |---|---|---|
-| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given |
+| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given |
 | [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
 | [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change |
 | [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files |
@@ -70,6 +71,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`ui`](#naima-ui) | ui | show the views the plugins contribute — the project's metrics first — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it |
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work |
+| [`hooks`](#naima-hooks) | commit-hooks | the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it |
 | [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused |
 | [`docs`](#naima-docs) | docs | print the reference generated from the loaded manifests; write it, or check that a file matches it |
 
@@ -79,13 +81,13 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, ui, metrics, rules, privacy, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, loop, beta-markers, verifier, ui, metrics, rules, commit-hooks, privacy, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, verifier, rules, privacy, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, beta-markers, verifier, metrics, rules, privacy, docs |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, beta-markers, verifier, metrics, rules, commit-hooks, privacy, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | triage, planning |
-| `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics |
+| `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics, commit-hooks |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers, metrics |
 | `guide` | core | a block `naima guide` prints first, inside a project, before the documentation pages | triage, rules |
 | `rank` | core | an additive term of every item's urgency; lower is more urgent | triage, gates |
@@ -110,21 +112,23 @@ An item is a directory under `<tracker>/<TYPE>/<slug>/`: `README.md` for the pro
 
 ### naima init
 
-Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given.
+Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given.
 
 ```sh
-naima init [--write-excludes]
+naima init [--write-excludes] [--write-agent-pointer]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--write-excludes` |  | also write those lines into the host's own files: deno.json and tsconfig.json when they are plain JSON, .prettierignore; a file with comments is left to be edited by hand |
+| `--write-agent-pointer` |  | also write the one-line pointer into each configured entry file that exists and does not already have it |
 
 Examples:
 
 ```sh
 naima init
 naima init --write-excludes
+naima init --write-agent-pointer
 ```
 
 ### naima update
@@ -357,13 +361,18 @@ naima move export-drops features --force
 Run every invariant; exit 1 on any problem.
 
 ```sh
-naima check
+naima check [--staged]
 ```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--staged` |  | run only the checks that read the change staged for the next commit: what the pre-commit hook runs |
 
 Examples:
 
 ```sh
 naima check
+naima check --staged
 ```
 
 ### naima board
@@ -504,6 +513,7 @@ naima runs --json
 | `links` | every link uses a declared relation and names an existing item other than its own |
 | `layout` | every directory under the tracker root belongs to an item type or a plugin |
 | `duplicates` | items of one type with the same title are linked as duplicates, or reported |
+| `entry-pointers` | every agent-harness entry file naima.json configures (entryFiles; sensible defaults absent it) names no path or link, plain-text or markdown, that is missing from disk |
 | `one-format` | no item is still in a shape a format migration, the core's or a plugin's own, replaced: a tracker never mixes formats |
 
 **Summary sections**: `items`.
@@ -1097,7 +1107,7 @@ Requirements proven by tests, specifications versioned name-vN, and the owner's 
 
 Its contributions' qualified ids are `planning/<name>`.
 
-Planning as items, so each is proven or checked rather than implied by a test. A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again.
+Planning as items, so each is proven or checked rather than implied by a test. A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again. A **release** opens at its first stage (`naima new releases "<name>"`); each stage's output is recorded with `naima note`, headed `Stage: <name>` (or `Stage: <name> — skipped, decided by <who>`), and the hook refuses `status=released` while a stage is unrecorded — `naima view releases` shows what each one still owes.
 
 **Uses**, declared by other plugins: fields `runBy`, `humanBecause`; relations `verified-by`.
 
@@ -1173,6 +1183,16 @@ Decisions: a choice or a standing permission of the owner's, recorded once: date
 | `reopened` | open |  | the owner reopened it: the question may be asked again, and the answer is a new decision that supersedes this one |
 | `superseded` | done |  | replaced by a later decision, kept as history |
 
+### type: releases
+
+Releases: a release in progress, staged from pre-release checks to announcing: each stage's output recorded before the next, a skipped stage naming who decided. Items live in `naima-tracker/naima-data/releases/`; a new one starts as `staging`.
+
+| Status | Category | Flags | Meaning |
+|---|---|---|---|
+| `staging` | open |  | in progress: opened at its first stage, not every stage is recorded yet |
+| `released` | done |  | every stage is recorded, or skipped and said by whom; published and announced |
+| `rolled-back` | done |  | a stage found an issue serious enough to stop the release; the page says why |
+
 **Fields**
 
 | Field | Kind | Applies to | Meaning | Values |
@@ -1202,18 +1222,21 @@ Decisions: a choice or a standing permission of the owner's, recorded once: date
 | `requirements-proven` | a requirement marked met has a proof that passed and none that refutes it; one proven but still stated is noted; one that nothing satisfies or verifies is noted |
 | `specs-versioned` | one version of a specification is current; a version superseded by a current one is marked superseded; a spec supersedes only an earlier version of itself; an open item following a superseded version is noted |
 | `decisions-settled` | an open item waiting on the owner's decision (runBy human, humanBecause decision) that a settled decision settles is noted, to be acted on rather than asked; a decision superseded by a settled one is marked superseded |
+| `release-stages` | a release marked released has every stage recorded or skipped with who decided; one hand-edited past the hook is a problem |
 
 **Views**, printed by `naima view <name>`
 
 | View | What it shows |
 |---|---|
 | `requirements` | every requirement that is not dropped: its status, whether it is proven, what satisfies it and what proves it |
+| `releases` | every release in progress or done: its status and which stages it still owes |
 
 **Write hooks**, run on every item write
 
 | Hook | What it does |
 |---|---|
 | `planning-stamps` | a new spec takes its name and version from its title (`Export format v2` is export-format, version 2) unless given; a new decision is dated today unless given |
+| `release-stages` | a release is marked released only once every stage is recorded, or skipped and said by whom |
 
 ## loop
 
@@ -1601,6 +1624,55 @@ Rules: a rule of this project, for agents, people or both: its page is the rule 
 | Section | What it shows |
 |---|---|
 | `rules` | the project's active rules for agents, read before anything else |
+
+## commit-hooks
+
+Companion records required in the commit that makes a change, and the path-scoped pre-commit hook that holds them.
+
+Its contributions' qualified ids are `commit-hooks/<name>`.
+
+A record written later is never written: a fix with no test to prove it, a feature with no note. A companion rule says that a change — under a path, to an item of a type, or setting a field — must come with another record in the same commit: a change to an item of a type, a field set on the item, a note on its page, or a link from it. `naima check --staged` evaluates the rules over the staged change, and `naima check` over whatever is staged when it runs. One rule is built in, `fixed-has-test`: setting `fixedOn` comes with a linked verifying test. `naima hooks install` writes a pre-commit hook into the data directory, tracked, and points core.hooksPath at it — once per clone, which every worktree shares. The hook starts Naima only when a staged path is under the data directory or a rule's paths; `git commit --no-verify` skips it.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `companions` | `[] — the built-in rule alone` | the project's companion rules: each { "name", "says"?, "when": { "paths" } or { "type"?, "field"? }, "requires": exactly one of { "type" }, { "field" }, { "note": true }, { "link" } } |
+| `builtin` | `true` | false switches off the built-in rule fixed-has-test |
+| `command` | `deno run -A <the program's naima.ts> check --staged` | the command the hook runs when a watched path is staged |
+
+**Uses**, declared by other plugins: fields `fixedOn`; relations `verified-by`.
+
+### naima hooks
+
+The pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it.
+
+```sh
+naima hooks [list]
+naima hooks install [--force]
+naima hooks uninstall
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--force` |  | install even when core.hooksPath already names another directory, whose hooks then stop running |
+
+Examples:
+
+```sh
+naima hooks
+naima hooks install
+naima hooks uninstall
+```
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `companions` | the change staged for the next commit carries the records each companion rule requires with it: a change to an item of a type, a field set, a note, a link |
+| `hook-current` | the pre-commit hook in the data directory, once written, is the one naima hooks install writes for the companion rules as they are now |
+
+**Directories** it owns under the tracker root: `hooks/`.
 
 ## privacy
 

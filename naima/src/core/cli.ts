@@ -5,7 +5,19 @@
 
 import { existsSync, mkdirSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
-import { CARRY_MODES, DEFAULT_CARRY, type Lock, parseLock, posixRelative, programDir, readRaw, sourceRefusal, withCarry, writeRaw } from "./config.ts"
+import {
+  CARRY_MODES,
+  DEFAULT_CARRY,
+  type Lock,
+  parseConfig,
+  parseLock,
+  posixRelative,
+  programDir,
+  readRaw,
+  sourceRefusal,
+  withCarry,
+  writeRaw,
+} from "./config.ts"
 import { consoleIO, type IO, type Place } from "./context.ts"
 import { cliCommands } from "./entry.ts"
 import { FORMAT, formatRefusal, isFormat, migrate, MIGRATIONS, type Step } from "./format.ts"
@@ -13,6 +25,7 @@ import { formatsFor, type OpenOptions, openProject, owed } from "./project.ts"
 import { bool, parse } from "./args.ts"
 import { gitOrNull, nativePath, toplevel } from "./git.ts"
 import { exclusions } from "./excludes.ts"
+import { DEFAULT_ENTRY_FILES, entryPointers, writePointer } from "./pointer.ts"
 import {
   DATA_DIR,
   DATA_FILE,
@@ -154,8 +167,22 @@ function excludeHost(root: string, program: string, write: boolean, io: IO): voi
   }
 }
 
+/** Print, and with --write-agent-pointer write, the line that points each configured entry file at Naima's own agent docs. */
+function agentPointer(root: string, program: string, entryFiles: readonly string[], write: boolean, io: IO): void {
+  for (const p of entryPointers(root, program, entryFiles)) {
+    if (p.present) continue
+    if (!write) io.out(`entry pointer missing from ${p.file}: ${p.line}   (naima init --write-agent-pointer adds it)`)
+    else {
+      writePointer(root, program, p.file)
+      io.out(`wrote ${p.file}: ${p.line}`)
+    }
+  }
+}
+
 async function init(args: string[], opts: CliOptions, io: IO): Promise<number> {
-  const write = bool(parse(args, { "write-excludes": { type: "boolean" } }), "write-excludes")
+  const p = parse(args, { "write-excludes": { type: "boolean" }, "write-agent-pointer": { type: "boolean" } })
+  const write = bool(p, "write-excludes")
+  const writeAgent = bool(p, "write-agent-pointer")
   const root = toplevel(resolve(opts.cwd))
   if (!root) throw new Error("not a git repository — naima init makes a git repository a Naima project")
   const tracker = join(root, TRACKER_DIR)
@@ -163,7 +190,9 @@ async function init(args: string[], opts: CliOptions, io: IO): Promise<number> {
   const program = join(tracker, PROGRAM_DIR)
   if (existsSync(join(data, DATA_FILE))) {
     io.out(`${DEFAULT_DATA}/${DATA_FILE} already exists — left as it is`)
+    const config = parseConfig(readRaw(data), { lenient: true })
     excludeHost(root, programDir(data, parseLock(readRaw(data))), write, io)
+    agentPointer(root, programDir(data, parseLock(readRaw(data))), config.entryFiles, writeAgent, io)
     io.out(await nextStep({ root, data: real(data), program: programDir(data, parseLock(readRaw(data))) }, opts, io))
     return 0
   }
@@ -201,6 +230,7 @@ async function init(args: string[], opts: CliOptions, io: IO): Promise<number> {
   const copied = opts.launched && real(opts.programRoot) !== real(program) ? (align(t), `, ${TRACKER_DIR}/${PROGRAM_DIR}/`) : ""
   io.out(`wrote ${TRACKER_DIR}/: README.md, .gitignore, ${DATA_DIR}/${DATA_FILE}${copied} — locked to ${source} at ${short(commit)}`)
   excludeHost(root, program, write, io)
+  agentPointer(root, program, DEFAULT_ENTRY_FILES, writeAgent, io)
   io.out(await nextStep({ root, data: real(data), program }, opts, io))
   return 0
 }
@@ -336,7 +366,7 @@ export async function runCli(argv: string[], opts: CliOptions): Promise<number> 
     const { data, rest } = globalOptions(argv)
     const [command, ...args] = rest
     if (command === "init") {
-      if (args.some((a) => a !== "--write-excludes")) throw new Error(usage("init"))
+      if (args.some((a) => a !== "--write-excludes" && a !== "--write-agent-pointer")) throw new Error(usage("init"))
       return await init(args, opts, io)
     }
     if (command === "guide") return await guide(opts, data, io)

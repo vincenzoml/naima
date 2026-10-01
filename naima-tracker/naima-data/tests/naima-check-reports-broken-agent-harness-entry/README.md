@@ -1,0 +1,3 @@
+# naima check reports a broken agent-harness entry pointer; init --write-agent-pointer writes it, through the real launcher
+
+Unwire entryPointers from coreChecks in naima/src/core/check.ts and run `node --test test/core/core.test.ts`: the entry-pointers test fails (red, attachments/red-then-green.txt). Restore check.ts, run it again: all 34 tests in that file pass, including entry-pointers (green). Full suite: `deno task verify`, `node --test \"test/**/*.test.ts\"` (302 pass, attachments/node_full_tail.log) and `bun test --timeout 30000 ./test/` (302 pass) all green on commit d821550358e3864cdd1ff5ed3101a3766e69cc48.
