@@ -1,0 +1,5 @@
+=== grep coordinator-and-workers.md ===
+33:- **The owner is a resource holder too.** A restart or a rebuild is asked
+118:### The tester and the resource holder are different actors
+=== grep coordinate.md ===
+9:- **The owner holds too**: ask first to restart or rebuild while he is

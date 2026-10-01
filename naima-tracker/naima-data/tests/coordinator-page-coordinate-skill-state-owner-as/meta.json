@@ -1,0 +1,21 @@
+{
+  "id": "531ae3a2-cd4f-453c-a0ba-371612b9716a",
+  "title": "Coordinator page and coordinate skill state the owner as a resource holder",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "f1d68726-7476-40cd-a4f4-91fa68f45ec6"
+    }
+  ],
+  "attached": {
+    "_run1.txt": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  },
+  "evidenceKind": "observation"
+}
