@@ -215,9 +215,11 @@ function carryCommand(args: string[], place: Place, lock: Lock, raw: Record<stri
 export const GUIDE_PAGES: readonly (readonly [string, string])[] = [
   ["skill", "skills/naima/SKILL.md"],
   ["index", "docs/README.md"],
-  ["flows", "docs/flows/README.md"],
-  ["format", "docs/format.md"],
-  ["install", "docs/install.md"],
+  ["guide", "docs/guide/README.md"],
+  ["rules", "docs/guide/rules.md"],
+  ["agents", "docs/agents/README.md"],
+  ["format", "docs/reference/format.md"],
+  ["install", "docs/guide/install.md"],
 ]
 
 function guide(opts: CliOptions, io: IO): number {

@@ -4,7 +4,7 @@ argument-hint: [what was said]
 ---
 $ARGUMENTS
 
-Flow: [reporting and triage](../../../../docs/flows/reporting-and-triage.md) —
+Flow: [reporting and triage](../../../../docs/agents/reporting-and-triage.md) —
 it owns the routing table.
 
 1. **Write it before you understand it**: `naima new <type> "<what happened>"`.

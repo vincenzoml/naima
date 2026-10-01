@@ -30,7 +30,7 @@ project, copy the directory into its `.claude/commands/flow/`, and the pages if
 the project does not depend on Naima's docs.
 
 In the commands, `naima` is the CLI: `deno run -A
-naima-tracker/naima/naima.ts` ([installing](../install.md)). In this
+naima-tracker/naima/naima.ts` ([installing](../guide/install.md)). In this
 repository it is `deno task naima`.
 
 ## Enforced, not only written
@@ -43,7 +43,7 @@ Where a rule can be checked, Naima checks it:
 | every fix names the gesture that proves it | `fix-names-its-gesture` (a note) |
 | closed means proven | `closed-carries-proof`, and `naima close` refuses anything not resolved |
 | a claim names real items | `claims-resolve` |
-| a feature is documented as part of its implementation | the [`docs` plugin](../documentation.md) |
+| a feature is documented as part of its implementation | the [`docs` plugin](../develop/documentation.md) |
 | the flows an instruction names exist | `links-resolve`, over the markdown the `docs` plugin is given |
 
-Full list of checks: [reference](../reference.md).
+Full list of checks: [reference](../reference/reference.md).

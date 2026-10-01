@@ -7,7 +7,7 @@
 //     naima-data/               the data: the items, and naima.json
 //       naima.json              the anchor: the data format, the lock, the project's facts
 //
-// Both directories can move (docs/format.md); the anchor is always a
+// Both directories can move (docs/reference/format.md); the anchor is always a
 // naima.json that carries `format`.
 
 import { existsSync, realpathSync } from "node:fs"
@@ -25,7 +25,7 @@ export const DEFAULT_PROGRAM = `../${PROGRAM_DIR}`
 /**
  * The branch of Naima's repository that holds only what runs Naima, built by
  * CI from every commit of main: what a project clones and locks, and what
- * `naima update` follows when the source has it (docs/install.md#the-dist-branch).
+ * `naima update` follows when the source has it (docs/guide/install.md#the-dist-branch).
  */
 export const DIST_BRANCH = "dist"
 

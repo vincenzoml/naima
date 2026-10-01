@@ -1,12 +1,12 @@
 # verify on Deno, the documented runtime; the same tests on Node and Bun; on
-# Linux and macOS (Windows is not exercised: docs/install.md#other-runtimes).
+# Linux and macOS (Windows is not exercised: docs/guide/install.md#other-runtimes).
 # Every job needs Deno: the distribution tests run Naima through its launcher.
 # The full history is fetched so the tracker's locked commit is here, and the
 # program is cloned from this repository's own objects, without the network.
 #
 # On main, once every check has passed, the dist job builds the dist commit of
 # the pushed commit from dist.json and pushes the dist branch
-# (docs/install.md#the-dist-branch).
+# (docs/guide/install.md#the-dist-branch).
 #
 # Pinned: every action by commit (the tag it was is in the comment), every
 # runtime by version, so a red run is a regression and not a toolchain

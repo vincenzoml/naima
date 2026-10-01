@@ -204,7 +204,7 @@ export interface ExtensionPoint<T = any> {
 }
 
 /**
- * One write of one item, as the write hooks see it (docs/plugin-contract.md#write-hooks).
+ * One write of one item, as the write hooks see it (docs/develop/plugin-contract.md#write-hooks).
  * `create` opens an item, `update` rewrites its fields, `move` archives or moves it to another type's directory.
  */
 export interface Write {
@@ -259,7 +259,7 @@ export interface Plugin {
   hooks?: WriteHook[]
   /** Additive changes to other plugins' types and fields. */
   extends?: Extension[]
-  /** Its own data migrations, in order from its format 1: its format is 1 + their number (docs/format.md#migrations). */
+  /** Its own data migrations, in order from its format 1: its format is 1 + their number (docs/reference/format.md#migrations). */
   migrations?: Migration[]
   /** Extension points it declares: new kinds of contribution any plugin can make. */
   points?: ExtensionPoint[]
@@ -341,7 +341,7 @@ export type Carry = "clone" | "vendored" | "submodule"
 
 /** `naima-data/naima.json`: the data format, the lock, and only what the tool cannot infer. */
 export interface Config {
-  /** The data format (docs/format.md). */
+  /** The data format (docs/reference/format.md). */
   format: number
   /** Each plugin's own data format, by plugin name; a plugin absent from it is at format 1. */
   formats: Record<string, number>

@@ -10,14 +10,14 @@ each rule links the page that holds its reasoning.
    or feels, a decision reserved to them, a credential, a physical act. A
    question you could have answered yourself spends the most expensive
    resource in the project. How to tell the two apart:
-   [asking the human](docs/flows/asking-the-human.md).
+   [asking the human](docs/agents/asking-the-human.md).
 2. **Features are documented always, as part of their implementation.** A
    feature is not done until its documentation is in the same change. For a
    plugin contribution that means its manifest carries the documentation (a
    command its usage, options and an example; a gate how it decides) and
    `docs/reference.md` is regenerated with `deno task docs`; for anything else,
    the page under `docs/` that explains it. `deno task verify` fails otherwise:
-   [the documentation rule](docs/documentation.md).
+   [the documentation rule](docs/develop/documentation.md).
 3. **Don't start implementing until the owner says so.** A request is not a
    work order. First its item must say what "done" is: for a feature, its
    behaviour, its boundaries and how it is documented; for a defect, its
@@ -72,10 +72,10 @@ rewriting published history, discarding someone's uncommitted work.
   working tree, as a test, and never writes the tracker. Every tracker change
   goes through the CLI, never by hand. A change the tracker is about to use is
   merged and pushed first, then `naima update` moves the lock to it:
-  [Naima tracking itself](docs/bootstrap.md).
+  [Naima tracking itself](docs/develop/bootstrap.md).
 - **Write it down before fixing it.** A defect, a task or a request becomes an
   item first (`naima new`), then gets worked on. A fix with no trace is
-  diagnosed from scratch next time: [reporting and triage](docs/flows/reporting-and-triage.md).
+  diagnosed from scratch next time: [reporting and triage](docs/agents/reporting-and-triage.md).
 - **Triage what you touch.** An item you open, report or fix leaves with
   `impact`, `priority` and `confidence` set; `effort` is set only by someone
   who has looked at the code, never guessed.
@@ -85,10 +85,10 @@ rewriting published history, discarding someone's uncommitted work.
   branch does not close its own items on the strength of its own tests.
 - **One isolated worktree per piece of work.** A worktree writes to its own
   branch and nowhere else; no shared mutable file — a registry is a directory
-  of files named by uuid: [worktree isolation](docs/flows/worktree-isolation.md).
+  of files named by uuid: [worktree isolation](docs/agents/worktree-isolation.md).
 - **Every merge to the trunk is `git merge --ff-only`.** If it fails, stop:
   the resolution belongs on the branch, after merging the trunk into it:
-  [closing a worktree](docs/flows/closing-a-worktree.md).
+  [closing a worktree](docs/agents/closing-a-worktree.md).
 - **Evidence travels with the claim.** "It works" without a number, a log line
   or an attachment is not a verification.
 - **English**, in code, docs, items and commit messages.
@@ -102,5 +102,5 @@ deno task verify    # typecheck, lint, format, tests, check (working tree and lo
 node --test "src/**/*.test.ts" && bun test ./src/     # the same tests on Node and Bun
 ```
 
-Architecture and the dependency rule: [docs/architecture.md](docs/architecture.md).
+Architecture and the dependency rule: [docs/architecture.md](docs/develop/architecture.md).
 Everything else: [docs/README.md](docs/README.md).

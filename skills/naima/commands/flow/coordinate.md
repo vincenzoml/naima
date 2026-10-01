@@ -1,10 +1,10 @@
 ---
 description: Staff the session · one coordinator, workers in their own worktrees
 ---
-Flow: [the coordinator and the workers](../../../../docs/flows/coordinator-and-workers.md).
+Flow: [the coordinator and the workers](../../../../docs/agents/coordinator-and-workers.md).
 
 - **You talk to the owner** — one question at a time, only what is theirs
-  ([asking the human](../../../../docs/flows/asking-the-human.md)) — and hold any
+  ([asking the human](../../../../docs/agents/asking-the-human.md)) — and hold any
   locked resource. You do not do the work.
 - **Each worker gets**: its own worktree and branch, the item already filed,
   what is already measured, the gates, the constraints, and no sub-agents.

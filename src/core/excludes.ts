@@ -5,7 +5,7 @@
 // exclusion lives in the host's own configuration: `naima init` prints the
 // line for each such file it finds, and writes it only when asked
 // (`init --write-excludes`), since everything else it does stays inside
-// naima-tracker/ (docs/install.md#the-hosts-own-tools).
+// naima-tracker/ (docs/guide/install.md#the-hosts-own-tools).
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"

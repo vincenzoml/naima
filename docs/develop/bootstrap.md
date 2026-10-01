@@ -5,11 +5,11 @@ working tree managed that tracker, a bug in the checker could hide a bug on
 the board, and a change to the item format could make the tracker's own
 history unreadable. So the working tree never manages it. There is no special
 case for this: Naima's repository uses exactly the model every project uses
-([installing and updating](install.md)).
+([installing and updating](../guide/install.md)).
 
 1. **The tracker is managed by the locked commit.** `naima-tracker/naima/` is
    a gitignored clone of Naima itself, locked by `naima.json` to a commit of
-   its own [`dist` branch](install.md#the-dist-branch), exactly as a project
+   its own [`dist` branch](../guide/install.md#the-dist-branch), exactly as a project
    is; that commit is the "previous version". `deno task naima <command>` runs
    it, through the launcher. Alignment clones it from this repository's own
    objects — the dist commits are here once `origin/dist` is fetched — so it

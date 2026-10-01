@@ -52,7 +52,7 @@ git add naima-tracker && git commit -m "Track this project with Naima"
 ignores `naima/`) and `naima-tracker/naima-data/naima.json`, locked to the
 source and commit of the clone that ran it. Nothing else in the project is
 touched ([unless asked](#the-hosts-own-tools)). What goes in the folder:
-[using Naima in your project](using-naima.md).
+[using Naima in your project](tracker-folder.md).
 
 `init` locks only what everyone else can fetch: it refuses a clone with
 uncommitted changes, or with a commit its origin does not have, and it drops
@@ -175,7 +175,7 @@ naima update             # move the lock to it
 `update` follows the source's `dist` branch, or its `main` when the source
 publishes no dist (a fork, a local source). It fetches that head, moves the
 program to it, migrates the
-data forward if its format moved ([migrations](format.md#migrations)), and
+data forward if its format moved ([migrations](../reference/format.md#migrations)), and
 records the new commit in `naima.json`. A vendored program is checked out
 beside the old one and swapped in only once it is whole, so a failed update
 leaves the program that ran before. The result is one change to review and
@@ -187,7 +187,7 @@ git add naima-tracker && git commit -m "Update Naima to <commit>"
 
 "Explicit" means a deliberate command, not a human-only one: an agent runs
 `naima update --check` at the start of a session and, when the dist has moved,
-`naima update`, the checks, and the commit ([the skill](skill.md)). With
+`naima update`, the checks, and the commit ([the skill](../agents/skill.md)). With
 several branches open, update on a branch of its own and merge it first; the
 others merge the trunk and run `naima update` again, which finishes the
 migration of their new items or does nothing.
@@ -202,7 +202,7 @@ under Deno with only these:
 |---|---|---|
 | read | the repository, the program wherever it is, and the data directory of every other worktree of the project | items, the project's markdown and source (the docs and beta-marker checks read them), git's view of branches, and the uncommitted claims and notes of the other worktrees |
 | write | `naima-tracker/` only, and the data or program directory if moved out of it | items, claims, notes, the program's own alignment; nothing else in the project |
-| run | `git`, and the programs the loaded contributions declare | alignment, update and carry, and reading claims and notes across branches; a verifier's model checker (its `runs`, [the contract](plugin-contract.md#the-verifier-contract)) |
+| run | `git`, and the programs the loaded contributions declare | alignment, update and carry, and reading claims and notes across branches; a verifier's model checker (its `runs`, [the contract](../develop/plugin-contract.md#the-verifier-contract)) |
 | env | an allow-list: `HOME`, `PATH`, the user, shell, terminal, locale and temporary-directory variables, the proxy variables, Windows' system ones, and every `NAIMA_*`, `GIT_*`, `SSH_*`, `LC_*` and `DENO_*` | what git needs to reach a source, and Naima's own; nothing else of the environment reaches the program, nor the git it runs |
 | net | none | the network is git's, in alignment and update |
 
@@ -239,7 +239,7 @@ in the fork, and `plugins` names it by its path there — or, without a fork,
 in the project or its own git repository, pinned by its hash or commit
 ([third-party plugins](config.md#third-party-plugins)).
 Improvements go back through pull requests. The data stays compatible as long
-as the fork keeps [the format](format.md).
+as the fork keeps [the format](../reference/format.md).
 
 ## How the program is carried
 
@@ -254,7 +254,7 @@ naima carry clone        # back to the ignored clone
 
 Each switch stages exactly what it changed — under `naima-tracker/`, plus
 `.gitmodules` in submodule mode — so it is one commit. The lock and `update`
-work the same in every mode ([the format](format.md#how-the-program-is-carried)).
+work the same in every mode ([the format](../reference/format.md#how-the-program-is-carried)).
 
 ## Other runtimes
 

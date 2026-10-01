@@ -1,5 +1,5 @@
 // The program's entry point. The launcher (naima.ts) runs it under Deno with
-// the permissions docs/install.md lists; run directly, it is the development
+// the permissions docs/guide/install.md lists; run directly, it is the development
 // build, which aligns nothing and moves nothing.
 
 import { dirname } from "node:path"

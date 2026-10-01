@@ -54,7 +54,7 @@ feature — is an item in its own `naima-data/`, in the directory of its type;
 `naima/` is replaced whole on every update. Only the item directories that hold something exist. Commands work
 from any subdirectory: Naima walks up from the current directory to the first
 `naima-tracker/naima-data/naima.json`. Every file and field is specified in
-[the format](format.md).
+[the format](../reference/format.md).
 
 ## The lock
 
@@ -72,7 +72,7 @@ the same change, deterministically. A Naima never acts on data in another
 format: newer data is refused in one line, older data is left to `naima
 update`, and `naima check` fails on a tracker whose items mix formats — the
 mark of a branch that has not merged the trunk's update yet. What to do then:
-[migrations](format.md#migrations).
+[migrations](../reference/format.md#migrations).
 
 ## Moving things
 

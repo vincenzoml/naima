@@ -2,7 +2,7 @@
 description: Start a piece of work · item, worktree, claim
 argument-hint: <what-you-are-doing> [item ...]
 ---
-Flow: [opening a worktree](../../../../docs/flows/opening-a-worktree.md). Where
+Flow: [opening a worktree](../../../../docs/agents/opening-a-worktree.md). Where
 this checklist and the page disagree, the page wins.
 
 1. **The work has an item.** If not: `naima new <type> "<what happened>"`,
@@ -14,4 +14,4 @@ this checklist and the page disagree, the page wins.
 4. **A scratchpad is not a tracker.** Defects, tasks and verifications are items.
 
 Never write into another checkout, and never commit on the trunk:
-[worktree isolation](../../../../docs/flows/worktree-isolation.md).
+[worktree isolation](../../../../docs/agents/worktree-isolation.md).

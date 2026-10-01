@@ -10,7 +10,7 @@
 // again to finish the migration of its own new items. `check` fails on items
 // still in a shape a migration replaced.
 //
-// Format 1 is the first format of the open specification (docs/format.md).
+// Format 1 is the first format of the open specification (docs/reference/format.md).
 // Each migration adds one, so the format this Naima reads is 1 + the number
 // of migrations it carries, and a plugin's is 1 + the number of its own.
 
@@ -60,7 +60,7 @@ const formatName = (plugin: string | null): string => (plugin === null ? "format
 export function formatRefusal(format: unknown, reads = FORMAT, plugin: string | null = null): string | null {
   const name = formatName(plugin)
   if (!isFormat(format)) {
-    return plugin === null ? "has no format: it is not Naima data (docs/format.md)" : `has ${name} ${JSON.stringify(format)}, which is not an integer from 1`
+    return plugin === null ? "has no format: it is not Naima data (docs/reference/format.md)" : `has ${name} ${JSON.stringify(format)}, which is not an integer from 1`
   }
   const whose = plugin === null ? "this Naima reads" : `this Naima's ${plugin} reads`
   if (format > reads) {

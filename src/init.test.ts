@@ -1,6 +1,6 @@
 // naima init, in process: what it refuses to lock, what it prints as the
 // next step, and the lines that keep the program out of the host's own tools
-// (docs/install.md#the-hosts-own-tools). Run as the development build, like
+// (docs/guide/install.md#the-hosts-own-tools). Run as the development build, like
 // cli.test.ts; the launcher's side of --write-excludes is in launcher.test.ts.
 
 import assert from "node:assert/strict"

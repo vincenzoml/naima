@@ -43,7 +43,7 @@ export const cliCommands: Omit<Command, "run">[] = [
   },
   {
     name: "guide",
-    says: "print where the running Naima's documentation is: the skill, the docs index, the flows, the format, installing; read them as files",
+    says: "print where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files",
     usage: "guide",
     examples: ["guide"],
   },

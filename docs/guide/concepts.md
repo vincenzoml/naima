@@ -17,12 +17,12 @@ the title's words in whatever script they are written (Latin letters lose their
 accents; Cyrillic, CJK and every other letter are kept), and may
 change; the id never does, and links hold ids. A slug another local branch
 already holds under the same type is not taken again
-([across branches](flows/worktree-isolation.md#item-slugs-across-branches)). On the command line an item is
+([across branches](../agents/worktree-isolation.md#item-slugs-across-branches)). On the command line an item is
 named by its id, `type/slug`, its slug, or any fragment of a slug that matches
 exactly one item.
 
 Which types, statuses and fields exist depends on the loaded plugins:
-[reference](reference.md). Each status is in the `open` or the `done`
+[reference](../reference/reference.md). Each status is in the `open` or the `done`
 category; a status may also `prove` — count as evidence for whatever the item
 `verifies`.
 
@@ -68,7 +68,7 @@ whole tracker to its invariants, the way a test suite holds the code.
 
 A gate is a named condition — a release, a merge — backed by items: an item
 joins a gate by carrying `gate: <name>`. How each gate decides is in the
-[reference](reference.md#gates).
+[reference](../reference/reference.md#gates).
 
 ## Coordination across branches
 
@@ -78,4 +78,4 @@ branch, and recombined when read from every local branch: the trunk and every
 unmerged branch, each read from the disk of the worktree that stands on it,
 uncommitted files included, or from its ref when none does. Remote-tracking
 refs are not read. Two sessions never edit one file. The flows
-that go with it: [flows](flows/README.md).
+that go with it: [flows](../agents/README.md).

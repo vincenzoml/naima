@@ -1,5 +1,5 @@
 {
-  "says": "The runtime allowlist: the only files of a main commit that its dist commit holds, and so the only files a project's naima-tracker/naima/ holds. Read by scripts/dist.ts; docs/install.md#the-dist-branch.",
+  "says": "The runtime allowlist: the only files of a main commit that its dist commit holds, and so the only files a project's naima-tracker/naima/ holds. Read by scripts/dist.ts; docs/guide/install.md#the-dist-branch.",
   "include": ["naima.ts", "src/**/*.ts", "docs/**", "skills/naima/**", "README.md", "LICENSE", "NOTICE"],
   "exclude": ["src/**/*.test.ts", "src/core/testing.ts"]
 }

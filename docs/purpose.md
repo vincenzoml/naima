@@ -56,26 +56,26 @@ says so.
 
 **plain-files.** Every item is a directory of plain files in the repository:
 `README.md` for prose, `meta.json` for fields, `attachments/` for evidence.
-No database, no server. Held by: the [format](format.md#items) and its
-[invariants](format.md#invariants), which `naima check` runs (readable
+No database, no server. Held by: the [format](reference/format.md#items) and its
+[invariants](reference/format.md#invariants), which `naima check` runs (readable
 items, a `README.md` and a JSON `meta.json` in every item directory).
 
 **permanent-ids.** An item's uuid never changes; its slug may. Links hold
 ids, and only one direction of a link is stored, the inverse derived.
 Held by: the core invariants of `naima check` (unique uuids, links naming an
-existing item, [architecture](architecture.md#checks)).
+existing item, [architecture](develop/architecture.md#checks)).
 
 **derived-views.** Boards, queues, gate states, urgency, claim tables and
 summaries are computed when read and never written, so no stored copy can go
-stale ([concepts](concepts.md#derived-never-stored)). Held by: the plugin
+stale ([concepts](guide/concepts.md#derived-never-stored)). Held by: the plugin
 contract, in which a view or summary returns data and has no way to persist
-it ([views and summaries](plugin-contract.md#views-and-summaries)). No check
+it ([views and summaries](develop/plugin-contract.md#views-and-summaries)). No check
 looks for a stored board: not yet enforced beyond that.
 
 **three-completion-states.** Fixed (the code exists), resolved (fixed and
 proven by an item that `verifies` it and has passed) and closed (resolved and
 archived with its proof) are three states, never added into one number
-([concepts](concepts.md#fixed-resolved-closed)). Held by: the checks
+([concepts](guide/concepts.md#fixed-resolved-closed)). Held by: the checks
 `closed-carries-proof` (a closed item carries its proof) and
 `proven-but-open`, `naima close` refusing anything not resolved, and
 `src/lifecycle.test.ts`.
@@ -91,7 +91,7 @@ and the tests in `src/plugins/verifier/verifier.test.ts` and `src/lifecycle.test
 **verifiers-are-evidence.** A formal-methods tool plugs in as a verifier; its
 run is attached as evidence with the hash of the model it ran on, and
 resolves items like a passed test ([the verifier
-contract](plugin-contract.md#the-verifier-contract)). Held by:
+contract](develop/plugin-contract.md#the-verifier-contract)). Held by:
 `src/plugins/verifier/verifier.test.ts` and the check `property-evidence`.
 
 **gates.** A release or a merge is a named condition backed by items; an item
@@ -103,7 +103,7 @@ plugin and its tests, `src/plugins/gates/gates.test.ts`; the check
 belongs to no single branch, claims and session notes, is one uuid-named file
 per session on its own branch, recombined when read from every local branch
 and every worktree's disk ([worktree
-isolation](flows/worktree-isolation.md#4-no-shared-mutable-file)). Held by:
+isolation](agents/worktree-isolation.md#4-no-shared-mutable-file)). Held by:
 the `coordination` plugin and `src/plugins/coordination/coordination.test.ts`,
 and `src/core/git.test.ts` for reading across branches. That every merge to
 the trunk is a fast-forward is a flow, not code: not enforced by Naima.
@@ -113,14 +113,14 @@ when one breaks, the way a test suite fails when the code breaks. Held by:
 `naima check` itself, run by `deno task verify` in this repository and by CI.
 
 **documented-always.** Every feature is documented as part of its
-implementation ([the documentation rule](documentation.md)). Held by: the
+implementation ([the documentation rule](develop/documentation.md)). Held by: the
 checks `documented` (every contribution carries its documentation),
 `features-documented` (a shipped feature names its page), `links-resolve`
 (every relative link in tracked markdown resolves) and `reference-current`
 (the generated reference matches the code).
 
 **agent-rules-checked.** Where a rule for people and agents can be checked,
-it is ([enforced, not only written](flows/README.md#enforced-not-only-written)):
+it is ([enforced, not only written](agents/README.md#enforced-not-only-written)):
 a person is asked only for what is theirs, a fix names the gesture that
 proves it, a branch does not close what it claims on its own tests. Held by:
 the checks `human-says-why`, `fix-names-its-gesture` (a note) and
@@ -142,11 +142,11 @@ macOS.
 **small-fixed-core.** The core names no item type, field, relation, gate,
 verifier or plugin; everything above it is a plugin. Held by:
 `src/arch.test.ts` ("the core names no plugin's type, field, relation or
-plugin"), and the [dependency rule](architecture.md#the-dependency-rule).
+plugin"), and the [dependency rule](develop/architecture.md#the-dependency-rule).
 
 **extensible.** A project, or anyone, extends Naima through plugins: types,
 statuses, fields, relations, checks, commands, views, gates, verifiers,
-migrations ([extension points](plugin-contract.md#extension-points)).
+migrations ([extension points](develop/plugin-contract.md#extension-points)).
 Plugins never import each other; they cooperate through the registry. Held
 by: `src/arch.test.ts` (a plugin imports only the core's public API and its
 own files), `src/extending.test.ts`, and `src/external.test.ts` for plugins
@@ -154,13 +154,13 @@ outside Naima.
 
 **stable-contract.** A plugin says the contract version it is written for; a
 newer one is refused rather than half run ([the contract
-version](plugin-contract.md#the-contract-version)). Held by:
+version](develop/plugin-contract.md#the-contract-version)). Held by:
 `src/external.test.ts`.
 
 **offline.** No run touches the network except through git, and only
 alignment and `naima update` ask git for it; a normal run never pulls. Held
 by: the launcher granting no network permission
-([the permissions](install.md#the-permissions), `src/launcher.ts`), and
+([the permissions](guide/install.md#the-permissions), `src/launcher.ts`), and
 `src/distribution.test.ts` ("a normal run never pulls").
 
 **contained.** Naima writes nothing in a project outside `naima-tracker/`
@@ -172,22 +172,22 @@ environment. Held by: the launcher's permissions, and the tests in
 **reproducible.** Every clone, worktree, colleague and CI run the same Naima:
 the one locked by commit in `naima.json`. Alignment never overwrites work and
 refuses a commit it cannot reach ([every run aligns the
-program](install.md#every-run-aligns-the-program)). Held by:
+program](guide/install.md#every-run-aligns-the-program)). Held by:
 `src/distribution.test.ts` and `src/core/lock.test.ts`.
 
 **runtime-only-distribution.** A project receives only what runs Naima: no
 tests, no CI, no development agent rules, none of Naima's own tracker items
-([the dist branch](install.md#the-dist-branch)). Held by: `dist.json`, the
+([the dist branch](guide/install.md#the-dist-branch)). Held by: `dist.json`, the
 allowlist, and `src/dist.test.ts`, which holds the dist to it.
 
 **forward-migration.** The data has a format number; it moves only with a
 migration, forward only and deterministic; newer data is refused and left
-untouched ([migrations](format.md#migrations)). Held by:
+untouched ([migrations](reference/format.md#migrations)). Held by:
 `src/core/format.test.ts` and the check `one-format`.
 
 **fork-friendly.** The format is the compatibility boundary: a fork that
 reads and writes it works on the same data as every other
-([the format](format.md), [modifying Naima](install.md#modifying-naima)).
+([the format](reference/format.md), [modifying Naima](guide/install.md#modifying-naima)).
 Held by: the format's invariants in `naima check`, and
 `src/distribution.test.ts` ("a fork source is honoured once accepted").
 
@@ -198,7 +198,7 @@ bass note held while the harmony changes above it, the core stays small and
 still, and everything built on it is free to change. It serves
 **extensible** and **fork-friendly**: a project extends Naima without
 forking the core, and forks keep sharing the data. The rule is in
-[architecture](architecture.md#the-dependency-rule).
+[architecture](develop/architecture.md#the-dependency-rule).
 
 **Plain files and git, nothing else.** Files can be read by every tool and
 every agent, diffed, reviewed and versioned with the code. Git already
@@ -222,14 +222,14 @@ one. It serves **checked-like-code**, **documented-always** and
 
 **Automatic first.** Every first-party plugin is loaded and every default is
 inferred from the repository; `naima.json` holds only what cannot be
-inferred ([the automatic principle](config.md#the-automatic-principle)).
+inferred ([the automatic principle](guide/config.md#the-automatic-principle)).
 A project that needs nothing else configures nothing.
 
 **Extension is data, not inheritance.** No object-oriented modelling: no
 classes to subclass, no type hierarchy. A type carries plain tags (such as
 `fixable`), a field applies to the types that carry a tag, and an extension
 adds statuses or values to another plugin's type or field but never
-redefines one ([extending](plugin-contract.md#extending-another-plugins-types-and-fields)).
+redefines one ([extending](develop/plugin-contract.md#extending-another-plugins-types-and-fields)).
 Plain data can be merged, checked and documented; a hierarchy has to be
 understood. Held by: `src/extending.test.ts`. That the code has no classes of
 its own is a practice, not a check: the only ones are `NaimaError`, which
@@ -254,7 +254,7 @@ through the host or mixed into the program.
 **Nothing moves without a reviewable commit.** Updating Naima, changing its
 source, carrying it differently: each is an explicit commit in the project.
 That is the protection the permissions cannot give against a malicious
-update ([what this does not protect](install.md#the-permissions)).
+update ([what this does not protect](guide/install.md#the-permissions)).
 
 **Don't overthink; iterate version by version.** Choose the simplest design
 that fixes the problem at hand, ship it, and extend it in a later version
@@ -263,10 +263,10 @@ that a later step never breaks what an earlier one wrote.
 
 **Agents are a first audience.** The tool is designed for agents as much as
 for people: flows written as procedures, rules checked by the tracker, and a
-skill that teaches an agent the tool ([the Naima skill](skill.md)). A
+skill that teaches an agent the tool ([the Naima skill](agents/skill.md)). A
 person's time is the most expensive resource in the project, so it is
 spent only on what is genuinely theirs
-([asking the human](flows/asking-the-human.md)).
+([asking the human](agents/asking-the-human.md)).
 
 ## Non-goals
 

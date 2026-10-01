@@ -1,7 +1,7 @@
 // The distribution, end to end, under Deno and through the launcher, whatever
 // runtime runs this file: a Naima source repository, a host project that
 // clones it into naima-tracker/naima/, and every way the program is aligned,
-// updated, carried and fenced in. docs/install.md and docs/format.md describe
+// updated, carried and fenced in. docs/guide/install.md and docs/reference/format.md describe
 // what is asserted here.
 
 import assert from "node:assert/strict"

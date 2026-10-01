@@ -1,4 +1,4 @@
-// The dist branch (docs/install.md#the-dist-branch): the runtime allowlist in
+// The dist branch (docs/guide/install.md#the-dist-branch): the runtime allowlist in
 // dist.json, the commit scripts/dist.ts builds from it, and a project that
 // clones, locks, aligns and updates the dist, end to end through the launcher,
 // offline — the source is a repository on this disk.
@@ -58,7 +58,7 @@ test("the glob language: ** spans directories, * stays inside one", () => {
   assert.ok(globRegex("src/**/*.ts").test("src/cli.ts"))
   assert.ok(globRegex("src/**/*.ts").test("src/plugins/docs/index.ts"))
   assert.ok(!globRegex("src/*.ts").test("src/core/cli.ts"))
-  assert.ok(globRegex("docs/**").test("docs/flows/README.md"))
+  assert.ok(globRegex("docs/**").test("docs/agents/README.md"))
   assert.ok(!globRegex("naima.ts").test("naimaXts"))
 })
 

@@ -25,7 +25,7 @@ does not:
 `naima docs --write <file>` writes it, and `naima docs --check <file>` fails
 when the file differs from what the code generates, so the reference cannot
 drift. In this repository the working tree runs that check (see [Naima tracking itself](bootstrap.md#why-the-reference-is-checked-by-the-working-tree)),
-and the generated file is [reference.md](reference.md).
+and the generated file is [reference.md](../reference/reference.md).
 
 ## 2. The tracker
 
@@ -50,5 +50,5 @@ the flows its agent instructions name exist.
 ## Always on
 
 Nothing switches it on: the `docs` plugin is loaded in every project and
-infers what to check from the repository ([the automatic principle](config.md#the-automatic-principle)).
-Every option and its default: [reference](reference.md#docs).
+infers what to check from the repository ([the automatic principle](../guide/config.md#the-automatic-principle)).
+Every option and its default: [reference](../reference/reference.md#docs).

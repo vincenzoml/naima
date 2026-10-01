@@ -1,7 +1,7 @@
 # Plugin contract
 
-The interfaces are in [`src/core/types.ts`](../src/core/types.ts); what a
-plugin may call is [`src/core/api.ts`](../src/core/api.ts). This page says
+The interfaces are in [`src/core/types.ts`](../../src/core/types.ts); what a
+plugin may call is [`src/core/api.ts`](../../src/core/api.ts). This page says
 what each part is for.
 
 ## Shape
@@ -29,7 +29,7 @@ migrations) — `src/arch.test.ts` fails on a plugin that does.
 The first-party plugins are loaded unless the project switches one off or
 replaces it. A third-party plugin is added under `plugins` in `naima.json`,
 with optional `options`; a first-party plugin takes its options, and its
-replacement, the same way ([configuration](config.md#the-plugins-table)):
+replacement, the same way ([configuration](../guide/config.md#the-plugins-table)):
 
 ```json
 { "plugins": { "mine": { "source": "plugins/mine.ts", "options": {} }, "docs": { "options": { "reference": "docs/reference.md" } } } }
@@ -105,18 +105,18 @@ The core's points, each also a typed key of the manifest:
 | `fields` | fields with a kind (`string`, `strings`, `date`, `enum`, `boolean`, `number`, `object`), enum values in rank order — or `valuesFrom` a point, and `multiple` for several — and the types they apply to, by name (`appliesTo`) or by trait (`traits`); `configured: true` when the values come from the project's configuration, so the program's reference does not list them |
 | `extends` | additive changes to another plugin's types and fields ([extending](#extending-another-plugins-types-and-fields)) |
 | `relations` | link relations; each names its inverse, which must also be declared |
-| `checks` | `run(ctx) → Finding[]`, or a promise of them; `problem` fails `naima check`, `note` does not; the project may weigh each one `off`, `note` or `problem` ([check severity](config.md#check-severity)) |
+| `checks` | `run(ctx) → Finding[]`, or a promise of them; `problem` fails `naima check`, `note` does not; the project may weigh each one `off`, `note` or `problem` ([check severity](../guide/config.md#check-severity)) |
 | `views` | `naima view <name>`: a named rendering of derived state, `render(args, ctx) → { data, text() }` ([below](#views-and-summaries)) |
 | `dirs` | directories under the tracker root the plugin owns that are not item types |
 | `summary` | a block of `naima summary`, `render(ctx) → { data, text() }` |
 | `rank` | an additive urgency term; lower is more urgent |
 | `hooks` | [write hooks](#write-hooks): `beforeWrite(write, ctx)`, which may change what is written or refuse it, and `afterWrite(write, ctx)`, on every item write |
-| `migrations` | its own data migrations, in order from its format 1: `from`, `says`, and pure `config(raw)`, `item(meta)`, `stale(meta)`; its format is 1 + their number ([migrations](format.md#migrations)) |
+| `migrations` | its own data migrations, in order from its format 1: `from`, `says`, and pure `config(raw)`, `item(meta)`, `stale(meta)`; its format is 1 + their number ([migrations](../reference/format.md#migrations)) |
 
 First-party plugins declare two more: the `gates` plugin declares `gates` (a
 named condition: `title`, `says`, `decides`, `evaluate(ctx) → { holds,
 blocking, owed }`), the `verifier` plugin `verifiers`
-([below](#the-verifier-contract)). The [reference](reference.md#extension-points)
+([below](#the-verifier-contract)). The [reference](../reference/reference.md#extension-points)
 lists every point with who declares it and who contributes to it.
 
 A contribution to a point no loaded plugin declares, and any manifest key the
@@ -125,7 +125,7 @@ never silently ignored.
 
 ## Extension points
 
-A point is data: an `ExtensionPoint` in [`src/core/types.ts`](../src/core/types.ts).
+A point is data: an `ExtensionPoint` in [`src/core/types.ts`](../../src/core/types.ts).
 
 ```ts
 const notifiersPoint: ExtensionPoint<Notifier> = {
@@ -153,7 +153,7 @@ configuration makes, which the program's reference leaves out. The core's own
 points are declared exactly this way (`src/core/points.ts`): adding a kind
 of contribution never takes a change to the core. The on-disk layout is not
 a point: `<type>/<slug>/{README.md,meta.json,attachments/}` is the
-compatibility boundary between forks ([the format](format.md)).
+compatibility boundary between forks ([the format](../reference/format.md)).
 
 ## Extending another plugin's types and fields
 
@@ -167,7 +167,7 @@ mechanisms, used together:
   `incidents` type that says it is fixable. `appliesTo` still names types
   exactly; a field with both applies to both.
 - **Extensions.** A plugin — or the project, under `extends` in
-  [`naima.json`](format.md#naimajson) — adds to a type it does not own:
+  [`naima.json`](../reference/format.md#naimajson) — adds to a type it does not own:
   statuses, traits, transitions; or to a field: enum values, more types or
   traits it applies to. It never redefines: a status it names that exists
   keeps its category (open stays open), its flags only grow, and a field
@@ -334,7 +334,7 @@ disk, `null` for a create; `to` the type a move goes to; `force` the command's
 The first-party hooks — triage stamping `triagedOn`, a property reopening when
 what it was verified on changes, `holds` written only by `naima verify`, and
 no branch closing an item it claims — are listed in the
-[reference](reference.md).
+[reference](../reference/reference.md).
 
 ## Cooperation without imports
 

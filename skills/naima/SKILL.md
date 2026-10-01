@@ -20,7 +20,7 @@ deno run -A naima-tracker/naima/naima.ts
 
 Run `deno --version`. If it is missing, install it with its official
 installer, once per machine: `curl -fsSL https://deno.land/install.sh | sh`
-([installing](../../docs/install.md#deno-once-per-machine)).
+([installing](../../docs/guide/install.md#deno-once-per-machine)).
 
 ## 2. Have a project
 
@@ -39,7 +39,7 @@ naima init
 
 `init` writes `naima-tracker/` and touches nothing else. Commit
 `naima-tracker/` with the work; git never shows `naima-tracker/naima/`, which
-is ignored ([bootstrap a project](../../docs/install.md#bootstrap-a-project)).
+is ignored ([bootstrap a project](../../docs/guide/install.md#bootstrap-a-project)).
 
 When a run refuses, it says why in one line and what to do: local changes in
 the program, a commit the source does not have, data in another format.
@@ -52,7 +52,7 @@ naima update --check
 
 When it says the source's dist moved, run `naima update`, then `naima check`,
 then commit `naima-tracker/` as one change. Updating is your job, not a
-person's: [updating](../../docs/install.md#updating).
+person's: [updating](../../docs/guide/install.md#updating).
 
 ## 4. Work by the flows
 
@@ -61,10 +61,10 @@ Every change to the tracker goes through the CLI (`naima new`, `set`, `link`,
 when, is in the flows — read the one that applies before acting. They are
 plain files in the clone; `naima guide` prints where:
 
-- [the flows, and when each applies](../../docs/flows/README.md)
-- [concepts](../../docs/concepts.md): items, links, fixed / resolved / closed
-- [the format](../../docs/format.md): every file and field
-- [reference](../../docs/reference.md): every command, type, status, field and gate
+- [the flows, and when each applies](../../docs/agents/README.md)
+- [concepts](../../docs/guide/concepts.md): items, links, fixed / resolved / closed
+- [the format](../../docs/reference/format.md): every file and field
+- [reference](../../docs/reference/reference.md): every command, type, status, field and gate
 
 `naima help` lists the commands of the Naima in use; `naima summary` says where
 the project stands.

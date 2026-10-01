@@ -20,10 +20,10 @@ committed. A project that needs nothing else configures nothing.
 
 - the project's own **extensions** of the loaded plugins' types and fields,
   under `extends`: a status added to a type, a type made `fixable`, an enum
-  value added ([extending](plugin-contract.md#extending-another-plugins-types-and-fields)).
+  value added ([extending](../develop/plugin-contract.md#extending-another-plugins-types-and-fields)).
 
 `naima init` writes the formats and the lock; nothing else is needed. Every
-key, with its default: [the format](format.md#naimajson).
+key, with its default: [the format](../reference/format.md#naimajson).
 
 ## The plugins table
 
@@ -71,7 +71,7 @@ as its plugin weighs it.
 
 The `gates` plugin's `gates` option maps a gate name to
 `{ "title", "says", "holdsOn" }`. How a gate decides is in the
-[reference](reference.md#gates). Format 1 kept it as a top-level `gates` key;
+[reference](../reference/reference.md#gates). Format 1 kept it as a top-level `gates` key;
 the `gates` plugin's own migration moves it here.
 
 ## Third-party plugins
@@ -102,5 +102,5 @@ third-party plugin's entry names it in `source`, with optional options:
 refused: it is already loaded, and `replacedBy` is how it is replaced. The
 module's default export is a factory that takes the options and the plugin
 API and returns the manifest, which says the contract it is written for
-([plugin contract](plugin-contract.md#shape)). Two plugins declaring the
+([plugin contract](../develop/plugin-contract.md#shape)). Two plugins declaring the
 same name is an error when the project loads.

@@ -2,7 +2,7 @@
 // runs Naima — the files dist.json allows, and nothing else — with a
 // `Source-Commit:` trailer naming the main commit it was built from. CI runs
 // it on every commit of main and pushes the branch (.github/workflows/ci.yml);
-// projects clone and lock the dist (docs/install.md#the-dist-branch).
+// projects clone and lock the dist (docs/guide/install.md#the-dist-branch).
 //
 // Built with git's plumbing from the commit's own tree, never from a working
 // tree, so it is reproducible: the same main commit, with the same dist.json,

@@ -64,9 +64,9 @@ deno run -A naima-tracker/naima/naima.ts new bugs "Export drops the alpha channe
 deno run -A naima-tracker/naima/naima.ts check
 ```
 
-Details: [installing and updating](docs/install.md), [using Naima in your
-project](docs/using-naima.md), [the format](docs/format.md). An agent can do
-all of this itself: [the Naima skill](docs/skill.md).
+Details: [installing and updating](docs/guide/install.md), [using Naima in your
+project](docs/guide/tracker-folder.md), [the format](docs/reference/format.md). An agent can do
+all of this itself: [the Naima skill](docs/agents/skill.md).
 
 ## Documentation
 
@@ -82,7 +82,7 @@ Rules for working on this repository: [AGENTS.md](https://github.com/vincenzoml/
 Naima tracks itself, in `naima-tracker/`, managed by a clone of its own
 `dist`, locked by commit, as every project is (`deno task naima`);
 `deno task verify` runs the typecheck, the tests, and `check` with both the
-lock and the working tree: [Naima tracking itself](docs/bootstrap.md).
+lock and the working tree: [Naima tracking itself](docs/develop/bootstrap.md).
 
 ## Licence
 

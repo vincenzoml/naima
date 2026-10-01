@@ -1,6 +1,6 @@
 // The launcher: the one piece of Naima that runs with every permission, and
 // all it does is work out where things are, then run the program under Deno
-// with only these (docs/install.md says why each one exists):
+// with only these (docs/guide/install.md says why each one exists):
 //
 //   read    the repository, the program wherever it is, and the data directory of every other worktree
 //   write   the tracker folder (naima-tracker/), and the data and program if moved out of it
@@ -124,7 +124,7 @@ export function permissions(
 
 /**
  * The data directory of every other worktree of the project, where each one's uncommitted records are: the
- * cross-branch views read them from disk (docs/flows/worktree-isolation.md). Only when the data is inside the project.
+ * cross-branch views read them from disk (docs/agents/worktree-isolation.md). Only when the data is inside the project.
  */
 function otherWorktrees(root: string, data: string | null): string[] {
   if (!data) return []

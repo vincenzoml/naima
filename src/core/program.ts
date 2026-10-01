@@ -1,5 +1,5 @@
 // The program: the Naima a project runs, in naima-tracker/naima/, locked to
-// the source and commit naima.json records (docs/format.md#the-lock).
+// the source and commit naima.json records (docs/reference/format.md#the-lock).
 //
 // Every operation here goes through git. None ever overwrites work: a program
 // directory with uncommitted changes, or with commits its source does not
@@ -180,7 +180,7 @@ export interface Head {
 
 /**
  * The head `naima update` follows: the source's dist branch when it publishes
- * one — Naima's runtime files only, built from main (docs/install.md#the-dist-branch) —
+ * one — Naima's runtime files only, built from main (docs/guide/install.md#the-dist-branch) —
  * and its main otherwise, as a fork or a local source without a dist has.
  * Reads the source; changes nothing.
  */

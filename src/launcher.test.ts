@@ -1,6 +1,6 @@
 // The launcher's fence, through the real launcher under Deno: the environment
 // the program is handed, a path Deno's permission flags cannot express, and
-// the host files only `init --write-excludes` may write (docs/install.md#the-permissions).
+// the host files only `init --write-excludes` may write (docs/guide/install.md#the-permissions).
 
 import assert from "node:assert/strict"
 import { spawnSync } from "node:child_process"

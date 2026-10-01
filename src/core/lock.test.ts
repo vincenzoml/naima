@@ -1,4 +1,4 @@
-// The lock's source: what git is handed as an argument (docs/format.md#the-lock).
+// The lock's source: what git is handed as an argument (docs/reference/format.md#the-lock).
 
 import assert from "node:assert/strict"
 import { test } from "node:test"

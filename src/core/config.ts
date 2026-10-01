@@ -6,7 +6,7 @@
 // its source, commit and how it is carried), where the program is when it has
 // moved — and the `plugins` table: a plugin's options, a plugin switched off
 // or replaced, a third-party plugin added, a check weighed differently. The
-// format is specified in docs/format.md.
+// format is specified in docs/reference/format.md.
 
 import { readFileSync } from "node:fs"
 import { isAbsolute, join, relative, resolve, sep } from "node:path"

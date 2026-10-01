@@ -14,12 +14,12 @@
     "dev": "deno run -A src/cli.ts",
     "typecheck": "deno check naima.ts src/ scripts/",
     "test": "deno test -A src/",
-    "docs": "deno run -A src/cli.ts docs --write docs/reference.md",
+    "docs": "deno run -A src/cli.ts docs --write docs/reference/reference.md",
     "dist": "deno run -A scripts/dist.ts",
     "coverage": "deno run -A scripts/coverage.ts",
     "lint": "deno lint",
     "fmt": "deno fmt",
-    "verify": "deno task typecheck && deno task lint && deno fmt --check && deno task test && deno run -A src/cli.ts check && deno run -A src/cli.ts docs --check docs/reference.md && deno run -A naima.ts check"
+    "verify": "deno task typecheck && deno task lint && deno fmt --check && deno task test && deno run -A src/cli.ts check && deno run -A src/cli.ts docs --check docs/reference/reference.md && deno run -A naima.ts check"
   },
   "fmt": {
     "include": ["naima.ts", "src/", "scripts/"],

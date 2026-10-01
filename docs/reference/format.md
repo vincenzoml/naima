@@ -3,7 +3,7 @@
 The public specification of every file Naima reads and writes in a project:
 its files, their fields and the invariants `naima check` holds. It is the
 compatibility boundary between forks. Change Naima however you like
-([modifying Naima](install.md#modifying-naima)); a fork that reads and writes
+([modifying Naima](../guide/install.md#modifying-naima)); a fork that reads and writes
 this format works on the same data as every other.
 
 This page specifies **format 2**, the one this Naima reads. The format is a
@@ -57,13 +57,13 @@ the one whose `naima.json` carries `format`.
 | `format` | yes | the data format, an integer: this page is format 2 |
 | `formats` | no, `{}` | each plugin's own data format, by plugin name: only the plugins whose format has moved past 1 appear; one absent is at format 1 ([migrations](#migrations)) |
 | `source` | yes | the git URL, or absolute path, of the Naima the project runs: Naima's own repository, or a fork; never starting with `-`, and a path on this disk is absolute |
-| `commit` | yes | the full hash of the `source` commit the project runs: **the lock**; a commit of its [`dist` branch](install.md#the-dist-branch), or of `main` for a source without one |
+| `commit` | yes | the full hash of the `source` commit the project runs: **the lock**; a commit of its [`dist` branch](../guide/install.md#the-dist-branch), or of `main` for a source without one |
 | `carry` | no, `clone` | how the program is carried: `clone`, `vendored` or `submodule` (below) |
-| `verify` | no | `"signed"`: run a locked commit only when git verifies its signature ([install](install.md#every-run-aligns-the-program)) |
+| `verify` | no | `"signed"`: run a locked commit only when git verifies its signature ([install](../guide/install.md#every-run-aligns-the-program)) |
 | `program` | no, `../naima` | the program directory, relative to the data directory |
-| `plugins` | no, `{}` | plugin name → `{ "options", "enabled", "replacedBy", "source", "checks" }`, first-party plugins included: their options (the project's gates are the `gates` plugin's), switched off, replaced, added from a pinned source — a path inside the program, `{ "path", "sha256" }` or `{ "git", "commit", "path" }` — their checks weighed ([configuration](config.md#the-plugins-table)) |
-| `rename` | no, `{}` | kind → `{ "<plugin>/<name>": "<short name>" }`: the name a third-party plugin's contribution goes by, when two plugins would store the same one ([names](plugin-contract.md#names)) |
-| `extends` | no, `[]` | the project's own additive changes to the loaded plugins' types and fields: `{ "type", "statuses", "traits", "transitions" }` or `{ "field", "values", "appliesTo", "traits" }` ([extending](plugin-contract.md#extending-another-plugins-types-and-fields)) |
+| `plugins` | no, `{}` | plugin name → `{ "options", "enabled", "replacedBy", "source", "checks" }`, first-party plugins included: their options (the project's gates are the `gates` plugin's), switched off, replaced, added from a pinned source — a path inside the program, `{ "path", "sha256" }` or `{ "git", "commit", "path" }` — their checks weighed ([configuration](../guide/config.md#the-plugins-table)) |
+| `rename` | no, `{}` | kind → `{ "<plugin>/<name>": "<short name>" }`: the name a third-party plugin's contribution goes by, when two plugins would store the same one ([names](../develop/plugin-contract.md#names)) |
+| `extends` | no, `[]` | the project's own additive changes to the loaded plugins' types and fields: `{ "type", "statuses", "traits", "transitions" }` or `{ "field", "values", "appliesTo", "traits" }` ([extending](../develop/plugin-contract.md#extending-another-plugins-types-and-fields)) |
 
 Any other key is an error. `source`, `commit`, `carry`, `verify` and `program` are the
 lock: they keep these names and meanings in every format, so that any Naima
@@ -77,7 +77,7 @@ directory to exactly that source and commit first: everyone on the project,
 and CI, runs the same Naima. No run pulls on its own; `naima update` is the
 only command that asks the source anything, and it moves the lock in one
 reviewable change. How alignment behaves, and when it refuses:
-[installing and updating](install.md#every-run-aligns-the-program).
+[installing and updating](../guide/install.md#every-run-aligns-the-program).
 
 Code runs only from the program, never from the data: a plugin is a path
 inside the program, and a project that wants one carries it in its fork.
@@ -123,7 +123,7 @@ Boards, queues and gate states are derived and never stored.
 ## Coordination files
 
 State that belongs to no branch is one file per writer, on the writer's own
-branch, recombined when read ([concepts](concepts.md)):
+branch, recombined when read ([concepts](../guide/concepts.md)):
 
 - `claims/<uuid>.json`: `{ "branch", "claimedAt", "note"?, "items": [{ "id", "ref", "title" }] }`;
 - `passes/<date>-<uuid>.md`: front matter `date`, `at` (an ISO instant), `branch`, then the note.

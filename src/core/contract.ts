@@ -1,5 +1,5 @@
 // The version of the plugin contract: the shape of a manifest, and of what
-// the core hands a plugin (docs/plugin-contract.md#the-contract-version).
+// the core hands a plugin (docs/develop/plugin-contract.md#the-contract-version).
 
 /**
  * The contract this core speaks. A plugin says the contract it was written

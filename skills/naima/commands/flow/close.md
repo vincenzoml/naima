@@ -1,7 +1,7 @@
 ---
 description: Before merging · the eight steps
 ---
-Flow: [closing a worktree](../../../../docs/flows/closing-a-worktree.md). This is
+Flow: [closing a worktree](../../../../docs/agents/closing-a-worktree.md). This is
 the sequence, not the reasoning; where the two disagree, the page wins.
 
 1. **Every fix names its gesture**: a test item linked `verifies`, with `runBy`
