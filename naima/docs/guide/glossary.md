@@ -71,6 +71,8 @@ ask anything ([planning](plan-with-requirements-specs-and-decisions.md)). *Every
 A job in the team of agents, defined mainly by what it refuses to do, so no
 one marks their own homework
 ([the company and its roles](../purpose.md#the-company-and-its-roles)).
+Roles are data: `naima roles` lists them, and `naima queue --role <role>`
+is one's queue ([a role's queue](read-the-board.md#a-roles-queue)).
 *Everyday example:* the inspector who signs off wiring never installs it.
 
 ### Formal methods
@@ -180,7 +182,14 @@ while working on it ("export", "chapter 3", "the cleaning script").
 ### Kind
 
 A field: the mode of work an item demands — code, decision, research,
-writing.
+writing. The kinds are those the [roles](#role) take, each putting the item
+on a role's queue; any other is a note, never refused.
+
+### Announceable
+
+A feature that may be announced: user-facing, shipped, documented, and
+checked by a person or end to end. Computed, never declared:
+`naima announce` ([announce only what is true](announce.md)).
 
 ## Links
 

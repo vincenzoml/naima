@@ -57,6 +57,7 @@ them, and Naima's own repository does.
 | [The non-stop loop](the-non-stop-loop.md) | when work should go on while the owner is away, until only the owner's is left |
 | [Code-quality metrics over time](code-quality-metrics.md) | when the owner asks how the code's quality moves, or for a chart of a metric over the commits |
 | [Release](release.md) | the runbook from a gate holding to a release being announced |
+| [Announcer](announcer.md) | release notes, changelog entries, README and site copy: only features that are announceable |
 | [Documentarian](documentarian.md) | writing the changelog, the announcement page, and keeping docs current once a release hands off |
 | [Community](community.md) | an outside issue or pull request, before it is triaged like any other report |
 | [Business](business.md) | a licence, funding, sponsorship or citation question, filed as a decision, never acted on here |

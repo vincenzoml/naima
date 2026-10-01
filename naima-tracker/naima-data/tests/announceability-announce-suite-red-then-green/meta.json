@@ -1,0 +1,20 @@
+{
+  "id": "f2dc6749-df0c-4646-80c1-012d8523cbce",
+  "title": "Announceability: announce suite red then green",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "diff",
+  "impact": "medium",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "redSeen": "2026-10-01",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "ebf8063f-412b-40aa-8356-ea9af97c0845"
+    }
+  ]
+}

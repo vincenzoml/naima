@@ -290,14 +290,15 @@ who builds, who tests and who judges are different agents
 | **Lead developer** — ranks the queue, runs the gates, merges | agent | merging without the gates; closing its own items | exists; "never close your own" is a check |
 | **Tester** — performs the tests, writes down what happened | agent, or a person with a reason | fixing what it finds; testing what it wrote | written practice |
 | **Evidence owner** — judges whether evidence proves the claim | agent | performing the test it judges | written practice |
-| **Release manager** — proposes a release when the gates hold | agent | releasing on an open gate; deciding to release | [planned](planned.md#roles) |
-| **Documentarian** — writes the docs with the feature | agent | marking a feature shipped without its pages | [planned](planned.md#roles); the rule is already a check |
-| **Announcer** — release notes, changelog, site, announcements | agent | announcing anything not shipped and checked | [planned](planned.md#roles) |
-| **Business** — options for licence, funding, sponsorship, adoption | agent proposes, you decide | committing the project to anything | [planned](planned.md#roles) |
+| **Release manager** — proposes a release when the gates hold | agent | releasing on an open gate; deciding to release | written practice; a release marked done with a stage unrecorded is refused |
+| **Documentarian** — writes the docs with the feature | agent | marking a feature shipped without its pages | written practice; the rule is a check |
+| **Announcer** — release notes, changelog, site, announcements | agent | announcing anything not shipped and checked | exists: `naima announce` computes what may be announced; the README naming anything else is a check |
+| **Business** — options for licence, funding, sponsorship, adoption | agent proposes, you decide | committing the project to anything | written practice |
 
 "Written practice" means the job and its refusals are written in
 [the pages for agents](agents/README.md) and agents follow them, but no
-program stops a breach.
+program stops a breach. Every role is also data — `naima roles` lists each with what it owns and
+refuses, and `naima queue --role <role>` is its queue.
 
 ## Principles
 
@@ -391,8 +392,10 @@ Checked against the commands of this version (`naima help`, `naima types`).
 - Long-running work: claim files, session notes, worktree flows, `naima prune`.
 - Rules as items: `naima rules`, `naima guide`, `naima check`.
 - Properties and verifiers with expiring proofs; only an example verifier.
-- The roles from Owner to Evidence owner, written in
-  [the pages for agents](agents/README.md).
+- The roles from Owner to Business, written in
+  [the pages for agents](agents/README.md), and as data: `naima roles`,
+  `naima queue --role <role>`.
+- Announcing only what is true: `naima announce`, and a check on the README.
 - Plugins for everything beyond the core; an installer that installs Deno.
 - Naima tracks its own development the same way.
 
