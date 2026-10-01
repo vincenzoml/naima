@@ -84,7 +84,7 @@ test("a work list stops when every line is done or carries a written deferral", 
     assert.match(out, /STOPPED/)
     assert.match(out, /1\. bugs\/tonight#3 {2}pick the licence — a decision reserved to the owner/)
     p.output.length = 0
-    await p.run("loop", list.slug, "--json")
+    await p.run("loop", list.slug, "--json", "--every", "5")
     const r = JSON.parse(p.output.join("\n"))
     assert.deepEqual([r.kind, r.done, r.total, r.stopped, r.every, r.next, r.owner.length], ["list", 2, 3, true, 5, [], 1])
     assert.ok(r.tick.some((t: string) => /am I done, or did I stop\?/.test(t)))
@@ -121,7 +121,7 @@ test("an epic stops when every item is closed or needs only the owner, who gets 
     // A reserved decision comes before a judgement.
     assert.match(
       out,
-      /1\. bugs\/pick-a-name {2}Pick a name — decision: a decision reserved to the owner\n.*2\. tests\/looks-right {2}Looks right — judgement: how it looks/,
+      /1\. bugs\/pick-name {2}Pick a name — decision: a decision reserved to the owner\n.*2\. tests\/looks-right {2}Looks right — judgement: how it looks/,
     )
     // Nobody has run the judgement test yet: while the owner is away, it is tried.
     assert.match(out, /nobody has tried yet[^\n]*\n\s+· tests\/looks-right/)
