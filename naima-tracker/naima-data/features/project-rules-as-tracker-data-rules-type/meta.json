@@ -11,5 +11,9 @@
     "naima/docs/guide/write-a-project-rule.md",
     "naima/docs/agents/read-the-project-rules.md",
     "naima/docs/reference/reference.md#rules"
+  ],
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "a7ec705"
   ]
 }
