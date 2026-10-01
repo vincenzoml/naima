@@ -1,0 +1,12 @@
+{
+  "branch": "claude/naima-ui",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "be498dfe-f0a7-456b-9f13-16985398556f",
+      "ref": "features/naima-ui-metrics-view-native-window-dashboard",
+      "title": "naima ui: the metrics view in a native window, the dashboard's first view"
+    }
+  ],
+  "note": "implementing naima ui"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "be498dfe-f0a7-456b-9f13-16985398556f",
+  "title": "naima ui: the metrics view in a native window, the dashboard's first view",
+  "status": "requested",
+  "created": "2026-10-01",
+  "kind": "code",
+  "area": "ui",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "b62da281-24df-4da5-8b87-5a895bf57df2"
+    }
+  ]
+}
