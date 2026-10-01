@@ -10,8 +10,10 @@
   explicitly. An opt-in `verify: "signed"` lock option is available for
   projects that want signed-commit verification.
 - Verifier adapters declare `runs: string[]`, the external tools they invoke
-  (for example TLC, the TLA+ model checker); these are collected at program
-  alignment time into the launcher's `--allow-run` list. This closes the gap
+  (for example `mcrl22lps`, `lps2pbes` and `pbes2bool`, the mCRL2 toolset's
+  pipeline for model checking concurrent systems); these are collected at
+  program alignment time into the launcher's `--allow-run` list. This closes
+  the gap
   where the launcher grants only `--allow-run=git`
   (`src/launcher.ts:49`, verified), making every real external-tool verifier
   adapter impossible to run today.

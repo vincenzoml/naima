@@ -1,6 +1,6 @@
 {
   "id": "ab7610f9-3905-48c6-bb00-aabd936d6040",
-  "title": "TLA+ specification of the coordination protocol, verified by Naima's own verifier plugin",
+  "title": "An mCRL2 model of the coordination protocol, verified by Naima's own verifier plugin",
   "status": "open",
   "created": "2026-09-29",
   "kind": "research",

@@ -4,8 +4,8 @@
 //   some <regex>    holds when at least one line matches
 //   never <regex>   holds when no line matches; the first match is the counterexample
 //
-// A real adapter (TLC, Apalache, mCRL2, VoxLogicA) runs the tool, maps its
-// exit status and output to a verdict, and returns the trace it printed.
+// A real adapter (mCRL2, VoxLogicA) runs the tool, maps its exit status and
+// output to a verdict, and returns the trace it printed.
 
 import { readFileSync } from "node:fs"
 import { message } from "../../../core/api.ts"

@@ -383,9 +383,10 @@ const myChecker: Verifier = {
 | `unknown` | `error` | the tool ran and could not decide (a bound was hit) |
 
 **Programs it starts.** A verifier that runs an external tool declares it:
-`runs: ["tlc"]` — a name looked up on `PATH`, or an absolute path; one word,
-no comma. `runs` is not the verifier's alone: a contribution to any point may
-declare the programs it starts, and the core collects them from every point.
+`runs: ["mcrl22lps", "lps2pbes", "pbes2bool"]` — each a name looked up on
+`PATH`, or an absolute path; one word, no comma. `runs` is not the verifier's
+alone: a contribution to any point may declare the programs it starts, and
+the core collects them from every point.
 The launcher allows the program exactly the declared programs, besides
 `git`: it asks the program about to run (`naima runs --json`, under read
 permission only) when the project loads a third-party plugin or a

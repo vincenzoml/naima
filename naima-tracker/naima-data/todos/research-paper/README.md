@@ -8,7 +8,7 @@ Candidate contributions:
 
 - items as directories with permanent ids and typed links; boards derived,
   never stored;
-- a coordination protocol with no shared mutable file, and its TLA+ proof;
+- a coordination protocol with no shared mutable file, and its mCRL2 proof;
 - fixed, resolved, closed as distinct, machine-checked states;
 - a plugin contract that puts model checkers and tests on the same footing.
 

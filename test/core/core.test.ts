@@ -662,8 +662,11 @@ test("a contribution names each program it runs by one word or an absolute path,
     points: [{ id: "tools", noun: "tool", says: "a tool", key: (t: { id: string }) => t.id }],
     contributes: { tools: [{ id: "checker", runs }] },
   })
-  for (const bad of ["tlc,java", "two words", ""]) {
+  for (const bad of ["mcrl22lps,java", "two words", ""]) {
     assert.throws(() => buildRegistry([tools([bad])]), /runs .*one word or an absolute path/, bad)
   }
-  assert.deepEqual((buildRegistry([tools(["tlc", "/usr/bin/java"])]).find("tools", "checker")?.value as { runs: string[] }).runs, ["tlc", "/usr/bin/java"])
+  assert.deepEqual((buildRegistry([tools(["mcrl22lps", "/usr/bin/java"])]).find("tools", "checker")?.value as { runs: string[] }).runs, [
+    "mcrl22lps",
+    "/usr/bin/java",
+  ])
 })
