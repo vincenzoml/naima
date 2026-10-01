@@ -263,5 +263,8 @@
       "rel": "relates-to",
       "id": "9e080b53-47d9-4417-9102-2b0d0fed061a"
     }
-  ]
+  ],
+  "fixedOn": "2026-10-01",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
 }

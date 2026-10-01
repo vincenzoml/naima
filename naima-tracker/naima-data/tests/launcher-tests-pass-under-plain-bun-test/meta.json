@@ -1,0 +1,20 @@
+{
+  "id": "dc90c59a-9a06-466b-849f-6a83cfcee388",
+  "title": "The launcher tests pass under plain bun test while three Node suites load the machine (test/launcher.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "bbdc3275-754a-46bb-9170-6d40f9ed1fbd"
+    }
+  ],
+  "redSeen": "2026-10-01",
+  "evidenceKind": "diff"
+}

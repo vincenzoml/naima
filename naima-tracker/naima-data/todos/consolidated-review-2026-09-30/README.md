@@ -32,3 +32,11 @@ it is not itself something to "fix".
 ### 2026-10-01 — Vincenzo Ciancia, on claude/evidence-close-5
 
 Checked after this session's closings: 61 of 64 linked items closed, 1 withdrawn, 1 wontfix (settled, duplicate of an already-fixed bug) — effectively all done but one. The remaining blocker is features/host-leakage-installed-program-directory-holds-only, which this session reopened: its linked proving test verified the now-removed dist-branch mechanism (src/dist.test.ts no longer exists), not the copy-on-install approach that actually shipped (aebd210). Not a proof. This umbrella stays open until that item gets a real proving test and closes.
+
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read the item and its 64 linked items: an index/umbrella that is effectively closed out already (61 closed, 1 withdrawn, 1 wontfix); remaining work is tracking one blocker (features/host-leakage-installed-program-directory-holds-only), not new code.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/final-sweep
+
+Final sweep (claude/final-sweep): its Done line (every fix and design decision filed and linked) holds — 64 linked items, none untriaged; two are open: the host-leakage feature, now proven by tests/host-leakage-copy-install-installed-program-holds, and the purpose page, waiting on the owner's read. Whether a standing index should be closed is the evidence owner's call.

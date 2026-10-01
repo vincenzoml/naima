@@ -14,5 +14,7 @@
   "impact": "medium",
   "priority": "now",
   "confidence": "measured",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "gate": "first-public",
+  "effort": "S"
 }

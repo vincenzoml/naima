@@ -5,5 +5,9 @@
   "created": "2026-10-01",
   "priority": "parked",
   "impact": "low",
-  "confidence": "reported"
+  "confidence": "reported",
+  "runBy": "human",
+  "humanBecause": "decision",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
 }

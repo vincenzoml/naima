@@ -18,3 +18,7 @@ when the reviewer's objections are answered rather than by running anything.
 ### 2026-10-01 — Vincenzo Ciancia, on claude/f-u7-paper-pack
 
 Shipped pack-papers: sections and reviews types, reusing verifies/verified-by like pack-analyses. Guide page naima/docs/guide/paper-sections-and-reviews.md; red-then-green suite tests/pack-papers-red-then-green-suite-passes passed; gates (deno task verify, node --test, bun test) green. fixedOn/commits/docs set; status left for the evidence owner to close.
+
+### 2026-10-01 — triage agent, on claude/effort-triage
+
+Read naima/src/plugins/pack-papers/index.ts (128 lines) and naima/docs/guide/paper-sections-and-reviews.md (42 lines): a new item-type plugin plus guide page plus a red-then-green test suite, already shipped; sized retrospectively by its footprint.

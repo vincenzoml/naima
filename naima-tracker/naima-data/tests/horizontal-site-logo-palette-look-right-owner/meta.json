@@ -15,5 +15,7 @@
       "rel": "verifies",
       "id": "56fa3460-3793-4dee-9f18-4f10574e0d48"
     }
-  ]
+  ],
+  "gate": "first-public",
+  "effort": "S"
 }
