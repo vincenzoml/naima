@@ -1,0 +1,13 @@
+{
+  "id": "ab7a14b5-c48c-493f-a1f6-0ab3f7152ec7",
+  "title": "Specs are versioned name-vN, a revision supersedes, one current version per name",
+  "status": "open",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "3827e991-e675-4aac-87b8-e47352a8c151"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "5b31c7ef-f765-4532-a071-6dd78f3004de",
+  "title": "Requirements type: what the result must satisfy, proven by tests",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}
