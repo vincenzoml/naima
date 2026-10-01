@@ -17,5 +17,10 @@
       "on": "2026-10-01"
     }
   },
-  "evidenceKind": "observation"
+  "evidenceKind": "observation",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
 }

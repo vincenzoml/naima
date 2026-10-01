@@ -1,6 +1,7 @@
 {
   "branch": "claude/jargon-audit",
   "claimedAt": "2026-10-01",
+  "note": "jargon audit: docs guide, docs agents, purpose, docs README, repo README, site llms.txt, skill",
   "items": [
     {
       "id": "220395ba-ce18-4df3-9720-74b333e5dc77",
@@ -8,5 +9,5 @@
       "title": "Jargon audit of docs, site and skill: plain English, one glossary, no paper references"
     }
   ],
-  "note": "jargon audit: docs guide, docs agents, purpose, docs README, repo README, site llms.txt, skill"
+  "preparing": true
 }
