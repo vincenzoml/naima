@@ -45,7 +45,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`view`](#naima-view) | core | print a plugin view — as text, its data as JSON, or markdown; without a name, list them |
 | [`summary`](#naima-summary) | core | where the project stands, in one screen: every plugin's section |
 | [`plugins`](#naima-plugins) | core | list loaded plugins, the extension points each declares, what each uses of the others, and what each contributes to every point; a contribution's qualified id is <plugin>/<name>, shown when its short name is shared or renamed |
-| [`types`](#naima-types) | core | list item types, their statuses and fields |
+| [`types`](#naima-types) | core | list item types, their statuses and fields, then every field's list of values with how many items hold each |
 | [`runs`](#naima-runs) | core | list the external programs the loaded contributions declare they start (a model checker, say), which the launcher allows besides git |
 | [`close`](#naima-close) | trackers | archive a resolved item: fixed, and proven by an item that has passed |
 | [`bugs`](#naima-bugs) | trackers | how many bugs have no code written, and how many are fixed but unproven |
@@ -438,7 +438,7 @@ naima plugins
 
 ### naima types
 
-List item types, their statuses and fields.
+List item types, their statuses and fields, then every field's list of values with how many items hold each.
 
 ```sh
 naima types
@@ -493,6 +493,7 @@ naima runs --json
 | `readable` | every item directory has a README.md and a meta.json that parses to an object whose id, title and status are strings; no symbolic link or _-prefixed directory sits unread among the items |
 | `identity` | every item has a permanent uuid, a title and a status its type declares; ids are unique |
 | `fields` | every declared field holds a value of its declared kind |
+| `values` | every value of a field with an open list of values — area or kind, once the project declares their values — is on its list; a value off it is a note naming the items that hold it, which are never rewritten |
 | `links` | every link uses a declared relation and names an existing item other than its own |
 | `layout` | every directory under the tracker root belongs to an item type or a plugin |
 | `duplicates` | items of one type with the same title are linked as duplicates, or reported |

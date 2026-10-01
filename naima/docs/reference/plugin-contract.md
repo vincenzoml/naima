@@ -168,8 +168,9 @@ mechanisms, used together:
   exactly; a field with both applies to both.
 - **Extensions.** A plugin — or the project, under `extends` in
   [`naima.json`](format.md#naimajson) — adds to a type it does not own:
-  statuses, traits, transitions; or to a field: enum values, more types or
-  traits it applies to. It never redefines: a status it names that exists
+  statuses, traits, transitions; or to a field: enum values, the open list of
+  values of a `string` or `strings` field, more types or traits it applies to.
+  A value is what it means, or `{ title, says }`. It never redefines: a status it names that exists
   keeps its category (open stays open), its flags only grow, and a field
   keeps its kind. Refused otherwise, when the project loads.
 
@@ -190,6 +191,12 @@ A field whose enum values are the names of a point's contributions says
 `valuesFrom`: the `gate` field takes its values from every gate contributed
 to the `gates` point, and with `multiple: true` an item may hold one value as
 a string or several as a list (`naima set <item> gate=v1,v2`).
+
+An enum's values are a closed list: any other value fails the `fields`
+check. A `string` or `strings` field with values — `area` and `kind`, once
+a project or a plugin lists them — has an open list: a value off it is a note
+from the core's `values` check, naming the items that hold it, and nothing is
+refused or rewritten. `naima types` prints every list with its counts.
 
 ## Views and summaries
 

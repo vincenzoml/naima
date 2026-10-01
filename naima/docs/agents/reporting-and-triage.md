@@ -84,6 +84,17 @@ naima triage set <item> impact=high priority=next confidence=reported
 | `confidence` | do we understand it? `measured` · `diagnosed` · `reported` · `unclear` |
 | `effort` | **never guessed.** Nothing in a report says what a fix costs; leave it empty until someone has looked at the code. An unsized item sinks in the ranking, which is the honest outcome |
 
+**Classifiers take the project's values.** `area` (where it lives) and
+`kind` (the mode of work; a role's name is a kind) take the values the
+project lists, if it lists any: `naima types` prints each list with how many
+items hold each value, and marks a value off the list. Pick a value from the
+list. A new value is defined in `naima.json`'s `extends`, title and meaning,
+in the same commit that first uses it; an off-list value already in the
+tracker is a note from `naima check` (the check `values`) naming its items —
+report it, never rewrite those items to make the note go away. `gate` and
+`epic` are closed: a gate no plugin contributes, or `part-of` an item that is
+not an epic, fails the check.
+
 [Triage what you touch](../guide/rules.md#triage-what-you-touch): opening,
 reporting or fixing an item means leaving its fields set. `naima triage` prints coverage per type; do not add to what it
 says is missing.

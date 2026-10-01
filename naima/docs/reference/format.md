@@ -114,7 +114,8 @@ An item is a directory, `<type>/<slug>/`, under the data directory, where
 
 Every other field is declared by a plugin with a kind — `string`, `strings`,
 `date` (`YYYY`, `YYYY-MM` or `YYYY-MM-DD`), `enum`, `boolean`, `number` — and
-is checked against it. An `enum` that takes several values holds one as a
+is checked against it; a `string` or `strings` field with a list of values
+has a value off it reported as a note, never refused. An `enum` that takes several values holds one as a
 string and several as a list: `"gate": "v1"`, `"gate": ["v1", "v2"]`. A field no loaded plugin declares is kept and not
 checked. The slug is the directory's name and may change; the id may not.
 Only one direction of a link is stored; its inverse is derived when read.
