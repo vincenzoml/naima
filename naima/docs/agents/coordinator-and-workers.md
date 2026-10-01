@@ -32,10 +32,10 @@ coordinator does not do the work; it holds the conversation.**
   reports.
 - Spawns workers, merges their branches, and keeps the queue honest.
 - Sets a timer that brings it back when nothing else will. The owner should
-  never be the reason work resumes. A fuller method — an explicit target
-  written first, a three-minute wake-up, stopping only when what is left is
-  the owner's, and the owner's ordered action list as the deliverable — is
-  [planned](../planned.md#the-non-stop-method).
+  never be the reason work resumes: [the non-stop loop](the-non-stop-loop.md)
+  — an explicit target written first, a three-minute wake-up, stopping only
+  when what is left is the owner's, and the owner's ordered action list as
+  the deliverable.
 
 ### What a worker gets
 

@@ -32,6 +32,7 @@ What Naima is for: [the purpose](../purpose.md).
 | rank what is open | [Triage](triage.md) |
 | see where things stand | [Read the board, the queue and the gates](read-the-board.md) |
 | group work, declare a release, give it a date | [Plan with epics, milestones and gates](plan-with-epics-milestones-and-gates.md) |
+| leave agents working and come back to only my part | [What happens while you are away](while-you-are-away.md) |
 | prove a fix and close it | [Prove and close](prove-and-close.md) |
 | work on several things at once | [Work on several branches at once](several-branches.md) |
 | move to a newer Naima | [Update Naima](update-naima.md) |

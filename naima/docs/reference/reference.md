@@ -13,6 +13,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [triage](#triage) — priority, impact, effort, confidence; the urgency ranking built from them
 - [gates](#gates) — named release conditions backed by items
 - [epics](#epics) — epics: bodies of work that group items, their status and progress derived from them
+- [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
@@ -52,6 +53,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 | [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks |
 | [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs |
 | [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out |
+| [`loop`](#naima-loop) | loop | the non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his |
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes |
@@ -64,7 +66,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, beta-markers, verifier, rules, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, loop, beta-markers, verifier, rules, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, verifier, rules |
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, verifier, rules, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics |
@@ -918,6 +920,44 @@ Traits: `group`.
 | Hook | What it does |
 |---|---|
 | `epic-status` | an epic's status follows its items: set on every write of the epic, and of an item it groups; setting it against them is refused |
+
+## loop
+
+The non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list.
+
+Its contributions' qualified ids are `loop/<name>`.
+
+`naima loop <target>` is what an agent runs on every tick of its wake-up timer. The target is chosen before starting: a work list — an item whose README lists steps as `- [ ]` and `- [x]` lines, a step that waits carrying `deferred: <why>` — an epic, or a gate. The loop stops when what is left needs only the owner: a work list when every line is done or deferred; an epic or a gate when every open item is a reserved decision (`humanBecause: decision`) or a proof only a person or a build can give (`runBy: human`, `runBy: build`). Once stopped it prints the owner's actions in order — decisions first, then credentials, physical acts, judgements and builds — each saying why it is his, and the proving gestures nobody has run yet, to try while he is away. The timer is the agent harness's; the plugin states its cadence, `every` minutes.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `every` | `3` | the wake-up cadence the loop states, in whole minutes; `--every` overrides it for one run |
+
+**Uses**, declared by other plugins: fields `runBy`, `humanBecause`, `fixedOn`; relations `has-part`, `verified-by`.
+
+### naima loop
+
+The non-stop loop on a target chosen before starting — a work list, an epic or a gate: done or not, the next agent work, the stop verdict, and once stopped the owner's ordered action list, each line saying why it is his.
+
+```sh
+naima loop <target> [--every <minutes>] [--json] [--check]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--every` |  | the wake-up cadence in minutes, for this run; default the plugin's option every (3) |
+| `--json` |  | print the verdict as JSON: target, kind, title, every, done, total, left, stopped, verdict, next, owner, untried, tick |
+| `--check` |  | exit 1 while the loop is not stopped |
+
+Examples:
+
+```sh
+naima loop todos/tonight
+naima loop epics/onboarding --json
+naima loop beta --check
+```
 
 ## beta-markers
 

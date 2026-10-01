@@ -58,23 +58,6 @@ the same way and can be checked. Missing today:
 - **Today:** the [opening flow](agents/opening-a-worktree.md) names the
   branch `<who>/<what>` and claims before any work, by convention.
 
-## The non-stop method
-
-A way of working in which agents keep going, without the owner having to
-restart them, until only the owner's work is left.
-
-1. Before starting, the coordinator writes an explicit target: a work list,
-   an epic, or a gate.
-2. A timer wakes it every three minutes; each time it asks "am I done, or did
-   I stop?" and resumes what stopped.
-3. It stops only when what is left on the target needs only the owner
-   (`naima queue <gate> --human` computes it for a gate).
-4. Its deliverable is the owner's ordered action list, each line saying why
-   it is the owner's.
-
-**Today:** the coordinator sets a timer so that the owner is never the
-reason work resumes ([the coordinator and the workers](agents/coordinator-and-workers.md)).
-
 ## Model checkers and the strength of evidence
 
 - **Real [model checkers](guide/glossary.md#model-checker) as verifiers**:
