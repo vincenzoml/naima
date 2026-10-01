@@ -85,3 +85,17 @@ the git commands that did it. A git problem the agent cannot solve alone —
 a credential to push, a conflict between two people's work that needs a
 choice — is brought as one question in plain words
 ([asking the human](asking-the-human.md#when-you-do-ask)).
+
+What a commit message itself must say is
+[its own contract](commit-messages.md).
+
+## Safety rules
+
+- **Never force-push, never rewrite shared history.** Convention: no
+  `--force`, `rebase` of a shared branch, `reset --hard` over someone's work,
+  or `commit --amend` of a commit already shared; undo with `git revert`
+  instead.
+- **No secret is committed.** Enforced by the check `secrets`, which reads
+  every file and attachment for the common key shapes before it lands.
+- **Nothing is pushed where the owner set no remote.** Convention: with no
+  remote, work stays local, which is always safe.

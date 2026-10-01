@@ -11,6 +11,11 @@ When the owner names a body of work, a release, or a date, turn the sentence int
 | "only when it is proven", "tested, not just written"                | add `--holds-on proof`                                                                              |
 | "how far is the beta?"                                              | `naima gate show <name>`; `naima epic` for epics                                                    |
 
+**Refusal:** whoever prepares a gate's items does not also mark the gate met.
+A gate's and an epic's status is derived from its items, never set by hand —
+so the one who did the work is never also the one who decides the release is
+ready.
+
 Rules that hold:
 
 - **One gate per release or merge condition.** Before `gate new`, run `naima gates`: if one already means it, `gate add` to that one. A name is lowercase

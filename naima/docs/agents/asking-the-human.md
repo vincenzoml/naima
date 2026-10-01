@@ -86,3 +86,13 @@ agent's. If you cannot, it is a person's, and `humanBecause` says which kind.
 Report when finished or when blocked, not between items. A report says what
 changed and what is needed from the owner — nothing already written in a
 commit message, an item or a [session note](../guide/glossary.md#session-note).
+
+## Safety rules
+
+- **One question at a time.** Convention: no command bundles multiple
+  questions into one prompt; it is read, not yet checked.
+- **A decision already settled is never asked again.** Convention, kept by
+  searching `naima decisions` before asking; `naima check` notes an item
+  handed to the owner that a settled decision already answers.
+- **`humanBecause` is never empty on `runBy: human`.** Enforced by the check
+  `human-says-why`.
