@@ -39,6 +39,7 @@ then any project, with its own checks in place of tests.
 | prove a fix and close it | [Prove and close](prove-and-close.md) |
 | measure the work — test time, coverage, warnings, complexity — hold it to a budget, and see how your code's quality moves over time | [Metrics and budgets](metrics-and-budgets.md) |
 | work on several things at once | [Work on several branches at once](several-branches.md) |
+| make sure a fix never lands without its test, or a change without its note | [Commit hooks and companion records](commit-hooks.md) |
 | move to a newer Naima | [Update Naima](update-naima.md) |
 | add a gate, weigh a check, switch a plugin off | [Configure the project](configure-the-project.md) |
 | use a plugin a colleague gave me | [Add a plugin someone gave you](add-a-plugin.md) |

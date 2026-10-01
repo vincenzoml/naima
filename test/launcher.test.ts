@@ -1,9 +1,9 @@
 // The launcher's fence, through the real launcher under Deno: the environment
 // the program is handed, a path Deno's permission flags cannot express, and
-// the host files only `init --write-excludes` may write (docs/guide/install.md#the-permissions).
+// the host files only `init --write-excludes` and `init --write-agent-pointer` may write (docs/guide/install.md#the-permissions).
 
 import assert from "node:assert/strict"
-import { spawnSync } from "node:child_process"
+import { spawn, spawnSync } from "node:child_process"
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
@@ -47,6 +47,14 @@ function world(name = "project") {
     ctx.out("secret=" + String(Deno.env.get("UNRELATED_SECRET")))
     ctx.out("git=" + String(Deno.env.get("GIT_PROBE")))
     ctx.out("home=" + String(!!Deno.env.get("HOME")))
+    return 0
+  } }, { name: "probe-listen", says: "probe-listen", usage: "probe-listen", examples: ["probe-listen"], run: (_a: string[], ctx: any) => {
+    try {
+      Deno.listen({ hostname: "127.0.0.1", port: 0 }).close()
+      ctx.out("listen=granted")
+    } catch (e) {
+      ctx.out("listen=" + (e as Error).name)
+    }
     return 0
   } }],
 })
@@ -123,6 +131,58 @@ test("init --write-excludes may write the host's deno.json through the launcher;
     const written = launch(w.host, ["init", "--write-excludes"])
     assert.equal(written.code, 0, written.err)
     assert.deepEqual(JSON.parse(readFileSync(join(w.host, "deno.json"), "utf8")), { exclude: ["naima-tracker/naima/"] })
+  } finally {
+    w.cleanup()
+  }
+})
+
+test("init --write-agent-pointer may write the host's AGENTS.md through the launcher; init alone may not touch it", { skip }, () => {
+  const w = world()
+  try {
+    writeFileSync(join(w.host, "AGENTS.md"), "# Working here\n")
+    const printed = w.init()
+    assert.equal(printed.code, 0, printed.err)
+    assert.match(printed.out, /entry pointer missing from AGENTS\.md/)
+    assert.equal(readFileSync(join(w.host, "AGENTS.md"), "utf8"), "# Working here\n")
+    const written = launch(w.host, ["init", "--write-agent-pointer"])
+    assert.equal(written.code, 0, written.err)
+    assert.match(readFileSync(join(w.host, "AGENTS.md"), "utf8"), /naima-tracker\/naima\/docs\/agents\/README\.md/)
+  } finally {
+    w.cleanup()
+  }
+})
+
+test("through the launcher, ui may serve on the loopback interface and no other command may listen", {
+  skip: skip || (process.platform === "win32" && "a process group is POSIX"),
+}, async () => {
+  const w = world()
+  try {
+    assert.equal(w.init().code, 0)
+    const file = join(w.host, "naima-tracker", "naima-data", "naima.json")
+    writeFileSync(file, JSON.stringify({ ...JSON.parse(readFileSync(file, "utf8")), plugins: { probe: { source: "plugins/probe.ts" } } }, null, 2))
+    const probe = launch(w.host, ["probe-listen"])
+    assert.equal(probe.code, 0, probe.err)
+    assert.equal(probe.out, "listen=NotCapable")
+    const env = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined, NAIMA_CACHE: join(w.base, "cache") }
+    const child = spawn("deno", ["run", "-A", join(w.host, "naima-tracker", "naima", "naima.ts"), "ui", "--no-open"], { cwd: w.host, env, detached: true })
+    let out = ""
+    let err = ""
+    child.stderr.on("data", (b) => (err += String(b)))
+    const exited = new Promise<number | null>((done) => child.once("exit", (code) => done(code)))
+    const url = await new Promise<string>((done, fail) => {
+      child.stdout.on("data", (b) => {
+        out += String(b)
+        const m = out.match(/serving (http:\/\/127\.0\.0\.1:\d+\/\?token=[0-9a-f]+)/)
+        if (m) done(m[1]!)
+      })
+      void exited.then((code) => fail(new Error(`ui exited ${code}: ${err}`)))
+    })
+    const r = await fetch(url, { redirect: "manual" })
+    assert.equal(r.status, 302)
+    assert.equal((await fetch(url.replace(/\?token=.*/, ""))).status, 403)
+    // Ctrl-C in a terminal reaches the whole process group: the launcher and the program
+    process.kill(-child.pid!, "SIGINT")
+    assert.equal(await exited, 0, err)
   } finally {
     w.cleanup()
   }

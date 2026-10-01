@@ -14,6 +14,7 @@ import { message } from "./errors.ts"
 import { writeFileAtomic } from "./files.ts"
 import { DATA_FILE, DEFAULT_PROGRAM } from "./layout.ts"
 import { FORMAT, formatRefusal, formatsOf } from "./format.ts"
+import { DEFAULT_ENTRY_FILES } from "./pointer.ts"
 import type { Carry, Config, Extension, PluginConfig, PluginOptions, PluginSource, Severity } from "./types.ts"
 
 export const CARRY_MODES: readonly Carry[] = ["copy", "vendored", "submodule"]
@@ -31,7 +32,7 @@ export function withCarry(raw: Record<string, unknown>, carry: Carry): Record<st
   return carry === DEFAULT_CARRY ? rest : { ...rest, carry }
 }
 
-const KEYS = new Set(["format", "formats", "source", "commit", "carry", "verify", "program", "plugins", "rename", "extends"])
+const KEYS = new Set(["format", "formats", "source", "commit", "carry", "verify", "program", "plugins", "rename", "extends", "entryFiles"])
 const COMMIT = /^[0-9a-f]{40}$/
 
 const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v)
@@ -108,7 +109,17 @@ export function parseConfig(raw: unknown, opts: { lenient?: boolean } = {}): Con
     plugins: parsePlugins(raw["plugins"]),
     rename: parseRename(raw["rename"]),
     extends: extensions as Extension[],
+    entryFiles: parseEntryFiles(raw["entryFiles"]),
   }
+}
+
+/** `entryFiles`: the agent-harness entry files `check` and `init --write-agent-pointer` act on, project root relative. Absent: sensible defaults. */
+function parseEntryFiles(value: unknown): string[] {
+  if (value === undefined) return [...DEFAULT_ENTRY_FILES]
+  if (!Array.isArray(value) || !value.every((v) => typeof v === "string" && v.trim())) {
+    throw new Error(`${DATA_FILE}: entryFiles must be a list of paths, project-root relative`)
+  }
+  return value as string[]
 }
 
 /** The `rename` table: kind → qualified id → new short name. Which ids exist is the registry's to say. */

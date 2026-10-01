@@ -23,16 +23,15 @@ The order is the order of the work: the first entries come first.
 
 ## Model checkers and the strength of evidence
 
-- **Real [model checkers](guide/glossary.md#model-checker) as verifiers**:
-  mCRL2 first, VoxLogicA (a tool for checking properties of images) where it
-  applies.
+- **VoxLogicA 2 as a verifier**: the shipped VoxLogicA adapter runs the 1.x
+  releases.
 - **The mCRL2 model of Naima's own claims** ("no claim is ever lost") as a
   property in Naima's own tracker.
 - **Red-then-green shown by the run itself**: the failing run on the old work
   attached and checked, not only its day recorded in `redSeen`.
-- **Today:** properties, `naima verify` and expiring proofs work, with one
-  example verifier, `naima/src/plugins/verifier/adapters/example-regex.ts`
-  ([prove and close](guide/prove-and-close.md#properties-proven-by-a-tool)).
+- **Today:** properties, `naima verify` and expiring proofs work, with the
+  mCRL2 and VoxLogicA verifiers and an example one
+  ([prove and close](guide/prove-and-close.md#two-model-checkers-mcrl2-and-voxlogica)).
   The evidence ranking (`evidenceKind`) and the red-then-green record
   (`redSeen`) are tracker fields, with checks that note their absence
   ([prove and close](guide/prove-and-close.md#3-perform-it-keep-the-evidence)).
@@ -52,8 +51,10 @@ these choices in chat, and the owner's answers become
   interface.
 - **Skills from GitHub**: an item or flow points to a
   [skill](guide/glossary.md#skill) published on GitHub instead of copying it.
-- **A dashboard**: a visual page of the project's state. **Today:** `naima
-  summary --markdown` prints it as text you can paste anywhere.
+- **A dashboard**: a visual page of the project's state — boards, gates, the
+  ranked queue, claims and notes. **Today:** `naima ui` opens a window with
+  one view, the project's metrics, which plugins can add views beside; and
+  `naima summary --markdown` prints the state as text you can paste anywhere.
 
 ## A pointer in the agent's instruction file
 

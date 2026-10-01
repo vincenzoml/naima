@@ -1,0 +1,17 @@
+{
+  "id": "58dc4d78-f62d-4e97-84f2-aa47f8425bc1",
+  "title": "Release stage hook refuses a premature release, and the view traces a release's stages",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "90f25e70-b3de-41a2-bf46-48bafd66ca4d"
+    },
+    {
+      "rel": "verifies",
+      "id": "77e9e459-c8a5-458b-8b5d-2a3815c1d192"
+    }
+  ]
+}

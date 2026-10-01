@@ -1,0 +1,14 @@
+Red (entry-pointers check unwired from coreChecks in naima/src/core/check.ts,
+duplicates, entryPointers, formatCheck() -> duplicates, formatCheck()):
+
+  node --test test/core/core.test.ts
+  ✖ entry-pointers: check reports a plain-text path or a markdown link in a
+    configured entry file that names a missing file
+    AssertionError: input did not match /AGENTS\.md: names "docs\/rules\.md".../ — Input: ''
+
+Green (check.ts restored to the committed version, d821550358e3864cdd1ff5ed3101a3766e69cc48):
+
+  node --test test/core/core.test.ts
+  ✔ entry-pointers: check reports a plain-text path or a markdown link in a
+    configured entry file that names a missing file
+  ℹ tests 34, pass 34, fail 0

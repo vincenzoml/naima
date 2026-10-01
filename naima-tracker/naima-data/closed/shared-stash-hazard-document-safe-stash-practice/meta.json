@@ -1,0 +1,23 @@
+{
+  "id": "ce3f8e19-9ec5-4e02-a879-a8c81e971d57",
+  "title": "Shared-stash hazard: document safe stash practice",
+  "status": "closed",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "now",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ],
+  "effort": "S",
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "df9f8f6"
+  ],
+  "closedFrom": "todos",
+  "closedOn": "2026-10-01"
+}

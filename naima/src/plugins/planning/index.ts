@@ -10,9 +10,13 @@
 //   decisions     a choice or a standing permission of the owner's, dated, in
 //                 the owner's words restated; it `settles` the items that
 //                 waited on it, and is searched before the owner is asked.
+//   releases      a release in progress, opened at its first stage: each
+//                 stage's output recorded with `naima note` ("Stage: <name>"),
+//                 or named who decided to skip it; a hook refuses `released`
+//                 while a stage is unrecorded.
 //
-// Data only: three types, their fields and relations, checks that read them,
-// one view and two commands. No type derives from another.
+// Data only: four types, their fields and relations, checks that read them,
+// two views and two commands. No type derives from another.
 
 import {
   bool,
@@ -424,6 +428,119 @@ const decisionsCheck: Check = {
   },
 }
 
+// ── releases ──────────────────────────────────────────────────────────────────
+
+/** The stages a release runs through, in order; `naima docs/agents/release.md` names what each one does. */
+export const STAGES = ["pre-release checks", "private draft", "test the artifact", "publish", "post-release checks", "announce"] as const
+
+const releasesType: TypeDef = {
+  id: "releases",
+  dir: "releases",
+  title: "Releases",
+  says: "a release in progress, staged from pre-release checks to announcing: each stage's output recorded before the next, a skipped stage naming who decided",
+  statuses: {
+    staging: { category: "open", says: "in progress: opened at its first stage, not every stage is recorded yet" },
+    released: { category: "done", says: "every stage is recorded, or skipped and said by whom; published and announced" },
+    "rolled-back": { category: "done", says: "a stage found an issue serious enough to stop the release; the page says why" },
+  },
+  initialStatus: "staging",
+  template: (title) =>
+    `# ${title}\n\n## Stages\n\n${
+      STAGES.map((s) => `- ${s}`).join("\n")
+    }\n\nRecord each stage's output with \`naima note <release> "Stage: <name>\\n<what happened>"\`.\nA stage skipped on purpose: \`Stage: <name> — skipped, decided by <who>\`.\n`,
+}
+
+const isRelease = (i: Item): boolean => i.type === releasesType.id
+const releasesOf = (ctx: Context): Item[] => ctx.repo.items.filter(isRelease)
+
+/** A line `Stage: <name>` in an item's page, case-insensitively. */
+const STAGE_LINE = /^stage:\s*(.+?)\s*$/gim
+/** The skipped form of a stage line, `<name> — skipped, decided by <who>` (a plain `-` works too). */
+const STAGE_SKIPPED = /^(.*?)\s*[—-]+\s*skipped,\s*decided by\s+(.+)$/i
+
+/** Every stage recorded on a release's page, by name (lower-cased): `true` if run, or who decided to skip it. */
+function recordedStages(item: Item): Map<string, true | string> {
+  const out = new Map<string, true | string>()
+  for (const m of readReadme(item).matchAll(STAGE_LINE)) {
+    const skipped = STAGE_SKIPPED.exec(m[1]!)
+    const name = (skipped ? skipped[1]! : m[1]!).trim().toLowerCase()
+    out.set(name, skipped ? skipped[2]!.trim() : true)
+  }
+  return out
+}
+
+/** The stages `naima release` still owes before the release can be marked `released`. */
+const missingStages = (item: Item): string[] => {
+  const recorded = recordedStages(item)
+  return STAGES.filter((s) => !recorded.has(s))
+}
+
+/** One release, as `naima view --json releases` prints it. */
+export interface ReleaseRow {
+  release: string
+  title: string
+  status: string
+  missing: string[]
+}
+
+const releasesView: View = {
+  name: "releases",
+  says: "every release in progress or done: its status and which stages it still owes",
+  render(_args, ctx) {
+    const rows: ReleaseRow[] = releasesOf(ctx).map((r) => ({
+      release: label(r),
+      title: String(r.meta.title ?? ""),
+      status: r.meta.status,
+      missing: missingStages(r),
+    }))
+    return rendered(
+      rows,
+      (rs) =>
+        rs.length
+          ? rs.map((r) => `${r.missing.length ? "✗" : "✓"} ${r.release}  ${r.title}  [${r.status}]${r.missing.length ? `  owes: ${r.missing.join(", ")}` : ""}`)
+          : [`no releases — naima new releases "<name>"`],
+    )
+  },
+}
+
+const releasesHook: WriteHook = {
+  name: "release-stages",
+  says: "a release is marked released only once every stage is recorded, or skipped and said by whom",
+  beforeWrite(write) {
+    if (!isRelease(write.item) || write.kind !== "update" || !write.before) return
+    const asked = write.item.meta.status
+    if (asked === "released" && write.before.status !== "released") {
+      const missing = missingStages(write.item)
+      if (missing.length) {
+        return `${label(write.item)} cannot be released: record Stage: ${missing[0]} first — naima note ${label(write.item)} "Stage: ${
+          missing[0]
+        }\\n<what happened>", or "… — skipped, decided by <who>"`
+      }
+    }
+  },
+}
+
+const releasesCheck: Check = {
+  name: "release-stages",
+  says: "a release marked released has every stage recorded or skipped with who decided; one hand-edited past the hook is a problem",
+  run(ctx) {
+    const out: Finding[] = []
+    for (const r of releasesOf(ctx)) {
+      const missing = missingStages(r)
+      if (r.meta.status === "released" && missing.length) {
+        out.push({
+          level: "problem",
+          item: r,
+          message: `${label(r)} is released, but owes Stage: ${missing.join(", ")} — naima set ${label(r)} status=staging`,
+        })
+      } else if (r.meta.status === "staging" && !missing.length) {
+        out.push({ level: "note", item: r, message: `${label(r)}: every stage is recorded — naima set ${label(r)} status=released` })
+      }
+    }
+    return out
+  },
+}
+
 // ── hooks ─────────────────────────────────────────────────────────────────────
 
 const stamp: WriteHook = {
@@ -452,8 +569,9 @@ export default function planning(): Plugin {
       "A **requirement** says what must hold: the features, tests or epics that deliver it are linked `satisfies`, the tests or properties that prove it `verifies`; it is `met` only once a proof has passed and none refutes it, and `naima view requirements` traces each one. " +
       "A **specification** says how something must behave, versioned `name-vN`: `naima spec revise <spec>` opens the next version as a draft that `supersedes` the old one, one version per name is `current`, and an item that follows a spec is linked `specified-by` — work starts from the spec, and closes when the code matches it. " +
       "A **decision** is a choice or a standing permission of the owner's, dated and restated in the owner's words: it `settles` the items that waited on it and `supersedes` the decision it replaces. " +
-      "Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again.",
-    types: [requirementsType, specsType, decisionsType],
+      "Before asking the owner anything, an agent runs `naima decisions <words>`; after the owner answers, it records the answer with `naima new decisions`, so a settled question is never asked again. " +
+      'A **release** opens at its first stage (`naima new releases "<name>"`); each stage\'s output is recorded with `naima note`, headed `Stage: <name>` (or `Stage: <name> — skipped, decided by <who>`), and the hook refuses `status=released` while a stage is unrecorded — `naima view releases` shows what each one still owes.',
+    types: [requirementsType, specsType, decisionsType, releasesType],
     fields: [SPEC, VERSION, DECIDED_ON, STANDING],
     relations: [
       { name: "satisfies", inverse: "satisfied-by", says: "delivers or proves the requirement" },
@@ -468,8 +586,8 @@ export default function planning(): Plugin {
     // What it reads of others: who performs a proof and why, and what proves an item.
     uses: { fields: [RUN_BY.name, HUMAN_BECAUSE.name], relations: ["verified-by"] },
     commands: [spec, decisions],
-    views: [requirementsView],
-    checks: [requirementsCheck, specsCheck, decisionsCheck],
-    hooks: [stamp],
+    views: [requirementsView, releasesView],
+    checks: [requirementsCheck, specsCheck, decisionsCheck, releasesCheck],
+    hooks: [stamp, releasesHook],
   }
 }

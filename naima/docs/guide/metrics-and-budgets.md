@@ -160,7 +160,26 @@ that run the same command share one run.
 
 ## See how your code's quality moves over time
 
-Every recorded run is a point on the commit timeline. Four ways to read them:
+**See your project's metrics: `naima ui`.** It opens a window, titled
+Naima, with the chart and the table of every metric. Tick the metrics you
+want and pick the first and the last commit, then **Show**. The window reads
+the records each time it shows them, so a metric recorded while it is open
+appears on the next **Show**. Closing the window ends it.
+
+```sh
+naima ui              # a window
+naima ui --browser    # the same page in your browser; Ctrl-C ends it
+```
+
+The window needs Deno. Its first run fetches the small library that draws
+it, so it needs the network once; where it cannot open — Naima run by Node or
+Bun, no network on that first run — your browser opens instead, and
+`naima ui` says why in one line. The page is served from your machine only,
+and only to the window or browser it opened: anyone else who tries the
+address is refused.
+
+Every recorded run is a point on the commit timeline. Four ways to read them
+in the terminal:
 
 ```sh
 naima metrics trend complexity            # one metric, as a line of text

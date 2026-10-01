@@ -1,0 +1,5 @@
+# naima ui on macOS opens the Naima webview window through the launcher, the webview loads the metrics view, and closing the window stops the server
+
+On a Mac with Deno, in a project with recorded metrics, run `naima ui --log` through the launcher. Expect: 'the Naima window is open'; requests from the webview (an AppleWebKit user agent without Safari's token) answered 302 then 200 for /view/metrics; the program's permissions include --allow-net=127.0.0.1 and no --allow-ffi; the window's process has --allow-ffi scoped to Deno's plug/ cache; closing the window ends the launcher. Negative half: curl without the token gets 403, and the machine's LAN address does not answer.
+
+Result 2026-10-01, on a clone of this repository with four code metrics backfilled over ten commits: all of the above held (attachments: ui-launch.err, ui-permissions.txt, curl.txt). Not done: a screenshot of the window, refused by macOS (screencapture: could not create image from window — this session has no screen-recording permission).

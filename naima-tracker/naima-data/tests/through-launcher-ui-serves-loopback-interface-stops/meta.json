@@ -1,0 +1,18 @@
+{
+  "id": "47e45714-957e-4866-ac1d-73eba10f0c45",
+  "title": "Through the launcher, ui serves on the loopback interface and stops on Ctrl-C, while another command cannot listen (test/launcher.test.ts, on Deno, Node and Bun)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "be498dfe-f0a7-456b-9f13-16985398556f"
+    }
+  ]
+}

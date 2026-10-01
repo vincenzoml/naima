@@ -1,0 +1,5 @@
+load img = "square.png"
+let sq = between(128, 255, intensity(img))
+print "square_nonempty" volume(sq) .>. 0
+print "square_small" volume(sq) .<. 5
+print "vol" volume(sq)

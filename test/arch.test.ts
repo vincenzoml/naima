@@ -57,6 +57,8 @@ const PUBLIC = join(CORE, "api.ts")
 const TEST_HELPER = join(TESTS, "core", "testing.ts")
 /** The one computed import the rule allows: the core loading a third-party plugin named in naima.json. */
 const PLUGIN_LOADER = join(CORE, "plugins.ts")
+/** The one computed import a plugin may make: `naima ui`'s window, a program of its own, loading the pinned webview binding. */
+const UI_WINDOW = join(SRC, "plugins", "ui", "window.ts")
 /** Every place a plugin can live: the first-party ones, and the program's plugins/ for a fork's own. */
 const PLUGIN_DIRS = [join(SRC, "plugins"), join(ROOT, "plugins")]
 
@@ -89,6 +91,7 @@ test("a plugin, wherever it lives, imports only the core's public API and its ow
       for (const r of references(readFileSync(file, "utf8"))) {
         checked++
         assert.notEqual(r.how, "require", `${rel(file)} uses require — a plugin is an ES module`)
+        if (r.spec === null && file === UI_WINDOW) continue
         assert.ok(r.spec !== null, `${rel(file)} has a computed ${r.how}; a plugin's imports must be checkable`)
         if (r.spec.startsWith("node:")) continue
         assert.ok(r.spec.startsWith("."), `${rel(file)} imports package "${r.spec}" — plugins have no dependencies`)

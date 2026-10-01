@@ -5,7 +5,7 @@
 
 import { existsSync, realpathSync } from "node:fs"
 import { basename, dirname, resolve } from "node:path"
-import { type Finding, gitOrNull, gitReason, isGitRepo, mustGit, runGit, trunk, type Worktree, worktrees } from "../../core/api.ts"
+import { type CheckOptions, type Finding, gitOrNull, gitReason, isGitRepo, mustGit, runGit, trunk, type Worktree, worktrees } from "../../core/api.ts"
 
 /** The plugin's options that shape the scheme. */
 export interface Policy {
@@ -105,8 +105,14 @@ export interface Holders {
  * One with commits the trunk has not and nothing holding it (no claim now,
  * none added by those commits, no session note) is a problem;
  * one with nothing on it yet is a note.
+ *
+ * A gate judges its own tree: a sibling worktree's missing claim is a note
+ * naming it, never a problem, so one worker's missing claim cannot fail
+ * every other branch's gate. It is still a problem for the worktree being
+ * checked itself (`w.self`), and, with `options.allWorktrees`, for every
+ * worktree — the coordinator's view (`naima check --all-worktrees`).
  */
-export function policyFindings(root: string, policy: Policy, holders: Holders): Finding[] {
+export function policyFindings(root: string, policy: Policy, holders: Holders, options: CheckOptions = {}): Finding[] {
   if (!isGitRepo(root)) return []
   const out: Finding[] = []
   const main = trunk(root)
@@ -123,15 +129,16 @@ export function policyFindings(root: string, policy: Policy, holders: Holders): 
     if (holders.claimed.has(w.branch) || holders.noted.has(w.branch)) continue
     const n = main ? ahead(root, main, w.branch) : 0
     if (n && gitOrNull(root, "log", "-1", "--format=%H", "--diff-filter=A", `${main}..${w.branch}`, "--", holders.claims)) continue
+    const level = w.self || options.allWorktrees ? (n ? "problem" : "note") : "note"
     out.push(
       n
         ? {
-          level: "problem",
+          level,
           message: `worktree ${w.path} (${w.branch}) carries no claim and has ${
             plural(n, "commit")
           } not on ${main}: claim its items there (naima claim), or, once they are released, write its session note (naima pass)`,
         }
-        : { level: "note", message: `worktree ${w.path} (${w.branch}) carries no claim: claim its items there before any work (naima claim)` },
+        : { level, message: `worktree ${w.path} (${w.branch}) carries no claim: claim its items there before any work (naima claim)` },
     )
   }
   for (const line of (gitOrNull(root, "for-each-ref", "--format=%(refname:short)", "refs/heads") ?? "").split("\n")) {

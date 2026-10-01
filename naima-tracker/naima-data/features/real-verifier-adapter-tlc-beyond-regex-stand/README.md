@@ -9,3 +9,7 @@ Done: a TLC adapter plugin maps TLC's exit status and output to a verdict, retur
 ### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
 
 U4 proof run: withdrawn as a duplicate of features/verifier-adapters-tla-tlc-apalache-mcrl2-voxlogica. The owner chose mCRL2 over the TLA+ checkers (commit 5cdcb40). Leaving status as-is for the evidence owner to close.
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u16-adapters
+
+Withdrawn as a duplicate: the survivor is features/verifier-adapters-tla-tlc-apalache-mcrl2-voxlogica (verifier adapters for mCRL2 and VoxLogicA), built on claude/u16-adapters.

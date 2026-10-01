@@ -430,3 +430,31 @@ export function readAcrossBranches(root: string, dir: string, ext: string, opts:
   }
   return [...seen.values()]
 }
+
+/** One path the index changes against HEAD: git's status letter (`A`, `M`, `D`, `T`), and the path from the root, with forward slashes. */
+export interface StagedChange {
+  status: string
+  path: string
+}
+
+/**
+ * What the next commit would change: every path the index adds, modifies or
+ * deletes against HEAD — a rename is a deletion and an addition — or against
+ * the empty tree before the first commit. Empty outside git, or when git fails.
+ */
+export function stagedChanges(root: string): StagedChange[] {
+  const r = runGit(root, ["diff", "--cached", "--name-status", "--no-renames", "-z"])
+  if (!r.ok) return []
+  const parts = r.out.split("\0").filter((x) => x !== "")
+  const out: StagedChange[] = []
+  for (let i = 0; i + 1 < parts.length; i += 2) out.push({ status: parts[i] ?? "", path: parts[i + 1] ?? "" })
+  return out
+}
+
+/**
+ * The text of each file `rev:path` names — `HEAD:<path>` as last committed, `:<path>` as staged — or null where
+ * git has no such file. One process for any number of them.
+ */
+export function textsAt(root: string, names: string[]): (string | null)[] {
+  return objects(root, names).map((o) => (o?.type === "blob" ? o.data.toString("utf8") : null))
+}

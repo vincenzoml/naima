@@ -99,13 +99,16 @@ test("init refuses outside a git repository", async () => {
   }
 })
 
-test("every first-party plugin is loaded with nothing but the lock; new, link, show, board, from a subdirectory", async () => {
+test("every first-party plugin but the opt-in ones is loaded with nothing but the lock; new, link, show, board, from a subdirectory", async () => {
   const h = host()
   try {
     assert.equal((await naima(h.root, ["init"])).code, 0)
     const sub = join(h.root, "src")
     const plugins = (await naima(sub, ["plugins"])).out
-    for (const p of firstParty) assert.match(plugins, new RegExp(`\\b${p.name}\\b`))
+    for (const p of firstParty) {
+      if (p.optIn) assert.doesNotMatch(plugins, new RegExp(`^${p.name} —`, "m"), `${p.name} is opt-in: off until naima.json names it`)
+      else assert.match(plugins, new RegExp(`\\b${p.name}\\b`))
+    }
     const made = await naima(sub, ["new", "bugs", "Export drops alpha", "--set", "impact=high"])
     assert.match(made.out, /^naima-tracker\/naima-data\/bugs\/export-drops-alpha\//)
     assert.equal((await naima(sub, ["new", "tests", "Export keeps alpha"])).code, 0)

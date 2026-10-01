@@ -1,0 +1,20 @@
+{
+  "id": "f8379aef-8575-479e-a0a0-cd84292e91dd",
+  "title": "Bun's 5-second default test timeout can fail the dist tests under load",
+  "status": "closed",
+  "created": "2026-10-01",
+  "area": "tests",
+  "kind": "defect",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01",
+  "effort": "S",
+  "commits": [
+    "9968ca0",
+    "624af8d"
+  ],
+  "closedFrom": "bugs",
+  "closedOn": "2026-10-01"
+}

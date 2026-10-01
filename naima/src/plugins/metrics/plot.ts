@@ -21,7 +21,7 @@ const RIGHT = 20
 const TOP = 34
 const BOTTOM = 30
 
-const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+export const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 const num = (n: number): string => (Math.abs(n) >= 1000 || Number.isInteger(n) ? String(Math.round(n)) : String(Math.round(n * 100) / 100))
 
 /** Round ticks that cover lo..hi: about four of them, at 1, 2 or 5 times a power of ten. */
@@ -125,8 +125,17 @@ export function verdict(s: Series): { first?: number; last?: number; change?: nu
   return { first, last, change, reads }
 }
 
-/** A page with the chart and the table: open it in a browser. */
-export function htmlReport(series: Series[], title = "Code quality over time"): string {
+/** The styles of the report: its own page's, and the `naima ui` view's. */
+export const REPORT_CSS = [
+  ":root{--bg:#ffffff;--fg:#1f2328;--muted:#656d76;--rule:#d8dee4;--good:#1a7f37;--bad:#cf222e}",
+  "@media (prefers-color-scheme: dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--rule:#30363d;--good:#3fb950;--bad:#f85149}}",
+  "body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0 auto;max-width:800px;padding:16px}",
+  "svg{max-width:100%;height:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule)}",
+  "th{color:var(--muted);font-weight:600}.better{color:var(--good)}.worse{color:var(--bad)}.wrap{overflow-x:auto}",
+].join("\n")
+
+/** The report without its page: the table of where each metric started and where it is now, then the chart. */
+export function reportBody(series: Series[], title = "Code quality over time"): string {
   const rows = series.map((s) => {
     const v = verdict(s)
     const u = s.unit ? ` ${s.unit}` : ""
@@ -135,21 +144,60 @@ export function htmlReport(series: Series[], title = "Code quality over time"): 
     }</td><td class="${v.reads}">${esc(v.reads)}${v.change ? ` (${v.change > 0 ? "+" : ""}${num(v.change)})` : ""}</td><td>${s.points.length}</td></tr>`
   })
   return [
-    "<!doctype html>",
-    '<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
-    `<title>${esc(title)}</title>`,
-    "<style>",
-    ":root{--bg:#ffffff;--fg:#1f2328;--muted:#656d76;--rule:#d8dee4;--good:#1a7f37;--bad:#cf222e}",
-    "@media (prefers-color-scheme: dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--rule:#30363d;--good:#3fb950;--bad:#f85149}}",
-    "body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0 auto;max-width:800px;padding:16px}",
-    "svg{max-width:100%;height:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule)}",
-    "th{color:var(--muted);font-weight:600}.better{color:var(--good)}.worse{color:var(--bad)}.wrap{overflow-x:auto}",
-    "</style></head><body>",
-    `<h1>${esc(title)}</h1>`,
     '<div class="wrap"><table><thead><tr><th>Metric</th><th>What it measures</th><th>First</th><th>Now</th><th>Change</th><th>Commits</th></tr></thead><tbody>',
     ...rows,
     "</tbody></table></div>",
     plotSvg(series, title),
+  ].join("\n")
+}
+
+/** A page with the chart and the table: open it in a browser. */
+export function htmlReport(series: Series[], title = "Code quality over time"): string {
+  return [
+    "<!doctype html>",
+    '<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
+    `<title>${esc(title)}</title>`,
+    `<style>\n${REPORT_CSS}\n</style></head><body>`,
+    `<h1>${esc(title)}</h1>`,
+    reportBody(series, title),
     "</body></html>",
   ].join("\n")
+}
+
+/** What the metrics view of `naima ui` shows: every metric, those picked, the commits recorded, and the range chosen. */
+export interface Selection {
+  metrics: { name: string; says?: string }[]
+  picked: string[]
+  /** The commits with a record of any metric, oldest first. */
+  commits: { commit: string; date: string }[]
+  /** The range, both ends included: full commit ids from `commits`. */
+  from?: string
+  to?: string
+}
+
+/** The metrics view: a form to pick the metrics and the commit range, then the report of what is picked. */
+export function selectionPage(sel: Selection, series: Series[], title = "Code quality over time"): string {
+  const option = (c: { commit: string; date: string }, chosen?: string) =>
+    `<option value="${esc(c.commit)}"${c.commit === chosen ? " selected" : ""}>${esc(`${c.date.slice(0, 10)} ${c.commit.slice(0, 12)}`)}</option>`
+  const boxes = sel.metrics.map((m) =>
+    `<label title="${esc(m.says ?? "")}"><input type="checkbox" name="metric" value="${esc(m.name)}"${sel.picked.includes(m.name) ? " checked" : ""}> ${
+      esc(m.name)
+    }</label>`
+  )
+  const form = [
+    '<form method="get" class="pick">',
+    `<fieldset><legend>Metrics</legend>${boxes.join(" ")}</fieldset>`,
+    sel.commits.length
+      ? `<fieldset><legend>Commits</legend><label>from <select name="from">${
+        sel.commits.map((c) => option(c, sel.from)).join("")
+      }</select></label> <label>to <select name="to">${sel.commits.map((c) => option(c, sel.to)).join("")}</select></label></fieldset>`
+      : "",
+    '<button type="submit">Show</button>',
+    "</form>",
+  ].join("\n")
+  if (!sel.metrics.length) return "<p>No metrics declared — <code>naima metrics presets</code> lists ready ones.</p>"
+  if (!sel.commits.length) {
+    return `${form}\n<p>Nothing recorded on this line of history — <code>naima metrics run --record</code>, or <code>naima metrics backfill</code>.</p>`
+  }
+  return `${form}\n${reportBody(series, title)}`
 }

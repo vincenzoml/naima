@@ -54,6 +54,21 @@ table: the first and last value of each, and whether the change is better or
 worse by the metric's `better`. Show the owner the chart, not the commands;
 for numbers they want to work with themselves, the CSV.
 
+When the owner wants to look at the metrics themselves rather than at a
+file, tell them `naima ui`: a native window with every metric, a picker and
+a commit range, read live from the records. It holds the terminal until the
+window closes, so you do not run it on their behalf in a session that must
+go on; for a check of your own, `naima ui --no-open --log` prints the address
+with its token and one line per request, and `/data/metrics?metric=…&from=…&to=…`
+answers the same view as JSON. Where the window cannot open it falls back to
+the browser and says why in one line: report that line, it is the diagnosis.
+
+A plugin adds a tab to that window by contributing a view to the `ui-views`
+extension point — `name`, `title`, `says`, `render(params, ctx) → { data,
+html, css? }` — rendered at each request
+([the reference](../reference/reference.md)); the ui plugin never names the
+plugins it shows.
+
 Under the launcher Naima may write only inside the tracker directory: when
 `--out` is refused, print the chart and redirect it,
 `naima metrics plot coverage > quality.svg`.

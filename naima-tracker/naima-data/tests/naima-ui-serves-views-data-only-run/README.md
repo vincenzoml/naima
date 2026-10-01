@@ -1,0 +1,5 @@
+# naima ui serves views and data only with the run's token, on the loopback interface only, and picks the window, the browser fallback or --browser (test/plugins/ui/ui.test.ts, on Deno, Node and Bun)
+
+Run `deno test -A test/plugins/ui/`, `node --test test/plugins/ui/ui.test.ts` and `bun test ./test/plugins/ui/`. Nine tests must pass: a request without the token, or with a wrong one, is refused 403 on every path, and the token, then the cookie it sets, opens the view and its JSON data; another IPv4 interface of the machine does not answer; the metrics view follows the picked metrics and the commit range (given backwards too) and reads records written after the server started; the window is chosen when it can open and closing it stops the server; a window that cannot open, or fails to, falls back to the browser in one line; --browser never asks for the window and --no-open opens nothing; the window's process gets scoped permissions only, and the binding is pinned to an exact version.
+
+Result 2026-10-01: 9 of 9 passed on Deno; the full suites passed 293 of 293 on Deno, Node and Bun.

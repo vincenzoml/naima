@@ -1,0 +1,27 @@
+{
+  "id": "e1843e81-982c-46d9-b9cb-a5e2fb740a85",
+  "title": "naima check reports a broken agent-harness entry pointer; init --write-agent-pointer writes it, through the real launcher",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "e1c8c7e8-f785-424c-aa07-9962ca2f6343"
+    }
+  ],
+  "attached": {
+    "red-then-green.txt": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    },
+    "node_full_tail.log": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  },
+  "evidenceKind": "live-read",
+  "redSeen": "2026-10-01"
+}

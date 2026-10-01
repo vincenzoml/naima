@@ -1,0 +1,5 @@
+no token: 403
+with token: 200
+data: 200
+other interface: 000
+server exited after window closed

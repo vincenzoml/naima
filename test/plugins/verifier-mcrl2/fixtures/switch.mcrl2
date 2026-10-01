@@ -1,0 +1,4 @@
+act on, off;
+proc Off = on . On;
+     On = off . Off;
+init Off;
