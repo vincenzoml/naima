@@ -1,0 +1,16 @@
+{
+  "id": "613cc72e-bcb3-4312-85e4-13dae3b48a66",
+  "title": "Port role refusals into existing flow pages first",
+  "status": "open",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

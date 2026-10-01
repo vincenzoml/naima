@@ -1,7 +1,9 @@
 # Installing and updating Naima
 
-How Naima reaches a project and stays the same for everyone on it. Just
-updating: [update Naima](update-naima.md). Terms: [glossary](glossary.md).
+How Naima reaches a project and stays the same for everyone on it. An agent
+does all of this for you; this page is what it follows, for anyone who wants
+to see or do it by hand. Just updating: [update Naima](update-naima.md).
+Terms: [glossary](glossary.md).
 
 Naima has no releases, no version numbers and no compiled binaries. A
 project runs Naima from a git clone of its `dist` branch,
@@ -10,6 +12,8 @@ Deno runs the TypeScript directly.
 
 ## Deno, once per machine
 
+Besides git, which an agent installs when it is missing
+([git, handled for the owner](../agents/git-for-the-owner.md#1-have-git)),
 Deno is the only thing installed on the machine, once, by its official
 installer:
 
@@ -75,7 +79,7 @@ and a GitHub Action ships a built branch:
   `src/` (no test), `skills/naima/`, `docs/`, `README.md`, `LICENSE` and
   `NOTICE`. A dist commit is a copy of it, so a project's
   `naima-tracker/naima/` holds exactly what `naima/` holds. A test holds it
-  to that: no test, no development file, no tracker item, and every import
+  to that: no test, no development file, no tracker [item](glossary.md#item), and every import
   and relative link of what ships resolving inside it.
 - **Built by CI from every commit of `main`**, with `scripts/dist.ts`, and
   pushed after the checks pass. A dist commit carries the trailer
@@ -146,7 +150,7 @@ The rest of the documentation writes `naima <command>` for it.
 
 Before it does anything else, every run makes `naima-tracker/naima/` exactly
 the `source` and `commit` in `naima.json`, cloning it when it is absent. So a
-fresh clone of the project, a new worktree, a colleague and CI all run the
+fresh clone of the project, a new [worktree](glossary.md#worktree), a colleague and CI all run the
 same Naima. Where the project has no program yet, there is no launcher in it
 either: clone the `source` into `naima-tracker/naima/`, or run the launcher of
 any Naima at hand from inside the project — the main worktree's, say. Either
@@ -211,7 +215,7 @@ git add naima-tracker && git commit -m "Update Naima to <commit>"
 `naima update --check` at the start of a session and, when the dist has moved,
 `naima update`, the checks, and the commit ([the skill](../agents/skill.md)). With
 several branches open, update on a branch of its own and merge it first; the
-others merge the trunk and run `naima update` again, which finishes the
+others merge the [trunk](glossary.md#trunk) and run `naima update` again, which finishes the
 migration of their new items or does nothing.
 
 ## The permissions
@@ -224,7 +228,7 @@ under Deno with only these:
 |---|---|---|
 | read | the repository, the program wherever it is, and the data directory of every other worktree of the project | items, the project's markdown and source (the docs and beta-marker checks read them), git's view of branches, and the uncommitted claims and notes of the other worktrees |
 | write | `naima-tracker/` only, and the data or program directory if moved out of it | items, claims, notes, the program's own alignment; nothing else in the project |
-| run | `git`, and the programs the loaded contributions declare | alignment, update and carry, and reading claims and notes across branches; a verifier's model checker (its `runs`, [the contract](../reference/plugin-contract.md#the-verifier-contract)) |
+| run | `git`, and the programs the loaded contributions declare | alignment, update and carry, and reading claims and notes across branches; a [verifier](glossary.md#verifier)'s model checker (its `runs`, [the contract](../reference/plugin-contract.md#the-verifier-contract)) |
 | env | an allow-list: `HOME`, `PATH`, the user, shell, terminal, locale and temporary-directory variables, the proxy variables, Windows' system ones, and every `NAIMA_*`, `GIT_*`, `SSH_*`, `LC_*` and `DENO_*` | what git needs to reach a source, and Naima's own; nothing else of the environment reaches the program, nor the git it runs |
 | net | none | the network is git's, in alignment and update |
 

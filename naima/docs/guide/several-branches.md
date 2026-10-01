@@ -20,7 +20,7 @@ git add naima-tracker && git commit -m "Claim export-drops"
   checkout's, at the same locked commit.
 - `naima claim` writes one file of this branch's own, saying what it works on.
   Others see it at once; nobody is locked out — several branches may claim
-  one item, and `claim` says who else holds it.
+  one [item](glossary.md#item), and `claim` says who else holds it.
 
 ## See who is doing what
 
@@ -45,7 +45,7 @@ git add -A && git commit -m "Release the claim; session note"
 git merge --no-edit main
 ```
 
-- `naima release` drops this branch's claim. Run it here, not on the trunk.
+- `naima release` drops this branch's claim. Run it here, not on the [trunk](glossary.md#trunk).
 - `naima pass` writes a [session note](glossary.md#session-note): what
   changed, what is proven, and what was **not** verified.
 - Merging the trunk into the branch first makes the final merge a

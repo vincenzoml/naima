@@ -9,7 +9,8 @@ it owns the routing table.
 
 1. **Write it before you understand it**: `naima new <type> "<what happened>"`.
    Broken → `bugs`; work → `todos`; wanted → `features`; to be tried → `tests`.
-2. **The page carries**: the words verbatim, the evidence, measured apart from
+2. **The page carries**: what happened, in your own words (the owner's words or
+   files only with their yes), the evidence, measured apart from
    inferred, the consequence.
 3. **Triage it now**: `naima triage set <item> impact=… priority=… confidence=…`.
    `effort` only if you have looked at the code.

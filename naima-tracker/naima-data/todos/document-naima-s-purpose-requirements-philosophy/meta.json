@@ -6,5 +6,11 @@
   "impact": "medium",
   "priority": "next",
   "confidence": "diagnosed",
-  "fixedOn": "2026-09-30"
+  "fixedOn": "2026-09-30",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
 }

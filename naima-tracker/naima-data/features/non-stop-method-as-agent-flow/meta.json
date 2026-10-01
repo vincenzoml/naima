@@ -1,0 +1,20 @@
+{
+  "id": "49617651-d4e1-4d54-a265-e94274b690dc",
+  "title": "Non-stop method as an agent flow",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "high",
+  "priority": "now",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "2aa741bf-f899-47fe-9dfe-c3417e63bacb"
+    }
+  ]
+}

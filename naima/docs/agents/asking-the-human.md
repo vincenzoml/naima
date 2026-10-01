@@ -1,7 +1,7 @@
 # Asking the human
 
 How to keep [the rule](../guide/rules.md#dont-ask-the-human-if-you-know-the-answer):
-don't ask the human if you know the answer. Decide, act, report. The owner's attention is the most expensive resource in
+don't ask the human if you know the answer. Decide, act, report. The [owner](../guide/glossary.md#owner)'s attention is the most expensive resource in
 the project: every question spends it, and a question an agent could have
 answered spends it for nothing.
 
@@ -40,7 +40,7 @@ Everything else is an agent's. In particular:
 
 ## When you hand work to a person
 
-An item whose proof only a person can perform carries `runBy: human` **and**
+An [item](../guide/glossary.md#item) whose [proof](../guide/glossary.md#proof) only a person can perform carries `runBy: human` **and**
 `humanBecause: <reason>` ([the rule](../guide/rules.md#work-handed-to-a-person-says-why)), and `naima queue --human` prints each item with its
 reason, so a list handed to the owner says, line by line, why each is theirs.
 
@@ -58,4 +58,4 @@ agent's. If you cannot, it is a person's, and `humanBecause` says which kind.
 
 Report when finished or when blocked, not between items. A report says what
 changed and what is needed from the owner — nothing already written in a
-commit message, an item or a session note.
+commit message, an item or a [session note](../guide/glossary.md#session-note).

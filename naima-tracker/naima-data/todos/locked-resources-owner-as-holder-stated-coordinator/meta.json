@@ -1,0 +1,16 @@
+{
+  "id": "f1d68726-7476-40cd-a4f4-91fa68f45ec6",
+  "title": "Locked resources and the owner as a holder, stated in the coordinator flow",
+  "status": "open",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

@@ -1,8 +1,19 @@
 # The guide
 
-For people who use Naima on a project. Nothing here assumes you read or write
-code: everything is a `naima` command or plain text on an item's page. A word
-you do not know is in the [glossary](glossary.md).
+For the people whose project Naima runs. Nothing here assumes you read or
+write code, know git, or have managed a project professionally: an AI agent
+does the machine work, and every step is a `naima` command or plain text on
+an [item](glossary.md#item)'s page. A word you do not know is in the [glossary](glossary.md).
+What Naima is for: [the purpose](../purpose.md).
+
+## First, how the project runs
+
+| Page | What it gives you |
+|---|---|
+| [How the project runs](how-the-project-runs.md) | the [flow](glossary.md#flow) every piece of work follows — report, file, [triage](glossary.md#triage), claim, work, prove, close — then planning, [gates](glossary.md#gate), long work across sessions, and decisions |
+| [Working with AI agents](working-with-agents.md) | how to get an agent going, what to ask of it, and what it will ask of you |
+| [Rules](rules.md) | the rules every project holds to, each marked checked by Naima or kept by convention |
+| [Concepts](concepts.md) | the ideas underneath: items, links, fixed / resolved / closed, [evidence](glossary.md#evidence), gates, working across branches |
 
 ## Start
 
@@ -10,8 +21,6 @@ you do not know is in the [glossary](glossary.md).
 |---|---|
 | [Tutorial](tutorial.md) | from an empty repository to a closed bug, every command with its real output |
 | [Install](install.md) | installing, the copy of Naima a project runs, keeping it aligned, the permissions |
-| [Concepts](concepts.md) | items, links, fixed / resolved / closed, evidence, gates, working across branches |
-| [Rules](rules.md) | the rules every project holds to, each marked checked by Naima or kept by convention |
 
 ## Everyday tasks
 
@@ -28,7 +37,6 @@ you do not know is in the [glossary](glossary.md).
 | move to a newer Naima | [Update Naima](update-naima.md) |
 | add a gate, weigh a check, switch a plugin off | [Configure the project](configure-the-project.md) |
 | use a plugin a colleague gave me | [Add a plugin someone gave you](add-a-plugin.md) |
-| have AI agents do the work | [Working with AI agents](working-with-agents.md) |
 
 ## Look up
 
@@ -38,4 +46,5 @@ you do not know is in the [glossary](glossary.md).
 | [Configuration](config.md) | every key of `naima.json`: plugins, options, check weights, third-party plugins |
 | [Questions](faq.md) | the questions people ask first |
 | [Glossary](glossary.md) | every term, defined once |
+| [Planned](../planned.md) | everything not in Naima yet, in one place |
 | [Reference](../reference/reference.md) | every command, type, status, field, check and gate, generated from the code |

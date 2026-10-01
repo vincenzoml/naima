@@ -1,0 +1,16 @@
+{
+  "id": "90203cb9-a42a-43ac-a221-cff10e7fadde",
+  "title": "The paper's pre-submission checklist is invisible as tracker items",
+  "status": "open",
+  "created": "2026-10-01",
+  "impact": "low",
+  "priority": "later",
+  "confidence": "reported",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "bf710ef8-85e1-4c3c-b06a-c448d966e85f",
+  "title": "Worker protocol page: report shape, merge-at-once, file-overlap test",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "next",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}

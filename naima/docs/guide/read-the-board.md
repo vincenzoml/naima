@@ -1,6 +1,6 @@
 # Read the board, the queue and the gates
 
-Every view below is [derived](glossary.md#derived): worked out from the items
+Every view below is [derived](glossary.md#derived): worked out from the [items](glossary.md#item)
 when you ask, never stored, so it is never stale. Run any of them at any
 time; none changes anything.
 
@@ -15,7 +15,7 @@ naima show <item>      # one item: fields, links both ways, attachments, page
 ```
 
 `naima summary` has a block per plugin: item counts, bugs, what is next,
-the gates, who is working on what ([claims](glossary.md#claim)) and where
+the gates, who is working on what ([claims](glossary.md#claim-file)) and where
 the last sessions left off ([session notes](glossary.md#session-note)). With
 `--markdown` it prints the same as markdown, to paste into a report.
 
@@ -76,7 +76,7 @@ declare it once in the configuration, then put items on it.
 `holdsOn` decides what blocks:
 
 - `"code"` (the default): the gate waits for code. An item with no fix
-  blocks; a fixed item that only owes its proof, and the proving gestures
+  blocks; a fixed item that only owes its [proof](glossary.md#proof), and the proving gestures
   themselves, are listed as **owed** (`·`) but do not block.
 - `"proof"`: every open item on the gate blocks.
 

@@ -39,7 +39,7 @@ naima-tracker/
   naima-data/
     naima.json         the format, the lock, and the few facts that cannot be inferred
     bugs/<slug>/       one directory per item: README.md, meta.json, attachments/
-    todos/  features/  tests/  closed/  properties/
+    todos/  features/  tests/  properties/  rules/  closed/
     claims/  passes/   coordination across branches: one file per session
 ```
 
@@ -48,9 +48,10 @@ naima-tracker/
 
 **Your material is in `naima-data/`, never in `naima/`.** The program
 directory holds only what runs Naima: no tests, no fixtures, no CI, no agent
-rules, and none of Naima's own items. Everything the project tracks — its
-bugs, its tests, its features, its milestones, the documentation of a
-feature — is an item in its own `naima-data/`, in the directory of its type;
+rules, and none of Naima's own [items](glossary.md#item). Everything the project tracks — its
+bugs, its todos, its features, its tests, its rules — is an item in its own
+`naima-data/`, in the directory of its type (milestones are
+[planned](../planned.md#epics-and-milestones));
 `naima/` is replaced whole on every update. Only the item directories that hold something exist. Commands work
 from any subdirectory: Naima walks up from the current directory to the first
 `naima-tracker/naima-data/naima.json`. Every file and field is specified in
@@ -71,7 +72,7 @@ Naima that reads a newer format, `naima update` migrates the data forward in
 the same change, deterministically. A Naima never acts on data in another
 format: newer data is refused in one line, older data is left to `naima
 update`, and `naima check` fails on a tracker whose items mix formats — the
-mark of a branch that has not merged the trunk's update yet. What to do then:
+mark of a branch that has not merged the [trunk](glossary.md#trunk)'s update yet. What to do then:
 [migrations](../reference/format.md#migrations).
 
 ## Moving things

@@ -41,7 +41,7 @@ naima/src/
     base.ts        the core's own contributions: generic fields, relations, commands
     cli.ts         dispatch, and the commands that move the program
   plugins/<name>/  one directory per first-party plugin:
-                   trackers, coordination, triage, gates, beta-markers, verifier, docs
+                   trackers, coordination, triage, gates, beta-markers, verifier, docs, rules
   builtins.ts      every first-party plugin, in load order } the composition root:
   cli.ts           the program's entry point             } the only modules that see both
   launcher.ts      runs the program under Deno's permissions (install.md)

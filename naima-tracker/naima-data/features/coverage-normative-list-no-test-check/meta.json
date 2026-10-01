@@ -1,0 +1,16 @@
+{
+  "id": "6f34bf2d-bf86-43d5-b1a5-b8f84a2fb9d8",
+  "title": "Coverage of a normative list (NO TEST check)",
+  "status": "requested",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "later",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "444d7de9-2698-4563-bfab-be5859779ae3"
+    }
+  ]
+}
