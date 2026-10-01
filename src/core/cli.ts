@@ -42,7 +42,8 @@ import {
   withoutCredentials,
 } from "./program.ts"
 import { EXIT, isInternal, message, NaimaError } from "./errors.ts"
-import type { Carry, Command, Context } from "./types.ts"
+import type { Carry, Command, Context, GuideSection } from "./types.ts"
+import { asRendered, linesAs } from "./rendered.ts"
 import { shortOrId } from "./names.ts"
 import { apiFor } from "./plugins.ts"
 
@@ -220,7 +221,27 @@ export const GUIDE_PAGES: readonly (readonly [string, string])[] = [
   ["install", "docs/install.md"],
 ]
 
-function guide(opts: CliOptions, io: IO): number {
+/** The guide sections the project's plugins contribute, as lines; none outside a project, and none when it does not open (`naima check` says why). */
+async function guideSections(opts: CliOptions, data: string | undefined, io: IO): Promise<string[]> {
+  let ctx: Context
+  try {
+    const place = locate(opts, data)
+    if (!place) return []
+    ctx = await openProject(place, opts, io)
+  } catch (e) {
+    io.err(`naima: the project's guide sections are not shown: ${message(e)} — naima check`)
+    return []
+  }
+  const out: string[] = []
+  for (const c of ctx.registry.contributions("guide")) {
+    const lines = linesAs(asRendered(await (c.value as GuideSection).render(ctx), `guide section "${c.name}"`), "text")
+    if (lines.length) out.push(...lines, "")
+  }
+  return out
+}
+
+async function guide(opts: CliOptions, data: string | undefined, io: IO): Promise<number> {
+  for (const line of await guideSections(opts, data, io)) io.out(line)
   const at = (path: string): string => relative(opts.cwd, join(opts.programRoot, path)) || "."
   const commit = runningCommit(opts.programRoot)
   io.out(`Naima ${commit ? commit.slice(0, 12) : "(vendored)"}, data format ${FORMAT}, at ${at("")}`)
@@ -256,7 +277,7 @@ export async function runCli(argv: string[], opts: CliOptions): Promise<number> 
       if (args.some((a) => a !== "--write-excludes")) throw new Error(usage("init"))
       return await init(args, opts, io)
     }
-    if (command === "guide") return guide(opts, io)
+    if (command === "guide") return await guide(opts, data, io)
     const place = locate(opts, data)
     if (!place) {
       if (isHelp(command)) return help(null, io)

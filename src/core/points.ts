@@ -12,6 +12,7 @@ import type {
   ExtensionPoint,
   FieldDef,
   FieldKind,
+  GuideSection,
   Migration,
   OptionDoc,
   RankTerm,
@@ -237,6 +238,19 @@ export const summaryPoint: ExtensionPoint<SummarySection> = {
   document: (sections) => ["", `**Summary sections**: ${sections.map((s) => code(s.name)).join(", ")}.`],
 }
 
+export const guidePoint: ExtensionPoint<GuideSection> = {
+  id: "guide",
+  says: "a block `naima guide` prints first, inside a project, before the documentation pages",
+  noun: "guide section",
+  key: (s) => s.name,
+  renamed: (s, name) => ({ ...s, name }),
+  validate: (v) => shape(v, (c) => text(c, "name"), (c) => fn(c, "render")),
+  gaps: (s) => says(s, "shows"),
+  document: (
+    sections,
+  ) => ["", "**Guide sections**, printed first by `naima guide`", ...table(["Section", "What it shows"], sections.map((s) => [code(s.name), s.says]))],
+}
+
 export const rankPoint: ExtensionPoint<RankTerm> = {
   id: "rank",
   says: "an additive term of every item's urgency; lower is more urgent",
@@ -321,6 +335,7 @@ export const CORE_POINTS: readonly ExtensionPoint[] = [
   viewsPoint,
   dirsPoint,
   summaryPoint,
+  guidePoint,
   rankPoint,
   extendsPoint,
   hooksPoint,

@@ -168,6 +168,13 @@ export interface SummarySection {
   render(ctx: Context): Rendered | Promise<Rendered>
 }
 
+/** A block `naima guide` prints first, inside a project, before the documentation pages: what an agent reads before anything else. May be async; one with nothing to say renders no lines. */
+export interface GuideSection {
+  name: string
+  says: string
+  render(ctx: Context): Rendered | Promise<Rendered>
+}
+
 /** One additive term of an item's urgency. Lower is more urgent. */
 export interface RankTerm {
   name: string
@@ -254,6 +261,8 @@ export interface Plugin {
   commands?: Command[]
   views?: View[]
   summary?: SummarySection[]
+  /** Blocks `naima guide` prints first, inside a project. */
+  guide?: GuideSection[]
   rank?: RankTerm[]
   /** Hooks on every item write, in load order. */
   hooks?: WriteHook[]
