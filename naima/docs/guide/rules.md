@@ -46,12 +46,12 @@ what lacks [effort](glossary.md#effort): [triage](triage.md).
 
 ### Effort is never guessed
 
-Only someone who has looked at the code sets `effort`. **Convention**: no
+Only someone who has looked at the work to be done sets `effort`. **Convention**: no
 tool infers it (`naima triage derive` never touches it).
 
 ### Fixed, resolved and closed are three states
 
-[Fixed](glossary.md#fixed) (the code exists), [resolved](glossary.md#resolved)
+[Fixed](glossary.md#fixed) (the change exists), [resolved](glossary.md#resolved)
 (fixed and proven) and [closed](glossary.md#closed) (resolved and archived)
 are never confused or added into one number. **Enforced by** `naima close`,
 which refuses anything not resolved, and the checks `closed-carries-proof`
@@ -120,8 +120,25 @@ reasons it is in `humanBecause`. **Enforced by** the check `human-says-why`;
 A branch does not close its own items on the strength of its own tests:
 someone else checks the proof, from the [trunk](glossary.md#trunk), after the
 merge. **Enforced by** the write hook `no-closing-own-claims`: `naima close`
-refuses an item the current branch [claims](glossary.md#claim), unless
+refuses an item the current branch [claims](glossary.md#claim-file), unless
 `--force`, which is for the one who owns the evidence.
+
+### The owner's chat stays private
+
+The conversation between the [owner](glossary.md#owner) and an agent is
+private. Nothing from it is copied into the repository verbatim: the agent
+writes the report, the description or the note in its own words. The owner's
+own words are quoted, and a file or screenshot the owner shared becomes an
+attachment, only after the owner's explicit yes. **Convention**:
+[reporting and triage](../agents/reporting-and-triage.md#3-what-a-report-carries).
+
+### Git is the agent's job, done safely
+
+The owner never has to learn git. Agents install it when it is missing,
+start a repository when there is none, keep secrets and private data out of
+it with a `.gitignore`, and save work in small commits; they never
+force-push, never rewrite history, and never commit a secret.
+**Convention**: [git, handled for the owner](../agents/git-for-the-owner.md).
 
 ## Branches and worktrees
 

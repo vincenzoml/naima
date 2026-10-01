@@ -2,20 +2,32 @@
 
 ## Do I need to read or write code to use Naima?
 
-No. Everything in [the guide](README.md) is done with `naima` commands and by
-writing plain text on an item's page. The only code involved is your own
-project's.
+No, nor know git or project management. An AI agent runs the `naima`
+commands and git for you; you say what you want in plain words and decide
+what is yours to decide ([working with AI agents](working-with-agents.md)).
+If you like, everything in [the guide](README.md) can also be done by hand,
+with `naima` commands and plain text on an item's page.
+
+## Is Naima only for software?
+
+No. It runs anything that benefits from keeping every version: software, a
+scientific data analysis, a paper written with colleagues, or several at once
+in one project. Today's item types are shaped for software, but a bug such as
+"figure 3 uses last year's data" fits them already; packs of item types for
+other work are [planned](../planned.md#item-types-for-other-work).
 
 ## Is there a web page with the board?
 
 No: Naima has no server and no account. The board is `naima board <type>`,
 and `naima summary --markdown` prints the state of the project as markdown
-you can paste anywhere.
+you can paste anywhere. A visual dashboard is
+[planned](../planned.md#design-skills-and-a-dashboard).
 
 ## Where is my data? Does anything leave my machine?
 
 In `naima-tracker/naima-data/`, as plain files in your repository, committed
-with your code. Naima itself never uses the network; git does, only to fetch
+with your work. What you say to an agent in chat is not copied there without
+your yes ([the rule](rules.md#the-owners-chat-stays-private)). Naima itself never uses the network; git does, only to fetch
 Naima when it is first installed or updated
 ([the permissions](install.md#the-permissions)).
 

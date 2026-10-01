@@ -1,6 +1,6 @@
 # File a feature
 
-Someone wants the software to do something it does not do yet.
+Someone wants the work — a program, an analysis, a document — to do something it does not do yet.
 
 ## Ask for it
 
