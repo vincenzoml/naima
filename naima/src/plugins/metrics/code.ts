@@ -819,7 +819,7 @@ export function dependenciesIn(name: string, text: string): number {
     let inBlock = false
     let n = 0
     for (const l of lines) {
-      if (l.startsWith("require (")) inBlock = true
+      if (/^require\s*\(/.test(l)) inBlock = true
       else if (inBlock && l === ")") inBlock = false
       else if (inBlock && l && !l.startsWith("//")) n++
       else if (/^require\s+\S+\s+\S+/.test(l)) n++
