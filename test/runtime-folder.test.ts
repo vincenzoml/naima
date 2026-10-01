@@ -167,3 +167,57 @@ test("a project's program holds exactly naima/, and init, check, new, guide, a n
     removeTemp(base)
   }
 })
+
+// ---- host leakage: what an installed program directory holds, read off the disk ----
+
+/** The paths under `dir` that only developing Naima needs: tests, fixtures, CI, agent rules, tracker items. */
+function leaks(dir: string): string[] {
+  const all = onDisk(dir)
+  const item = (f: string) => /(^|\/)naima-data\/.+\/meta\.json$/.test(f) || /^naima-tracker\//.test(f)
+  const devOnly = (f: string) =>
+    /\.test\.ts$/.test(f) || /(^|\/)testing\.ts$/.test(f) || /^test\//.test(f) || /(^|\/)(AGENTS|CLAUDE)\.md$/.test(f) ||
+    /(^|\/)\.(claude|github)\//.test(f)
+  return all.filter((f) => item(f) || devOnly(f))
+}
+
+test("host leakage: an installed program holds no test, no tracker item and no agent rule, though its source holds all three", {
+  skip: !hasDeno && "deno is not on PATH",
+  timeout: 30_000, // git and Deno subprocesses: past Bun's 5 second default
+}, () => {
+  const base = mkdtempSync(join(tmpdir(), "naima-leak-"))
+  try {
+    const source = sourceRepo(REPO, join(base, "naima"))
+    // The negative half: the source is all of Naima's repository, so there is something to leak.
+    const inSource = leaks(source)
+    for (const kind of [/\.test\.ts$/, /^AGENTS\.md$/, /^CLAUDE\.md$/, /^naima-tracker\/naima-data\/.+\/meta\.json$/]) {
+      assert.ok(inSource.some((f) => kind.test(f)), `the source holds a file matching ${kind}`)
+    }
+    const host = join(base, "project")
+    mkdirSync(host)
+    writeFileSync(join(host, "README.md"), "# A project\n")
+    git(host, "init", "-q", "-b", "main")
+    git(host, "add", "-A")
+    git(host, "commit", "-q", "-m", "init")
+    const env = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined, NAIMA_CACHE: join(base, "cache") }
+    const run = (launcher: string, ...args: string[]) => spawnSync("deno", ["run", "-A", launcher, ...args], { cwd: host, encoding: "utf8", env })
+    const installer = join(base, "installer")
+    git(base, "clone", "-q", "--", source, installer)
+    const init = run(join(installer, RUNTIME_DIR, "naima.ts"), "init")
+    assert.equal(init.status, 0, init.stderr)
+    rmSync(installer, { recursive: true, force: true })
+
+    const program = join(host, "naima-tracker", "naima")
+    assert.deepEqual(leaks(program), [], "the program directory holds nothing that only developing Naima needs")
+    assert.deepEqual(onDisk(program), [COPY_FILE, ...shipped].sort(), "it is exactly naima/'s files and the copy record")
+    assert.ok(!existsSync(join(program, ".git")), "a plain copy: no repository inside")
+
+    // The host's own material lives in its own naima-data/, never in the program directory.
+    const filed = run(join(program, "naima.ts"), "new", "tests", "The host's own test")
+    assert.equal(filed.status, 0, filed.stderr)
+    const data = join(host, "naima-tracker", "naima-data")
+    assert.ok(onDisk(data).some((f) => /^tests\/.+\/meta\.json$/.test(f)), "the host's item is under its naima-data/tests/")
+    assert.deepEqual(onDisk(program), [COPY_FILE, ...shipped].sort(), "filing an item leaves the program untouched")
+  } finally {
+    removeTemp(base)
+  }
+})

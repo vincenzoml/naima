@@ -9,6 +9,11 @@
     {
       "rel": "verifies",
       "id": "7779ea18-36e0-41bb-8b05-866ded7ac3a0"
+    },
+    {
+      "rel": "verifies",
+      "id": "b276af50-8f52-42d4-abad-fc765c8ddc6b"
     }
-  ]
+  ],
+  "gate": "first-public"
 }

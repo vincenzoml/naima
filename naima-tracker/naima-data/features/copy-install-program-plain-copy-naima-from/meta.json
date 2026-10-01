@@ -16,5 +16,8 @@
     "naima/docs/reference/format.md#how-the-program-is-carried",
     "develop/bootstrap.md"
   ],
-  "fixedOn": "2026-10-01"
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "aebd210"
+  ]
 }

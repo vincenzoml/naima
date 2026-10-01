@@ -16,3 +16,9 @@ Pass: both tests green on Deno, Node and Bun.
 ## Result
 
 What was seen, when, and by whom.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/final-sweep
+
+Run in the final sweep (claude/final-sweep, 2026-10-01): the two first-screen tests of test/plugins/ui/ui.test.ts and test/launcher.test.ts green on Deno (deno task verify: 363 passed, 0 failed), Node (364 tests, 363 pass, 0 fail) and Bun (363 pass, 1 skip, 0 fail).
