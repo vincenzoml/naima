@@ -1,4 +1,4 @@
-# Using Naima in your project
+# The tracker folder
 
 A project that uses Naima carries one folder, `naima-tracker/`, at its root,
 and runs the Naima inside it. Installing Deno and bootstrapping the folder:

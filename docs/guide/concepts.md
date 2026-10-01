@@ -1,5 +1,9 @@
 # Concepts
 
+The ideas behind every command, for anyone using Naima. Each term is defined
+once in the [glossary](glossary.md); the rules built on these ideas are on
+[the rules page](rules.md).
+
 ## Items
 
 Every item — a bug, a task, a feature, a test, a property — is a directory

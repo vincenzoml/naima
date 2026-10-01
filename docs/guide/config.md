@@ -1,5 +1,9 @@
 # Configuration
 
+Every key of `naima-tracker/naima-data/naima.json`. The common tasks, step by
+step: [configure the project](configure-the-project.md). Terms:
+[glossary](glossary.md).
+
 ## The automatic principle
 
 Naima is automatic first. Every first-party plugin — `trackers`,

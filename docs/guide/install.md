@@ -1,5 +1,8 @@
 # Installing and updating Naima
 
+How Naima reaches a project and stays the same for everyone on it. Just
+updating: [update Naima](update-naima.md). Terms: [glossary](glossary.md).
+
 Naima has no releases, no version numbers and no compiled binaries. A
 project runs Naima from a git clone of its `dist` branch,
 `naima-tracker/naima/`, locked to one commit; that commit is the version.
