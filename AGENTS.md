@@ -51,8 +51,9 @@ deno task verify    # typecheck, lint, format, tests, check (working tree and lo
 node --test "test/**/*.test.ts" && bun test ./test/     # the same tests on Node and Bun
 ```
 
-What Naima is for — an enabling technology and decision support system for
-any versioned work, run by agents for an owner who only decides — is
+What Naima is for — a silent software house of agents, born for software,
+that turns vibe coding into an exact science for an owner who only decides,
+and then manages any project — is
 [the purpose](naima/docs/purpose.md); what it does not do yet is
 [planned](naima/docs/planned.md), and a page describes nothing planned as if
 it existed. Requirements and design principles:

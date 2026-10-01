@@ -55,17 +55,20 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
     assert.ok(text.includes(`curl -fsSL ${BASE}install.sh | sh`) && text.includes(`irm ${BASE}install.ps1 | iex`), `${where} gives the one-liners`)
     assert.match(text, /naima rules --audience agents/, where)
   }
-  assert.ok(readme.startsWith("# Naima\n\nNaima turns your AI agents into a small team"), "the README opens with the site's passage")
+  assert.ok(
+    readme.startsWith("# Naima\n\nNaima is a silent software house of AI agents: it turns vibe coding into an exact science."),
+    "the README opens with the site's passage: born for software",
+  )
   for (const [where, text] of [["README.md", readme], ["llms.txt", llms]] as const) {
     assert.match(text, /If git is not installed, install it[\s\S]*winget install Git\.Git/, where)
   }
   assert.match(page, /<p class="need">You don’t need to know git, code or project management\./)
   assert.match(
     page,
-    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">Software, a data analysis, a paper written with colleagues/,
-    "the line under the tagline says what it is for",
+    /<p class="tagline">[\s\S]*?<\/p>\s*<p class="about">Born for software: a silent software house of AI agents that turns vibe coding into an exact science[\s\S]*?Then any project/,
+    "the line under the tagline says what it is for: software first, then any project",
   )
-  assert.doesNotMatch(page, /small team/, "the long passage is the README's, not the page's")
+  assert.doesNotMatch(page, /every claim comes with its evidence/, "the long passage is the README's, not the page's")
   assert.ok(existsSync(join(NAIMA, RUNTIME_DIR, "skills", "naima", "SKILL.md")), "the skill the prompt names ships")
 })
 
