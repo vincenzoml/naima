@@ -60,6 +60,6 @@ naima update --accept-source
 |---|---|
 | the program directory has local changes, or commits its source does not have | someone changed Naima in place: publish the change as a fork and set `source` ([modifying Naima](install.md#modifying-naima)) |
 | it cannot reach the locked commit | the source was rewritten or deleted: point `source` at a repository that has it |
-| no network, and no copy yet | connect once; after the first clone every run works offline |
+| no network, and no copy yet | connect once; once the commit is in the user's cache every copy of it works offline |
 
-Everything about the lock, alignment and the dist branch: [install](install.md).
+Everything about the lock, alignment and the copy: [install](install.md).

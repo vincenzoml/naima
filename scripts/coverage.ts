@@ -4,7 +4,7 @@
 //   deno task coverage --lcov     lcov on stdout, for a viewer
 //
 // The distribution tests run Naima the way a project does: a copy of this
-// source cloned into a temporary project, run through its launcher as its own
+// source copied into a temporary project, run through its launcher as its own
 // process. Deno records those runs under the copy's paths, which are deleted
 // when the test ends, so without help their coverage is lost and a module
 // only they exercise (program.ts, the launcher) reads as barely run. Each

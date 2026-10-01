@@ -26,9 +26,9 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 
 | Command | Plugin | What it does |
 |---|---|---|
-| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given |
-| [`update`](#naima-update) | core | move the lock to the head of the source's dist branch — its main, when the source publishes no dist: fetch it, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
-| [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored clone, vendored as committed files, or a git submodule — staging the switch as one change |
+| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given |
+| [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything |
+| [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change |
 | [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files |
 | [`help`](#naima-help) | core | list every command the loaded plugins provide, with its usage |
 | [`new`](#naima-new) | core | open an item |
@@ -105,7 +105,7 @@ An item is a directory under `<tracker>/<TYPE>/<slug>/`: `README.md` for the pro
 
 ### naima init
 
-Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given.
+Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore); nothing outside naima-tracker/ is touched unless --write-excludes is given.
 
 ```sh
 naima init [--write-excludes]
@@ -124,7 +124,7 @@ naima init --write-excludes
 
 ### naima update
 
-Move the lock to the head of the source's dist branch — its main, when the source publishes no dist: fetch it, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything.
+Move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything.
 
 ```sh
 naima update [--check
@@ -133,7 +133,7 @@ naima --accept-source]
 
 | Option | Default | What it does |
 |---|---|---|
-| `--check` |  | only say whether the source's dist (or main) has moved past the locked commit; exit 1 when it has |
+| `--check` |  | only say whether the source's main has moved past the locked commit; exit 1 when it has |
 | `--accept-source` |  | trust the source naima.json now names, after reviewing why it changed: every other command refuses to run a program from a source it was not aligned from; aligns the program to the locked commit of the new source, and moves nothing else |
 
 Examples:
@@ -146,17 +146,17 @@ naima update --accept-source
 
 ### naima carry
 
-Switch how the program is carried — a gitignored clone, vendored as committed files, or a git submodule — staging the switch as one change.
+Switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change.
 
 ```sh
-naima carry <clone|vendored|submodule>
+naima carry <copy|vendored|submodule>
 ```
 
 Examples:
 
 ```sh
 naima carry vendored
-naima carry clone
+naima carry copy
 ```
 
 ### naima guide

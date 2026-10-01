@@ -31,7 +31,7 @@ These apply only to this repository; the general ones are on
 [the rules page](naima/docs/guide/rules.md).
 
 - **Naima tracks itself, and the tracker is managed by the locked commit.**
-  `deno task naima <command>` runs the gitignored clone in
+  `deno task naima <command>` runs the gitignored copy of `naima/` in
   `naima-tracker/naima/`, locked to a commit of `main` by
   `naima-tracker/naima-data/naima.json`; `deno task dev <command>` runs the
   working tree, as a test, and never writes the tracker. Every tracker change
@@ -46,11 +46,15 @@ These apply only to this repository; the general ones are on
 
 ```sh
 deno task verify    # typecheck, lint, format, tests, check (working tree and lock), reference current
-node --test "test/**/*.test.ts" && bun test ./test/     # the same tests on Node and Bun
+node --test "test/**/*.test.ts" && bun test --timeout 30000 ./test/     # the same tests on Node and Bun
 ```
 
-What Naima is for — an enabling technology and decision support system for
-any versioned work, run by agents for an owner who only decides — is
+No CI runs them: these are the gate, run locally before every push. `.github/`
+holds only `pages.yml`, which deploys the site.
+
+What Naima is for — a silent software house of agents, born for software,
+that turns vibe coding into an exact science for an owner who only decides,
+and then manages any project — is
 [the purpose](naima/docs/purpose.md); what it does not do yet is
 [planned](naima/docs/planned.md), and a page describes nothing planned as if
 it existed. Requirements and design principles:
