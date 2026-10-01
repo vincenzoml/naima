@@ -23,7 +23,9 @@ data in its tracker.
 ### Change the tracker only through the CLI
 
 Items are created, changed, linked and closed with `naima` commands, never by
-editing `meta.json` by hand. An item's page, `README.md`, is yours to write.
+editing `meta.json` by hand. An item's page, `README.md`, is written with
+`naima describe` (the description) and `naima note` (a dated, attributed,
+append-only note); a person may also write it as a file.
 **Enforced by** the checks `readable`, `identity`, `fields` and `links`,
 which fail on what a hand edit typically breaks; the rest is convention.
 

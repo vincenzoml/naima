@@ -124,6 +124,61 @@ function afterWrite(ctx: Context, write: Write): void {
   for (const hook of ctx.registry.hooks) hook.afterWrite?.(write, ctx)
 }
 
+/**
+ * The heading of the section that holds an item's notes: dated, attributed
+ * entries that `naima note` appends and nothing rewrites.
+ */
+export const NOTES_HEADING = "## Notes"
+
+/** A README cut in three: the title line, the description, and the Notes section (its heading to the next `## ` heading, or the end). */
+export interface Prose {
+  title: string
+  description: string
+  notes: string
+}
+
+/** The lines of `text` that are headings, by index: a line in a fenced code block is not one. */
+function headingLines(lines: string[]): number[] {
+  const at: number[] = []
+  let fenced = false
+  lines.forEach((l, i) => {
+    if (/^\s*(```|~~~)/.test(l)) fenced = !fenced
+    else if (!fenced && /^#{1,6}\s/.test(l)) at.push(i)
+  })
+  return at
+}
+
+/** Split a README into its title, its description and its Notes section; any part it lacks is empty. */
+export function splitProse(text: string): Prose {
+  const lines = text.split("\n")
+  const headings = headingLines(lines)
+  const titleAt = headings[0] === 0 && /^#\s/.test(lines[0] ?? "") ? 0 : -1
+  const notesAt = headings.find((i) => lines[i]?.trimEnd() === NOTES_HEADING) ?? -1
+  const notesEnd = notesAt < 0 ? -1 : headings.find((i) => i > notesAt && /^##\s/.test(lines[i] ?? "")) ?? lines.length
+  const title = titleAt === 0 ? lines[0]! : ""
+  const notes = notesAt < 0 ? "" : lines.slice(notesAt, notesEnd).join("\n").trim()
+  const rest = lines.filter((_, i) => i !== titleAt && (notesAt < 0 || i < notesAt || i >= notesEnd))
+  return { title, description: rest.join("\n").trim(), notes }
+}
+
+/** A README from its three parts, each separated by one blank line. */
+export const joinProse = (p: Prose): string => [p.title, p.description, p.notes].filter((s) => s.trim()).join("\n\n") + "\n"
+
+/**
+ * Write an item's README, through every plugin's write hooks, as an `update`
+ * whose `prose` is the text about to be written: a hook may refuse it or change
+ * it. Its fields are written too when a hook changed them.
+ */
+export function saveProse(ctx: Context, item: Item, prose: string, opts: WriteOptions = {}): void {
+  const write: Write = { kind: "update", item: { ...item, meta: { ...item.meta } }, before: onDisk(item.dir), force: opts.force === true, prose }
+  beforeWrite(ctx, write)
+  writeFileAtomic(join(item.dir, README), write.prose ?? prose)
+  generation++
+  if (JSON.stringify(write.item.meta) !== JSON.stringify(write.before)) writeJson(join(item.dir, META), write.item.meta)
+  item.meta = write.item.meta
+  afterWrite(ctx, write)
+}
+
 /** Write an item's fields, through every plugin's write hooks. */
 export function saveMeta(ctx: Context, item: Item, opts: WriteOptions = {}): void {
   const write: Write = { kind: "update", item, before: onDisk(item.dir), force: opts.force === true }

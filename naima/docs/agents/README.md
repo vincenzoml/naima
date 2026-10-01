@@ -51,13 +51,12 @@ them, and Naima's own repository does.
 | [Closing a worktree](closing-a-worktree.md) | before a branch is merged |
 | [Reporting and triage](reporting-and-triage.md) | when something is said, seen or found |
 | [Planning: epics, milestones and gates](plan-with-epics-and-gates.md) | when the owner names a body of work, a release or a date |
+| [The non-stop loop](the-non-stop-loop.md) | when work should go on while the owner is away, until only the owner's is left |
 
 Whatever the flow, the owner's chat is private: nothing from it goes into
 the repository verbatim, and a file the owner shared becomes an attachment
 only with their explicit yes
-([the rule](../guide/rules.md#the-owners-chat-stays-private)). A way of
-working that keeps going until only the owner's work is left is
-[planned](../planned.md#the-non-stop-method).
+([the rule](../guide/rules.md#the-owners-chat-stays-private)).
 
 Two words used throughout: the [owner](../guide/glossary.md#owner), the person
 the project answers to, and the [trunk](../guide/glossary.md#trunk), the

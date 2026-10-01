@@ -12,5 +12,10 @@
       "rel": "relates-to",
       "id": "444d7de9-2698-4563-bfab-be5859779ae3"
     }
+  ],
+  "effort": "M",
+  "fixedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/guide/triage.md"
   ]
 }

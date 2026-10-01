@@ -7,7 +7,7 @@ later, and how that item earns its place in the ranking.
 the [owner](../guide/glossary.md#owner)'s chat — files it at once, before investigating (step 2). The
 filer then [triages](../guide/glossary.md#triage) it, in the same sitting (steps 3–6): it rewrites the
 description in its own words, records what it checked, links duplicates and
-sets the fields. The owner may also write an item directly as a file; it is
+sets the fields (`naima describe`, `naima note`, `naima triage set`; step 4). The owner may also write an item directly as a file; it is
 triaged the same way. A report written by the owner is never overwritten:
 the triage adds to it.
 
@@ -81,10 +81,29 @@ naima triage set <item> impact=high priority=next confidence=reported
 reporting or fixing an item means leaving its fields set. `naima triage` prints coverage per type; do not add to what it
 says is missing.
 
-**Notes of what you checked** go on the item's page, under a dated heading
-with who wrote them. A command to add a dated comment, and one to rewrite the
-description, are [planned](../planned.md#commands-for-every-action); until
-then, edit the page, `README.md`, and never `meta.json`.
+**The page is written by command, never by hand.** Two commands write the
+item's page, `README.md`, through every plugin's write hooks:
+
+```sh
+naima describe <item> --file triaged.md          # the description, rewritten in your own words
+naima note <item> "Reproduced on 16-bit PNGs only; 8-bit keeps alpha." --by "triage agent"
+```
+
+- `naima describe` replaces the description and keeps the title line and the
+  Notes section. Rewrite a report an agent filed; never one a person wrote,
+  which the triage adds to with a note instead. The title is a field:
+  `naima set <item> title="…"`.
+- `naima note` appends a dated entry, with who wrote it (`--by`, else git's
+  `user.name`) and the branch, to the Notes section. Notes are append-only:
+  a write that changes an earlier one is refused. Record there what you
+  checked, measured apart from inferred.
+- Both take `--file` for a longer text, and refuse an empty one (exit 2).
+- **What goes in is your own words.** Neither command takes the owner's chat:
+  paraphrase it. A verbatim quote, or a file the owner shared, goes in only
+  after their explicit yes, and the note says that they gave it
+  ([the rule](../guide/rules.md#the-owners-chat-stays-private)). A command to
+  attach a file with that consent recorded on the item is
+  [planned](../planned.md#commands-for-every-action).
 
 ## 5. Cross-reference instead of repeating
 
