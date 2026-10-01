@@ -126,6 +126,7 @@ const epicOrThrow = (ctx: Context, ref: string | undefined): Item => {
 const command: Command = {
   name: "epic",
   says: "each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out",
+  enforces: "only an epic groups items and never itself, and its status follows its items: setting it against them is refused",
   usage: "epic [<epic>...] [--all] [--json] | epic add <epic> <item>... | epic remove <epic> <item>...",
   options: [
     { name: "--all", says: "list the done epics too" },

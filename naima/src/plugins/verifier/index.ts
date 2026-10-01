@@ -252,6 +252,8 @@ const properties = (ctx: Context): Item[] => ctx.repo.items.filter((i) => i.type
 const verify: Command = {
   name: "verify",
   says: "run the verifier of properties and attach each run as evidence",
+  enforces:
+    "a property holds only with a run of its verifier on exactly what it has now, attached as evidence; a model or input outside the project is refused",
   usage: "verify <property>... | verify --all",
   options: [{ name: "--all", says: "every property item" }],
   examples: ["verify no-deadlock", "verify --all"],
@@ -273,6 +275,7 @@ const verify: Command = {
 const verifiers: Command = {
   name: "verifiers",
   says: "list the verifier adapters every plugin contributes",
+  enforces: "nothing: it only reads",
   usage: "verifiers",
   examples: ["verifiers"],
   run(_args, ctx) {

@@ -214,6 +214,7 @@ function specRows(ctx: Context): SpecRow[] {
 const spec: Command = {
   name: "spec",
   says: "each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version",
+  enforces: "a revision is a new spec item, its next version, that supersedes the old one; the old version is kept as it was",
   usage: "spec [--json] | spec revise <spec>",
   options: [{ name: "--json", says: "print each specification as JSON: spec, current, versions, drafts, followedBy" }],
   examples: ["spec", "spec --json", "spec revise specs/export-format"],
@@ -371,6 +372,7 @@ export function findDecisions(ctx: Context, words: string[], all = false): Decis
 const decisions: Command = {
   name: "decisions",
   says: "search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first",
+  enforces: "nothing: it only searches, so a settled question is looked up before it is asked again",
   usage: "decisions [<word>...] [--all] [--json]",
   options: [
     { name: "--all", says: "search the superseded and reopened decisions too" },

@@ -798,6 +798,8 @@ const metricsCommand: Command = {
   name: "metrics",
   says:
     "the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to",
+  enforces:
+    "numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why",
   usage:
     "metrics [list] | metrics run [name...] [--record] | metrics bound <name> <value> [--because <item>] | metrics trend <name> | metrics history [name...] [--json | --csv] [--last <n>] | metrics backfill [name...] [--since <ref>] [--last <n>] [--every <n>] [--again] | metrics plot [name...] [--out <file>] [--html] [--last <n>] [--title <t>] | metrics presets [--json]",
   options: [

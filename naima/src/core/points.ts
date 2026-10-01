@@ -61,12 +61,13 @@ export function commandGaps(c: Pick<Command, "says" | "usage" | "options" | "exa
 }
 
 /** A command's section of the reference: heading, what it does, usage, options, examples. */
-export function commandSection(c: Pick<Command, "name" | "says" | "usage" | "options" | "examples">): string[] {
+export function commandSection(c: Pick<Command, "name" | "says" | "usage" | "options" | "examples" | "enforces">): string[] {
   return [
     "",
     `### naima ${c.name}`,
     "",
     sentence(c.says),
+    ...(c.enforces ? ["", `**Enforces**: ${sentence(c.enforces)}`] : []),
     "",
     "```sh",
     ...c.usage.split(" | ").map((u) => `naima ${u}`),

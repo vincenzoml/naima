@@ -242,6 +242,7 @@ export const eventCommand: Command = {
   name: "event",
   says:
     "record an event the timeline cannot derive — a decision taken elsewhere, a build handed out, a policy, an outside fact — as one new file; everything else on `naima view timeline` is derived",
+  enforces: "an event has a YYYY-MM-DD date and a one-word kind, and is one new file; what the timeline derives is never recorded",
   usage: 'event <YYYY-MM-DD> "<what happened>" [--kind <kind>]',
   options: [{ name: "--kind", says: "what sort of event: decision, build, policy, fact, or any word", default: "fact" }],
   examples: ['event 2026-09-14 "Build 3 handed to the testers" --kind build', 'event 2026-09-20 "The vendor ended support for v1"'],

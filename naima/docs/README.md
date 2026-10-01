@@ -32,7 +32,8 @@ Then start from who you are.
   and the flows: the procedures an agent follows.
 - **[reference/](reference/)** — [the format](reference/format.md), the open
   specification of every file; [the reference](reference/reference.md),
-  generated from the plugins' manifests, so it cannot drift from the code;
+  generated from the plugins' manifests, so it cannot drift from the code —
+  [every command, what it does and what it enforces](reference/reference.md#commands-at-a-glance) opens it;
   [the plugin contract](reference/plugin-contract.md), for writing a plugin.
 - **[develop/](https://github.com/vincenzoml/naima/blob/main/develop/README.md)**, in Naima's repository and not in a
   project's copy — for people changing Naima itself: architecture, the

@@ -1,0 +1,14 @@
+{
+  "id": "22773f31-dae1-49c6-9fb3-17a879672a4e",
+  "title": "The three test gates finish within a wall-clock limit and leave no naima ui process behind",
+  "status": "passed",
+  "created": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "5c5044fa-9c0b-45fc-9eba-ae97cd27c7f4"
+    }
+  ],
+  "runBy": "agent",
+  "evidenceKind": "observation"
+}

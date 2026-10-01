@@ -183,5 +183,7 @@ one confirmed without a passing test, and one already proven that is still
 ([`naima/src/plugins/pack-analyses/index.ts`](https://github.com/vincenzoml/naima/blob/main/naima/src/plugins/pack-analyses/index.ts))
 is the fastest way to see how little a non-software pack has to add: one
 type, one field, and a check that reuses `verifies`/`verified-by` rather than
-inventing its own proof machinery. A paper's sections and reviews, or another
-kind of non-software work, would be its own pack, built the same way.
+inventing its own proof machinery. A paper's sections and reviews are the
+second worked example, for work with no command to rerun at all: see
+[Writing a paper: sections and reviews](paper-sections-and-reviews.md).
+Another kind of non-software work would be its own pack, built the same way.

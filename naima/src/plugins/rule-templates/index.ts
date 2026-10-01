@@ -71,6 +71,7 @@ const byId = new Map(TEMPLATES.map((t) => [t.id, t]))
 const command: Command = {
   name: "rule-templates",
   says: "list the ready-made rule templates this plugin ships, or add one as a project rule (a rules item, audience agents): none is added until asked for",
+  enforces: "nothing: a template becomes a rule only when asked for, as an ordinary rules item",
   usage: "rule-templates | rule-templates add <id>",
   options: [],
   examples: ["rule-templates", "rule-templates add one-predicate"],
