@@ -104,6 +104,14 @@ not an epic, fails the check.
 reporting or fixing an item means leaving its fields set. `naima triage` prints coverage per type; do not add to what it
 says is missing.
 
+A `priority=now` item sitting with nobody's [claim](../guide/glossary.md#claim-file)
+on it does not wait to be asked about: `naima view next` carries an age
+column (days since the field was last confirmed) and marks such an item
+`unclaimed`; `naima check` notes one open past
+`plugins.triage.options.maxNowAgeDays` (default 3 days). Claim it
+(`naima claim <item>`) or drop it back to `next` if nobody is actually
+picking it up.
+
 **The page is written by command, never by hand.** Two commands write the
 item's page, `README.md`, through every plugin's write hooks:
 

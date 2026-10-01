@@ -905,7 +905,13 @@ Priority, impact, effort, confidence; the urgency ranking built from them; parke
 
 Its contributions' qualified ids are `triage/<name>`.
 
-Four fields rank an item, and no more. `effort` is never derived: nothing in a report says what a fix costs, and a size guessed from the wording is how an XL hides inside an S. `triage derive` infers only `confidence`, from the page's own words — an evidence verb negated up to three words before it ("could not be reproduced") reads as `unclear`, never `measured` — and stamps `triagedBy: derived` so a value a person set is never overwritten. Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks. A parked priority, or a wontfix or dropped status, is a deferral: `reopensWhen` says what would make it worth re-arguing, `naima view parked` lists every one, and a page still left as its unfilled template is a problem. `options.documents` in naima.json (`plugins.triage.options.documents`) names which documents are authoritative and which are retired — path → { "says", "retired" }; `naima guide` prints the list, and a check notes a retired one still named from a current one.
+Four fields rank an item, and no more. `effort` is never derived: nothing in a report says what a fix costs, and a size guessed from the wording is how an XL hides inside an S. `triage derive` infers only `confidence`, from the page's own words — an evidence verb negated up to three words before it ("could not be reproduced") reads as `unclear`, never `measured` — and stamps `triagedBy: derived` so a value a person set is never overwritten. Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks. A parked priority, or a wontfix or dropped status, is a deferral: `reopensWhen` says what would make it worth re-arguing, `naima view parked` lists every one, and a page still left as its unfilled template is a problem. `options.documents` in naima.json (`plugins.triage.options.documents`) names which documents are authoritative and which are retired — path → { "says", "retired" }; `naima guide` prints the list, and a check notes a retired one still named from a current one. `naima view next` (and the summary it feeds) carries an age column, derived at read time from `triagedOn` or `created`, never stored; a `now` item no branch's claim names is marked unclaimed, and `unclaimed-now-item-aging` notes one open past `options.maxNowAgeDays` (default 3).
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `maxNowAgeDays` | `3` | how many days a `now` item may sit unclaimed before a check notes it |
 
 ### naima triage
 
@@ -949,6 +955,7 @@ naima triage derive --write
 |---|---|
 | `deferred-says-why` | a parked, wontfix or dropped item's page says why — not left as the template it was created with |
 | `retired-document-still-linked` | no current authoritative document still names a retired one |
+| `unclaimed-now-item-aging` | a `now` item open past options.maxNowAgeDays (3) with nobody's claim on it |
 
 **Views**, printed by `naima view <name>`
 

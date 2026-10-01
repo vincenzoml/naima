@@ -1,0 +1,12 @@
+{
+  "branch": "claude/f-u2-age",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "d651abd5-0a75-496b-8206-f308926f974d",
+      "ref": "todos/surface-how-long-now-priority-item-has",
+      "title": "Surface how long a now-priority item has sat unclaimed"
+    }
+  ],
+  "note": "implementing U2: age of unclaimed now items"
+}

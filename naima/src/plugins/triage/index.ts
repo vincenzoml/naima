@@ -33,6 +33,7 @@ import {
   type Plugin,
   positiveInt,
   type RankTerm,
+  readAcrossBranches,
   readReadme,
   rendered,
   saveMeta,
@@ -102,6 +103,43 @@ const field = (name: string) => FIELDS.find((f) => f.name === name)
 /** A parked, wontfix or dropped item: deliberately not being worked on now. */
 const DEFERRED_STATUSES = new Set(["wontfix", "dropped"])
 export const isDeferred = (item: Item): boolean => fieldValue(item, PRIORITY) === "parked" || DEFERRED_STATUSES.has(String(item.meta.status ?? ""))
+
+const DAY = 86_400_000
+const DEFAULT_MAX_NOW_AGE_DAYS = 3
+
+/** Whole days since an item's priority was last confirmed: `triagedOn`, or `created` for one never triaged. */
+function ageDays(ctx: Context, item: Item): number {
+  const since = fieldValue(item, TRIAGED_ON) ?? String(item.meta["created"] ?? today(ctx))
+  return Math.max(0, Math.round((Date.parse(`${today(ctx)}T00:00:00Z`) - Date.parse(`${since}T00:00:00Z`)) / DAY))
+}
+
+/**
+ * Every item id any branch's claim names, read the same way `naima claims`
+ * does — directly off `<data>/claims/*.json` across every local branch —
+ * without depending on the coordination plugin being loaded.
+ */
+function claimedItemIds(ctx: Context): Set<string> {
+  const ids = new Set<string>()
+  for (const f of readAcrossBranches(ctx.root, `${ctx.trackerDir}/claims`, ".json")) {
+    try {
+      const items = (JSON.parse(f.text) as { items?: { id?: unknown }[] }).items ?? []
+      for (const e of items) if (typeof e?.id === "string") ids.add(e.id)
+    } catch {
+      // an unreadable claim file names nobody: skip it, as `naima claims` does
+    }
+  }
+  return ids
+}
+
+/** `options.maxNowAgeDays`: how many days a `now` item may sit unclaimed before `unclaimed-now-item-aging` notes it. */
+function readMaxNowAgeDays(options: Record<string, unknown>): number {
+  const raw = options["maxNowAgeDays"]
+  if (raw === undefined) return DEFAULT_MAX_NOW_AGE_DAYS
+  if (typeof raw !== "number" || !Number.isInteger(raw) || raw < 1) {
+    throw new Error(`triage: options.maxNowAgeDays is a whole number of days, got ${JSON.stringify(raw)}`)
+  }
+  return raw
+}
 
 const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v)
 
@@ -288,24 +326,35 @@ interface NextRow {
   impact: string | null
   priority: string | null
   effort: string | null
+  /** Days since priority was last confirmed (`triagedOn`, or `created` if never triaged). */
+  age: number
+  /** No branch's claim names this item. */
+  unclaimed: boolean
 }
 
-const nextRows = (ctx: Context, n: number): NextRow[] =>
-  byUrgency(ctx, openItems(ctx)).slice(0, n).map((i) => ({
+const nextRows = (ctx: Context, n: number): NextRow[] => {
+  const held = claimedItemIds(ctx)
+  return byUrgency(ctx, openItems(ctx)).slice(0, n).map((i) => ({
     ref: label(i),
     title: i.meta.title,
     impact: fieldValue(i, IMPACT) ?? null,
     priority: fieldValue(i, PRIORITY) ?? null,
     effort: fieldValue(i, EFFORT) ?? null,
+    age: ageDays(ctx, i),
+    unclaimed: !held.has(i.meta.id),
   }))
+}
 
-const rowLine = (r: NextRow): string => `  ${[r.impact, r.priority, r.effort].map((v) => (v ?? "·").padEnd(8)).join("")}${r.ref}  ${r.title}`
+/** A line's age suffix: the days waited, flagged when it is a `now` item nobody holds. */
+const ageSuffix = (r: NextRow): string => `${r.age}d${r.priority === "now" && r.unclaimed ? " unclaimed" : ""}`
+
+const rowLine = (r: NextRow): string => `  ${[r.impact, r.priority, r.effort].map((v) => (v ?? "·").padEnd(8)).join("")}${r.ref}  ${r.title}  (${ageSuffix(r)})`
 const rowsTable = (rows: NextRow[]): string[] =>
   rows.length
     ? [
-      "| Impact | Priority | Effort | Item | Title |",
-      "|---|---|---|---|---|",
-      ...rows.map((r) => `| ${r.impact ?? ""} | ${r.priority ?? ""} | ${r.effort ?? ""} | ${r.ref} | ${cell(r.title)} |`),
+      "| Impact | Priority | Effort | Age | Item | Title |",
+      "|---|---|---|---|---|---|",
+      ...rows.map((r) => `| ${r.impact ?? ""} | ${r.priority ?? ""} | ${r.effort ?? ""} | ${ageSuffix(r)} | ${r.ref} | ${cell(r.title)} |`),
     ]
     : []
 
@@ -410,6 +459,25 @@ function documentsGuide(options: Record<string, unknown>): GuideSection {
   }
 }
 
+/** A `now` item open past `options.maxNowAgeDays` with no branch's claim on it: visible to a check without anyone asking the queue. */
+function unclaimedAgingNow(options: Record<string, unknown>): Check {
+  const maxAge = readMaxNowAgeDays(options)
+  return {
+    name: "unclaimed-now-item-aging",
+    says: `a \`now\` item open past options.maxNowAgeDays (${maxAge}) with nobody's claim on it`,
+    run: (ctx) => {
+      const held = claimedItemIds(ctx)
+      return openItems(ctx)
+        .filter((i) => fieldValue(i, PRIORITY) === "now" && !held.has(i.meta.id) && ageDays(ctx, i) > maxAge)
+        .map((i): Finding => ({
+          level: "note",
+          message: `${label(i)} has been \`now\` and unclaimed for ${ageDays(ctx, i)} days (over ${maxAge}) — nobody holds it`,
+          item: i,
+        }))
+    },
+  }
+}
+
 /** A retired document still named from a current one: the two keep competing instead of one replacing the other. */
 function retiredStillLinked(options: Record<string, unknown>): Check {
   return {
@@ -435,6 +503,7 @@ function retiredStillLinked(options: Record<string, unknown>): Check {
 
 export default function triagePlugin(options: Record<string, unknown> = {}): Plugin {
   readDocuments(options) // validated eagerly: a bad naima.json is caught when the plugin loads, not when guide or check happen to run
+  readMaxNowAgeDays(options) // same: a bad options.maxNowAgeDays is caught when the plugin loads
   return {
     name: "triage",
     contract: CONTRACT,
@@ -444,14 +513,18 @@ export default function triagePlugin(options: Record<string, unknown> = {}): Plu
       '`triage derive` infers only `confidence`, from the page\'s own words — an evidence verb negated up to three words before it ("could not be reproduced") reads as `unclear`, never `measured` — and stamps `triagedBy: derived` so a value a person set is never overwritten. ' +
       "Urgency is the sum of every plugin's rank terms, lower first; this plugin adds impact (×1.5), priority (×1.2) and effort (×0.3), each by its value's rank; an unset impact or priority counts as the middle of its scale, an unset effort as its largest size (XL), so an item nobody has sized sinks. " +
       "A parked priority, or a wontfix or dropped status, is a deferral: `reopensWhen` says what would make it worth re-arguing, `naima view parked` lists every one, and a page still left as its unfilled template is a problem. " +
-      '`options.documents` in naima.json (`plugins.triage.options.documents`) names which documents are authoritative and which are retired — path → { "says", "retired" }; `naima guide` prints the list, and a check notes a retired one still named from a current one.',
+      '`options.documents` in naima.json (`plugins.triage.options.documents`) names which documents are authoritative and which are retired — path → { "says", "retired" }; `naima guide` prints the list, and a check notes a retired one still named from a current one. ' +
+      "`naima view next` (and the summary it feeds) carries an age column, derived at read time from `triagedOn` or `created`, never stored; a `now` item no branch's claim names is marked unclaimed, and `unclaimed-now-item-aging` notes one open past `options.maxNowAgeDays` (default 3).",
+    options: [
+      { name: "maxNowAgeDays", says: "how many days a `now` item may sit unclaimed before a check notes it", default: String(DEFAULT_MAX_NOW_AGE_DAYS) },
+    ],
     fields: FIELDS,
     rank,
     commands: [triage],
     views: [next, parked],
     summary: [top],
     hooks: [stampTriage],
-    checks: [deferredSaysWhy, retiredStillLinked(options)],
+    checks: [deferredSaysWhy, retiredStillLinked(options), unclaimedAgingNow(options)],
     guide: [documentsGuide(options)],
   }
 }
