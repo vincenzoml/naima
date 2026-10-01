@@ -18,7 +18,8 @@
   ],
   "fixedOn": "2026-10-01",
   "commits": [
-    "ecfc16e"
+    "ecfc16e",
+    "992d10c"
   ],
   "docs": [
     "naima/docs/guide/read-the-board.md",
