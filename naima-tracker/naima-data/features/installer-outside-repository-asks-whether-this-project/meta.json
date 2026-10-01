@@ -1,0 +1,14 @@
+{
+  "id": "ddd7a2ad-603a-4a34-8e3a-b83ed455559b",
+  "title": "The installer outside a repository asks whether this is the project root and points to the agent; agent instructions say: in the root of this repository, creating one if missing",
+  "status": "shipped",
+  "created": "2026-10-01",
+  "impact": "medium",
+  "priority": "now",
+  "effort": "S",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01",
+  "docs": [
+    "naima/docs/guide/install.md"
+  ]
+}
