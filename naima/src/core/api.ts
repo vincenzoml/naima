@@ -83,7 +83,7 @@ export {
   type Worktree,
   worktrees,
 } from "./git.ts"
-export { DATA_FILE, DEFAULT_DATA, TRACKER_DIR } from "./layout.ts"
+export { cacheDir, DATA_FILE, DEFAULT_DATA, TRACKER_DIR } from "./layout.ts"
 export { cell, code, sentence, table } from "./markdown.ts"
 export { commandGaps, commandSection, FIELD_KINDS, optionsTable } from "./points.ts"
 export { contributionsOf } from "./manifest.ts"

@@ -10,7 +10,7 @@ import { mayRun, OPT_IN } from "../../../naima/src/launcher.ts"
 import { firstParty, firstPartyPlugins } from "../../../naima/src/builtins.ts"
 import { composePlugins } from "../../../naima/src/core/plugins.ts"
 import verifier, { readRun } from "../../../naima/src/plugins/verifier/index.ts"
-import { mcrl2Plugin, mcrl2Verifier, type Runner, type ToolRun } from "../../../naima/src/plugins/verifier-mcrl2/index.ts"
+import { mcrl2Plugin, mcrl2Verifier, type Runner, type ToolRun, workBase } from "../../../naima/src/plugins/verifier-mcrl2/index.ts"
 
 const FIXTURES = join(dirname(new URL(import.meta.url).pathname), "fixtures")
 const fixtures = JSON.parse(readFileSync(join(FIXTURES, "tools.json"), "utf8")) as Record<string, unknown>
@@ -204,5 +204,15 @@ test("switched on, both model-checker plugins are documented as every loaded plu
     assert.deepEqual(p.ctx.registry.contributions("verifiers").map((c) => c.name).sort(), ["example-regex", "mcrl2", "voxlogica"])
   } finally {
     p.cleanup()
+  }
+})
+
+test("mCRL2: a run works under the per-user cache, inside the launcher's fence, not in the system's temporary directory", () => {
+  const cache = mkdtempSync(join(tmpdir(), "naima-cache-"))
+  try {
+    assert.equal(workBase({ NAIMA_CACHE: cache }, "darwin"), join(cache, "verifier-mcrl2"))
+    assert.equal(workBase({}, "linux"), tmpdir())
+  } finally {
+    rmSync(cache, { recursive: true, force: true })
   }
 })

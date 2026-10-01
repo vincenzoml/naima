@@ -1,0 +1,38 @@
+{
+  "branch": "claude/mcrl2-coordination-check",
+  "claimedAt": "2026-10-01",
+  "note": "install mCRL2, check coordination model and properties, negative experiment",
+  "preparing": true,
+  "items": [
+    {
+      "id": "c8259401-3093-4ed2-a227-6fcca381ae28",
+      "ref": "todos/mcrl2-model-coordination-protocol-complete-checked-negative",
+      "title": "mCRL2 model of the coordination protocol complete and checked, with the negative experiment (drop the fast-forward rule or the no-shared-file rule, showing the counterexample)"
+    },
+    {
+      "id": "92552bf4-de93-402e-933d-233e41f21228",
+      "ref": "todos/coordination-protocol-properties-filed-as-property-items",
+      "title": "Coordination-protocol properties filed as property items in Naima and verified by the mCRL2 verifier plugin"
+    },
+    {
+      "id": "4b027eb2-2e9f-4864-aaae-c3b1e42ec03a",
+      "ref": "properties/no-claim-ever-lost-mcrl2-model-coordination",
+      "title": "No claim is ever lost, in the mCRL2 model of the coordination protocol"
+    },
+    {
+      "id": "4b08ada1-730a-49a6-9bab-9fb401d2ab1e",
+      "ref": "properties/released-claim-never-reappears-mcrl2-model-coordination",
+      "title": "A released claim never reappears, in the mCRL2 model of the coordination protocol"
+    },
+    {
+      "id": "79b38ca9-901f-48a3-a6b9-c19de5ff4063",
+      "ref": "bugs/mcrl2-verifier-writes-run-files-system-temporary",
+      "title": "The mCRL2 verifier writes its run files in the system temporary directory, outside the launcher's write fence, so every real run ends in error"
+    },
+    {
+      "id": "70f54810-ffa8-4fca-b2b2-0e8dc4294015",
+      "ref": "tests/real-naima-verify-run-mcrl2-verifier-under",
+      "title": "A real naima verify run of the mCRL2 verifier, under the launcher's fence, reaches the mCRL2 tools and returns a verdict other than error"
+    }
+  ]
+}

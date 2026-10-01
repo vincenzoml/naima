@@ -1,7 +1,7 @@
 {
   "id": "4b027eb2-2e9f-4864-aaae-c3b1e42ec03a",
   "title": "No claim is ever lost, in the mCRL2 model of the coordination protocol",
-  "status": "open",
+  "status": "error",
   "created": "2026-10-01",
   "verifier": "mcrl2",
   "model": "develop/models/coordination/claims.mcrl2",
@@ -16,5 +16,6 @@
       "rel": "verifies",
       "id": "92552bf4-de93-402e-933d-233e41f21228"
     }
-  ]
+  ],
+  "lastRun": "run-2026-10-01T20-28-32-194Z.json"
 }
