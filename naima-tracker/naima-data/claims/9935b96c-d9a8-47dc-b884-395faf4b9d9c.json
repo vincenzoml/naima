@@ -1,0 +1,22 @@
+{
+  "branch": "claude/w1-worktrees",
+  "claimedAt": "2026-10-01",
+  "items": [
+    {
+      "id": "f0dd88a2-7b6c-4c08-bcfe-4970dfaf0ffd",
+      "ref": "todos/worktree-naming-policy-enforced-every-naima-created",
+      "title": "Worktree naming policy, enforced; every Naima-created worktree carries a claim"
+    },
+    {
+      "id": "4ebcd644-4871-479e-bb9e-f674281c172a",
+      "ref": "features/trunk-commit-detection-while-branch-being-prepared",
+      "title": "Trunk-commit detection while a branch is being prepared"
+    },
+    {
+      "id": "96a1f1fc-92d4-430d-9628-9285f6075724",
+      "ref": "todos/recovery-tags-before-destructive-git-operations",
+      "title": "Recovery tags before destructive git operations"
+    }
+  ],
+  "note": "U2: worktree discipline — naming policy, naima open, preparing claims, archive tags"
+}
