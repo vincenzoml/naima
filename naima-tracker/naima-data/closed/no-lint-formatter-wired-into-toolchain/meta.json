@@ -10,5 +10,8 @@
   "effort": "M",
   "triagedOn": "2026-09-30",
   "closedFrom": "todos",
-  "closedOn": "2026-10-01"
+  "closedOn": "2026-10-01",
+  "commits": [
+    "legacy"
+  ]
 }

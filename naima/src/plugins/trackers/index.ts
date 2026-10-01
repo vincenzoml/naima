@@ -9,10 +9,12 @@ import {
   bool,
   type Check,
   type Command,
+  commitExists,
   type Context,
   CONTRACT,
   fieldValue,
   type Finding,
+  isAncestor,
   isOpen,
   type Item,
   label,
@@ -28,6 +30,7 @@ import {
   setFieldValue,
   type SummarySection,
   today,
+  trunk,
   typeOrThrow,
   usageError,
 } from "../../core/api.ts"
@@ -80,6 +83,37 @@ const CLOSED_FROM = { name: "closedFrom", kind: "string" } as const
 const CLOSED_ON = { name: "closedOn", kind: "date" } as const
 const RUN_BY = { name: "runBy", kind: "enum" } as const
 const HUMAN_BECAUSE = { name: "humanBecause", kind: "enum" } as const
+const COMMITS = { name: "commits", kind: "strings" } as const
+
+/**
+ * The one guessed value `commits` may hold: it marks an item closed before
+ * this field existed, grandfathered in by the migration that shipped it — not
+ * retrofitted with an invented hash. Never satisfies `naima close`'s own
+ * requirement: only a real commit, reachable from the trunk, does that.
+ */
+export const LEGACY_COMMIT = "legacy"
+
+/** The date, YYYY-MM-DD, from which an archived item is checked for a commit. Before it, nothing is retrofitted by guessing. */
+const DEFAULT_COMMITS_REQUIRED_FROM = "2026-10-01"
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
+
+function readOptions(options: Record<string, unknown>): { commitsRequiredFrom: string } {
+  const v = options["commitsRequiredFrom"] ?? DEFAULT_COMMITS_REQUIRED_FROM
+  if (typeof v !== "string" || !ISO_DATE.test(v)) {
+    throw new Error(`trackers: options.commitsRequiredFrom must be a date, YYYY-MM-DD, got ${JSON.stringify(v)}`)
+  }
+  return { commitsRequiredFrom: v }
+}
+
+/** Whether one of `item`'s `commits` is a real commit, and reachable from the trunk. False with no trunk to read. */
+function hasCommitFromTrunk(ctx: Context, item: Item): boolean {
+  const t = trunk(ctx.root)
+  if (!t) return false
+  return (fieldValue(item, COMMITS) ?? []).some((h) => commitExists(ctx.root, h) && isAncestor(ctx.root, h, t))
+}
+
+/** Whether `item` is grandfathered: closed before `commits` existed, marked so by the migration, not by a guess. */
+const isGrandfathered = (item: Item): boolean => (fieldValue(item, COMMITS) ?? []).includes(LEGACY_COMMIT)
 
 export type Lifecycle = "unfixed" | "fixed" | "resolved" | "closed"
 
@@ -160,6 +194,16 @@ const humanSaysWhy: Check = {
         message: `${label(i)} is handed to a person without saying why — set humanBecause, or runBy if an agent can do it`,
         item: i,
       })),
+}
+
+const commitsAreReal: Check = {
+  name: "commits-are-real",
+  says: "every hash an item's commits field names is a commit git has",
+  run: (ctx) =>
+    ctx.repo.items.flatMap((i): Finding[] => {
+      const bad = (fieldValue(i, COMMITS) ?? []).filter((h) => h !== LEGACY_COMMIT && !commitExists(ctx.root, h))
+      return bad.length ? [{ level: "problem", message: `${label(i)}: commits names ${bad.join(", ")}, which git does not have`, item: i }] : []
+    }),
 }
 
 /** A test that verifies a bug, open or archived: it proves the fix only if it was seen failing first. */
@@ -270,6 +314,11 @@ const close: Command = {
     if (state !== "resolved") {
       throw new Error(`${label(item)} is ${state}: closing takes fixedOn and a verified-by item that has passed`)
     }
+    if (!bool(p, "force") && !hasCommitFromTrunk(ctx, item)) {
+      throw new Error(
+        `${label(item)} cannot be closed: none of its commits is a real commit reachable from the trunk — set commits, or close --force`,
+      )
+    }
     // One write: the move carries the new fields, so a refusal leaves the item as it was, where it was.
     const archived: Item = { ...item, meta: { ...item.meta, status: "closed" } }
     setFieldValue(archived, CLOSED_FROM, item.type)
@@ -309,6 +358,15 @@ const bugCounts: SummarySection = {
 }
 
 export default function trackers(options: Record<string, unknown> = {}): Plugin {
+  const { commitsRequiredFrom } = readOptions(options)
+  const closedNamesCommits: Check = {
+    name: "closed-names-its-commits",
+    says: `an item closed on or after ${commitsRequiredFrom} names a commit reachable from the trunk`,
+    run: (ctx) =>
+      ctx.repo.items
+        .filter((i) => i.type === "closed" && (fieldValue(i, CLOSED_ON) ?? "") >= commitsRequiredFrom && !hasCommitFromTrunk(ctx, i) && !isGrandfathered(i))
+        .map((i): Finding => ({ level: "problem", message: `${label(i)} is closed without a commit reachable from the trunk`, item: i })),
+  }
   const phrases = readExcusePhrases(options)
   return {
     name: "trackers",
@@ -428,6 +486,13 @@ export default function trackers(options: Record<string, unknown> = {}): Plugin 
       { name: "redSeen", kind: "date", says: "the day a regression test was seen failing on the code before the fix: red, then green", appliesTo: ["tests"] },
       { name: "area", kind: "string", says: "where it lives: the surface somebody would have open while working on it" },
       { name: "kind", kind: "string", says: "the mode of work it demands: code, decision, research, writing…" },
+      {
+        name: "commits",
+        kind: "strings",
+        says:
+          'the git commit hashes that fixed it, each reachable from the trunk — or "legacy" on an item closed before this field existed, set once by migration, never retrofitted by guessing',
+        traits: [FIXABLE],
+      },
     ],
     relations: [
       { name: "verifies", inverse: "verified-by", says: "is the gesture that proves" },
@@ -439,6 +504,8 @@ export default function trackers(options: Record<string, unknown> = {}): Plugin 
       fixNamesGesture,
       closedHasProof,
       humanSaysWhy,
+      commitsAreReal,
+      closedNamesCommits,
       regressionSawRed,
       inspectionProvesNothing,
       untickedNamesPassed,

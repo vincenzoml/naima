@@ -42,7 +42,7 @@ The configuration, `naima.json`: yes, by hand
 ## Why won't Naima close my item?
 
 Closing needs the fix and a [proof](glossary.md#proof) that passed. `naima close` says which is
-missing; [prove and close](prove-and-close.md#4-close-it) lists every reason.
+missing; [prove and close](prove-and-close.md#5-close-it) lists every reason.
 
 ## Why does `naima check` fail after I pulled?
 

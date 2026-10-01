@@ -19,5 +19,8 @@
     "naima/docs/guide/plan-with-requirements-specs-and-decisions.md#requirements-what-must-hold"
   ],
   "closedFrom": "features",
-  "closedOn": "2026-10-01"
+  "closedOn": "2026-10-01",
+  "commits": [
+    "legacy"
+  ]
 }

@@ -660,6 +660,7 @@ Traits: `fixable`.
 | `redSeen` | date | tests | the day a regression test was seen failing on the code before the fix: red, then green |  |
 | `area` | string | every type | where it lives: the surface somebody would have open while working on it |  |
 | `kind` | string | every type | the mode of work it demands: code, decision, research, writing… |  |
+| `commits` | strings | any type tagged `fixable` | the git commit hashes that fixed it, each reachable from the trunk — or "legacy" on an item closed before this field existed, set once by migration, never retrofitted by guessing |  |
 
 **Link relations** — only the direction written is stored; the inverse is derived when read.
 
@@ -677,6 +678,8 @@ Traits: `fixable`.
 | `fix-names-its-gesture` | a fixed item names the gesture that would prove it |
 | `closed-carries-proof` | every archived item is verified by an item that has passed |
 | `human-says-why` | an open item whose proof needs a person (runBy human) says why in humanBecause |
+| `commits-are-real` | every hash an item's commits field names is a commit git has |
+| `closed-names-its-commits` | an item closed on or after 2026-10-01 names a commit reachable from the trunk |
 | `regression-test-saw-red` | a passed test that verifies a bug records the day it was seen failing first, in redSeen |
 | `inspection-proves-nothing` | a passed test whose evidenceKind is inspection is noted: reading the code is no evidence |
 | `unticked-clause-names-passed-test` | an open item's unticked clause that names a test which has passed — as tests/<slug>, or as its linked test once every item verifying it has passed — is noted: tick it, or reopen the test |
