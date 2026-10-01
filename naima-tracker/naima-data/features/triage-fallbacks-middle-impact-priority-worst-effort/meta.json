@@ -7,5 +7,8 @@
   "priority": "later",
   "confidence": "diagnosed",
   "effort": "S",
-  "triagedOn": "2026-09-30"
+  "triagedOn": "2026-09-30",
+  "docs": [
+    "naima/docs/guide/extending-naima.md"
+  ]
 }

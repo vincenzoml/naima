@@ -79,4 +79,5 @@ included.
 Delete its entry from `plugins`. Its [items](glossary.md#item), if it added a type, stay on disk;
 `naima check` reports a folder no loaded plugin owns (the check `layout`).
 
-Writing a plugin of your own: [plugin contract](../reference/plugin-contract.md).
+Writing a plugin of your own: [extending Naima](extending-naima.md), and the
+full contract it is written against: [plugin contract](../reference/plugin-contract.md).

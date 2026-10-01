@@ -21,6 +21,19 @@ shared only after their explicit yes, with
 evidence goes in with `--own`, redacted first
 ([the rule](../../docs/guide/rules.md#the-owners-chat-stays-private)).
 
+**Capture now, act later — always, not only on `/flow:report`.** Whenever
+the owner, in chat, asks for a feature, reports a problem, makes a decision
+or defers something, file it at once, in the background, without derailing
+whatever you are doing: restated in your own words, never the chat verbatim;
+duplicates searched first (`naima list`, or `naima new --dedupe`, which
+prints likely duplicates of the same type before writing and still writes)
+and linked instead of refiled; triaged on the spot (impact, priority,
+confidence); a decision recorded with `naima new decisions`, a deferral with
+its reason. "I already told you" means a report was lost: file it now and
+say so — never argue that it was already said. The full shape of a report
+is [reporting and triage](../../docs/agents/reporting-and-triage.md); this
+line is so it happens even when nobody typed `/flow:report`.
+
 In this page, `naima` means, from the project's root:
 
 ```sh

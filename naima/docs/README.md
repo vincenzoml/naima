@@ -21,7 +21,9 @@ Then start from who you are.
   project runs, the tutorial, a page per everyday task, concepts, the [rules](guide/rules.md) (the only
   page that states them), a project's own rules
   ([write one](guide/write-a-project-rule.md)), installing, configuration,
-  questions, glossary.
+  questions, glossary, and [extending Naima](guide/extending-naima.md) for a
+  programmer writing a plugin or a researcher adopting Naima outside
+  software.
 - **[agents/](agents/README.md)** — for agents. How an agent learns a
   project, the skill, [the project's own rules](agents/read-the-project-rules.md),
   and the flows: the procedures an agent follows.

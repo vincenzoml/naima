@@ -61,9 +61,10 @@ naima new features "Export to PDF with the figures in colour"
 naima board features
 ```
 
-Epics, milestones, requirements and specifications as items are
-[planned](../planned.md#epics-and-milestones); today a todo or a feature
-whose page lists its parts stands in for an epic.
+Grouping work as an [epic](glossary.md#epic), giving a release a date as a
+[milestone](glossary.md#milestone), and saying what must hold and how exactly
+([requirements, specifications and decisions](plan-with-requirements-specs-and-decisions.md))
+are items too: [plan with epics, milestones and gates](plan-with-epics-milestones-and-gates.md).
 
 ## Gates
 
@@ -99,7 +100,14 @@ because everything is written down in files:
 
 Worktrees and branches follow one naming scheme, and each worktree carries
 a claim file: `naima open` makes both, and `naima check` fails what breaks
-them. A way of working keeps going until only your work is left
+them
+([the enforced rule](rules.md#worktrees-and-branches-are-named-by-one-scheme-and-every-worktree-carries-a-claim)).
+Full lifecycle of a piece of work, start to finish, each step naming its
+command: [the tutorial](tutorial.md) walks it for a single worktree; opening
+one and finishing it are their own pages, for agents:
+[opening a worktree](../agents/opening-a-worktree.md),
+[closing a worktree](../agents/closing-a-worktree.md). A way of working
+keeps going until only your work is left
 ([while you are away](while-you-are-away.md)).
 
 ## Decisions

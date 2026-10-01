@@ -9,7 +9,20 @@ import { coreChecks, runChecks } from "./check.ts"
 import { groupBy } from "./collections.ts"
 import { appliesTo, fieldValue, isOpenList, parseFieldValue } from "./fields.ts"
 import { currentBranch, gitOrNull, isGitRepo } from "./git.ts"
-import { ATTACHMENTS, createItem, joinProse, moveItem, NOTES_HEADING, readReadme, saveMeta, saveProse, splitProse, today, type WriteOptions } from "./item.ts"
+import {
+  ATTACHMENTS,
+  createItem,
+  joinProse,
+  moveItem,
+  NOTES_HEADING,
+  readReadme,
+  saveMeta,
+  saveProse,
+  significantWords,
+  splitProse,
+  today,
+  type WriteOptions,
+} from "./item.ts"
 import { byUrgency, isOpen, label } from "./lifecycle.ts"
 import { CONTRACT } from "./contract.ts"
 import { shortOrId } from "./names.ts"
@@ -83,17 +96,40 @@ const SECTION = { name: "section", kind: "string" } as const
 
 const line = (item: Item): string => `  ${item.meta.status.padEnd(9)} ${item.meta.title}  — ${label(item)}`
 
+/**
+ * Items, of any type, whose title shares at least half of `title`'s
+ * significant words — a hint for a human or agent about to file a report,
+ * never a block: `new --dedupe` prints these before writing, and still
+ * writes (features/capture-now-act-later-top-level-behaviour,
+ * todos/deferral-reason-becomes-check-parked-wontfix-must).
+ */
+export function likelyDuplicatesOf(ctx: Context, type: string, title: string): Item[] {
+  const words = new Set(significantWords(title))
+  if (!words.size) return []
+  return ctx.repo.items
+    .filter((i) => i.type === type)
+    .filter((i) => {
+      const shared = significantWords(i.meta.title).filter((w) => words.has(w)).length
+      return shared > 0 && shared * 2 >= words.size
+    })
+}
+
 const newCommand: Command = {
   name: "new",
   says: "open an item",
-  usage: 'new <type> "<title>" [--section <s>] [--set field=value]...',
+  usage: 'new <type> "<title>" [--section <s>] [--set field=value]... [--dedupe]',
   options: [
     { name: "--section", says: "the heading the item is grouped under on its board" },
     { name: "--set", says: "a field=value pair to set on the new item; repeatable" },
+    { name: "--dedupe", says: "print items of the same type with a similar title before writing; never blocks" },
   ],
-  examples: ['new bugs "Export drops the alpha channel"', 'new tests "Export keeps the alpha channel" --set runBy=agent --section export'],
+  examples: [
+    'new bugs "Export drops the alpha channel"',
+    'new tests "Export keeps the alpha channel" --set runBy=agent --section export',
+    'new todos "Retry export on timeout" --dedupe',
+  ],
   run(args, ctx) {
-    const p = parse(args, { section: { type: "string" }, set: { type: "string", multiple: true } })
+    const p = parse(args, { section: { type: "string" }, set: { type: "string", multiple: true }, dedupe: { type: "boolean" } })
     const [typeId, title] = p.positionals
     const type = typeOrThrow(ctx, typeId)
     if (type.creatable === false) throw new Error(`${type.id} is an archive: items arrive by being moved there, not by being opened`)
@@ -101,6 +137,13 @@ const newCommand: Command = {
     const section = str(p, "section")
     // Every assignment is validated before the item exists: a typo leaves nothing behind.
     const fields = withFields(ctx, type.id, section ? { section } : {}, pairs(strs(p, "set")))
+    if (bool(p, "dedupe")) {
+      const likely = likelyDuplicatesOf(ctx, type.id, title.trim())
+      if (likely.length) {
+        ctx.out("possible duplicates — link instead of refiling, or file anyway:")
+        for (const item of likely) ctx.out(line(item))
+      }
+    }
     const item = createItem(ctx, type, title.trim(), fields)
     ctx.out(`${ctx.trackerDir}/${type.dir}/${item.slug}/  ${item.meta.id}`)
     return 0
