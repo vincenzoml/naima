@@ -1,0 +1,13 @@
+{
+  "id": "f035aea2-c588-4081-b8ea-0ad8b91238f4",
+  "title": "An item closed by hand while this branch claims it fails naima check (test/plugins/coordination/coordination.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "40187932-f3aa-4d20-a09e-4e4412af7be2"
+    }
+  ]
+}
