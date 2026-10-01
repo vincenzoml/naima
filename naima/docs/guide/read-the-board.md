@@ -130,3 +130,19 @@ opened and finished, each release and session, derived from the items and git);
 `naima view next --json` gives the data behind it. `naima ui` shows the views
 plugins contribute as tabs of one window: the metrics, the timeline, the
 coverage of the project's declared lists. Every command: [reference](../reference/reference.md).
+
+## How long a `now` item has waited
+
+`naima view next` carries an age column: how many whole days since an item's
+priority was last confirmed (`triagedOn`, or `created` for one never
+triaged) — derived at read time, never stored. A `now` item no branch's
+[claim](glossary.md#claim-file) names is marked `unclaimed`:
+
+```console
+$ naima view next
+  high    now     S       bugs/second-bug  Second bug  (6d unclaimed)
+```
+
+`naima check` includes `unclaimed-now-item-aging`: a note for every `now`
+item open past `plugins.triage.options.maxNowAgeDays` (default 3) with
+nobody's claim on it — visible without anyone having to ask the queue.

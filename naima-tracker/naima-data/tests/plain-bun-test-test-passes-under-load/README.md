@@ -1,0 +1,3 @@
+# plain bun test ./test/ passes under load (verifies bun-test-ignores-bunfig-toml-s-30)
+
+Verifies bugs/bun-test-ignores-bunfig-toml-s-30 (bun test ignores bunfig.toml's 30-second timeout). Measured on claude/f-u1-bun with the file-bun-timeout fix (commit 9968ca0, per-test { timeout: 30_000 } overrides in test/init.test.ts and test/distribution.test.ts) already merged into main: under artificial CPU load (20 background 'yes' processes, load average 8.4 rising to 36.0 across the run), plain 'bun test ./test/' gave 356 pass / 1 skip / 0 fail across 59 files in 118s. The regression the bug describes (249/4 under load) no longer reproduces.

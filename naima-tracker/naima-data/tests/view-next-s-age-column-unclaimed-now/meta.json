@@ -1,0 +1,20 @@
+{
+  "id": "542bab5b-bdfe-4b5d-84c3-baec2d4bc919",
+  "title": "View next's age column and unclaimed-now-item-aging check surface a now item nobody holds",
+  "status": "passed",
+  "created": "2026-10-01",
+  "area": "triage",
+  "kind": "code",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "d651abd5-0a75-496b-8206-f308926f974d"
+    }
+  ],
+  "runBy": "agent",
+  "impact": "medium",
+  "priority": "now",
+  "effort": "S",
+  "confidence": "measured",
+  "triagedOn": "2026-10-01"
+}

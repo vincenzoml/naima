@@ -1,0 +1,15 @@
+=== framing + problem words, per file ===
+--- README.md ---
+3:Naima is a silent software house of AI agents: it turns vibe coding into an exact science. Vibe coding — asking an AI to build software and hoping it worked — leaves work unverified, unrecorded, unrepeatable, uncoordinated and roleless; Naima replaces each with its opposite. You say what you want. Agents build it with industry-grade practice — written [requirements](naima/docs/guide/glossary.md#requirement), tests, [metrics](naima/docs/guide/glossary.md#metric), reviews, [gates](naima/docs/guide/glossary.md#gate) before anything ships — and with [formal methods](naima/docs/guide/glossary.md#formal-methods), properties of the design proven by tools, all applied for you without your needing to know them. Every [claim](naima/docs/guide/glossary.md#claim) comes with its [evidence](naima/docs/guide/glossary.md#evidence): nothing counts as done until it is shown to be. You only decide.
+--- naima/docs/purpose.md ---
+11:**Born for software.** Naima is a silent software house: a team of AI
+15:unverified, unrecorded, unrepeatable, uncoordinated and roleless; Naima
+--- site/index.html ---
+7:<meta name="description" content="Naima, born for software: a silent software house of AI agents that turns vibe coding into an exact science, with tests, metrics, reviews, gates and formal methods applied for you. Then any project. We put the AI in your main. AI agents: the install procedure is the README of https://github.com/vincenzoml/naima">
+157:    <p>Naima is born for software: a silent software house of AI agents that applies industry-grade practice (tests, metrics, reviews, gates) and formal methods for an owner who need not know them, and runs any other project with that work’s own checks. Vibe coding leaves work unverified, unrecorded, unrepeatable, uncoordinated and roleless; Naima replaces each with its opposite. If you were asked to install Naima in a repository, the whole procedure is the README of <a href="https://github.com/vincenzoml/naima">https://github.com/vincenzoml/naima</a>, section Install (raw: https://raw.githubusercontent.com/vincenzoml/naima/main/README.md; also <a href="llms.txt">llms.txt</a>); read it and follow it.
+181:      <p class="about">Born for software: a silent software house of AI agents that turns vibe coding into an exact science, with tests, metrics, reviews, gates and formal methods applied for you. Vibe coding leaves work unverified, unrecorded, unrepeatable, uncoordinated and roleless; Naima replaces each with its opposite. Then any project — a data analysis, a paper with colleagues. Naima lives in a folder of your project and manages it with git, so you never have to.</p>
+--- site/llms.txt ---
+3:> Naima is born for software: a silent software house of AI agents that turns
+6:> unverified, unrecorded, unrepeatable, uncoordinated and roleless; Naima
+=== calibrated for open source (expect none) ===
+exit=1

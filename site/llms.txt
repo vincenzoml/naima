@@ -1,8 +1,11 @@
 # Naima
 
 > Naima is born for software: a silent software house of AI agents that turns
-> vibe coding into an exact science for the person who owns the project. They
-> say what they want; agents build it with industry-grade practice (written
+> vibe coding into an exact science for the person who owns the project. Vibe
+> coding — asking an AI to build software and hoping it worked — leaves work
+> unverified, unrecorded, unrepeatable, uncoordinated and roleless; Naima
+> replaces each with its opposite. They say what they want; agents build it
+> with industry-grade practice (written
 > requirements, tests, metrics, reviews, gates) and formal methods (properties
 > of the design proven by tools), check it, prove it and document it, every
 > claim with its evidence, nothing done until shown to be; the person only

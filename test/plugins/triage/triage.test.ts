@@ -2,9 +2,19 @@ import assert from "node:assert/strict"
 import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { test } from "node:test"
-import { byUrgency, createItem, type Plugin, runChecks } from "../../../naima/src/core/api.ts"
+import { byUrgency, type Context, createItem, type Plugin, runChecks } from "../../../naima/src/core/api.ts"
 import { tempProject } from "../../core/testing.ts"
+import coordination from "../../../naima/src/plugins/coordination/index.ts"
 import triage, { confidenceFrom } from "../../../naima/src/plugins/triage/index.ts"
+
+/** `createItem` passes through the write hook that stamps `triagedOn` with today: back-date it on disk, as a person editing the file by hand would. */
+function backdate(ctx: Context, item: { dir: string }, date: string): void {
+  const file = join(item.dir, "meta.json")
+  const meta = JSON.parse(readFileSync(file, "utf8"))
+  meta.triagedOn = date
+  writeFileSync(file, `${JSON.stringify(meta, null, 2)}\n`)
+  ctx.reload()
+}
 
 const things: Plugin = {
   name: "things",
@@ -168,6 +178,70 @@ test("a triage field changed by any command stamps triagedOn and stops being der
   } finally {
     p.cleanup()
   }
+})
+
+test("view next carries an age column, marking an unclaimed now item", async () => {
+  const p = tempProject([things, triage()], { git: true })
+  try {
+    const { ctx } = p
+    const type = ctx.registry.types.get("things")!
+    backdate(ctx, createItem(ctx, type, "Stale now", { priority: "now" }), "2026-01-10") // 5 days old at FIXED_NOW
+    await p.run("view", "next")
+    const line = p.output.find((l) => l.includes("Stale now"))
+    assert.match(line ?? "", /\(5d unclaimed\)/, p.output.join("\n"))
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("view next does not mark an item a branch's claim names", async () => {
+  const p = tempProject([things, triage(), coordination()], { git: true })
+  try {
+    const { ctx } = p
+    const type = ctx.registry.types.get("things")!
+    const item = createItem(ctx, type, "Held now", { priority: "now" })
+    backdate(ctx, item, "2026-01-10")
+    p.git("add", "-A")
+    p.git("commit", "-q", "-m", "item")
+    await p.run("claim", item.slug)
+    await p.run("view", "next")
+    const line = p.output.find((l) => l.includes("Held now"))
+    assert.match(line ?? "", /\(5d\)/, p.output.join("\n"))
+    assert.ok(!/unclaimed/.test(line ?? ""), line)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("unclaimed-now-item-aging notes a now item open past the configured age with no claim on it", async () => {
+  const p = tempProject([things, triage({ maxNowAgeDays: 2 }), coordination()], { git: true })
+  try {
+    const { ctx } = p
+    const type = ctx.registry.types.get("things")!
+    backdate(ctx, createItem(ctx, type, "Fresh now", { priority: "now" }), "2026-01-14") // 1 day: under the limit
+    backdate(ctx, createItem(ctx, type, "Stale now", { priority: "now" }), "2026-01-10") // 5 days: over it
+    const held = createItem(ctx, type, "Held stale now", { priority: "now" })
+    backdate(ctx, held, "2026-01-10")
+    backdate(ctx, createItem(ctx, type, "Stale later", { priority: "later" }), "2026-01-10") // not `now`
+    p.git("add", "-A")
+    p.git("commit", "-q", "-m", "items")
+    await p.run("claim", held.slug)
+
+    const report = await runChecks(ctx)
+    const messages = report.notes.map((f) => f.message)
+    assert.ok(messages.some((m) => m.includes("stale-now") && m.includes("5 days")), messages.join("\n"))
+    assert.ok(!messages.some((m) => m.includes("fresh-now")), messages.join("\n"))
+    assert.ok(!messages.some((m) => m.includes("held-stale-now")), messages.join("\n"))
+    assert.ok(!messages.some((m) => m.includes("stale-later")), messages.join("\n"))
+    assert.deepEqual(report.problems, [])
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("triage: options.maxNowAgeDays must be a positive whole number", () => {
+  assert.throws(() => triage({ maxNowAgeDays: 0 }), /options\.maxNowAgeDays/)
+  assert.throws(() => triage({ maxNowAgeDays: "3" }), /options\.maxNowAgeDays/)
 })
 
 test("a change that touches no triage field stamps nothing", async () => {
