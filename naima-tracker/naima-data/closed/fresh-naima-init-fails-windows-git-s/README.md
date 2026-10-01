@@ -43,3 +43,7 @@ tests/install-workflow-passes-ubuntu-macos-windows.
 ### 2026-10-01 — evidence owner, on claude/evidence-close-6
 
 Evidence review (final pass): confirmed still unproven end-to-end. tests/nativepath-turns-git-s-forward-slash-toplevel is a sound unit-level regression test (red/green) but only simulates the Windows separator; tests/install-workflow-passes-ubuntu-macos-windows (the CI proof the item's own 'Done' section cites) is withdrawn — CI was removed; tests/install-ps1-installs-naima-windows-machine-fresh (the real gesture) is still open, runBy=human. Not closing: Windows install remains unverified on a real machine.
+
+### 2026-10-01 — claude, on claude/windows-proof
+
+Proven on a real Windows 11 machine, 2026-10-01: a fresh install.ps1 run locked to a commit containing the fix (b4230e5) passed naima init and naima check; see tests/install-ps1-installs-naima-windows-machine-fresh, now passed.

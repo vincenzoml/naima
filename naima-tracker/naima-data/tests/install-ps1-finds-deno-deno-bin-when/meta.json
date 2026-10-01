@@ -1,0 +1,22 @@
+{
+  "id": "d4bfc702-4b25-40a1-a748-947fde699c58",
+  "title": "install.ps1 finds Deno in ~\\.deno\\bin when it is not on the session path (real Windows run, and test/site.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "evidenceKind": "observation",
+  "redSeen": "2026-10-01",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "2f7f1eb6-2886-43a1-9dde-48222fc0dde3"
+    }
+  ],
+  "attached": {
+    "windows-install-fixed-deno-off-path-2026-10-01.log": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  }
+}

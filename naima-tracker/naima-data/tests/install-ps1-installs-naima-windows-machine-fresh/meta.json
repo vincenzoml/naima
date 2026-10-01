@@ -1,10 +1,9 @@
 {
   "id": "5a847fdc-30f8-48c7-9e4f-9f58d8912aa7",
   "title": "install.ps1 installs Naima on a Windows machine: fresh, again, refusing outside a repository, and the piped form",
-  "status": "open",
+  "status": "passed",
   "created": "2026-10-01",
-  "runBy": "human",
-  "humanBecause": "physical",
+  "runBy": "agent",
   "effort": "S",
   "triagedOn": "2026-10-01",
   "links": [
@@ -17,5 +16,13 @@
       "id": "0c72d1bb-a5c6-4244-9657-8c4d99ff1c44"
     }
   ],
-  "gate": "first-public"
+  "gate": "first-public",
+  "attached": {
+    "windows-install-proof-2026-10-01.log": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  },
+  "evidenceKind": "observation"
 }

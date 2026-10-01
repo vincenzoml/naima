@@ -1,0 +1,19 @@
+BASE=C:\Users\<user>\AppData\Local\Temp\naima-proof2-20261001230357
+deno on session path: False
+naima: fetching https://github.com/vincenzoml/naima.git (main)
+wrote naima-tracker/: README.md, .gitignore, naima-data/naima.json, naima-tracker/naima/ — locked to https://github.com/vincenzoml/naima.git at 100eba52c7ae
+next: naima new bugs "<the first thing to do>"
+0 items, 48 checks
+
+all invariants hold
+
+Naima is installed in C:\Users\<user>\AppData\Local\Temp\naima-proof2-20261001230357\nopath.
+
+Next:
+  git add naima-tracker; git commit -m "Track this project with Naima"
+  function naima { deno run -A "$(git rev-parse --show-toplevel)/naima-tracker/naima/naima.ts" @args }
+
+Agents: read naima-tracker/naima/skills/naima/SKILL.md
+
+EXIT=0
+DONE

@@ -8,5 +8,17 @@
   "confidence": "measured",
   "effort": "S",
   "gate": "first-public",
-  "triagedOn": "2026-10-01"
+  "triagedOn": "2026-10-01",
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "cd4c0ee"
+  ],
+  "area": "install",
+  "attached": {
+    "windows-deno-install-first-run-2026-10-01.log": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-01"
+    }
+  }
 }
