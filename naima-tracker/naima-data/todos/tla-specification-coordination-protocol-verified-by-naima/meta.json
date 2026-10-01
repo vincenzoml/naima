@@ -1,7 +1,7 @@
 {
   "id": "ab7610f9-3905-48c6-bb00-aabd936d6040",
   "title": "An mCRL2 model of the coordination protocol, verified by Naima's own verifier plugin",
-  "status": "open",
+  "status": "dropped",
   "created": "2026-09-29",
   "kind": "research",
   "area": "coordination",
@@ -16,6 +16,10 @@
     },
     {
       "rel": "relates-to",
+      "id": "c8259401-3093-4ed2-a227-6fcca381ae28"
+    },
+    {
+      "rel": "duplicate-of",
       "id": "c8259401-3093-4ed2-a227-6fcca381ae28"
     }
   ],

@@ -1,0 +1,17 @@
+{
+  "branch": "claude/big-mcrl2-model",
+  "claimedAt": "2026-10-01",
+  "note": "mCRL2 model of the claim protocol and its properties",
+  "items": [
+    {
+      "id": "c8259401-3093-4ed2-a227-6fcca381ae28",
+      "ref": "todos/mcrl2-model-coordination-protocol-complete-checked-negative",
+      "title": "mCRL2 model of the coordination protocol complete and checked, with the negative experiment (drop the fast-forward rule or the no-shared-file rule, showing the counterexample)"
+    },
+    {
+      "id": "92552bf4-de93-402e-933d-233e41f21228",
+      "ref": "todos/coordination-protocol-properties-filed-as-property-items",
+      "title": "Coordination-protocol properties filed as property items in Naima and verified by the mCRL2 verifier plugin"
+    }
+  ]
+}
