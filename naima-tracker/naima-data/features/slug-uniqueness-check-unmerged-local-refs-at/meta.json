@@ -16,5 +16,9 @@
   "triagedOn": "2026-09-30",
   "docs": [
     "naima/docs/guide/several-branches.md"
+  ],
+  "fixedOn": "2026-10-01",
+  "commits": [
+    "610abf1"
   ]
 }
