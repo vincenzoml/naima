@@ -32,3 +32,9 @@ Pass: all hold.
 Steps 1–2 performed by the author on 2026-09-30 (Deno 2.9.7, Node 26.5.0,
 Bun 1.4.2): pass. Steps 3–5 not performed: the dist branch does not exist
 until CI runs on a pushed main.
+
+## Notes
+
+### 2026-10-01 — Vincenzo Ciancia, on claude/u4-proofs
+
+Full suite pass on main's head (commit 623fd87af5526fccdf685f4d0825ac0e062b4509). deno task verify: 220/220 passed, 0 failed. node --test test/**/*.test.ts: 220/220 passed. bun test --timeout 30000 ./test/: 220/220 passed. Logs kept as evidence in the session scratchpad (verify-deno.log, node-test.log, bun-test.log).

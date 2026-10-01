@@ -1,7 +1,7 @@
 {
   "id": "880b24c7-dbec-4faa-b9bc-f2c7d432d58b",
   "title": "The launcher's permissions confine Naima to naima-tracker/ and git",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "section": "distribution",
   "runBy": "agent",

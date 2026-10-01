@@ -1,7 +1,7 @@
 {
   "id": "e0c2b259-6e7b-40b1-96b9-9882b008b081",
   "title": "a marker naming an item since archived is found through the archive, and a bad reference says why (src/plugins/beta-markers/beta-markers.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "low",

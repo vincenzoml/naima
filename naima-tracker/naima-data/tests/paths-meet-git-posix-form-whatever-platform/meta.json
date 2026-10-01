@@ -1,7 +1,7 @@
 {
   "id": "6abf6133-f0d0-4308-b0b5-ac948e55e64f",
   "title": "paths meet git in posix form, whatever the platform's separator (src/core/git.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

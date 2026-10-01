@@ -1,7 +1,7 @@
 {
   "id": "dd956bb7-0c2b-4df5-8b25-f701d9f5d292",
   "title": "the gates option names the file it is configured in, in the shape it is written (src/plugins/gates/gates.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "low",

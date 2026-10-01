@@ -1,7 +1,7 @@
 {
   "id": "ff7fc98c-92e4-4c03-bbd5-9bfcc59ee73d",
   "title": "Switching off a plugin whose vocabulary another uses fails at load, named",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

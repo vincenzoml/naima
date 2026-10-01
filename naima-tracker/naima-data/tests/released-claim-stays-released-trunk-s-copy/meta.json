@@ -1,7 +1,7 @@
 {
   "id": "c320dfa6-2d92-43df-8b55-b19357d0957d",
   "title": "a released claim stays released: the trunk's copy does not bring it back, and a new claim reuses the file (src/plugins/coordination/coordination.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

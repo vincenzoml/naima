@@ -1,7 +1,7 @@
 {
   "id": "fce57a11-a2b9-4c08-a298-da71fa45fa23",
   "title": "non-Latin titles keep their letters: distinct slugs, and no false duplicates (src/core/core.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "low",

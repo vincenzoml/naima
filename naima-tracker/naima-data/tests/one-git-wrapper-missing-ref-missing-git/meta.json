@@ -1,7 +1,7 @@
 {
   "id": "500768d8-5783-43ac-a332-76187af39acc",
   "title": "one git wrapper: a missing ref and a missing git binary are told apart (src/core/git.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

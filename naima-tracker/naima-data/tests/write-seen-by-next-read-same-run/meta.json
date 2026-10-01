@@ -1,7 +1,7 @@
 {
   "id": "41493076-c574-45ee-bb69-3f8d14811ecb",
   "title": "a write is seen by the next read in the same run, with no reload (src/core/core.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "low",

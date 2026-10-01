@@ -1,7 +1,7 @@
 {
   "id": "c084327f-37b7-442c-97f5-37b696c64440",
   "title": "Two plugins declaring one name coexist by qualified id or a rename",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

@@ -1,7 +1,7 @@
 {
   "id": "9cc665d3-6615-4f29-9838-5e384b2c93c9",
   "title": "new validates every --set before it writes anything (src/core/core.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

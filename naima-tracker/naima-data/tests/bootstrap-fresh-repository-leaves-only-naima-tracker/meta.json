@@ -1,7 +1,7 @@
 {
   "id": "224083e8-a470-4de0-ad83-690dfddd115d",
   "title": "Bootstrap in a fresh repository leaves only naima-tracker/, with naima/ ignored",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "section": "distribution",
   "runBy": "agent",

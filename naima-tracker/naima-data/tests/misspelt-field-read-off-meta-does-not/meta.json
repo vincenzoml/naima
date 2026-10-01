@@ -1,7 +1,7 @@
 {
   "id": "00ea7614-64e6-40c4-af86-1d67b6ee4f8f",
   "title": "a misspelt field read off meta does not compile; the typed accessor does, with the field's type (src/core/typecheck.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

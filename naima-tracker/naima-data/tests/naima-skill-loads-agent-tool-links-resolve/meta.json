@@ -1,7 +1,7 @@
 {
   "id": "4afa3cc9-4cf3-4d75-b608-a44488b8c204",
   "title": "The Naima skill loads in an agent tool and its links resolve",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "area": "docs",

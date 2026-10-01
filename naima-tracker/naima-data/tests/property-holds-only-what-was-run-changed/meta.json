@@ -1,7 +1,7 @@
 {
   "id": "b4ee219a-4167-45c4-b07f-d3bbabcbdd16",
   "title": "a property holds only for what was run: a changed property, verifier, model path or options is reported (src/plugins/verifier/verifier.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "high",

@@ -1,7 +1,7 @@
 {
   "id": "2a2640a3-3f9e-4392-8e1e-ae17d7f13bf0",
   "title": "A changed lock source is refused until update --accept-source; a moved commit is followed and said; verify signed refuses an unsigned commit (src/distribution.test.ts, Deno)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

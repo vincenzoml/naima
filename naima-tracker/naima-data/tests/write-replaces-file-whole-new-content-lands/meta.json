@@ -1,7 +1,7 @@
 {
   "id": "20b43bac-6688-47a6-9644-1bb20de99929",
   "title": "a write replaces the file whole: new content lands beside it, then is renamed over it (src/core/files.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "low",

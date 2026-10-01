@@ -1,7 +1,7 @@
 {
   "id": "90c67ef9-c8a6-44c8-b09b-9acc97f33259",
   "title": "A view renders data once as text, JSON or markdown, and async checks are awaited",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

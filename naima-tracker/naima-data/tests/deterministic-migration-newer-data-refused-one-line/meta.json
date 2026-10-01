@@ -1,7 +1,7 @@
 {
   "id": "0b0371f3-57d7-4f4a-8d83-92ae7e527650",
   "title": "Deterministic migration; newer data refused in one line",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "section": "distribution",
   "runBy": "agent",

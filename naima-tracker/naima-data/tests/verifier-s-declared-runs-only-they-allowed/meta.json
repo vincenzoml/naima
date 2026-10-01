@@ -1,7 +1,7 @@
 {
   "id": "6d7913be-5e30-4837-a208-7975e85dea21",
   "title": "A verifier's declared runs, and only they, are allowed besides git under the launcher; no first-party verifier declares one (src/distribution.test.ts, src/lifecycle.test.ts)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

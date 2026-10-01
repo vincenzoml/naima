@@ -1,7 +1,7 @@
 {
   "id": "c303299c-9f1b-4b8c-9d50-b05989339dae",
   "title": "the reference is the program's: a project's own gates do not change it (src/cli.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "low",

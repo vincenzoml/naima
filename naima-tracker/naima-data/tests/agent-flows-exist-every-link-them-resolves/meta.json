@@ -1,7 +1,7 @@
 {
   "id": "41417ec5-4c6b-4a4d-a8d7-76a13244a752",
   "title": "The agent flows exist and every link to them resolves",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-29",
   "runBy": "agent",
   "gate": "first-public",

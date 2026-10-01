@@ -1,7 +1,7 @@
 {
   "id": "75efc397-8e2e-4e58-9077-4628a3e5a8ad",
   "title": "The trunk and each worker see the other worktrees' uncommitted claims, and not the ones deleted there; under the launcher too (src/core/git.test.ts, coordination.test.ts, distribution.test.ts)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

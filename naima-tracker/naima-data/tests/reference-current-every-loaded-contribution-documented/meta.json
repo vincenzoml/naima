@@ -1,7 +1,7 @@
 {
   "id": "12da5004-85d2-4d93-a2fa-4949d4051c89",
   "title": "The reference is current and every loaded contribution is documented",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-29",
   "runBy": "agent",
   "gate": "first-public",

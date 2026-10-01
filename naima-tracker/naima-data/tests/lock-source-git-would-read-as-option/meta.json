@@ -1,7 +1,7 @@
 {
   "id": "f64d06be-8e78-4945-a10d-50b639a1870e",
   "title": "A lock source git would read as an option, or a relative path, is refused",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "high",

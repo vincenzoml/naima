@@ -1,7 +1,7 @@
 {
   "id": "91ba3a32-9785-45aa-801e-3b3f375e684e",
   "title": "The launcher refuses a comma path, hands only allow-listed env, parses --data once",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

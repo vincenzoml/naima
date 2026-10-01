@@ -1,7 +1,7 @@
 {
   "id": "2de4ea3d-f064-4935-ba15-6e676288a81e",
   "title": "naima update pulls, migrates and records; a normal run never pulls",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "section": "distribution",
   "runBy": "agent",

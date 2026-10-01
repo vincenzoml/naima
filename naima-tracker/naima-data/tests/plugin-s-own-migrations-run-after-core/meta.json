@@ -1,7 +1,7 @@
 {
   "id": "4de73c33-4f5c-405c-95f3-3f03c0b47d72",
   "title": "A plugin's own migrations run after the core's, record its format and are held by one-format",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

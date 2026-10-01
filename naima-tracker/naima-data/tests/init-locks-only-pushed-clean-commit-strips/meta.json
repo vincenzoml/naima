@@ -1,7 +1,7 @@
 {
   "id": "98e9fb90-980b-48e9-87db-57f93370a65d",
   "title": "init locks only a pushed clean commit, strips credentials, names a real type",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",

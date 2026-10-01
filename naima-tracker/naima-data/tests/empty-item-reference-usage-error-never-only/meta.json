@@ -1,7 +1,7 @@
 {
   "id": "02921a89-16ac-4a08-89d2-acf048f5d5b6",
   "title": "an empty item reference is a usage error, never the only item (src/core/core.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "low",

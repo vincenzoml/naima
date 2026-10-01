@@ -1,7 +1,7 @@
 {
   "id": "5f016cf2-a5d7-48c3-9720-f100fa0dfa1f",
   "title": "a status is only one the type declares itself, never an Object.prototype key (src/core/core.test.ts, on Deno, Node and Bun)",
-  "status": "open",
+  "status": "passed",
   "created": "2026-09-30",
   "runBy": "agent",
   "impact": "medium",
