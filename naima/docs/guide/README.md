@@ -4,7 +4,9 @@ For the people whose project Naima runs. Nothing here assumes you read or
 write code, know git, or have managed a project professionally: an AI agent
 does the machine work, and every step is a `naima` command or plain text on
 an [item](glossary.md#item)'s page. A word you do not know is in the [glossary](glossary.md).
-What Naima is for: [the purpose](../purpose.md).
+What Naima is for: [the purpose](../purpose.md) — born for software, the
+agents building it with tests, reviews, gates and formal methods for you;
+then any project, with its own checks in place of tests.
 
 ## First, how the project runs
 

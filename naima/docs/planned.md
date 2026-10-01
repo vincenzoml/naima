@@ -8,13 +8,18 @@ what does, and [what Naima is for](purpose.md#what-exists-today) sums it up.
 Each entry says what it is, what you can do today instead, and an example.
 The order is the order of the work: the first entries come first.
 
-## Item types for other work
+## Metrics
 
-Packs of item types for work that is not software: experiments and analyses
-whose evidence is a reproducible run; sections and reviews of a paper.
-**Today:** bugs, todos, features and tests fit most of this already ("figure
-3 uses last year's data" is a bug), and a project can add its own types with
-a [plugin](guide/add-a-plugin.md).
+- **Code-quality metrics side by side with tests**: measures of the code
+  itself, read next to the test results, so a change that passes its tests
+  but makes the code harder to maintain is seen.
+- **Metrics measured on every commit without anyone asking**: a commit hook
+  that runs them and records the numbers, and a trend drawn as a chart on a
+  dashboard.
+- **Today:** `naima metrics run --record` runs the project's metrics when
+  asked, records them per commit, holds each to a budget, a floor or a
+  baseline, and `naima metrics trend` draws the trend as text
+  ([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ## Model checkers and the strength of evidence
 
@@ -30,15 +35,6 @@ a [plugin](guide/add-a-plugin.md).
 - **Today:** properties, `naima verify` and expiring proofs work, with one
   example verifier, `naima/src/plugins/verifier/adapters/example-regex.ts`
   ([prove and close](guide/prove-and-close.md#properties-proven-by-a-tool)).
-
-## Metrics
-
-Metrics measured on every commit without anyone asking: a commit hook that
-runs them and records the numbers, and a trend drawn as a chart on a
-dashboard. **Today:** `naima metrics run --record` runs the project's
-metrics when asked, records them per commit, holds each to a budget, a floor
-or a baseline, and `naima metrics trend` draws the trend as text
-([metrics and budgets](guide/metrics-and-budgets.md)).
 
 ## Structuring a project from the start
 
@@ -64,6 +60,16 @@ these choices in chat, and the owner's answers become
 instruction file (such as `AGENTS.md` or `CLAUDE.md`) pointing at the
 [skill](agents/skill.md). **Today:** the installer's instructions tell the
 agent to do it ([working with AI agents](guide/working-with-agents.md#get-an-agent-going)).
+
+## Item types for other work
+
+Naima is born for software; these are packs of item types for other work
+([beyond software](purpose.md#beyond-software-any-project)): experiments and
+analyses whose evidence is a reproducible run; sections and reviews of a
+paper.
+**Today:** bugs, todos, features and tests fit most of this already ("figure
+3 uses last year's data" is a bug), and a project can add its own types with
+a [plugin](guide/add-a-plugin.md).
 
 ## Roles
 

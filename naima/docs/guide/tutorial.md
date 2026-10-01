@@ -7,8 +7,8 @@ read or write code beyond changing one word in a one-line script.
 
 In everyday use an agent types these commands for you
 ([how the project runs](how-the-project-runs.md)); doing them once by hand
-shows what it does. The project here is a tiny script, but the same steps
-run a data analysis or a paper.
+shows what it does. The project here is a tiny script; the same steps
+run any software, and any other project, such as a data analysis or a paper.
 
 Every output below is what the commands printed when this tutorial was run.
 Yours differs only in the item ids, the dates, the commit and the folder.

@@ -1,12 +1,15 @@
 ---
 name: naima
-description: Run a project with Naima — any versioned work (software, a data analysis, a paper) whose bugs, todos, features, tests, rules and proofs are kept as files under naima-tracker/, for an owner who only decides. Use when a repository has naima-tracker/, when asked to report, triage, claim, fix, verify or close an item, or when asked to start tracking a project with Naima.
+description: Run a project with Naima — born for software, usable for any versioned work (a data analysis, a paper) — whose bugs, todos, features, tests, rules and proofs are kept as files under naima-tracker/, for an owner who only decides. Use when a repository has naima-tracker/, when asked to report, triage, claim, fix, verify or close an item, or when asked to start tracking a project with Naima.
 ---
 
 # Naima
 
-Naima runs any versioned work — software, a data analysis, a paper with
-colleagues — for an owner who decides while agents do the machine work. Its
+Naima is born for software: a silent software house in which you and other
+agents apply industry-grade practice (tests, metrics, reviews, gates) and
+formal methods for an owner who decides and need not know any of them. It
+runs any other versioned work too — a data analysis, a paper with
+colleagues — with that work's own checks in place of tests. Its
 items are files in the repository, under one folder, `naima-tracker/`, and
 its board is derived by a CLI, never edited by hand
 ([what Naima is for](../../docs/purpose.md)). This skill is a pointer: the
