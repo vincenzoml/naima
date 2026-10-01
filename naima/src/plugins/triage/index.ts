@@ -152,11 +152,11 @@ const coverage: Subcommand = {
   usage: "triage",
   run(args, ctx) {
     if (args.length) throw usageError(this)
-    ctx.out(`  ${"type".padEnd(12)} open  ${TRIAGE.map((f) => f.padStart(10)).join("")}   derived`)
+    ctx.out(`  ${"type".padEnd(12)} open  ${TRIAGE.map((f) => f.padStart(10)).join(" ")}   derived`)
     for (const type of ctx.registry.types.values()) {
       const mine = openItems(ctx).filter((i) => i.type === type.id)
       if (!mine.length) continue
-      const cells = TRIAGE.map((f) => String(mine.filter((i) => i.meta[f] !== undefined).length).padStart(10)).join("")
+      const cells = TRIAGE.map((f) => String(mine.filter((i) => i.meta[f] !== undefined).length).padStart(10)).join(" ")
       ctx.out(`  ${type.id.padEnd(12)} ${String(mine.length).padStart(4)}  ${cells}   ${mine.filter((i) => fieldValue(i, TRIAGED_BY) === "derived").length}`)
     }
     return 0

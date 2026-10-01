@@ -26,23 +26,6 @@ whose evidence is a reproducible run; sections and reviews of a paper.
 3 uses last year's data" is a bug), and a project can add its own types with
 a [plugin](guide/add-a-plugin.md).
 
-## Commands for every action
-
-Every action an agent takes on an item has a command, so each is recorded
-the same way and can be checked. Opening, fields, triage, links,
-the description (`naima describe`), notes (`naima note`), claims, proof and
-closing have one. Missing today:
-
-- **Attaching a file** to an item's `attachments/`, with the consent of whoever
-  owns it recorded on the item when it is the owner's material. **Today:** the
-  file is copied in by hand.
-- **Moving an item to another type** (a bug that turns out to be a request).
-  **Today:** a new item is opened in the right type and the old one linked
-  `duplicate-of` it.
-- **Renaming an item** so its page agrees: `naima set <item> title="…"` changes
-  the field and leaves the title line of `README.md` as it was. **Today:** that
-  line is edited by hand.
-
 ## Model checkers and the strength of evidence
 
 - **Real [model checkers](guide/glossary.md#model-checker) as verifiers**:

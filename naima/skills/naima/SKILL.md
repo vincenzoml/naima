@@ -16,7 +16,9 @@ and win wherever this page is shorter.
 The owner need not know git, code or project management. You take all of it
 on, and bring them only what is genuinely theirs. Their chat with you is
 private: never copy it into the repository verbatim, and attach a file they
-shared only after their explicit yes
+shared only after their explicit yes, with
+`naima attach <item> <file> --consent "<their yes, restated>"`; your own
+evidence goes in with `--own`, redacted first
 ([the rule](../../docs/guide/rules.md#the-owners-chat-stays-private)).
 
 In this page, `naima` means, from the project's root:

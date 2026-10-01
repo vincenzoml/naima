@@ -9,7 +9,7 @@ import { coreChecks, runChecks } from "./check.ts"
 import { groupBy } from "./collections.ts"
 import { appliesTo, fieldValue, parseFieldValue } from "./fields.ts"
 import { currentBranch, gitOrNull, isGitRepo } from "./git.ts"
-import { ATTACHMENTS, createItem, joinProse, NOTES_HEADING, readReadme, saveMeta, saveProse, splitProse, today, type WriteOptions } from "./item.ts"
+import { ATTACHMENTS, createItem, joinProse, moveItem, NOTES_HEADING, readReadme, saveMeta, saveProse, splitProse, today, type WriteOptions } from "./item.ts"
 import { byUrgency, isOpen, label } from "./lifecycle.ts"
 import { CONTRACT } from "./contract.ts"
 import { shortOrId } from "./names.ts"
@@ -60,7 +60,11 @@ export function withFields<M extends Record<string, unknown>>(ctx: Context, type
  */
 export function setFields(ctx: Context, item: Item, assignments: [string, string][], opts: WriteOptions = {}): void {
   const next: Item = { ...item, meta: withFields(ctx, item.type, item.meta, assignments) }
-  saveMeta(ctx, next, opts)
+  // A rename keeps the page's `# ` title line in step with meta.json's title, in the same write,
+  // so no agent has to remember to edit the page by hand (features/renaming-item-keeps-page-s-title-line).
+  const prose = next.meta.title !== item.meta.title ? splitProse(readReadme(item)) : null
+  if (prose?.title) saveProse(ctx, next, joinProse({ ...prose, title: `# ${next.meta.title}` }), opts)
+  else saveMeta(ctx, next, opts)
   item.meta = next.meta
 }
 
@@ -265,6 +269,39 @@ const describe: Command = {
     const prose = splitProse(readReadme(item))
     saveProse(ctx, item, joinProse({ ...prose, title: prose.title || `# ${item.meta.title}`, description: text }))
     ctx.out(`${label(item)}: description replaced`)
+    return 0
+  },
+}
+
+const move: Command = {
+  name: "move",
+  says: "move an item to another type, keeping its id and links; refuses a status or field the new type does not declare",
+  usage: "move <item> <type> [--force]",
+  options: [{ name: "--force", says: "move it even with a status or a field the new type does not declare, kept as they are" }],
+  examples: ["move export-drops features", "move export-drops features --force"],
+  run(args, ctx) {
+    const p = parse(args, { force: { type: "boolean" } })
+    const [ref, typeId] = p.positionals
+    if (!ref?.trim() || !typeId?.trim()) throw usageError(this)
+    const item = ctx.repo.resolve(ref)
+    const to = typeOrThrow(ctx, typeId)
+    if (to.id === item.type) throw new Error(`${label(item)} is already a ${to.id} item`)
+    const force = bool(p, "force")
+    if (!force && !Object.hasOwn(to.statuses, item.meta.status)) {
+      throw new Error(`${to.id} does not have a status "${item.meta.status}" — statuses: ${Object.keys(to.statuses).join(", ")} (--force keeps it as it is)`)
+    }
+    // Unknown fields are kept and not checked, everywhere (the core's own rule); only a field the
+    // registry does know, and ties to other types, is a reason to refuse a move.
+    const { id: _id, title: _title, status: _status, created: _created, links: _links, ...rest } = item.meta
+    const strays = Object.keys(rest).filter((k) => {
+      const def = ctx.registry.fields.get(k)
+      return def !== undefined && !appliesTo(def, to.id)
+    })
+    if (!force && strays.length) {
+      throw new Error(`${to.id} does not declare field(s) ${strays.join(", ")} on ${label(item)} (--force keeps them as they are)`)
+    }
+    const moved = moveItem(ctx, item, to, { force })
+    ctx.out(`${ctx.trackerDir}/${to.dir}/${moved.slug}/  ${moved.meta.id}`)
     return 0
   },
 }
@@ -525,7 +562,7 @@ export const corePlugin: Plugin = {
     { name: "blocked-by", inverse: "blocks", says: "waits on" },
   ],
   checks: coreChecks,
-  commands: [newCommand, show, list, set, note, describe, link, unlink, check, board, view, summary, plugins, types, runs],
+  commands: [newCommand, show, list, set, note, describe, link, unlink, move, check, board, view, summary, plugins, types, runs],
   summary: [counts],
   hooks: [statusMoves, notesAppendOnly],
 }

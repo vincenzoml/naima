@@ -314,6 +314,66 @@ test("new validates every --set before it writes anything", async () => {
   }
 })
 
+test("features/renaming-item-keeps-page-s-title-line: naima set of title rewrites the page's title line too, in one write", async () => {
+  const p = tempProject([notes])
+  try {
+    const item = createItem(p.ctx, p.ctx.registry.types.get("notes")!, "Export drops alpha")
+    const readme = () => readFileSync(join(item.dir, "README.md"), "utf8")
+    assert.match(readme(), /^# Export drops alpha\n/)
+    assert.equal(await p.run("set", item.slug, "title=Export drops the alpha channel"), 0)
+    assert.match(readme(), /^# Export drops the alpha channel\n/)
+    assert.equal(p.ctx.repo.resolve(item.meta.id).meta.title, "Export drops the alpha channel")
+    // A set that never touches title leaves the page's title line exactly as it was.
+    const before = readme()
+    assert.equal(await p.run("set", item.slug, "size=L"), 0)
+    assert.equal(readme(), before)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("features/naima-move-item-another-type-keeping-id: move keeps id and links, refuses a status or field the new type lacks", async () => {
+  const twoTypes: Plugin = {
+    name: "two-types",
+    says: "two types for testing move, with a field only one of them declares",
+    types: [
+      {
+        id: "notelike",
+        dir: "NOTELIKE",
+        title: "Notelike",
+        says: "",
+        statuses: { open: { category: "open", says: "" }, done: { category: "done", says: "" } },
+        initialStatus: "open",
+      },
+      { id: "requests", dir: "REQUESTS", title: "Requests", says: "", statuses: { open: { category: "open", says: "" } }, initialStatus: "open" },
+    ],
+    fields: [{ name: "size", kind: "enum", says: "size", values: { S: "small", L: "large" }, appliesTo: ["notelike"] }],
+  }
+  const p = tempProject([twoTypes])
+  try {
+    const { ctx } = p
+    const notesType = ctx.registry.types.get("notelike")!
+    const a = createItem(ctx, notesType, "Not really a note", { size: "L" })
+    const b = createItem(ctx, notesType, "Other")
+    addLink(ctx, a, "relates-to", b)
+    const id = a.meta.id
+    await assert.rejects(p.run("move", a.slug, "requests"), /requests does not declare field\(s\) size/)
+    assert.equal(await p.run("move", a.slug, "requests", "--force"), 0)
+    const moved = ctx.repo.resolve(id)
+    assert.equal(moved.type, "requests")
+    assert.equal(moved.meta.id, id)
+    assert.equal(moved.meta["size"], "L", "a field the new type does not declare is kept as it is, with --force")
+    assert.ok(ctx.repo.linksOf(moved).some((l) => l.rel === "relates-to" && l.id === b.meta.id), "links survive a move")
+    const c = createItem(ctx, notesType, "Finished note", { status: "done" })
+    await assert.rejects(p.run("move", c.slug, "requests"), /requests does not have a status "done"/)
+    assert.equal(await p.run("move", c.slug, "requests", "--force"), 0)
+    assert.equal(ctx.repo.resolve(c.meta.id).meta.status, "done", "a status the new type does not declare is kept as it is, with --force")
+    await assert.rejects(p.run("move", "", "notes"), /usage: naima move <item> <type>/)
+  } finally {
+    p.cleanup()
+  }
+})
+
 test("an empty item reference is a usage error, never the only item", async () => {
   const p = tempProject([notes])
   try {

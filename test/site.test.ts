@@ -107,7 +107,13 @@ test("the build writes the star count into the page when it has one, and leaves 
 const walk = (dir: string): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]))
 
-test("install.sh installs Naima in a git repository, says so when run again, and refuses outside one", { skip: process.platform === "win32" }, () => {
+// bugs/bun-s-5-second-default-test-timeout: three spawns of install.sh, each a clone and a full
+// `naima check`, graze Bun's 5 second per-test default under load. Node's test runner honors the
+// same option; Deno's test shim ignores what it does not need.
+test("install.sh installs Naima in a git repository, says so when run again, and refuses outside one", {
+  skip: process.platform === "win32",
+  timeout: 30_000,
+}, () => {
   const base = mkdtempSync(join(tmpdir(), "naima-site-"))
   try {
     const source = sourceRepo(NAIMA, join(base, "naima")) // the whole repository: its tests, its tracker, its agent rules

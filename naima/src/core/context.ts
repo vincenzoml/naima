@@ -12,9 +12,32 @@ export interface IO {
   now(): Date
 }
 
+// A reader that closes early (`naima list | head -1`) breaks the pipe: Deno, Node and Bun each
+// surface that differently — a thrown error here, an async "error" event there, EPIPE on a real
+// pipe or ENOTCONN when the runtime's stdout is backed by a socket (Bun, under load) — so all of
+// them are caught and treated the same way a closed pipe should end a CLI: quietly, exit code 0.
+const BROKEN_PIPE_CODES = new Set(["EPIPE", "ENOTCONN", "ECONNRESET"])
+function isEpipe(err: unknown): boolean {
+  return typeof err === "object" && err !== null && "code" in err && BROKEN_PIPE_CODES.has(String((err as { code?: unknown }).code))
+}
+for (const stream of [process.stdout, process.stderr]) {
+  stream.on("error", (err) => {
+    if (isEpipe(err)) process.exit(0)
+    throw err
+  })
+}
+function writeLine(stream: NodeJS.WriteStream, line: string): void {
+  try {
+    stream.write(line + "\n")
+  } catch (err) {
+    if (isEpipe(err)) process.exit(0)
+    throw err
+  }
+}
+
 export const consoleIO: IO = {
-  out: (line = "") => process.stdout.write(line + "\n"),
-  err: (line) => process.stderr.write(line + "\n"),
+  out: (line = "") => writeLine(process.stdout, line),
+  err: (line) => writeLine(process.stderr, line),
   now: () => new Date(),
 }
 

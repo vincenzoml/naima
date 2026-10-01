@@ -1,0 +1,13 @@
+{
+  "id": "6b8c9e05-39ff-4848-b57d-c41a67395f9b",
+  "title": "The triage coverage table's header keeps its columns apart (test/plugins/triage/triage.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "4926098d-c8f8-4b3e-925f-6c429f356467"
+    }
+  ]
+}

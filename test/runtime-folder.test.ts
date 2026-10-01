@@ -97,6 +97,7 @@ function onDisk(dir: string, prefix = ""): string[] {
 
 test("a project's program holds exactly naima/, and init, check, new, guide, a new worktree and update all work on it", {
   skip: !hasDeno && "deno is not on PATH",
+  timeout: 30_000, // many git and Deno subprocesses: past Bun's 5 second default (bugs/bun-s-5-second-default-test-timeout)
 }, () => {
   const base = mkdtempSync(join(tmpdir(), "naima-runtime-"))
   try {

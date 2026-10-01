@@ -41,7 +41,12 @@ async function naima(cwd: string, argv: string[], programRoot: string, plugins: 
 
 const lockFile = (root: string) => join(root, "naima-tracker", "naima-data", "naima.json")
 
-test("init refuses to lock a commit its origin lacks, or a Naima with uncommitted changes: nobody else could run it", async () => {
+// bugs/bun-s-5-second-default-test-timeout: `world()` clones this whole checkout, and this test
+// calls it and runs three `init`s besides — slow enough, under load, to graze Bun's 5 second
+// per-test default. Node's test runner honors the same option; Deno's test shim ignores it.
+const SLOW = { timeout: 30_000 }
+
+test("init refuses to lock a commit its origin lacks, or a Naima with uncommitted changes: nobody else could run it", SLOW, async () => {
   const w = world()
   try {
     writeFileSync(join(w.program, "NOTICE"), "changed\n")

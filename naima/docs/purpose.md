@@ -104,9 +104,8 @@ links the earlier report of the same problem, and ranks it before the
 submission gate.
 
 **Today:** filing, routing, fields, links, boards (`naima board bugs`),
-`naima summary`. Commands to rewrite a description and to add a dated
-comment are [planned](planned.md#commands-for-every-action); today the agent
-edits the item's page.
+`naima summary`, rewriting a description (`naima describe`) and adding a
+dated comment (`naima note`).
 
 ### Planning
 
@@ -277,11 +276,10 @@ it; a visual page of the project's state
 ### Commands for every action
 
 Every action an agent takes on an item has a command, so each is recorded
-the same way and can be checked. **Today:** `new`, `set`, `link`, `triage
-set`, `claim`, `release`, `pass`, `verify`, `close`, `check` (`naima help`
-lists them all; the [reference](reference/reference.md) documents each).
-Editing an item's description and adding a dated comment are
-[planned](planned.md#commands-for-every-action).
+the same way and can be checked. `new`, `set`, `move`, `link`, `describe`,
+`note`, `attach`, `triage set`, `claim`, `release`, `pass`, `verify`,
+`close`, `check` (`naima help` lists them all; the
+[reference](reference/reference.md) documents each).
 
 ## The company and its roles
 
@@ -343,8 +341,8 @@ are in [the tutorial](guide/tutorial.md).
    own item: `naima new tests "Export keeps the alpha channel" --set
    runBy=agent` and `naima link export-keeps verifies export-drops`. The test
    fails on the old code and passes on the new.
-5. **Evidence attached.** The test's output goes to the test's
-   `attachments/run.txt`; `naima set export-keeps status=passed`.
+5. **Evidence attached.** `naima attach export-keeps run.txt --own` puts the
+   test's output in its `attachments/`; `naima set export-keeps status=passed`.
 6. **Gate and handover.** The gates run; `naima release export-drops` and
    `naima pass "..."` record the end of the session; the branch is merged
    with `git merge --ff-only`, which refuses rather than overwrite anything.

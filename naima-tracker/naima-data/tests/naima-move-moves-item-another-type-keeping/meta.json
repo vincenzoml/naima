@@ -1,0 +1,13 @@
+{
+  "id": "a6070ceb-3a22-49a8-a424-f6dde781accc",
+  "title": "naima move moves an item to another type, keeping its id and links, refusing a status or field the new type lacks (test/core/core.test.ts)",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "83358273-9a8d-4805-ba1d-7e59255e87e2"
+    }
+  ]
+}
