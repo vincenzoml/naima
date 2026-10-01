@@ -96,6 +96,16 @@ changed since), cannot be closed. **Enforced by** `naima close` and the check
 **Enforced by** the check `partial-says-what-is-left`: an item in status
 `partial` carries at least one unticked `- [ ]` line on its page.
 
+### A deferred item says why, and what would reopen it
+
+A [deferral](glossary.md#deferral) — `priority=parked`, or a bug `wontfix`
+or a todo `dropped` — is still an item someone may re-argue later, not a
+loss: say why it is deferred on its page, and set
+[`reopensWhen`](glossary.md#reopenswhen). `naima view parked` lists every
+one with its trigger, so a deferral is found before it is re-argued from
+scratch. **Enforced by** the check `deferred-says-why`: a deferred item left
+exactly as the unfilled template it was created with is a problem.
+
 ### Behaviour shipped without proof is marked
 
 A [beta marker](glossary.md#beta-marker) in the code names the item whose
