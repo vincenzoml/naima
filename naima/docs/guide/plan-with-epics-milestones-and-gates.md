@@ -66,7 +66,62 @@ beta — Public beta (version 0.9; due 2026-12-01, 17 days left): BLOCKED by 2
 `naima gates`, `naima queue beta` and `naima summary` say the days left, `today`, or how many days overdue. Once the date has passed and the gate does not hold,
 `naima check` warns (the check `milestone-overdue`) — a note, not a failure: a late milestone is news, not a broken project.
 
+## See when things happened: the timeline
+
+```sh
+naima view timeline
+```
+
+```text
+2026-09-02  gate opened   gate beta (Public beta): the first of its 12 items reported
+2026-09-14  record        build: Build 3 handed to the testers
+2026-10-20  gate passed   gate beta (Public beta): the last of its 12 items resolved
+2026-10-21  release       version tag v0.9
+undated, not placed: epic finished 1 — an item without created, or resolved without closedOn or fixedOn
+```
+
+Nothing on it is stored: each event is worked out from the items and git every time. A gate opens on the day its first item was reported and passes on the day
+its last item was resolved — archived (`closedOn`), else fixed (`fixedOn`) — once none is open; an epic the same, from its items. A release is a version tag
+(`v0.9`, `1.2`), dated by its commit; a session is its note (`naima pass`). Something with no date is counted at the foot, never put at a guessed day.
+
+Only what the tracker cannot know needs writing down — a decision taken in a meeting, a build handed out, a policy, an outside fact:
+
+```sh
+naima event 2026-09-14 "Build 3 handed to the testers" --kind build
+```
+
+Each is one file in `naima-tracker/naima-data/events/`. The timeline is also a tab of the window `naima ui` opens.
+
+## Hold a declared list to its tests: coverage
+
+A list the project keeps somewhere else — the paid features in a pricing file, the API endpoints in the code, the limits — is declared once, by where it is, and
+read from there on every run: there is no copy to fall behind. In `plugins.gates.options.coverage` of `naima-tracker/naima-data/naima.json`:
+
+```json
+"coverage": {
+  "paid": { "says": "the paid features", "json": "plans.json", "path": "plans.*.features" },
+  "api": { "files": ["src/**/*.ts"], "pattern": "route\\(\"([^\"]+)\"" }
+}
+```
+
+A JSON source names the file and where the list is in it (keys joined by dots, `*` for every element); an element that is an object is named by its `id`, or
+the field `key` says. A files source names the files and a regular expression: each match is an entry, its first group when it has one.
+
+A test names the entries it proves in `covers` — `naima set tests/sso-signs-in covers=sso`, or `paid:sso` to say which list. Then:
+
+```text
+$ naima coverage
+paid — the paid features: 2 of 3 covered
+  export  tests/export-works [passed]
+  sso     NO TEST
+  audit   tests/audit-log [open]
+```
+
+`naima coverage --check` exits 1 while any entry has NO TEST. A gate can require a list — `naima gate new launch "Launch" --coverage paid` — and is then
+blocked by each entry with NO TEST. `naima check` notes a test whose `covers` names an entry the list no longer holds. Coverage is also a tab of `naima ui`.
+
 ## Where it lives
 
 Epics are items, in `naima-tracker/naima-data/epics/`. Gates are under `plugins.gates.options.gates` in `naima-tracker/naima-data/naima.json`
-([configuration](config.md)), which `naima gate new` writes. Commit both with the work.
+([configuration](config.md)), which `naima gate new` writes; coverage lists beside them, under `plugins.gates.options.coverage`. The timeline's records are in
+`naima-tracker/naima-data/events/`. Commit them all with the work.

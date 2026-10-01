@@ -39,7 +39,7 @@ export {
 export { storedLinks } from "./repo.ts"
 export { groupBy } from "./collections.ts"
 export { EXIT, isInternal, message, NaimaError } from "./errors.ts"
-export { isRegularFile, NEVER_SOURCE, walkFiles, writeFileAtomic } from "./files.ts"
+export { isRegularFile, NEVER_SOURCE, pathMatches, walkFiles, writeFileAtomic } from "./files.ts"
 export { byUrgency, hasFlag, hasTrait, isEvidenceType, isOpen, label, linked, proves, refutes, statusDef, urgency } from "./lifecycle.ts"
 export { flagsOf } from "./vocabulary.ts"
 export { addLink, alongside, renderBoard, setFields, typeOrThrow } from "./base.ts"

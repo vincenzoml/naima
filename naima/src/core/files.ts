@@ -57,3 +57,12 @@ export function writeFileAtomic(path: string, data: string): void {
     throw e
   }
 }
+
+/** Does a path match a selection: a path prefix ("src", "src/core"), or a pattern with * and ** ("**\/*.test.ts"). */
+export function pathMatches(path: string, pattern: string): boolean {
+  const p = pattern.replace(/^\.\//, "").replace(/\/$/, "")
+  if (p === "" || p === ".") return true
+  if (!p.includes("*")) return path === p || path.startsWith(`${p}/`)
+  const re = p.split("**").map((part) => part.split("*").map((s) => s.replace(/[.+?^${}()|[\]\\]/g, "\\$&")).join("[^/]*")).join(".*")
+  return new RegExp(`^${re.replace(/\.\*\//g, "(?:.*/)?")}$`).test(path)
+}

@@ -18,6 +18,7 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
+import { pathMatches } from "../../core/api.ts"
 
 /** A function a language found in a file. */
 export interface FunctionInfo {
@@ -909,13 +910,7 @@ export const builtinMeasures: CodeMeasure[] = [
 ]
 
 /** Does a path match a selection: a path prefix ("src", "src/core"), or a pattern with * and ** ("**\/*.test.ts"). */
-export function matches(path: string, pattern: string): boolean {
-  const p = pattern.replace(/^\.\//, "").replace(/\/$/, "")
-  if (p === "" || p === ".") return true
-  if (!p.includes("*")) return path === p || path.startsWith(`${p}/`)
-  const re = p.split("**").map((part) => part.split("*").map((s) => s.replace(/[.+?^${}()|[\]\\]/g, "\\$&")).join("[^/]*")).join(".*")
-  return new RegExp(`^${re.replace(/\.\*\//g, "(?:.*/)?")}$`).test(path)
-}
+export const matches = pathMatches
 
 const cacheOf = new WeakMap<CodeSource, Map<string, AnalysedFile | null>>()
 

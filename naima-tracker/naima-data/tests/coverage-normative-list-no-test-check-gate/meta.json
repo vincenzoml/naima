@@ -1,0 +1,19 @@
+{
+  "id": "d1055ce3-93df-4452-9c87-f56026887455",
+  "title": "Coverage of a normative list: NO TEST, --check, gate, ui tab",
+  "status": "passed",
+  "created": "2026-10-01",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "6f34bf2d-bf86-43d5-b1a5-b8f84a2fb9d8"
+    }
+  ],
+  "redSeen": "2026-10-01",
+  "impact": "medium",
+  "priority": "later",
+  "confidence": "measured",
+  "effort": "S",
+  "triagedOn": "2026-10-01"
+}
