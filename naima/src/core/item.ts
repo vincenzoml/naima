@@ -29,9 +29,14 @@ export function titleWords(text: string): string[] {
     .filter(Boolean)
 }
 
+/** `titleWords`, minus the ones too common to tell titles apart — what a slug and a duplicate hint both compare. */
+export function significantWords(text: string): string[] {
+  return titleWords(text).filter((w) => !STOP_WORDS.has(w))
+}
+
 /** A readable directory name. Slugs may change; ids may not. */
 export function slugify(text: string, maxWords = 7): string {
-  const words = titleWords(text).filter((w) => !STOP_WORDS.has(w))
+  const words = significantWords(text)
   return [...words.slice(0, maxWords).join("-")].slice(0, 60).join("").replace(/-+$/, "") || "item"
 }
 

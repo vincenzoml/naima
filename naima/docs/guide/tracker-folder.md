@@ -51,8 +51,9 @@ naima-tracker/
 directory holds only what runs Naima: no tests, no fixtures, no CI, no agent
 rules, and none of Naima's own [items](glossary.md#item). Everything the project tracks — its
 bugs, its todos, its features, its tests, its rules — is an item in its own
-`naima-data/`, in the directory of its type (milestones are
-[planned](../planned.md#epics-and-milestones));
+`naima-data/`, in the directory of its type (a milestone is a
+[gate](glossary.md#gate) with a date, kept with the other gates in
+`naima.json` rather than in its own directory);
 `naima/` is replaced whole on every update. Only the item directories that hold something exist. Commands work
 from any subdirectory: Naima walks up from the current directory to the first
 `naima-tracker/naima-data/naima.json`. Every file and field is specified in
