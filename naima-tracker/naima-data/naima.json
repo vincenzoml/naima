@@ -4,7 +4,7 @@
     "gates": 2
   },
   "source": "https://github.com/vincenzoml/naima.git",
-  "commit": "2c3a166a61cbd33739100d283e799d819b8efadc",
+  "commit": "7ea88935c7029d760b5c6e10b52b9aa23769f67b",
   "plugins": {
     "gates": {
       "options": {
