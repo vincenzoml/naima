@@ -2,13 +2,22 @@
 #
 #   irm https://vincenzoml.github.io/naima/install.ps1 | iex
 #
-# It clones Naima into naima-tracker\naima\, and runs its `naima init`: that
-# records the clone's origin and commit in naima-tracker\naima-data\naima.json,
-# beside it, and writes the tracker folder's README.md and .gitignore. Then it
-# runs `naima check`. Nothing is installed globally for Naima; Deno, the
-# one thing Naima needs on the machine, is installed with its official
-# installer when it is missing. Run again, it says Naima is installed and
-# checks it. What it does by hand: naima/docs/guide/install.md#bootstrap-a-project.
+# It clones Naima into naima-tracker\naima\ (a branch or a tag, no temporary
+# clone), and runs its `naima init --write-agent-pointer`: that records the
+# clone's origin and commit in naima-tracker\naima-data\naima.json, beside it,
+# writes the tracker folder's README.md and .gitignore, and points the
+# project's agent file at Naima's own. Then it runs `naima check`. Nothing is
+# installed globally for Naima; Deno, the one thing Naima needs on the
+# machine, is installed with its official installer when it is missing. Run
+# again, it says Naima is installed and checks it, cloning the program again
+# first when it is missing (at the locked commit, if the clone that holds it
+# is gone). On a host installed before the program was a git clone — a copy
+# (naima\.naima-copy.json) or a clone of the old full repository (its HEAD
+# holds naima\src\cli.ts) — it is moved aside to
+# naima-tracker\.naima-legacy-<date>, never overwritten, the product is
+# cloned fresh, and `naima update` moves the lock to its head and migrates the
+# data; the one commit to make is printed. What it does by hand:
+# naima/docs/guide/install.md#bootstrap-a-project.
 #
 #   NAIMA_SOURCE           the repository to clone (default: Naima's on GitHub)
 #   NAIMA_REF              the branch or tag to install (default: main)
@@ -70,22 +79,50 @@ function Install-Naima {
     Say "cloning $Source ($Ref) into $Program"
     Invoke-Checked git @('-c', 'core.autocrlf=false', 'clone', '--quiet', '--config', 'core.autocrlf=false', '--single-branch', '--branch', $Ref, '--', $Source, $Program)
   }
+  function Invoke-Naima([string[]]$argv) { Invoke-Checked $DenoExe (@('run', '-A', "$Program/naima.ts") + $argv) }
+
+  # A host installed before the program was a git clone: a copy (carries .naima-copy.json)
+  # or a clone of the old full repository (its HEAD still holds naima/src/cli.ts).
+  function Test-Legacy {
+    if (Test-Path (Join-Path $Program '.naima-copy.json')) { return $true }
+    if (-not (Test-Path (Join-Path $Program '.git'))) { return $false }
+    & git -C $Program cat-file -e 'HEAD:naima/src/cli.ts' 2>$null
+    return $LASTEXITCODE -eq 0
+  }
+
+  # Move the legacy program aside, never overwritten, clone the product fresh, and let
+  # `naima update` move the lock to its head and migrate the data, as one change to commit.
+  function Move-Legacy {
+    $Legacy = "naima-tracker/.naima-legacy-$(Get-Date -Format 'yyyyMMddHHmmss')"
+    Say "naima-tracker/naima is from before the program was a git clone: moving it to $Legacy"
+    Move-Item $Program $Legacy
+    Get-Naima
+    Invoke-Naima @('update')
+    Invoke-Naima @('check')
+    Say 'commit the migration:'
+    Say '  git add naima-tracker; git commit -m "Migrate Naima to a git clone of the product"'
+    Say "  Remove-Item -Recurse -Force $Legacy     # once you have looked at what, if anything, you had changed in it"
+  }
 
   Push-Location $Root
   try {
-    if ((Test-Path $Program) -and -not (Test-Path (Join-Path $Program 'naima.ts'))) {
+    if ((Test-Path $Program) -and -not (Test-Path (Join-Path $Program 'naima.ts')) -and -not (Test-Legacy)) {
       throw "naima: $Program exists and is not Naima: move it away, then run this again"
     }
     if (Test-Path $Lock) {
       Say "Naima is already installed here ($Lock): checking it"
-      if (-not (Test-Path (Join-Path $Program 'naima.ts'))) { Get-Naima }
-      Invoke-Checked $DenoExe @('run', '-A', "$Program/naima.ts", 'check')
+      if ((Test-Path $Program) -and (Test-Legacy)) {
+        Move-Legacy
+      } else {
+        if (-not (Test-Path (Join-Path $Program 'naima.ts'))) { Get-Naima }
+        Invoke-Naima @('check')
+      }
       Say "up to date? naima update --check; to update: naima update (docs: $Program/docs/guide/install.md#updating)"
       return
     }
     if (-not (Test-Path $Program)) { Get-Naima }
-    Invoke-Checked $DenoExe @('run', '-A', "$Program/naima.ts", 'init')
-    Invoke-Checked $DenoExe @('run', '-A', "$Program/naima.ts", 'check')
+    Invoke-Naima @('init', '--write-agent-pointer')
+    Invoke-Naima @('check')
     Write-Host @"
 
 Naima is installed in $Root.

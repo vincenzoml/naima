@@ -109,8 +109,8 @@ project. Its layout is fixed by [the format](../reference/format.md).
 
 ### Program directory
 
-`naima-tracker/naima/`: the copy of Naima the project runs. It holds only the
-files that run Naima, is ignored by git, and is replaced whole on every
+`naima-tracker/naima/`: the clone of Naima the project runs. It holds only
+the files that run Naima, is ignored by git, and is checked out anew on every
 [update](#update). Nothing of yours lives in it.
 
 ### Item
@@ -474,11 +474,13 @@ What every run does first: make the program directory exactly the locked
 commit, copying it when it is missing. It never overwrites work and never
 pulls.
 
-### Copy
+### Clone
 
-What a project's program directory is: the files of Naima's `naima/` folder
-at the locked commit, without its tests or its own tracker, fetched through
-the per-user cache ([the copy](install.md#the-copy)).
+What a project's program directory is: a git clone of Naima's own
+repository, checked out at the locked commit — without its tests or its own
+tracker, which live in a separate repository,
+[`naima-dev`](https://github.com/vincenzoml/naima-dev)
+([the clone](install.md#the-clone)).
 
 ### Update
 
@@ -494,12 +496,6 @@ The version number of the data's layout, in `naima.json`. It moves only with a
 
 The step that rewrites the data from one [format](#format) to the next, run by
 `naima update`, forward only.
-
-### Carry
-
-How the program directory is kept: an ignored `copy` (the default),
-`vendored` (the copy, committed) or a git `submodule`
-([how the program is carried](install.md#how-the-program-is-carried)).
 
 ### Fork
 

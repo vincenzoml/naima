@@ -138,7 +138,7 @@ program](../naima/docs/guide/install.md#every-run-aligns-the-program)). Held by:
 
 **runtime-only-distribution.** A project receives only what runs Naima: no
 tests, no CI, no development agent rules, none of Naima's own tracker items
-([the copy](../naima/docs/guide/install.md#the-copy)). Held by: the runtime
+([the clone](../naima/docs/guide/install.md#the-clone)). Held by: the runtime
 folder `naima/`, which a project's program is a copy of and nothing else, and
 `test/runtime-folder.test.ts` and `test/site.test.ts`, which hold the copy to it.
 

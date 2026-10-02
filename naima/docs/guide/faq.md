@@ -65,7 +65,7 @@ archived. Three states, three numbers, never added together
 
 ## The program folder appeared in my repository. Is that right?
 
-`naima-tracker/naima/` is the copy of Naima your project runs. Git ignores
+`naima-tracker/naima/` is the clone of Naima your project runs. Git ignores
 it; `git status` never shows it. Some tools that ignore `.gitignore` may
 read it: [keep Naima out of your own tools](configure-the-project.md#keep-naima-out-of-your-own-tools).
 

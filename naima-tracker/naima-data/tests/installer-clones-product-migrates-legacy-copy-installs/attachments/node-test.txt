@@ -1,0 +1,17 @@
+✔ the site serves what the page points at: the installers, llms.txt, the favicon (1.251083ms)
+✔ the agent prompt is one line naming the repository, whose README, llms.txt and the page all give the steps (1.154291ms)
+✔ the logo is NAIMA on one line, named for assistive technology, its AI lit; the palette is defined once (1.505458ms)
+✔ the page links the documentation and the repository, with room for a star count filled at build time (0.179333ms)
+✔ the build writes the star count into the page when it has one, and leaves no empty count without (19.822042ms)
+✔ install.sh installs Naima in a git repository, says so when run again, and refuses outside one (5143.872167ms)
+✔ install.sh installs a tagged release: NAIMA_REF may name a tag (2969.337458ms)
+✔ install.sh migrates a legacy copy of the program aside and runs naima update (6189.064792ms)
+✔ install.ps1 looks for Deno where its installer puts it, before and after installing it (0.654875ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14479.732459

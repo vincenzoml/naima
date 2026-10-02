@@ -216,8 +216,7 @@ straight from git; metrics that run a command run it in a temporary copy of
 the repository, removed at the end. A commit already recorded is skipped.
 Commit the records it writes, like any other.
 
-A project carried as a [git submodule](install.md#how-the-program-is-carried),
-or with one of its own, measures the submodule's files like any other: the
+A project with a git submodule of its own measures its files like any other: the
 working tree through `git ls-files --recurse-submodules`, a past commit by
 following the gitlink `ls-tree` records into the submodule's own history at
 that commit — not whatever the submodule happens to be checked out to now.

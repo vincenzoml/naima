@@ -17,7 +17,7 @@ committed. A project that needs nothing else configures nothing.
 `naima-tracker/naima-data/naima.json` holds only what the tool cannot infer:
 
 - the **formats** of the data, and the **lock**: which Naima runs the project
-  (`source`, `commit`, optionally `verify`), and how it is carried (`carry`, `program`);
+  (`source`, `commit`, optionally `verify`), and where it is (`program`);
 - the **`plugins` table**: what the project decides about a plugin — its
   options (the project's [gates](glossary.md#gate) are the `gates` plugin's), a plugin switched
   off or replaced, a third-party plugin added, a check weighed differently.
