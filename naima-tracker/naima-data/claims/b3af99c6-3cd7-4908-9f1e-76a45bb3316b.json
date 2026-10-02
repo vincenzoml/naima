@@ -1,0 +1,12 @@
+{
+  "branch": "claude/rules-ack",
+  "claimedAt": "2026-10-02",
+  "items": [
+    {
+      "id": "c369f5f6-c353-4590-b107-018207d76aba",
+      "ref": "features/rule-can-require-acknowledgement-phrase-checked-session",
+      "title": "A rule can require an acknowledgement phrase, checked in session notes and worker reports"
+    }
+  ],
+  "note": "rules carry an ack field; naima pass/check and a new rules check-ack verify it"
+}
