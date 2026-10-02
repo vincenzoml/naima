@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    rect { fill: #0a0b0d; }
+    text { font: 900 21px ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: -1px; fill: #f1f0ec; }
+    .ai { fill: #4de3bf; }
+  </style>
+  <rect width="64" height="64" rx="14"/>
+  <text x="12" y="24">N</text>
+  <text x="12" y="41" class="ai">AI</text>
+  <text x="12" y="58">MA</text>
+</svg>

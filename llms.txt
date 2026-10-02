@@ -1,0 +1,47 @@
+# Naima
+
+> Naima is born for software: a silent software house of AI agents that turns
+> vibe coding into an exact science for the person who owns the project. Vibe
+> coding — asking an AI to build software and hoping it worked — leaves work
+> unverified, unrecorded, unrepeatable, uncoordinated and roleless; Naima
+> replaces each with its opposite. They say what they want; agents build it
+> with industry-grade practice (written
+> requirements, tests, metrics, reviews, gates) and formal methods (properties
+> of the design proven by tools), check it, prove it and document it, every
+> claim with its evidence, nothing done until shown to be; the person only
+> decides. It runs any other project too, with that work's own checks in place
+> of tests: a data analysis checked by reproducible runs, a paper checked by
+> reviews. The person needs no git, code or project management, only an AI
+> agent. Naima lives in a folder of the project and manages it with git, so
+> you never have to — naima-tracker/.
+
+The install procedure, for people and agents alike, is the repository's
+README, section "Install":
+https://raw.githubusercontent.com/vincenzoml/naima/main/README.md
+
+In short. If git is not installed, install it (macOS: `xcode-select --install`,
+or `brew install git` with Homebrew; Linux: the package manager, e.g.
+`sudo apt install git`; Windows: `winget install Git.Git`). Then, in the
+root of this repository (if it is not a git repository yet, create one at the
+root with `git init`):
+
+1. Run the installer for this system:
+   - macOS, Linux: `curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh`
+   - Windows (PowerShell): `irm https://vincenzoml.github.io/naima/install.ps1 | iex`
+2. `deno run -A naima-tracker/naima/naima.ts check` must end with `all invariants hold`.
+3. `git add naima-tracker && git commit -m "Track this project with Naima"`.
+4. Read `naima-tracker/naima/skills/naima/SKILL.md` and work by it, and the
+   project's rules, `naima rules --audience agents`; `naima` means
+   `deno run -A naima-tracker/naima/naima.ts`.
+5. Add this line, verbatim, to the repository's agent instruction file
+   (AGENTS.md, CLAUDE.md, or the one your agent reads; if none, create
+   AGENTS.md), and commit it:
+
+   This repository tracks its work with Naima: at the start of every session read naima-tracker/naima/skills/naima/SKILL.md and `naima rules --audience agents`, and work by them.
+
+## More
+
+- Source and README: https://github.com/vincenzoml/naima
+- The documentation: https://github.com/vincenzoml/naima/tree/main/naima/docs
+- Code-quality metrics (complexity, duplication, coverage and more), per
+  commit, in a native window: `naima ui`
