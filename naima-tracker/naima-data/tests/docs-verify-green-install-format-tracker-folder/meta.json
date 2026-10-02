@@ -1,0 +1,21 @@
+{
+  "id": "e7fd18fc-e98d-4535-a53b-7031166b09ed",
+  "title": "docs verify green: install, format and tracker-folder describe the clone, naima-dev links resolve",
+  "status": "passed",
+  "created": "2026-10-02",
+  "runBy": "agent",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "9719c906-f663-44b7-802f-c3daee0213d1"
+    }
+  ],
+  "attached": {
+    "verify-green.log": {
+      "from": "agent",
+      "by": "Vincenzo Ciancia",
+      "on": "2026-10-02"
+    }
+  },
+  "evidenceKind": "live-read"
+}
