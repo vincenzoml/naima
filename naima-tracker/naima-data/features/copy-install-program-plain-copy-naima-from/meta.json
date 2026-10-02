@@ -13,7 +13,7 @@
   "docs": [
     "naima/docs/guide/install.md#the-copy",
     "naima/docs/guide/install.md#how-the-program-is-carried",
-    "naima/docs/reference/format.md#how-the-program-is-carried",
+    "naima/docs/reference/format.md#the-program",
     "develop/bootstrap.md"
   ],
   "fixedOn": "2026-10-01",
