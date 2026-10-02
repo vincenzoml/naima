@@ -7,13 +7,13 @@ at a gitlink: every code metric of `naima-dev` would read `naima/src` as empty.
 
 ## Definition of done
 
-- [ ] The working-tree measure lists files with `ls-files --recurse-submodules`.
-- [ ] The past-commit measure (backfill) follows a gitlink entry of `ls-tree -r
+- [x] The working-tree measure lists files with `ls-files --recurse-submodules`.
+- [x] The past-commit measure (backfill) follows a gitlink entry of `ls-tree -r
   <commit>` into the submodule's repository (`.git/modules/<path>` or the
   submodule's own `.git`) and reads that commit's files; a gitlink whose
   commit is absent is reported in one line and counted as no files.
-- [ ] `include` paths name files inside a submodule as they name any other.
-- [ ] A project without submodules measures exactly as before.
+- [x] `include` paths name files inside a submodule as they name any other.
+- [x] A project without submodules measures exactly as before.
 
 ## Files
 

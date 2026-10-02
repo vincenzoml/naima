@@ -3,7 +3,7 @@
 // Automatic first: every first-party plugin is loaded, with defaults it infers
 // from the repository, unless the project says otherwise. The file holds only
 // what the tool cannot infer — the data formats, the lock (which Naima runs:
-// its source, commit and how it is carried), where the program is when it has
+// its source and commit), where the program is when it has
 // moved — and the `plugins` table: a plugin's options, a plugin switched off
 // or replaced, a third-party plugin added, a check weighed differently. The
 // format is specified in docs/reference/format.md.
@@ -15,29 +15,33 @@ import { writeFileAtomic } from "./files.ts"
 import { DATA_FILE, DEFAULT_PROGRAM } from "./layout.ts"
 import { FORMAT, formatRefusal, formatsOf } from "./format.ts"
 import { DEFAULT_ENTRY_FILES } from "./pointer.ts"
-import type { Carry, Config, Extension, PluginConfig, PluginOptions, PluginSource, Severity } from "./types.ts"
+import type { Config, Extension, PluginConfig, PluginOptions, PluginSource, Severity } from "./types.ts"
 
-export const CARRY_MODES: readonly Carry[] = ["copy", "vendored", "submodule"]
-
-/** The carry naima.json records by leaving `carry` out. */
-export const DEFAULT_CARRY: Carry = "copy"
-
-/**
- * `raw` with `carry` recorded: left out when it is the default, so that a
- * Naima that predates the copy, reading the default as its clone, still
- * aligns and updates onto the Naima that copies.
- */
-export function withCarry(raw: Record<string, unknown>, carry: Carry): Record<string, unknown> {
-  const { carry: _was, ...rest } = raw
-  return carry === DEFAULT_CARRY ? rest : { ...rest, carry }
-}
-
-const KEYS = new Set(["format", "formats", "source", "commit", "carry", "verify", "program", "plugins", "rename", "extends", "entryFiles"])
+const KEYS = new Set(["format", "formats", "source", "commit", "verify", "program", "plugins", "rename", "extends", "entryFiles"])
 const COMMIT = /^[0-9a-f]{40}$/
 
 const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v)
 
-export type Lock = Pick<Config, "source" | "commit" | "carry" | "verify" | "program">
+export type Lock = Pick<Config, "source" | "commit" | "verify" | "program">
+
+/**
+ * Why a naima.json's `carry`, which data before format 3 may hold, keeps the
+ * program from being a git clone, or null. The gitignored copy ("copy", or
+ * its earlier name "clone") becomes the clone by itself; a program committed
+ * in the project, vendored or as a submodule, is removed by hand first.
+ */
+export function carryRefusal(raw: Record<string, unknown>, program = "naima-tracker/naima"): string | null {
+  const carry = raw["carry"]
+  if (carry === undefined || carry === "copy" || carry === "clone") return null
+  const how = carry === "submodule"
+    ? `git submodule deinit -f ${program} && git rm -f ${program}`
+    : carry === "vendored"
+    ? `git rm -r -q --cached ${program} && rm -rf ${program}`
+    : `remove ${program}`
+  return `${DATA_FILE} says carry: ${
+    JSON.stringify(carry)
+  }, a program committed in the project, and the program is now a gitignored git clone — remove it by hand: ${how}, delete "carry" from ${DATA_FILE}, add /naima/ to the tracker folder's .gitignore, commit, then run the installer again`
+}
 
 /** A source on this disk rather than behind a URL. */
 export const isLocalSource = (source: string): boolean => source.startsWith("file:") || !/^([a-z][a-z0-9+.-]*:\/\/|[^/\\\s]+@[^:/\\\s]+:)/i.test(source)
@@ -69,14 +73,11 @@ export function parseLock(raw: Record<string, unknown>): Lock {
   const refusal = sourceRefusal(source)
   if (refusal) throw new Error(`${DATA_FILE}: source ${refusal}`)
   if (typeof commit !== "string" || !COMMIT.test(commit)) throw new Error(`${DATA_FILE}: commit must be the full hash of the Naima commit this project runs`)
-  // "clone" is how naima.json named the gitignored program before it was a copy: the same place, the same ignoring.
-  const carry = raw["carry"] === undefined || raw["carry"] === "clone" ? DEFAULT_CARRY : raw["carry"]
-  if (!CARRY_MODES.includes(carry as Carry)) throw new Error(`${DATA_FILE}: carry must be one of: ${CARRY_MODES.join(", ")}`)
   const program = raw["program"] ?? DEFAULT_PROGRAM
   if (typeof program !== "string" || !program.trim()) throw new Error(`${DATA_FILE}: program must be a path, relative to the data directory`)
   const verify = raw["verify"]
   if (verify !== undefined && verify !== "signed") throw new Error(`${DATA_FILE}: verify is "signed", or absent`)
-  return { source, commit, carry: carry as Carry, ...(verify ? { verify } : {}), program }
+  return { source, commit, ...(verify ? { verify } : {}), program }
 }
 
 /**

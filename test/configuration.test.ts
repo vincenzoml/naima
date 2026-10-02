@@ -32,7 +32,7 @@ function project(config: Record<string, unknown> = {}) {
     const out: string[] = []
     const err: string[] = []
     const io = { out: (l = "") => void out.push(l), err: (l: string) => void err.push(l), now: () => new Date("2026-01-15T10:00:00Z") }
-    const code = await runCli(argv, { cwd: root, programRoot: program, firstParty, io })
+    const code = await runCli(argv, { cwd: root, data: join(root, "naima-tracker", "naima-data"), programRoot: program, firstParty, io })
     return { code, out: out.join("\n"), err: err.join("\n") }
   }
   return { root, data, program, write, run, raw: () => JSON.parse(readFileSync(file, "utf8")), cleanup: () => removeTemp(base) }

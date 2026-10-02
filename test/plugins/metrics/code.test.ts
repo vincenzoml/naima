@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { test } from "node:test"
 import { type Context, DATA_FILE } from "../../../naima/src/core/api.ts"
@@ -18,7 +19,7 @@ import {
   workingTreeSource,
 } from "../../../naima/src/plugins/metrics/code.ts"
 import { htmlReport, plotSvg, ticks } from "../../../naima/src/plugins/metrics/plot.ts"
-import { tempProject } from "../../core/testing.ts"
+import { gitIn, removeTemp, tempProject } from "../../core/testing.ts"
 
 const TS = builtinLanguages.find((l) => l.id === "typescript")!
 const fns = (src: string) => jsFunctions(stripComments(src, TS))
@@ -182,6 +183,109 @@ test("backfill measures past commits without touching the working tree, and skip
     const src = commitSource(root, second, [ctx.trackerDir])
     assert.deepEqual(selectFiles(src, builtinLanguages, {}).map((f) => f.path), ["src/f1.ts", "src/f2.ts"])
     assert.equal(workingTreeSource(root, [ctx.trackerDir]).read("src/f1.ts"), "export const changed = 1\nexport const more = 2\n")
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("code metrics read the files of a git submodule: the working tree, a past commit following the historical gitlink, and an absent commit counted as no files", async () => {
+  // A standalone repository that will be added as a submodule: one commit, then a second that grows its file.
+  const subRoot = mkdtempSync(join(tmpdir(), "naima-submodule-"))
+  try {
+    gitIn(subRoot, "init", "-q", "-b", "main")
+    write(subRoot, "src/a.ts", "export const a = 1\n")
+    gitIn(subRoot, "add", "-A")
+    gitIn(subRoot, "commit", "-q", "-m", "sub1")
+
+    const p = tempProject(firstPartyPlugins({ metrics: CODE_METRICS }), { git: true })
+    try {
+      const { root, ctx } = p
+      // The same two lines, committed inline, as what a submodule holding them must measure equal to.
+      write(root, "inline/a.ts", "export const a = 1\n")
+      p.git("-c", "protocol.file.allow=always", "submodule", "add", "-q", subRoot, "sub")
+      p.git("add", "-A")
+      p.git("commit", "-q", "-m", "main1 — submodule at sub1")
+      const main1 = p.git("rev-parse", "HEAD")
+
+      // Advance the submodule's own history, then record the new commit as the main repository's gitlink.
+      write(subRoot, "src/a.ts", "export const a = 1\nexport const b = 2\n")
+      gitIn(subRoot, "add", "-A")
+      gitIn(subRoot, "commit", "-q", "-m", "sub2")
+      p.git("-C", "sub", "-c", "protocol.file.allow=always", "fetch", "-q")
+      const sub2 = gitIn(subRoot, "rev-parse", "HEAD")
+      p.git("-C", "sub", "checkout", "-q", sub2)
+      write(root, "inline/a.ts", "export const a = 1\nexport const b = 2\n")
+      p.git("add", "-A")
+      p.git("commit", "-q", "-m", "main2 — submodule at sub2")
+      const main2 = p.git("rev-parse", "HEAD")
+
+      // The working tree: `ls-files --recurse-submodules` reaches into the checked-out submodule.
+      const working = workingTreeSource(root, [ctx.trackerDir])
+      assert.ok(working.files.includes("sub/src/a.ts"), "the submodule's file is listed")
+      assert.equal(working.read("sub/src/a.ts"), "export const a = 1\nexport const b = 2\n")
+      const workingFiles = selectFiles(working, builtinLanguages, {})
+      const inlineLoc = workingFiles.find((f) => f.path === "inline/a.ts")!.codeLines
+      const subLoc = workingFiles.find((f) => f.path === "sub/src/a.ts")!.codeLines
+      assert.equal(subLoc, inlineLoc, "the submodule's file measures equal to the same file committed inline")
+
+      // `include` names a file inside a submodule as it names any other.
+      assert.deepEqual(selectFiles(working, builtinLanguages, { include: ["sub/**"] }).map((f) => f.path), ["sub/src/a.ts"])
+
+      // A past commit follows the gitlink it recorded, not the submodule's current checkout.
+      const atMain1 = commitSource(root, main1, [ctx.trackerDir])
+      assert.equal(atMain1.read("sub/src/a.ts"), "export const a = 1\n", "the gitlink of the first commit, one line")
+      const atMain2 = commitSource(root, main2, [ctx.trackerDir])
+      assert.equal(atMain2.read("sub/src/a.ts"), "export const a = 1\nexport const b = 2\n", "the gitlink of the second commit, two lines")
+      assert.equal(
+        selectFiles(atMain2, builtinLanguages, {}).find((f) => f.path === "sub/src/a.ts")!.codeLines,
+        selectFiles(atMain2, builtinLanguages, {}).find((f) => f.path === "inline/a.ts")!.codeLines,
+      )
+
+      // `metrics backfill` over the two commits: the submodule's lines count like any other file's.
+      assert.equal(await p.run("metrics", "backfill", "--last", "2"), 0)
+      const records = readRecords(ctx)
+      const atHead = records.find((r) => r.commit === main2)!
+      const atFirst = records.find((r) => r.commit === main1)!
+      assert.equal(atFirst.values["loc"]?.value, 2, "1 inline line + 1 submodule line, at the first commit")
+      assert.equal(atHead.values["loc"]?.value, 4, "2 inline lines + 2 submodule lines, at the second commit")
+
+      // A gitlink whose commit the submodule's repository never received: no files, one line reported, no throw.
+      const missingOid = "a".repeat(40)
+      gitIn(root, "update-index", "--add", "--cacheinfo", `160000,${missingOid},sub`)
+      const missingCommit = p.git("commit-tree", p.git("write-tree"), "-p", main2, "-m", "a gitlink with no matching commit")
+      const before = console.error
+      const lines: string[] = []
+      console.error = (msg: string) => void lines.push(msg)
+      try {
+        const atMissing = commitSource(root, missingCommit, [ctx.trackerDir])
+        assert.ok(!atMissing.files.includes("sub/src/a.ts"), "the submodule contributes no files")
+        assert.equal(lines.length, 1, "reported in exactly one line")
+        assert.match(lines[0] ?? "", /sub.*missing commit/)
+      } finally {
+        console.error = before
+      }
+      // The index change above is test-local bookkeeping, not a commit on HEAD: restore it so cleanup finds a clean tree.
+      gitIn(root, "reset", "-q", "--hard", main2)
+    } finally {
+      p.cleanup()
+    }
+  } finally {
+    removeTemp(subRoot)
+  }
+})
+
+test("a project without submodules measures exactly as before: ls-files --recurse-submodules changes nothing when there is nothing to recurse into", () => {
+  const p = tempProject(firstPartyPlugins({ metrics: CODE_METRICS }), { git: true })
+  try {
+    const { root, ctx } = p
+    write(root, "src/a.ts", "export const a = 1\nexport const b = 2\n")
+    p.git("add", "-A")
+    p.git("commit", "-q", "-m", "c1")
+    const working = workingTreeSource(root, [ctx.trackerDir])
+    assert.deepEqual(working.files, ["src/a.ts"])
+    const head = p.git("rev-parse", "HEAD")
+    const committed = commitSource(root, head, [ctx.trackerDir])
+    assert.deepEqual(committed.files, working.files)
   } finally {
     p.cleanup()
   }

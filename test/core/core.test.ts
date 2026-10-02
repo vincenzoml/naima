@@ -26,7 +26,7 @@ import {
   uniqueSlug,
 } from "../../naima/src/core/internal.ts"
 import { corePlugin } from "../../naima/src/core/base.ts"
-import { withCarry } from "../../naima/src/core/config.ts"
+import { carryRefusal } from "../../naima/src/core/config.ts"
 import { gitIn, tempProject } from "./testing.ts"
 
 const notes: Plugin = {
@@ -69,7 +69,6 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
     format: FORMAT,
     formats: {},
     ...LOCK,
-    carry: "copy",
     program: "../naima",
     plugins: {},
     rename: {},
@@ -79,7 +78,6 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
   const c = parseConfig({
     format: FORMAT,
     ...LOCK,
-    carry: "vendored",
     plugins: {
       gates: { options: { gates: { v1: { title: "One" } } } },
       "beta-markers": { enabled: false },
@@ -87,10 +85,9 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
       mine: { source: "plugins/mine.ts", options: { k: 1 }, checks: { strict: "note" } },
     },
   })
-  assert.equal(c.carry, "vendored")
-  assert.equal(parseConfig({ format: FORMAT, ...LOCK, carry: "clone" }).carry, "copy", "clone is the copy's earlier name: the same gitignored place")
-  assert.deepEqual(withCarry({ format: FORMAT, carry: "clone" }, "copy"), { format: FORMAT }, "the default is recorded by leaving carry out")
-  assert.deepEqual(withCarry({ format: FORMAT }, "vendored"), { format: FORMAT, carry: "vendored" })
+  assert.equal(carryRefusal({ carry: "copy" }), null, "a gitignored copy becomes the clone by itself")
+  assert.equal(carryRefusal({ carry: "clone" }), null)
+  assert.match(carryRefusal({ carry: "submodule" }) ?? "", /remove it by hand: git submodule deinit -f naima-tracker\/naima/)
   assert.deepEqual(c.plugins, {
     gates: { enabled: true, options: { gates: { v1: { title: "One" } } }, checks: {} },
     "beta-markers": { enabled: false, options: {}, checks: {} },
@@ -100,7 +97,7 @@ test("naima.json: the formats, the lock, and the plugins table — options, enab
   assert.throws(() => parseConfig({ ...LOCK }), /has no format/)
   assert.throws(() => parseConfig({ format: FORMAT, source: "", commit: LOCK.commit }), /source must be/)
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, commit: "abc" }), /commit must be the full hash/)
-  assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, carry: "zip" }), /carry must be one of: copy, vendored, submodule/)
+  assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, carry: "copy" }), /unknown key "carry"/, "carry left naima.json in format 3")
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, naima: "^0.2.0" }), /unknown key "naima"/)
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, gates: {} }), /unknown key "gates"/, "gates are the gates plugin's options now")
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, plugins: ["plugins/a.ts"] }), /plugins maps a plugin's name/)
@@ -122,14 +119,15 @@ test("naima.json: entryFiles overrides the sensible defaults for the agent-harne
   assert.throws(() => parseConfig({ format: FORMAT, ...LOCK, entryFiles: [""] }), /entryFiles must be a list of paths/)
 })
 
-test("the data directory: --data or NAIMA_DATA, else the first naima-tracker/naima-data/ walking up", () => {
+test("the data directory: --data or NAIMA_DATA, else the program's sibling, whatever the current directory", () => {
   const p = tempProject([])
   try {
     const deep = join(p.root, "a", "b")
     mkdirSync(deep, { recursive: true })
-    assert.equal(findData(deep), join(p.root, "naima-tracker", "naima-data"))
-    assert.equal(findData(deep, "../../elsewhere"), join(p.root, "elsewhere"))
-    assert.equal(findData(dirname(p.root)), null)
+    const program = join(p.root, "naima-tracker", "naima")
+    assert.equal(findData(deep, program), join(p.root, "naima-tracker", "naima-data"))
+    assert.equal(findData(dirname(p.root), program), join(p.root, "naima-tracker", "naima-data"), "no walk up from the current directory")
+    assert.equal(findData(deep, program, "../../elsewhere"), join(p.root, "elsewhere"))
   } finally {
     p.cleanup()
   }
@@ -530,7 +528,7 @@ test("a write is seen by the next read in the same run, with no reload", async (
 
 test("a plugin cannot take a name the entry point answers; a check, summary or rank name another plugin declared is shared, by qualified id", () => {
   const cmd = (name: string) => ({ name, says: "x", usage: name, run: () => 0 })
-  const reserved = ["init", "update", "carry", "guide", "help"]
+  const reserved = ["init", "update", "plugin", "guide", "help"]
   for (const name of reserved) {
     assert.throws(
       () => buildRegistry([corePlugin, { name: "p", says: "", commands: [cmd(name)] }], { reserved }),

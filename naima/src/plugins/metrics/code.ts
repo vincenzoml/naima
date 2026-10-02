@@ -663,12 +663,34 @@ const gitLines = (root: string, args: string[]): string[] => {
   return r.stdout.split("\0").filter(Boolean)
 }
 
-/** The working tree as git sees it: tracked files and untracked ones not ignored, the tracker's own directory left out. */
+/** The same, against a repository named by its git directory directly: no working tree needed, so a submodule not checked out still answers. */
+const gitDirLines = (gitDir: string, args: string[]): string[] => {
+  const r = spawnSync("git", ["--git-dir", gitDir, ...args], { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 })
+  if (r.status !== 0) throw new Error(`git ${args.join(" ")}: ${(r.stderr ?? "").trim() || `exited ${r.status}`}`)
+  return r.stdout.split("\0").filter(Boolean)
+}
+
+/** Where a submodule at `path` keeps its objects — `.git/modules/<path>` under root's common git directory, or the submodule's own checked-out `.git` — whichever exists; null when neither does (never cloned, or deinited). */
+function submoduleGitDir(root: string, path: string): string | null {
+  const common = gitLines(root, ["rev-parse", "--git-common-dir"])[0] ?? ".git"
+  const commonAbs = common.startsWith("/") ? common : join(root, common)
+  const modules = join(commonAbs, "modules", path)
+  if (existsSync(join(modules, "HEAD"))) return modules
+  const own = join(root, path, ".git")
+  if (existsSync(own)) return own
+  return null
+}
+
+/** The working tree as git sees it: tracked files and untracked ones not ignored, a submodule's own files included, the tracker's own directory left out. */
 export function workingTreeSource(root: string, leaveOut: string[] = []): CodeSource {
   const outside = (p: string) => !leaveOut.some((d) => p === d || p.startsWith(`${d}/`))
-  const files = [...new Set(gitLines(root, ["ls-files", "-z", "--cached", "--others", "--exclude-standard"]))].filter(outside).filter((p) =>
-    existsSync(join(root, p))
-  ).sort()
+  // `--recurse-submodules` only works with `--cached` alone: it refuses to combine with `--others`/`--exclude-standard`, so untracked files are a second call.
+  const files = [
+    ...new Set([
+      ...gitLines(root, ["ls-files", "-z", "--cached", "--recurse-submodules"]),
+      ...gitLines(root, ["ls-files", "-z", "--others", "--exclude-standard"]),
+    ]),
+  ].filter(outside).filter((p) => existsSync(join(root, p))).sort()
   return {
     files,
     read(path) {
@@ -683,40 +705,78 @@ export function workingTreeSource(root: string, leaveOut: string[] = []): CodeSo
   }
 }
 
-/** A commit's tree, read from git's objects: no checkout, nothing written. */
+/** A blob this source can later read, and the repository it lives in: null for the root repository itself, a submodule's git directory otherwise. */
+interface SourceEntry {
+  path: string
+  oid: string
+  gitDir: string | null
+}
+
+/** A commit's tree, read from git's objects: no checkout, nothing written. A gitlink entry (a submodule) is followed into its own repository at the commit it names; a gitlink whose commit is not there is reported in one line and counted as no files. */
 export function commitSource(root: string, commit: string, leaveOut: string[] = []): CodeSource {
   const outside = (p: string) => !leaveOut.some((d) => p === d || p.startsWith(`${d}/`))
-  const entries = gitLines(root, ["ls-tree", "-r", "-z", commit]).flatMap((e) => {
+  const entries: SourceEntry[] = []
+  for (const e of gitLines(root, ["ls-tree", "-r", "-z", commit])) {
     const tab = e.indexOf("\t")
     const [, type, oid] = e.slice(0, tab).split(" ")
     const path = e.slice(tab + 1)
-    return type === "blob" && oid && outside(path) ? [{ path, oid }] : []
-  })
-  const oids = new Map(entries.map((e) => [e.path, e.oid]))
+    if (!oid || !outside(path)) continue
+    if (type === "blob") {
+      entries.push({ path, oid, gitDir: null })
+      continue
+    }
+    if (type !== "commit") continue // a tree entry: ls-tree -r already flattened it away
+    const gitDir = submoduleGitDir(root, path)
+    if (!gitDir) {
+      console.error(`naima: submodule ${path} has no local repository (never cloned, or deinited) — its files are counted as 0`)
+      continue
+    }
+    let subLines: string[]
+    try {
+      subLines = gitDirLines(gitDir, ["ls-tree", "-r", "-z", oid])
+    } catch {
+      console.error(`naima: submodule ${path} is missing commit ${oid} — its files are counted as 0`)
+      continue
+    }
+    for (const se of subLines) {
+      const t2 = se.indexOf("\t")
+      const [, subType, subOid] = se.slice(0, t2).split(" ")
+      const subPath = `${path}/${se.slice(t2 + 1)}`
+      if (subType === "blob" && subOid && outside(subPath)) entries.push({ path: subPath, oid: subOid, gitDir })
+    }
+  }
+  const byPath = new Map(entries.map((e) => [e.path, e]))
   let texts: Map<string, string | null> | null = null
   const load = (): Map<string, string | null> => {
     const out = new Map<string, string | null>()
-    if (!entries.length) return out
-    const r = spawnSync("git", ["cat-file", "--batch"], { cwd: root, input: entries.map((e) => e.oid).join("\n") + "\n", maxBuffer: 1024 * 1024 * 1024 })
-    if (r.status !== 0) throw new Error(`git cat-file: ${String(r.stderr ?? "").trim()}`)
-    const buf = r.stdout as unknown as Uint8Array
-    const byOid = new Map<string, string | null>()
-    let at = 0
-    while (at < buf.length) {
-      const eol = buf.indexOf(10, at)
-      if (eol < 0) break
-      const [oid, type, size] = new TextDecoder().decode(buf.subarray(at, eol)).split(" ")
-      at = eol + 1
-      if (type === "missing" || !oid) continue
-      const len = Number(size)
-      byOid.set(oid, textOf(buf.subarray(at, at + len)))
-      at += len + 1
+    const byGitDir = new Map<string | null, SourceEntry[]>()
+    for (const e of entries) byGitDir.set(e.gitDir, [...(byGitDir.get(e.gitDir) ?? []), e])
+    for (const [gitDir, es] of byGitDir) {
+      if (!es.length) continue
+      const args = ["cat-file", "--batch"]
+      const r = gitDir === null
+        ? spawnSync("git", args, { cwd: root, input: es.map((e) => e.oid).join("\n") + "\n", maxBuffer: 1024 * 1024 * 1024 })
+        : spawnSync("git", ["--git-dir", gitDir, ...args], { input: es.map((e) => e.oid).join("\n") + "\n", maxBuffer: 1024 * 1024 * 1024 })
+      if (r.status !== 0) throw new Error(`git cat-file: ${String(r.stderr ?? "").trim()}`)
+      const buf = r.stdout as unknown as Uint8Array
+      const byOid = new Map<string, string | null>()
+      let at = 0
+      while (at < buf.length) {
+        const eol = buf.indexOf(10, at)
+        if (eol < 0) break
+        const [oid, type, size] = new TextDecoder().decode(buf.subarray(at, eol)).split(" ")
+        at = eol + 1
+        if (type === "missing" || !oid) continue
+        const len = Number(size)
+        byOid.set(oid, textOf(buf.subarray(at, at + len)))
+        at += len + 1
+      }
+      for (const e of es) out.set(e.path, byOid.get(e.oid) ?? null)
     }
-    for (const e of entries) out.set(e.path, byOid.get(e.oid) ?? null)
     return out
   }
   return {
-    files: [...oids.keys()].sort(),
+    files: [...byPath.keys()].sort(),
     read(path) {
       texts ??= load()
       return texts.get(path) ?? null

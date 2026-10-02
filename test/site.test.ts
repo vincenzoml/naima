@@ -12,8 +12,8 @@ import { dirname, join, relative, sep } from "node:path"
 import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 import { buildSite, tokensOf } from "../scripts/site.ts"
-import { COPY_FILE, RUNTIME_DIR } from "../naima/src/core/internal.ts"
-import { gitIn as git, removeTemp, sourceRepo } from "./core/testing.ts"
+import { RUNTIME_DIR } from "../naima/src/core/internal.ts"
+import { gitIn as git, productRepo, removeTemp } from "./core/testing.ts"
 
 const NAIMA = dirname(dirname(fileURLToPath(import.meta.url)))
 const SITE = join(NAIMA, "site")
@@ -128,7 +128,7 @@ test("install.sh installs Naima in a git repository, says so when run again, and
 }, () => {
   const base = mkdtempSync(join(tmpdir(), "naima-site-"))
   try {
-    const source = sourceRepo(NAIMA, join(base, "naima")) // the whole repository: its tests, its tracker, its agent rules
+    const source = productRepo(join(base, "naima"), { oldLayout: true }).dir // its history holds the old layout: tests, agent rules
     const run = (cwd: string) =>
       spawnSync("sh", [join(SITE, "install.sh")], {
         cwd,
@@ -136,7 +136,6 @@ test("install.sh installs Naima in a git repository, says so when run again, and
         env: {
           ...process.env,
           NAIMA_SOURCE: source,
-          NAIMA_CACHE: join(base, "cache"),
           TMPDIR: join(base, "tmp"),
           NAIMA_NO_DENO_INSTALL: "1",
           GIT_CEILING_DIRECTORIES: base,
@@ -154,15 +153,16 @@ test("install.sh installs Naima in a git repository, says so when run again, and
     assert.match(fresh.stdout, /all invariants hold/)
     assert.ok(existsSync(join(project, "naima-tracker", "naima-data", "naima.json")))
     const dir = join(project, "naima-tracker", "naima")
-    const program = walk(dir).map((f) => relative(dir, f).split(sep).join("/")).sort()
-    const runtime = git(source, "ls-tree", "-r", "--name-only", "HEAD:naima").split("\n").sort()
-    assert.deepEqual(program, [COPY_FILE, ...runtime].sort(), "the program is naima/, exactly, and what it is a copy of")
+    const program = walk(dir).map((f) => relative(dir, f).split(sep).join("/")).filter((f) => !f.startsWith(".git/")).sort()
+    const runtime = git(source, "ls-tree", "-r", "--name-only", "HEAD").split("\n").sort()
+    assert.deepEqual(program, runtime, "the program is the product's files, exactly")
     assert.deepEqual(program.filter((f) => f.endsWith(".test.ts")), [], "no test reaches the project")
     assert.deepEqual(program.filter((f) => f.startsWith("naima-tracker/")), [], "none of Naima's own items reaches the project")
     assert.deepEqual(program.filter((f) => /^(AGENTS|CLAUDE)\.md$/.test(f)), [], "nor Naima's agent rules")
-    assert.ok(!existsSync(join(dir, ".git")), "plain files, not a clone")
+    assert.equal(git(dir, "rev-parse", "HEAD"), git(source, "rev-parse", "main"), "a git clone of the product's main")
+    assert.equal(git(dir, "config", "core.autocrlf"), "false", "LF kept, on every platform")
     assert.equal(git(project, "status", "--porcelain", "--ignored", "naima-tracker/naima"), "!! naima-tracker/naima/", "and gitignored")
-    assert.deepEqual(readdirSync(join(base, "tmp")), [], "the installing clone is gone")
+    assert.deepEqual(readdirSync(join(base, "tmp")), [], "nothing is left in the temporary folder")
 
     const again = run(project)
     assert.equal(again.status, 0, again.stdout + again.stderr)

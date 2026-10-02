@@ -1,6 +1,6 @@
 {
   "id": "9e5673f3-61e2-4d98-ae5a-385cf26ca546",
-  "title": "Outward: rename to naima-dev, create the product repository, move the site, migrate the trackers",
+  "title": "Outward: create naima-dev and push it, push the product commit, move Pages to gh-pages, migrate the trackers",
   "status": "open",
   "created": "2026-10-02",
   "impact": "high",

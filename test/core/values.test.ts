@@ -125,7 +125,7 @@ test("a project declares its values in naima.json, and check passes with a note 
   )
   const out: string[] = []
   const io = { out: (l = "") => void out.push(l), err: (l: string) => void out.push(l), now: () => new Date("2026-01-15T10:00:00Z") }
-  const run = (...argv: string[]) => runCli(argv, { cwd: root, programRoot: base, firstParty, io })
+  const run = (...argv: string[]) => runCli(argv, { cwd: root, data: join(root, "naima-tracker", "naima-data"), programRoot: base, firstParty, io })
   try {
     assert.equal(await run("new", "bugs", "Crash", "--set", "area=web"), 0, out.join("\n"))
     out.length = 0

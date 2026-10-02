@@ -9,7 +9,10 @@ import { dirname, join } from "node:path"
 import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 
-const CLI = join(dirname(dirname(dirname(fileURLToPath(import.meta.url)))), "naima", "src", "cli.ts")
+const REPO = dirname(dirname(dirname(fileURLToPath(import.meta.url))))
+const CLI = join(REPO, "naima", "src", "cli.ts")
+/** Naima's own tracker: the development build reads it with --data. */
+const DATA = ["--data", join(REPO, "naima-tracker", "naima-data")]
 
 const hasDeno = spawnSync("deno", ["--version"]).status === 0
 const hasBun = spawnSync("bun", ["--version"]).status === 0
@@ -27,15 +30,17 @@ function runAndCutPipe(cmd: string, args: string[]): Promise<{ code: number | nu
 }
 
 const cases: [string, boolean, string[]][] = [
-  ["deno", hasDeno, ["run", "-A", CLI, "list"]],
-  ["node", hasNode, [CLI, "list"]],
-  ["bun", hasBun, [CLI, "list"]],
+  ["deno", hasDeno, ["run", "-A", CLI, ...DATA, "list"]],
+  ["node", hasNode, [CLI, ...DATA, "list"]],
+  ["bun", hasBun, [CLI, ...DATA, "list"]],
 ]
 
 for (const [runtime, available, args] of cases) {
   test(`piping naima's output into a reader that closes early ends quietly, on ${runtime}`, { skip: !available && `${runtime} is not on PATH` }, async () => {
     const r = await runAndCutPipe(runtime, args)
     assert.equal(r.code, 0, `exit code — stderr: ${r.err}`)
-    assert.equal(r.err, "", "nothing on stderr: no EPIPE stack trace")
+    // The development build may say the tracker owes a migration its locked commit has not run yet: that line only.
+    const said = r.err.split("\n").filter((l) => l && !/^naima: the data owes .* read as migrated, in memory; naima update migrates it$/.test(l))
+    assert.deepEqual(said, [], "nothing else on stderr: no EPIPE stack trace")
   })
 }

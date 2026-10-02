@@ -4,44 +4,30 @@
 
 import assert from "node:assert/strict"
 import { spawnSync } from "node:child_process"
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, join } from "node:path"
+import { join } from "node:path"
 import { test } from "node:test"
-import { fileURLToPath } from "node:url"
 import { allowedEnv } from "../naima/src/launcher.ts"
 import { leftovers, type Running, startGroup, WAIT_MS } from "./core/processes.ts"
-import { gitIn as git, removeTemp } from "./core/testing.ts"
-
-/** The runtime folder of this checkout: what a program directory holds a copy of. */
-const NAIMA = join(dirname(dirname(fileURLToPath(import.meta.url))), "naima")
+import { gitIn as git, productRepo, removeTemp } from "./core/testing.ts"
 const hasDeno = spawnSync("deno", ["--version"]).status === 0
 const skip = !hasDeno && "deno is not on PATH"
 
-/** The launcher of the project at `cwd`, or `launcher`: the program's own once it is copied. */
+/** The launcher of the project at `cwd`, or `launcher`: the program's own. */
 function launch(cwd: string, args: string[], extraEnv: Record<string, string> = {}, launcher = join(cwd, "naima-tracker", "naima", "naima.ts")) {
   const env: Record<string, string | undefined> = {
     ...process.env,
     NO_COLOR: "1",
     NAIMA_DATA: undefined,
     NAIMA_LAUNCHED: undefined,
-    NAIMA_CACHE: join(dirname(cwd), "cache"),
     ...extraEnv,
   }
   const r = spawnSync("deno", ["run", "-A", launcher, ...args], { cwd, encoding: "utf8", env })
   return { code: r.status, out: r.stdout.trim(), err: r.stderr.trim() }
 }
 
-/** A Naima source with a plugin that reports what it can see, and a host at `name` bootstrapped from it. */
-function world(name = "project") {
-  const base = mkdtempSync(join(tmpdir(), "naima-launcher-"))
-  const source = join(base, "naima")
-  cpSync(join(NAIMA, "src"), join(source, "naima", "src"), { recursive: true })
-  cpSync(join(NAIMA, "naima.ts"), join(source, "naima", "naima.ts"))
-  mkdirSync(join(source, "naima", "plugins"))
-  writeFileSync(
-    join(source, "naima", "plugins", "probe.ts"),
-    `export default () => ({
+const PROBE = `export default () => ({
   name: "probe",
   says: "reports the environment it is handed",
   commands: [{ name: "probe", says: "probe", usage: "probe", examples: ["probe"], run: (_a: string[], ctx: any) => {
@@ -59,21 +45,21 @@ function world(name = "project") {
     return 0
   } }],
 })
-`,
-  )
-  git(source, "init", "-q", "-b", "main")
-  git(source, "add", "-A")
-  git(source, "commit", "-q", "-m", "Naima with a probe")
+`
+
+/** The product with a plugin that reports what it can see, and a host at `name` with a git clone of it as its program. */
+function world(name = "project") {
+  const base = mkdtempSync(join(tmpdir(), "naima-launcher-"))
+  const source = productRepo(join(base, "naima"), { extra: { "plugins/probe.ts": PROBE } }).dir
   const host = join(base, name)
   mkdirSync(host)
   writeFileSync(join(host, "README.md"), "# A project\n")
   git(host, "init", "-q", "-b", "main")
   git(host, "add", "-A")
   git(host, "commit", "-q", "-m", "init")
-  const installer = join(base, "installer")
-  git(base, "clone", "-q", "--", source, installer)
-  /** init as the installer runs it: from a clone of the source outside the project. */
-  const init = (...args: string[]) => launch(host, ["init", ...args], {}, join(installer, "naima", "naima.ts"))
+  git(host, "clone", "-q", "--", source, "naima-tracker/naima")
+  /** init, as the installer runs it: from the clone. */
+  const init = (...args: string[]) => launch(host, ["init", ...args])
   return { base, source, host, init, cleanup: () => removeTemp(base) }
 }
 
@@ -146,11 +132,11 @@ test("init --write-agent-pointer may write the host's AGENTS.md through the laun
     writeFileSync(join(w.host, "AGENTS.md"), "# Working here\n")
     const printed = w.init()
     assert.equal(printed.code, 0, printed.err)
-    assert.match(printed.out, /entry pointer missing from AGENTS\.md/)
+    assert.match(printed.out, /agent pointer missing from AGENTS\.md/)
     assert.equal(readFileSync(join(w.host, "AGENTS.md"), "utf8"), "# Working here\n")
     const written = launch(w.host, ["init", "--write-agent-pointer"])
     assert.equal(written.code, 0, written.err)
-    assert.match(readFileSync(join(w.host, "AGENTS.md"), "utf8"), /naima-tracker\/naima\/docs\/agents\/README\.md/)
+    assert.match(readFileSync(join(w.host, "AGENTS.md"), "utf8"), /^Naima is in naima-tracker\/ \(naima\/ the program, naima-data\/ the data\)/m)
   } finally {
     w.cleanup()
   }
@@ -158,7 +144,7 @@ test("init --write-agent-pointer may write the host's AGENTS.md through the laun
 
 /** `naima ui --no-open` through the launcher of `w`, handed to `body` once it serves; stopped, group and all, however `body` ends. */
 async function withUi(w: ReturnType<typeof world>, body: (ui: Running, url: string) => Promise<void>): Promise<void> {
-  const env = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined, NAIMA_CACHE: join(w.base, "cache") }
+  const env = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined }
   const ui = startGroup("deno", ["run", "-A", join(w.host, "naima-tracker", "naima", "naima.ts"), "ui", "--no-open"], { cwd: w.host, env })
   try {
     const [, url] = await ui.waitFor(/serving (http:\/\/127\.0\.0\.1:\d+\/\?token=[0-9a-f]+)/)

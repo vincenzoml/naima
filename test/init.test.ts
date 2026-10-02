@@ -6,17 +6,13 @@
 import assert from "node:assert/strict"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, join } from "node:path"
+import { join } from "node:path"
 import { test } from "node:test"
-import { fileURLToPath } from "node:url"
 import { firstParty } from "../naima/src/builtins.ts"
 import { type Plugin, runCli } from "../naima/src/core/internal.ts"
-import { gitIn as git, removeTemp } from "./core/testing.ts"
+import { dataOf, gitIn as git, productRepo, removeTemp } from "./core/testing.ts"
 
-/** This checkout: the repository a project clones. */
-const NAIMA = dirname(dirname(fileURLToPath(import.meta.url)))
-
-/** A host project, and a clone of Naima beside it whose origin holds its HEAD: what runs init. */
+/** A host project, and a git clone of the product beside it, at its origin's main: what runs init. */
 function world() {
   const base = mkdtempSync(join(tmpdir(), "naima-init-"))
   const root = join(base, "project")
@@ -25,17 +21,17 @@ function world() {
   git(root, "init", "-q", "-b", "main")
   git(root, "add", "-A")
   git(root, "commit", "-q", "-m", "init")
+  const product = productRepo(join(base, "product")).dir
   const clone = join(base, "naima")
-  git(base, "clone", "-q", "--", NAIMA, clone)
-  git(clone, "update-ref", "refs/remotes/origin/pushed", "HEAD")
-  return { base, root, clone, program: join(clone, "naima"), cleanup: () => removeTemp(base) }
+  git(base, "clone", "-q", "--", product, clone)
+  return { base, root, clone, program: clone, cleanup: () => removeTemp(base) }
 }
 
 async function naima(cwd: string, argv: string[], programRoot: string, plugins: typeof firstParty = firstParty) {
   const out: string[] = []
   const err: string[] = []
   const io = { out: (l = "") => void out.push(l), err: (l: string) => void err.push(l), now: () => new Date("2026-01-15T10:00:00Z") }
-  const code = await runCli(argv, { cwd, programRoot, firstParty: plugins, io })
+  const code = await runCli(argv, { cwd, programRoot, data: dataOf(cwd), firstParty: plugins, io })
   return { code, out: out.join("\n"), err: err.join("\n") }
 }
 
@@ -46,7 +42,7 @@ const lockFile = (root: string) => join(root, "naima-tracker", "naima-data", "na
 // per-test default. Node's test runner honors the same option; Deno's test shim ignores it.
 const SLOW = { timeout: 30_000 }
 
-test("init refuses to lock a commit its origin lacks, or a Naima with uncommitted changes: nobody else could run it", SLOW, async () => {
+test("init refuses to lock a commit not on its origin's main, or a Naima with uncommitted changes: nobody else could run it", SLOW, async () => {
   const w = world()
   try {
     writeFileSync(join(w.program, "NOTICE"), "changed\n")
@@ -54,12 +50,11 @@ test("init refuses to lock a commit its origin lacks, or a Naima with uncommitte
     assert.equal(dirty.code, 2)
     assert.match(dirty.err, /has uncommitted changes, so nobody else could run the commit it would lock/)
     git(w.program, "commit", "-q", "-am", "unpushed")
-    git(w.program, "update-ref", "-d", "refs/remotes/origin/pushed")
     const unpushed = await naima(w.root, ["init"], w.program)
     assert.equal(unpushed.code, 2)
-    assert.match(unpushed.err, /has commits its source does not have/)
+    assert.match(unpushed.err, /is at \w{12}, which is not on its origin's main/)
     assert.ok(!existsSync(join(w.root, "naima-tracker", "naima-data")), "nothing is written")
-    git(w.program, "update-ref", "refs/remotes/origin/pushed", "HEAD") // pushed: now it may
+    git(w.program, "update-ref", "refs/remotes/origin/main", "HEAD") // pushed: now it may
     assert.equal((await naima(w.root, ["init"], w.program)).code, 0)
   } finally {
     w.cleanup()
@@ -137,28 +132,29 @@ test("init prints the exclude line for each host tool configuration it finds, an
   }
 })
 
-test("init prints the agent pointer for each configured entry file it finds, and writes it only with --write-agent-pointer", SLOW, async () => {
+test("init prints the agent pointer, for AGENTS.md before CLAUDE.md, and writes it only with --write-agent-pointer", SLOW, async () => {
   const w = world()
   try {
     writeFileSync(join(w.root, "AGENTS.md"), "# Working here\n")
     writeFileSync(join(w.root, "CLAUDE.md"), "# Claude\n")
     const before = (f: string) => readFileSync(join(w.root, f), "utf8")
     const agents = before("AGENTS.md")
+    const line = "Naima is in naima-tracker/ (naima/ the program, naima-data/ the data); if you find it elsewhere, update this line."
 
     const printed = await naima(w.root, ["init"], w.program)
     assert.equal(printed.code, 0, printed.err)
-    assert.match(printed.out, /^entry pointer missing from AGENTS\.md: Read \[naima-tracker\/naima\/docs\/agents\/README\.md]/m)
-    assert.match(printed.out, /^entry pointer missing from CLAUDE\.md: /m)
+    assert.ok(printed.out.split("\n").includes(`agent pointer missing from AGENTS.md: ${line}   (naima init --write-agent-pointer adds it)`), printed.out)
+    assert.doesNotMatch(printed.out, /CLAUDE\.md/, "one line, in one file")
     assert.equal(before("AGENTS.md"), agents, "printing touches nothing")
 
     const written = await naima(w.root, ["init", "--write-agent-pointer"], w.program)
     assert.equal(written.code, 0, written.err)
-    assert.match(before("AGENTS.md"), /# Working here\n\nRead \[naima-tracker\/naima\/docs\/agents\/README\.md]/)
+    assert.equal(before("AGENTS.md"), `# Working here\n\n${line}\n`)
+    assert.equal(before("CLAUDE.md"), "# Claude\n")
     assert.match(written.out, /^wrote AGENTS\.md: /m)
-    assert.match(written.out, /^wrote CLAUDE\.md: /m)
 
     const again = await naima(w.root, ["init"], w.program)
-    assert.doesNotMatch(again.out, /entry pointer missing/, "once there, nothing is printed")
+    assert.doesNotMatch(again.out, /agent pointer missing/, "once there, nothing is printed")
   } finally {
     w.cleanup()
   }

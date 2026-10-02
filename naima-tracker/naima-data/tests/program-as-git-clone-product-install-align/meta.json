@@ -1,0 +1,18 @@
+{
+  "id": "ebef2c3c-ce86-4342-a0b8-9280f110c91f",
+  "title": "the program as a git clone of the product: install, align without the network, update, legacy migration",
+  "status": "passed",
+  "created": "2026-10-02",
+  "section": "Proving gesture: test/distribution.test.ts, on Deno, Node and Bun: a git clone of the fixture product plus any command installs; a second host clone and a worktree align to the lock with the source gone; a new product commit plus naima update moves the lock in one commit; a lock of the old layout migrates. Red: 12 of 12 fail on main; green: 12 of 12 pass, and deno task verify, node --test and bun test pass 384 of 384.",
+  "runBy": "agent",
+  "redSeen": "2026-10-02",
+  "evidenceKind": "observation",
+  "effort": "M",
+  "triagedOn": "2026-10-02",
+  "links": [
+    {
+      "rel": "verifies",
+      "id": "900f15f5-6260-4d5c-a534-559c640752da"
+    }
+  ]
+}

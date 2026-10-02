@@ -1,9 +1,10 @@
 // A throwaway project for tests: a temp directory, a naima.json, a context
 // whose output is captured and whose clock is fixed.
 
-import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readlinkSync, rmSync, symlinkSync } from "node:fs"
+import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 import { corePlugin } from "../../naima/src/core/base.ts"
 import { createContext } from "../../naima/src/core/context.ts"
 import { FORMAT } from "../../naima/src/core/format.ts"
@@ -79,14 +80,76 @@ export function sourceRepo(from: string, dir: string, files: string[] = trackedF
   return dir
 }
 
+/** This checkout's runtime folder, naima/: what the product holds at its top. */
+export const RUNTIME = join(dirname(dirname(dirname(fileURLToPath(import.meta.url)))), "naima")
+
+/** The files of the product: every file of naima/ git tracks or would track, by its path in naima/ (`git -C naima ls-files`). */
+export const productFiles = (): string[] => trackedFiles(RUNTIME)
+
+/**
+ * The product as a git repository at `dir`, with its main at a commit holding
+ * the files of naima/ at its top — the product layout, so a test passes before
+ * and after the split. With `oldLayout`, main first holds a commit of the old
+ * layout — the same files under naima/, beside the development material — and
+ * then the commit that moves them to the top, as the product's history has.
+ * `extra` files (path → text) are added to the product commit.
+ */
+export function productRepo(
+  dir: string,
+  opts: { oldLayout?: boolean; extra?: Record<string, string> } = {},
+): { dir: string; old: string | null; head: string } {
+  const files = productFiles()
+  const put = (prefix: string) => {
+    for (const f of files) {
+      const to = join(dir, prefix, f)
+      mkdirSync(dirname(to), { recursive: true })
+      if (lstatSync(join(RUNTIME, f)).isSymbolicLink()) symlinkSync(readlinkSync(join(RUNTIME, f)), to)
+      else copyFileSync(join(RUNTIME, f), to)
+    }
+  }
+  mkdirSync(dir, { recursive: true })
+  gitIn(dir, "init", "-q", "-b", "main")
+  let old: string | null = null
+  if (opts.oldLayout) {
+    put("naima")
+    writeFileSync(join(dir, "AGENTS.md"), "Naima's own development rules.\n")
+    gitIn(dir, "add", "-A")
+    gitIn(dir, "commit", "-q", "-m", "Naima, the old layout")
+    old = gitIn(dir, "rev-parse", "HEAD")
+    gitIn(dir, "rm", "-q", "-r", "--", "naima", "AGENTS.md")
+  }
+  put("")
+  for (const [f, text] of Object.entries(opts.extra ?? {})) {
+    mkdirSync(dirname(join(dir, f)), { recursive: true })
+    writeFileSync(join(dir, f), text)
+  }
+  gitIn(dir, "add", "-A")
+  gitIn(dir, "commit", "-q", "-m", "Naima")
+  return { dir, old, head: gitIn(dir, "rev-parse", "HEAD") }
+}
+
+/** The data of the project around `cwd`: its git root's naima-tracker/naima-data, as in-process tests name it with --data. */
+export function dataOf(cwd: string): string {
+  const r = spawnGitTop(cwd)
+  return join(r ?? cwd, DEFAULT_DATA)
+}
+
+const spawnGitTop = (cwd: string): string | null => {
+  try {
+    return gitIn(cwd, "rev-parse", "--show-toplevel")
+  } catch {
+    return null
+  }
+}
+
 export const FIXED_NOW = new Date("2026-01-15T10:00:00.000Z")
 
 export function tempProject(plugins: Plugin[], opts: { git?: boolean; now?: Date } & RegistryOptions = {}): TempProject {
   const root = mkdtempSync(join(tmpdir(), "naima-"))
   const data = join(root, DEFAULT_DATA)
-  const lock = { source: "https://example.invalid/naima.git", commit: "0".repeat(40), carry: "copy" as const, program: DEFAULT_PROGRAM }
+  const lock = { source: "https://example.invalid/naima.git", commit: "0".repeat(40), program: DEFAULT_PROGRAM }
   const config = { format: FORMAT, formats: {}, ...lock, plugins: {}, rename: opts.rename ?? {}, extends: [], entryFiles: [...DEFAULT_ENTRY_FILES] }
-  writeJson(join(data, DATA_FILE), { format: FORMAT, source: lock.source, commit: lock.commit, carry: lock.carry })
+  writeJson(join(data, DATA_FILE), { format: FORMAT, source: lock.source, commit: lock.commit })
   const output: string[] = []
   const errors: string[] = []
   const now = opts.now ?? FIXED_NOW
