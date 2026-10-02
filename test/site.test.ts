@@ -22,6 +22,15 @@ const read = (f: string): string => readFileSync(join(SITE, f), "utf8")
 const page = read("index.html")
 const prompt = /<code id="prompt">([\s\S]*?)<\/code>/.exec(page)?.[1] ?? ""
 
+// The workshop's README and the product's (what github.com/vincenzoml/naima shows) link the site right under the title.
+for (const readme of ["README.md", join(RUNTIME_DIR, "README.md")]) {
+  test(`${readme} links the site right under its title`, () => {
+    const lines = readFileSync(join(NAIMA, readme), "utf8").split("\n").filter((l) => l.trim())
+    assert.match(lines[0] ?? "", /^# /, "the title first")
+    assert.ok((lines[1] ?? "").includes(`](${BASE})`), `the line under the title links ${BASE}: ${lines[1]}`)
+  })
+}
+
 test("the site serves what the page points at: the installers, llms.txt, the favicon", () => {
   for (const f of ["index.html", "install.sh", "install.ps1", "llms.txt", "favicon.svg"]) assert.ok(existsSync(join(SITE, f)), `site/${f}`)
   assert.match(page, /<title>Naima<\/title>/)
@@ -61,7 +70,9 @@ test("the agent prompt is one line naming the repository, whose README, llms.txt
     assert.match(text, /naima rules --audience agents/, where)
   }
   assert.ok(
-    readme.startsWith("# Naima\n\nNaima is a silent software house of AI agents: it turns vibe coding into an exact science."),
+    readme.startsWith(
+      `# Naima\n\n**Website: [vincenzoml.github.io/naima](${BASE})**\n\nNaima is a silent software house of AI agents: it turns vibe coding into an exact science.`,
+    ),
     "the README opens with the site's passage: born for software",
   )
   for (const [where, text] of [["README.md", readme], ["llms.txt", llms]] as const) {
