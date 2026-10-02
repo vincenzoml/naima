@@ -8,5 +8,10 @@
   "impact": "medium",
   "effort": "L",
   "confidence": "measured",
-  "triagedOn": "2026-10-02"
+  "triagedOn": "2026-10-02",
+  "fixedOn": "2026-10-02",
+  "commits": [
+    "15f54b9",
+    "35ac73e"
+  ]
 }

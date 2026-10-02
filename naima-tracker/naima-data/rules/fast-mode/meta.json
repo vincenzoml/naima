@@ -4,5 +4,6 @@
   "status": "active",
   "created": "2026-10-01",
   "audience": "agents",
-  "strength": "must"
+  "strength": "must",
+  "ack": "Fast mode on"
 }
