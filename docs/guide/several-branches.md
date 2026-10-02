@@ -71,6 +71,48 @@ aside rather than merged.
 If `--ff-only` refuses, stop: the trunk moved. Merge it into the branch
 again, on the branch ([the rule](rules.md#every-merge-to-the-trunk-is-a-fast-forward)).
 
+## One holder at a time: resources
+
+An item may be claimed by several branches; a **resource** may not. A
+resource is something two sessions must never touch at once — the published
+site, another repository's trunk, the release tags — and it is held by one
+branch at a time. The resources are data, in naima.json:
+
+```sh
+naima plugin set coordination 'resources={"site":{"says":"the published site","role":"website-manager"}}'
+```
+
+Each one says what it is, and may name the [role](glossary.md#role) that
+holds it. Then:
+
+```sh
+naima claim --resource site --note "publishing"   # refused, naming the holder, while another branch holds it
+naima claims --resources                          # every resource: its holder, or free
+naima release --resource site                     # done: another branch may take it
+```
+
+The resource is written in the branch's own claim file, beside its items, so
+it is seen from every local branch exactly as an item claim is. A holder
+whose branch is gone is listed by `naima prune`, and refused claims name it
+too; a resource two branches hold at once — two claims made before either
+saw the other — fails `naima check`.
+
+A tool that touches a resource asks first: `naima claims --resources --json`
+prints, for each one, its holders with their branch and claim id, so a
+publish script can refuse unless the branch it runs on is the holder, and
+record the claim id in what it publishes.
+
+A role can be the one that holds a resource. A project declares its own roles
+in the roles plugin's `roles` option — for example a website manager that
+alone publishes the site, whose queue (`naima queue --role website-manager`)
+lists the items of kind `site` everyone else files instead of publishing
+themselves:
+
+```sh
+naima plugin set roles 'roles={"website-manager":{"title":"Website manager","owns":"the site: it alone publishes it","refuses":["publishing without the site claim"],"kinds":["site"],"types":[]}}'
+naima new todos "Site: fix the install line" --set kind=site
+```
+
 ## Two branches, one title
 
 Two branches that open an item with the same title would make the same
@@ -81,7 +123,7 @@ a collision is rarer, not impossible: git reports it at the merge.
 ## Claims left behind
 
 ```sh
-naima prune            # claims naming a branch git no longer has
+naima prune            # claims naming a branch git no longer has, with the resources they hold
 naima prune --write    # remove them; commit the deletions
 ```
 

@@ -124,6 +124,20 @@ fact about the software from the current state of something editable — to it
 they are one motion. Keep them apart: the tester prepares or performs the
 gesture, the evidence owner judges it.
 
+### A locked resource has one holder
+
+Some things are touched by one session at a time: the published site,
+another repository's trunk, the release tags. They are the project's declared
+resources (`naima claims --resources` lists them, with their holder). Before
+touching one, take it — `naima claim --resource <name>` — and release it when
+done, `naima release --resource <name>`. A refused claim names the holder:
+then the change is filed as an item for the holder, or for the role the
+resource names, never made anyway. A worker gets a resource only when the
+coordinator says so; two workers never hold one at the same time, and a
+resource held by a branch that is gone is listed by `naima prune` before it
+is taken over
+([one holder at a time](../guide/several-branches.md#one-holder-at-a-time-resources)).
+
 ## Choosing the model
 
 **A worker's model is a parameter, and choosing it is the largest saving
