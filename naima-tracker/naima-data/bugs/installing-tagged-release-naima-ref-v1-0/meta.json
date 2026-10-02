@@ -9,5 +9,9 @@
   "confidence": "measured",
   "triagedOn": "2026-10-01",
   "area": "install",
-  "gate": "release-1.1"
+  "gate": "release-1.1",
+  "fixedOn": "2026-10-02",
+  "commits": [
+    "9cf8ecd5fffc1b1561fff484b4e4fa53995a9ae0"
+  ]
 }
