@@ -1,7 +1,7 @@
 {
   "id": "88d166ee-5de5-490a-8082-a06b1621f6a2",
   "title": "Code metrics read the files of a git submodule",
-  "status": "requested",
+  "status": "shipped",
   "created": "2026-10-02",
   "impact": "medium",
   "priority": "next",
@@ -14,5 +14,12 @@
       "rel": "part-of",
       "id": "03b565e7-01b7-43ff-8ced-7a0af42348b6"
     }
+  ],
+  "fixedOn": "2026-10-02",
+  "commits": [
+    "77447e1bbc124f71cdb490537d9514ce61be83f6"
+  ],
+  "docs": [
+    "naima/docs/guide/metrics-and-budgets.md#see-how-your-codes-quality-moves-over-time"
   ]
 }
