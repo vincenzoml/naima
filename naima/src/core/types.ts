@@ -379,9 +379,6 @@ export interface PluginConfig {
   checks: Record<string, Severity>
 }
 
-/** How a project carries its program: a gitignored copy of naima/, the same copy committed, or a git submodule. */
-export type Carry = "copy" | "vendored" | "submodule"
-
 /** `naima-data/naima.json`: the data format, the lock, and only what the tool cannot infer. */
 export interface Config {
   /** The data format (docs/reference/format.md). */
@@ -392,7 +389,6 @@ export interface Config {
   source: string
   /** The commit of `source` this project runs: the lock. */
   commit: string
-  carry: Carry
   /** `"signed"`: run a locked commit only when git verifies its signature. Absent: no signature is asked for. */
   verify?: "signed"
   /** The program directory, relative to the data directory. */

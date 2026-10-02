@@ -44,7 +44,7 @@ function project() {
     const out: string[] = []
     const err: string[] = []
     const io = { out: (l = "") => void out.push(l), err: (l: string) => void err.push(l), now: () => new Date("2026-01-15T10:00:00Z") }
-    const code = await runCli(argv, { cwd: root, programRoot: join(base, "program"), firstParty, io })
+    const code = await runCli(argv, { cwd: root, data: join(root, "naima-tracker", "naima-data"), programRoot: join(base, "program"), firstParty, io })
     return { code, out: out.join("\n"), err: err.join("\n") }
   }
   return { base, root, tracker, configure, run, cleanup: () => removeTemp(base) }

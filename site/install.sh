@@ -3,17 +3,16 @@
 #
 #   curl -fsSL https://vincenzoml.github.io/naima/install.sh | sh
 #
-# It clones Naima's main, shallow, into a temporary folder, and runs its
-# `naima init`: that records the commit in naima-tracker/naima-data/naima.json
-# and copies Naima's naima/ folder, only, into naima-tracker/naima/ through
-# the per-user cache. Then it runs `naima check`, and removes the temporary
-# clone. Nothing is installed globally for Naima; Deno, the
+# It clones Naima into naima-tracker/naima/, and runs its `naima init`: that
+# records the clone's origin and commit in naima-tracker/naima-data/naima.json,
+# beside it, and writes the tracker folder's README.md and .gitignore. Then it
+# runs `naima check`. Nothing is installed globally for Naima; Deno, the
 # one thing Naima needs on the machine, is installed with its official
 # installer when it is missing. Run again, it says Naima is installed and
 # checks it. What it does by hand: naima/docs/guide/install.md#bootstrap-a-project.
 #
 #   NAIMA_SOURCE           the repository to clone (default: Naima's on GitHub)
-#   NAIMA_REF              the branch to install (default: main)
+#   NAIMA_REF              the branch or tag to install (default: main)
 #   NAIMA_NO_DENO_INSTALL  when set, never install Deno: say how, and stop
 
 set -eu
@@ -70,16 +69,12 @@ need_deno() {
 
 naima() { "$DENO" run -A "$PROGRAM/naima.ts" "$@"; }
 
-# A shallow clone of the source, outside the project, removed on exit: the Naima that installs.
-fetch_naima() {
-  CLONE=$(mktemp -d "${TMPDIR:-/tmp}/naima-install.XXXXXX") || die "cannot make a temporary folder"
-  trap 'rm -rf "$CLONE"' EXIT
-  say "fetching $SOURCE ($REF)"
-  git clone --quiet --depth 1 --branch "$REF" -- "$SOURCE" "$CLONE/naima" 2>/dev/null ||
-    git clone --quiet --branch "$REF" -- "$SOURCE" "$CLONE/naima" ||
+# The program: a git clone of the source, LF kept on every platform.
+clone_naima() {
+  say "cloning $SOURCE ($REF) into $PROGRAM"
+  git -c core.autocrlf=false clone --quiet --config core.autocrlf=false --single-branch --branch "$REF" -- "$SOURCE" "$PROGRAM" ||
     die "cannot clone $SOURCE ($REF): check the network, or NAIMA_SOURCE and NAIMA_REF"
 }
-installer() { "$DENO" run -A "$CLONE/naima/naima/naima.ts" "$@"; }
 
 next_steps() {
   cat <<EOF
@@ -108,19 +103,14 @@ main() {
 
   if [ -f "$LOCK" ]; then
     say "Naima is already installed here ($LOCK): checking it"
-    if [ -f "$PROGRAM/naima.ts" ]; then
-      naima check
-    else
-      fetch_naima
-      say "copying the locked commit into $PROGRAM"
-      installer check
-    fi
+    [ -f "$PROGRAM/naima.ts" ] || clone_naima
+    naima check
     say "up to date? naima update --check; to update: naima update (docs: $PROGRAM/docs/guide/install.md#updating)"
     return 0
   fi
 
-  fetch_naima
-  installer init
+  [ -e "$PROGRAM" ] || clone_naima
+  naima init
   naima check
   next_steps
 }

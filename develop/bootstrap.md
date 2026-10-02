@@ -11,8 +11,9 @@ case for this: Naima's repository uses exactly the model every project uses
    a gitignored copy of Naima's own `naima/`, locked by `naima.json` to a
    commit of `main`, exactly as a project is
    ([the copy](../naima/docs/guide/install.md#the-copy)); that commit is the
-   "previous version". `deno task naima <command>` runs it, through the
-   working tree's launcher. Alignment fetches the commit into the per-user
+   "previous version". `deno task naima <command>` runs it, through its own
+   launcher, `naima-tracker/naima/naima.ts`; `deno task dev` names the data
+   with `--data`, since a program finds its data beside itself. Alignment fetches the commit into the per-user
    cache from this repository's own objects, so it needs no network. A lock
    that names a commit of the `dist` branch runs it as a clone, cloned from
    this repository once `origin/dist` is fetched, until `naima update` moves

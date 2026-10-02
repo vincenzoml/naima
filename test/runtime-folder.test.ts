@@ -1,25 +1,25 @@
-// The runtime folder, naima/: what a project's program is a copy of. It holds
-// only what runs Naima, and is whole on its own — every import and every link
-// resolves inside it; and a project installed from a source holding all of
-// Naima's repository gets exactly naima/, through init, check, new, guide, a
-// new worktree and an update, end to end through the launcher and offline
-// once the commit is in the user's cache (docs/guide/install.md).
+// The runtime folder, naima/: what the product holds at its top, and a
+// project's program is a git clone of. It holds only what runs Naima, and is
+// whole on its own — every import and every link resolves inside it; and a
+// project whose program is a clone of the product gets exactly naima/'s files,
+// through its first run, check, new, guide, a new worktree and an update, end
+// to end through the launcher (docs/guide/install.md).
 
 import assert from "node:assert/strict"
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, posix } from "node:path"
 import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 import { GUIDE_PAGES } from "../naima/src/core/cli.ts"
-import { COPY_FILE, RUNTIME_DIR } from "../naima/src/core/internal.ts"
-import { gitIn as git, removeTemp, sourceRepo, trackedFiles } from "./core/testing.ts"
+import { RUNTIME_DIR } from "../naima/src/core/internal.ts"
+import { gitIn as git, productRepo, removeTemp, trackedFiles } from "./core/testing.ts"
 
 /** This checkout. */
 const REPO = dirname(dirname(fileURLToPath(import.meta.url)))
 const tracked = trackedFiles(REPO)
-/** The runtime files, by their path in naima/: what a copy holds. */
+/** The runtime files, by their path in naima/: what the product holds. */
 const shipped = tracked.filter((p) => p.startsWith(`${RUNTIME_DIR}/`)).map((p) => p.slice(RUNTIME_DIR.length + 1)).sort()
 const inCopy = new Set(shipped)
 const here = (f: string): string => join(REPO, RUNTIME_DIR, f)
@@ -42,11 +42,10 @@ const DEV_ONLY = [
 
 test("naima/ holds only what runs Naima: no test, no fixture, no CI, no agent rules, none of Naima's own items", () => {
   assert.ok(shipped.length > 40, `naima/ holds ${shipped.length} files`)
-  for (const f of shipped) for (const dev of DEV_ONLY) assert.ok(!dev.test(f), `${f} is copied, and it is development-only (${dev})`)
+  for (const f of shipped) for (const dev of DEV_ONLY) assert.ok(!dev.test(f), `${f} is in the product, and it is development-only (${dev})`)
   for (const f of ["naima.ts", "src/cli.ts", "src/launcher.ts", "README.md", "LICENSE", "NOTICE", ...GUIDE_PAGES.map(([, p]) => p)]) {
-    assert.ok(inCopy.has(f), `${f} must be copied`)
+    assert.ok(inCopy.has(f), `${f} must be in the product`)
   }
-  assert.ok(!inCopy.has(COPY_FILE), "the copy record is written by the copy, never committed in naima/")
   assert.equal(tracked.filter((f) => /\.test\.ts$/.test(f) && !f.startsWith("test/")).length, 0, "every test is under test/")
 })
 
@@ -87,46 +86,50 @@ test("every relative link in naima/'s markdown resolves inside naima/", () => {
 
 const hasDeno = spawnSync("deno", ["--version"]).status === 0
 
-/** The files on disk under `dir`, with forward slashes. */
+/** The files on disk under `dir`, with forward slashes, but git's own. */
 function onDisk(dir: string, prefix = ""): string[] {
   return readdirSync(join(dir, prefix), { withFileTypes: true }).flatMap((e) => {
     const rel = prefix ? `${prefix}/${e.name}` : e.name
+    if (rel === ".git") return []
     return e.isDirectory() ? onDisk(dir, rel) : [rel]
   }).sort()
 }
 
-test("a project's program holds exactly naima/, and init, check, new, guide, a new worktree and update all work on it", {
+/** A host project, its program a git clone of `source`. */
+function hostOf(base: string, source: string, name = "project"): string {
+  const host = join(base, name)
+  mkdirSync(host)
+  writeFileSync(join(host, "README.md"), "# A project\n")
+  git(host, "init", "-q", "-b", "main")
+  git(host, "add", "-A")
+  git(host, "commit", "-q", "-m", "init")
+  git(host, "clone", "-q", "--", source, "naima-tracker/naima")
+  return host
+}
+
+const env = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined }
+const programOf = (host: string) => join(host, "naima-tracker", "naima")
+const naima = (host: string, ...args: string[]) => {
+  const r = spawnSync("deno", ["run", "-A", join(programOf(host), "naima.ts"), ...args], { cwd: host, encoding: "utf8", env })
+  return { code: r.status, out: r.stdout.trim(), err: r.stderr.trim() }
+}
+
+test("a project's program holds exactly naima/'s files, and its first run, check, new, guide, a new worktree and update all work on it", {
   skip: !hasDeno && "deno is not on PATH",
-  timeout: 30_000, // many git and Deno subprocesses: past Bun's 5 second default (bugs/bun-s-5-second-default-test-timeout)
+  timeout: 60_000, // many git and Deno subprocesses: past Bun's 5 second default (bugs/bun-s-5-second-default-test-timeout)
 }, () => {
   const base = mkdtempSync(join(tmpdir(), "naima-runtime-"))
   try {
-    const source = sourceRepo(REPO, join(base, "naima"))
-    const cache = join(base, "cache")
-    const launch = (launcher: string, cwd: string, ...args: string[]) => {
-      const env: Record<string, string | undefined> = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined, NAIMA_CACHE: cache }
-      const r = spawnSync("deno", ["run", "-A", launcher, ...args], { cwd, encoding: "utf8", env })
-      return { code: r.status, out: r.stdout.trim(), err: r.stderr.trim() }
-    }
-    const programOf = (host: string) => join(host, "naima-tracker", "naima")
-    const naima = (host: string, ...args: string[]) => launch(join(programOf(host), "naima.ts"), host, ...args)
-    const host = join(base, "project")
-    mkdirSync(host)
-    writeFileSync(join(host, "README.md"), "# A project\n")
-    git(host, "init", "-q", "-b", "main")
-    git(host, "add", "-A")
-    git(host, "commit", "-q", "-m", "init")
-    const runtime = git(source, "ls-tree", "-r", "--name-only", `HEAD:${RUNTIME_DIR}`).split("\n").sort()
-    assert.deepEqual(runtime, shipped, "the source's naima/ is this checkout's")
+    const source = productRepo(join(base, "naima")).dir
+    const host = hostOf(base, source)
+    const runtime = git(source, "ls-tree", "-r", "--name-only", "HEAD").split("\n").sort()
+    assert.deepEqual(runtime, shipped, "the product's files are this checkout's naima/")
 
-    const installer = join(base, "installer")
-    git(base, "clone", "-q", "--", source, installer)
-    const init = launch(join(installer, RUNTIME_DIR, "naima.ts"), host, "init")
-    assert.equal(init.code, 0, init.err)
-    rmSync(installer, { recursive: true, force: true })
+    const first = naima(host, "check")
+    assert.equal(first.code, 0, first.out + first.err)
     const main = git(source, "rev-parse", "main")
     assert.equal(JSON.parse(readFileSync(join(host, "naima-tracker", "naima-data", "naima.json"), "utf8")).commit, main, "the lock names main's commit")
-    assert.deepEqual(onDisk(programOf(host)), [COPY_FILE, ...shipped].sort(), "the program directory is naima/: 0 tests, 0 items, no agent rules")
+    assert.deepEqual(onDisk(programOf(host)), shipped, "the program directory is naima/: 0 tests, 0 items, no agent rules")
     assert.equal(naima(host, "new", "bugs", "Something broke").code, 0)
     const check = naima(host, "check")
     assert.equal(check.code, 0, check.out + check.err)
@@ -138,30 +141,31 @@ test("a project's program holds exactly naima/, and init, check, new, guide, a n
     git(host, "add", "-A")
     git(host, "commit", "-q", "-m", "Track with Naima")
 
-    // A new worktree, with the source gone: its program is copied from the user's cache.
+    // A new worktree, with the source gone: its program is a local clone of the main worktree's.
     renameSync(source, `${source}.away`)
     const tree = `${host}-worktrees/worktree` // by the naming scheme the check holds every worktree to
     git(host, "worktree", "add", "-q", "-b", "test/worktree", tree)
-    const inTree = launch(join(programOf(host), "naima.ts"), tree, "check")
+    git(host, "clone", "-q", "--local", "--", programOf(host), programOf(tree))
+    git(programOf(tree), "remote", "set-url", "origin", source)
+    const inTree = naima(tree, "check")
     assert.equal(inTree.code, 0, inTree.err)
-    assert.deepEqual(onDisk(programOf(tree)), [COPY_FILE, ...shipped].sort(), "the second worktree's program is naima/ too")
+    assert.deepEqual(onDisk(programOf(tree)), shipped, "the second worktree's program is naima/'s files too")
     renameSync(`${source}.away`, source)
 
-    // Main moves the runtime and the tracker; update follows main and copies naima/ again.
-    const readme = join(source, RUNTIME_DIR, "docs", "README.md")
+    // Main moves the runtime; update follows main and checks it out.
+    const readme = join(source, "docs", "README.md")
     writeFileSync(readme, readFileSync(readme, "utf8") + "\nMoved.\n")
-    writeFileSync(join(source, "naima-tracker", "naima-data", "note.txt"), "a tracker change\n")
     git(source, "add", "-A")
-    git(source, "commit", "-q", "-m", "docs and tracker moved")
+    git(source, "commit", "-q", "-m", "docs moved")
     const moved = git(source, "rev-parse", "main")
     const asked = naima(host, "update", "--check")
     assert.equal(asked.code, 1, asked.err)
     assert.match(asked.out, /the source's main moved/)
     const up = naima(host, "update")
     assert.equal(up.code, 0, up.err)
-    assert.equal(JSON.parse(readFileSync(join(programOf(host), COPY_FILE), "utf8")).commit, moved)
+    assert.equal(git(programOf(host), "rev-parse", "HEAD"), moved)
     assert.match(readFileSync(join(programOf(host), "docs", "README.md"), "utf8"), /Moved\.\n$/)
-    assert.deepEqual(onDisk(programOf(host)), [COPY_FILE, ...shipped].sort(), "after the update, the program is naima/ exactly")
+    assert.deepEqual(onDisk(programOf(host)), shipped, "after the update, the program is naima/'s files exactly")
     assert.match(naima(host, "update", "--check").out, /current: the source's main is the locked commit/)
   } finally {
     removeTemp(base)
@@ -180,43 +184,27 @@ function leaks(dir: string): string[] {
   return all.filter((f) => item(f) || devOnly(f))
 }
 
-test("host leakage: an installed program holds no test, no tracker item and no agent rule, though its source holds all three", {
+test("host leakage: an installed program holds no test, no tracker item and no agent rule, though the old layout in its history held them", {
   skip: !hasDeno && "deno is not on PATH",
-  timeout: 30_000, // git and Deno subprocesses: past Bun's 5 second default
+  timeout: 60_000, // git and Deno subprocesses: past Bun's 5 second default
 }, () => {
   const base = mkdtempSync(join(tmpdir(), "naima-leak-"))
   try {
-    const source = sourceRepo(REPO, join(base, "naima"))
-    // The negative half: the source is all of Naima's repository, so there is something to leak.
-    const inSource = leaks(source)
-    for (const kind of [/\.test\.ts$/, /^AGENTS\.md$/, /^CLAUDE\.md$/, /^naima-tracker\/naima-data\/.+\/meta\.json$/]) {
-      assert.ok(inSource.some((f) => kind.test(f)), `the source holds a file matching ${kind}`)
-    }
-    const host = join(base, "project")
-    mkdirSync(host)
-    writeFileSync(join(host, "README.md"), "# A project\n")
-    git(host, "init", "-q", "-b", "main")
-    git(host, "add", "-A")
-    git(host, "commit", "-q", "-m", "init")
-    const env = { ...process.env, NO_COLOR: "1", NAIMA_DATA: undefined, NAIMA_LAUNCHED: undefined, NAIMA_CACHE: join(base, "cache") }
-    const run = (launcher: string, ...args: string[]) => spawnSync("deno", ["run", "-A", launcher, ...args], { cwd: host, encoding: "utf8", env })
-    const installer = join(base, "installer")
-    git(base, "clone", "-q", "--", source, installer)
-    const init = run(join(installer, RUNTIME_DIR, "naima.ts"), "init")
-    assert.equal(init.status, 0, init.stderr)
-    rmSync(installer, { recursive: true, force: true })
+    const product = productRepo(join(base, "naima"), { oldLayout: true })
+    // The negative half: the old layout held Naima's development rules beside naima/, so there is something to leak.
+    assert.ok(git(product.dir, "ls-tree", "-r", "--name-only", product.old!).split("\n").includes("AGENTS.md"))
+    const host = hostOf(base, product.dir)
+    const filed = naima(host, "new", "tests", "The host's own test")
+    assert.equal(filed.code, 0, filed.err)
 
-    const program = join(host, "naima-tracker", "naima")
+    const program = programOf(host)
     assert.deepEqual(leaks(program), [], "the program directory holds nothing that only developing Naima needs")
-    assert.deepEqual(onDisk(program), [COPY_FILE, ...shipped].sort(), "it is exactly naima/'s files and the copy record")
-    assert.ok(!existsSync(join(program, ".git")), "a plain copy: no repository inside")
+    assert.deepEqual(onDisk(program), shipped, "it is exactly naima/'s files")
+    assert.equal(git(program, "status", "--porcelain", "--ignored"), "", "a clean clone: nothing written into it")
 
     // The host's own material lives in its own naima-data/, never in the program directory.
-    const filed = run(join(program, "naima.ts"), "new", "tests", "The host's own test")
-    assert.equal(filed.status, 0, filed.stderr)
     const data = join(host, "naima-tracker", "naima-data")
     assert.ok(onDisk(data).some((f) => /^tests\/.+\/meta\.json$/.test(f)), "the host's item is under its naima-data/tests/")
-    assert.deepEqual(onDisk(program), [COPY_FILE, ...shipped].sort(), "filing an item leaves the program untouched")
   } finally {
     removeTemp(base)
   }

@@ -6,20 +6,20 @@ compatibility boundary between forks. Change Naima however you like
 ([modifying Naima](../guide/install.md#modifying-naima)); a fork that reads and writes
 this format works on the same data as every other.
 
-This page specifies **format 2**, the one this Naima reads. The format is a
+This page specifies **format 3**, the one this Naima reads. The format is a
 number, `format` in `naima.json`; it moves only with a migration (below).
 Each plugin with migrations of its own has a format of its own too, in
 `formats`.
 
 ## The folder
 
-A project carries one folder, `naima-tracker/`, at its root:
+A project carries one folder, `naima-tracker/` (any name works), at its root:
 
 ```
 naima-tracker/
-  README.md                 one line: what Naima is, and a link to it
-  .gitignore                /naima/ — when the program is carried as a copy, the default
-  naima/                    the program: a copy of Naima's naima/ folder, at the locked commit
+  README.md                 what Naima is, and the two commands that restore the program
+  .gitignore                /naima/
+  naima/                    the program: a git clone of Naima, at the locked commit
   naima-data/               the data
     naima.json              the anchor: the format, the lock, the project's facts
     <type>/<slug>/          one directory per item
@@ -28,25 +28,26 @@ naima-tracker/
     adopted/<file>.json     naima adopt: one record per board brought in
 ```
 
-Naima writes nothing in the project outside this folder, with two
-exceptions: `.gitmodules`, which git itself imposes when the program is
-carried as a submodule, and the marker lines `naima adopt propose --write`
-inserts into the board being adopted, which only add lines
-([adopt an existing board](../guide/adopt-an-existing-board.md)). Outside the project it writes only the per-user cache the program
-is copied from ([the copy](../guide/install.md#the-copy)).
+Naima writes nothing in the project outside this folder, with one
+exception: the marker lines `naima adopt propose --write` inserts into the
+board being adopted, which only add lines
+([adopt an existing board](../guide/adopt-an-existing-board.md)) — and the
+host files `naima init --write-excludes` and `--write-agent-pointer` name.
+Nothing is written outside the project.
 
-Both directories can move. The data directory is found by walking up from the
-current directory to the first `naima-tracker/naima-data/naima.json`, or is
-named by `naima --data <dir>` or the `NAIMA_DATA` environment variable; a
-project that moves it says so in its tracker's README. The program directory
-is `program` in `naima.json`. The anchor never moves: the data directory is
-the one whose `naima.json` carries `format`.
+The program finds its data beside itself: `naima-data/`, the sibling of the
+program directory, whatever the current directory; `naima --data <dir>` or the
+`NAIMA_DATA` environment variable names another. When the sibling is absent,
+the first run makes it, as `naima init` does — only inside a git repository.
+The program directory of data named elsewhere is `program` in `naima.json`.
+The anchor never moves: the data directory is the one whose `naima.json`
+carries `format`.
 
 ## `naima.json`
 
 ```json
 {
-  "format": 2,
+  "format": 3,
   "formats": { "gates": 2 },
   "source": "https://github.com/vincenzoml/naima.git",
   "commit": "0123456789abcdef0123456789abcdef01234567",
@@ -58,11 +59,10 @@ the one whose `naima.json` carries `format`.
 
 | Key | Required | What it is |
 |---|---|---|
-| `format` | yes | the data format, an integer: this page is format 2 |
+| `format` | yes | the data format, an integer: this page is format 3 |
 | `formats` | no, `{}` | each plugin's own data format, by plugin name: only the plugins whose format has moved past 1 appear; one absent is at format 1 ([migrations](#migrations)) |
 | `source` | yes | the git URL, or absolute path, of the Naima the project runs: Naima's own repository, or a fork; never starting with `-`, and a path on this disk is absolute |
-| `commit` | yes | the full hash of the `source` commit the project runs: **the lock**; a commit of its `main` ([the copy](../guide/install.md#the-copy)) |
-| `carry` | no, `copy` | how the program is carried: `copy`, `vendored` or `submodule` (below); the default is recorded by leaving `carry` out, and `clone` is read as `copy` |
+| `commit` | yes | the full hash of the `source` commit the project runs: **the lock**; a commit of its `main` ([the program](#the-program)) |
 | `verify` | no | `"signed"`: run a locked commit only when git verifies its signature ([install](../guide/install.md#every-run-aligns-the-program)) |
 | `program` | no, `../naima` | the program directory, relative to the data directory |
 | `plugins` | no, `{}` | plugin name → `{ "options", "enabled", "replacedBy", "source", "checks" }`, first-party plugins included: their options (the project's gates are the `gates` plugin's), switched off, replaced, added from a pinned source — a path inside the program, `{ "path", "sha256" }` or `{ "git", "commit", "path" }` — their checks weighed ([configuration](../guide/config.md#the-plugins-table)) |
@@ -70,7 +70,7 @@ the one whose `naima.json` carries `format`.
 | `extends` | no, `[]` | the project's own additive changes to the loaded plugins' types and fields: `{ "type", "statuses", "traits", "transitions" }` or `{ "field", "values", "appliesTo", "traits" }` ([extending](plugin-contract.md#extending-another-plugins-types-and-fields)) |
 | `entryFiles` | no, sensible defaults | the agent-harness entry files (`CLAUDE.md`, `AGENTS.md`, …) `naima check` and `naima init --write-agent-pointer` act on, project-root relative ([the agent-harness entry point](../guide/install.md#the-agent-harness-entry-point)) |
 
-Any other key is an error. `source`, `commit`, `carry`, `verify` and `program` are the
+Any other key is an error. `source`, `commit`, `verify` and `program` are the
 lock: they keep these names and meanings in every format, so that any Naima
 can align itself and update whatever the format of the data.
 
@@ -87,19 +87,16 @@ reviewable change. How alignment behaves, and when it refuses:
 Code runs only from the program, never from the data: a plugin is a path
 inside the program, and a project that wants one carries it in its fork.
 
-### How the program is carried
+### The program
 
-| `carry` | The program is | The lock is |
-|---|---|---|
-| `copy` | a copy of `naima/` at `commit`, as plain files, ignored by `naima-tracker/.gitignore` | `commit` |
-| `vendored` | the same copy, committed into the project | the committed tree; `commit` records where it came from |
-| `submodule` | a git submodule: all of `commit`, its runtime in its `naima/` | the submodule pointer, which is `commit` |
-
-A copy holds `.naima-copy.json` beside the runtime files: the `source`, the
-`commit` and each file's git blob id it is a copy of, which alignment reads to
-know what is on disk and whether a file was changed.
-
-`naima carry <mode>` switches between them as one staged change.
+The program is a git clone of `source`, ignored by the tracker folder's
+`.gitignore`, its `HEAD` the locked `commit`, detached; its `origin` is
+`source`. Alignment fetches the commit from a repository on this disk that
+holds it — the main worktree's program — before `origin`, and refuses a clone
+with uncommitted changes or commits its source lacks. A commit of the old
+layout, its runtime in `naima/` rather than at the top, is refused by every
+command but `naima update`, which moves the lock to the head of the source's
+`main`.
 
 ## Items
 
@@ -191,13 +188,17 @@ change `naima.json` alone; one that rewrites items is refused there too. Paralle
 merge it first; every other branch then merges the trunk and runs `naima
 update`, which finishes the migration of its own new items or does nothing.
 
-This Naima carries one migration of the core's format, and one of the
+This Naima carries two migrations of the core's format, and one of the
 `gates` plugin's:
 
 - **format 1 → 2**: `plugins`, a list of third-party paths, becomes a table
   keyed by plugin name; each path becomes the `source` of an entry named
   after its file (`plugins/mine.ts` → `mine`, `plugins/other/index.ts` →
   `other`, a second `mine` → `mine-2`), its options kept;
+- **format 2 → 3**: `carry` leaves `naima.json`: the program is a gitignored
+  git clone, and nothing else. A project whose `carry` is `vendored` or
+  `submodule`, a program committed in it, is refused by `naima update` with
+  the commands that remove it by hand;
 - **gates format 1 → 2**: the top-level `gates` key moves to
   `plugins.gates.options.gates`.
 

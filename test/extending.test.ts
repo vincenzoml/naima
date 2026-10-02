@@ -136,7 +136,7 @@ test("a project extends the loaded plugins from naima.json, as a plugin would", 
   )
   const out: string[] = []
   const io = { out: (l = "") => void out.push(l), err: (l: string) => void out.push(l), now: () => new Date("2026-01-15T10:00:00Z") }
-  const run = (...argv: string[]) => runCli(argv, { cwd: root, programRoot: base, firstParty, io })
+  const run = (...argv: string[]) => runCli(argv, { cwd: root, data: join(root, "naima-tracker", "naima-data"), programRoot: base, firstParty, io })
   try {
     assert.equal(await run("new", "features", "Dark mode", "--set", "status=parked"), 0, out.join("\n"))
     assert.equal(await run("plugins"), 0)

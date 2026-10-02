@@ -10,13 +10,11 @@ import { runCli } from "./core/internal.ts"
 /** The Naima that is running: the directory above src/. */
 const programRoot = dirname(dirname(fileURLToPath(import.meta.url)))
 const data = process.env["NAIMA_DATA"]
-const cache = process.env["NAIMA_CACHE"]
 
 process.exitCode = await runCli(process.argv.slice(2), {
   cwd: process.cwd(),
   programRoot,
   ...(data ? { data } : {}),
-  ...(cache ? { cache } : {}),
   launched: process.env["NAIMA_LAUNCHED"] === "1",
   debug: process.env["NAIMA_DEBUG"] === "1",
   firstParty,

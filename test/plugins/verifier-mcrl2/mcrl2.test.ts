@@ -207,12 +207,13 @@ test("switched on, both model-checker plugins are documented as every loaded plu
   }
 })
 
-test("mCRL2: a run works under the per-user cache, inside the launcher's fence, not in the system's temporary directory", () => {
-  const cache = mkdtempSync(join(tmpdir(), "naima-cache-"))
+test("mCRL2: a run works in the tracker folder, inside the launcher's fence and ignored by git, not in the system's temporary directory", () => {
+  const tracker = mkdtempSync(join(tmpdir(), "naima-tracker-"))
   try {
-    assert.equal(workBase({ NAIMA_CACHE: cache }, "darwin"), join(cache, "verifier-mcrl2"))
-    assert.equal(workBase({}, "linux"), tmpdir())
+    assert.equal(workBase(join(tracker, "naima")), join(tracker, ".naima-work", "verifier-mcrl2"))
+    assert.equal(readFileSync(join(tracker, ".naima-work", ".gitignore"), "utf8"), "*\n")
+    assert.equal(workBase(), tmpdir())
   } finally {
-    rmSync(cache, { recursive: true, force: true })
+    rmSync(tracker, { recursive: true, force: true })
   }
 })

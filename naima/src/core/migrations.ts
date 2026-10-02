@@ -40,5 +40,19 @@ export const pluginsTable: Migration = {
   },
 }
 
+/**
+ * Format 2 → 3: `carry` leaves naima.json. The program is a git clone of the
+ * product, gitignored, and nothing else; `naima update` refuses, before
+ * migrating, a project whose program is committed (config.ts, carryRefusal).
+ */
+export const dropCarry: Migration = {
+  from: 2,
+  says: "carry leaves naima.json: the program is a gitignored git clone, and nothing else",
+  config(raw) {
+    const { carry: _carry, ...rest } = raw
+    return rest
+  },
+}
+
 /** Every migration of the core's own format, in order. */
-export const CORE_MIGRATIONS: readonly Migration[] = [pluginsTable]
+export const CORE_MIGRATIONS: readonly Migration[] = [pluginsTable, dropCarry]

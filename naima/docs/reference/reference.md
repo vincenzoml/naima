@@ -34,9 +34,8 @@ Every command: what it does, and the policy or invariant it enforces — or noth
 
 | Command | Plugin | What it does | What it enforces |
 |---|---|---|---|
-| [`init`](#naima-init) | core | make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given | the program is locked to a commit of its source that is committed and pushed, and nothing outside the tracker directory is written unless --write-excludes or --write-agent-pointer asks |
-| [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything | the lock moves only to the head of the source's main, with the data migrated forward in the same change; a source naima.json names other than the one the program was aligned from is refused, by every command, until --accept-source |
-| [`carry`](#naima-carry) | core | switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change | nothing: it switches how the program is carried and stages the switch as one change for a person to commit |
+| [`init`](#naima-init) | core | make the git repository around the program a Naima project, as its first run does by itself: beside the program, a git clone of Naima at naima-tracker/naima/, create naima-data/naima.json, locked to the clone's origin and its HEAD, which must be on the origin's main, and the tracker folder's README.md and .gitignore; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the one line that tells agents where Naima is; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given | the program is locked to a commit of its source's main, with nothing uncommitted, and nothing outside the tracker folder is written unless --write-excludes or --write-agent-pointer asks |
+| [`update`](#naima-update) | core | move the lock to the head of the source's main: fetch it into the program, check it out, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything | the lock moves only to the head of the source's main, with the data migrated forward in the same change; a source naima.json names other than the program's origin is refused, by every command, until --accept-source |
 | [`plugin`](#naima-plugin) | core | turn a plugin on or off, or set one of its options, in naima.json's plugins table — validated the way the project is validated on every load, instead of a hand-edit of the file | a name must be a first-party plugin (loaded or opt-in) or one the table already names with its own source; an option set on one whose options are known here must be one it declares; the whole file is re-validated before it is written, so nothing a later load would refuse ever reaches disk |
 | [`guide`](#naima-guide) | core | inside a project, first print what its plugins contribute to the guide, such as the project's active rules for agents; then where the running Naima's documentation is: the skill, the docs map, the guide for people, the rules, the pages for agents, the format, installing; read them as files | nothing: it only prints |
 | [`help`](#naima-help) | core | list every command the loaded plugins provide, with its usage | nothing: it only prints |
@@ -125,9 +124,9 @@ An item is a directory under `<tracker>/<TYPE>/<slug>/`: `README.md` for the pro
 
 ### naima init
 
-Make this git repository a Naima project: create naima-tracker/ — its README.md, its .gitignore and naima-data/naima.json, locked to the source and commit of the Naima that runs it, which must be committed and pushed, and the copy of that commit's naima/ in naima-tracker/naima/; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the line that points each agent-harness entry file it finds (CLAUDE.md, AGENTS.md, and the other sensible defaults, or a project's own entryFiles) at Naima's own agent docs; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given.
+Make the git repository around the program a Naima project, as its first run does by itself: beside the program, a git clone of Naima at naima-tracker/naima/, create naima-data/naima.json, locked to the clone's origin and its HEAD, which must be on the origin's main, and the tracker folder's README.md and .gitignore; print the line that keeps the program out of each host tool configuration it finds (deno.json, tsconfig.json, .prettierignore), and the one line that tells agents where Naima is; nothing outside naima-tracker/ is touched unless --write-excludes or --write-agent-pointer is given.
 
-**Enforces**: The program is locked to a commit of its source that is committed and pushed, and nothing outside the tracker directory is written unless --write-excludes or --write-agent-pointer asks.
+**Enforces**: The program is locked to a commit of its source's main, with nothing uncommitted, and nothing outside the tracker folder is written unless --write-excludes or --write-agent-pointer asks.
 
 ```sh
 naima init [--write-excludes] [--write-agent-pointer]
@@ -136,7 +135,7 @@ naima init [--write-excludes] [--write-agent-pointer]
 | Option | Default | What it does |
 |---|---|---|
 | `--write-excludes` |  | also write those lines into the host's own files: deno.json and tsconfig.json when they are plain JSON, .prettierignore; a file with comments is left to be edited by hand |
-| `--write-agent-pointer` |  | also write the one-line pointer into each configured entry file that exists and does not already have it |
+| `--write-agent-pointer` |  | also write the line telling agents where Naima is into the host's AGENTS.md, else its CLAUDE.md, else a new AGENTS.md, unless one of its entry files has it |
 
 Examples:
 
@@ -148,9 +147,9 @@ naima init --write-agent-pointer
 
 ### naima update
 
-Move the lock to the head of the source's main: fetch it, copy its naima/ into the program, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything.
+Move the lock to the head of the source's main: fetch it into the program, check it out, migrate the data forward if its format moved, and record the new commit, as one change to commit; the only command that asks the source anything.
 
-**Enforces**: The lock moves only to the head of the source's main, with the data migrated forward in the same change; a source naima.json names other than the one the program was aligned from is refused, by every command, until --accept-source.
+**Enforces**: The lock moves only to the head of the source's main, with the data migrated forward in the same change; a source naima.json names other than the program's origin is refused, by every command, until --accept-source.
 
 ```sh
 naima update [--check
@@ -160,7 +159,7 @@ naima --accept-source]
 | Option | Default | What it does |
 |---|---|---|
 | `--check` |  | only say whether the source's main has moved past the locked commit; exit 1 when it has |
-| `--accept-source` |  | trust the source naima.json now names, after reviewing why it changed: every other command refuses to run a program from a source it was not aligned from; aligns the program to the locked commit of the new source, and moves nothing else |
+| `--accept-source` |  | trust the source naima.json now names, after reviewing why it changed: every other command refuses to run a program from a source other than its origin; points the program's origin at the new source, checks out the locked commit, and moves nothing else |
 
 Examples:
 
@@ -168,23 +167,6 @@ Examples:
 naima update --check
 naima update
 naima update --accept-source
-```
-
-### naima carry
-
-Switch how the program is carried — a gitignored copy of naima/, the same copy committed (vendored), or a git submodule of the whole commit — staging the switch as one change.
-
-**Enforces**: Nothing: it switches how the program is carried and stages the switch as one change for a person to commit.
-
-```sh
-naima carry <copy|vendored|submodule>
-```
-
-Examples:
-
-```sh
-naima carry vendored
-naima carry copy
 ```
 
 ### naima plugin

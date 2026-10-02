@@ -11,8 +11,8 @@ import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 import { firstParty } from "../naima/src/builtins.ts"
 import { GUIDE_PAGES } from "../naima/src/core/cli.ts"
-import { gitIn, removeTemp } from "./core/testing.ts"
-import { ABOUT, FORMAT, runCli, RUNTIME_DIR, TRACKER_README } from "../naima/src/core/internal.ts"
+import { dataOf, gitIn, productRepo, removeTemp } from "./core/testing.ts"
+import { ABOUT, FORMAT, runCli, trackerReadme } from "../naima/src/core/internal.ts"
 
 /** The runtime folder of this checkout: what a program directory holds a copy of. */
 const NAIMA = join(dirname(dirname(fileURLToPath(import.meta.url))), "naima")
@@ -20,17 +20,17 @@ const NAIMA = join(dirname(dirname(fileURLToPath(import.meta.url))), "naima")
 const REPO = dirname(NAIMA)
 
 /**
- * The Naima that runs init: a clone of this repository, as a project's
- * naima-tracker/naima/ is. Not the working tree itself, which has work its
- * origin lacks, and init refuses to lock that. Its origin holds its HEAD, as
- * a pushed clone's does, whatever this checkout's branches are.
+ * The Naima that runs init: a git clone of the product built from this
+ * checkout's naima/, as a project's naima-tracker/naima/ is. Not the working
+ * tree itself, which is no clone of the product. Its HEAD is its origin's main.
  */
 const PROGRAM = (() => {
-  const dir = join(mkdtempSync(join(tmpdir(), "naima-program-")), "naima")
-  gitIn(REPO, "clone", "-q", "--", REPO, dir)
-  gitIn(dir, "update-ref", "refs/remotes/origin/pushed", "HEAD")
-  process.on("exit", () => rmSync(dirname(dir), { recursive: true, force: true }))
-  return join(dir, RUNTIME_DIR) // a clone of main runs its naima/, as the launcher finds it
+  const base = mkdtempSync(join(tmpdir(), "naima-program-"))
+  const product = productRepo(join(base, "product")).dir
+  const dir = join(base, "naima")
+  gitIn(base, "clone", "-q", "--", product, dir)
+  process.on("exit", () => rmSync(base, { recursive: true, force: true }))
+  return dir
 })()
 
 /** A git repository outside Naima, with one commit. */
@@ -51,7 +51,7 @@ async function naima(cwd: string, argv: string[], programRoot = PROGRAM) {
   const out: string[] = []
   const err: string[] = []
   const io = { out: (l = "") => void out.push(l), err: (l: string) => void err.push(l), now: () => new Date("2026-01-15T10:00:00Z") }
-  const code = await runCli(argv, { cwd, programRoot, firstParty, io })
+  const code = await runCli(argv, { cwd, programRoot, data: dataOf(cwd), firstParty, io })
   return { code, out: out.join("\n"), err: err.join("\n") }
 }
 
@@ -69,7 +69,7 @@ test("init writes naima-tracker/ and nothing else, locked to the Naima that runs
       source: git("remote", "get-url", "origin"),
       commit: git("rev-parse", "HEAD"),
     })
-    assert.equal(readFileSync(join(h.root, "naima-tracker", "README.md"), "utf8"), TRACKER_README)
+    assert.equal(readFileSync(join(h.root, "naima-tracker", "README.md"), "utf8"), trackerReadme("naima-tracker", data.source))
     assert.equal(readFileSync(join(h.root, "naima-tracker", ".gitignore"), "utf8"), "/naima/\n")
     assert.equal(
       h.git("status", "--porcelain", "--untracked-files=all"),
@@ -84,7 +84,7 @@ test("init writes naima-tracker/ and nothing else, locked to the Naima that runs
 
 test("the tracker's README and Naima's own share one sentence", () => {
   assert.ok(readFileSync(join(REPO, "README.md"), "utf8").includes(`Naima ${ABOUT}`))
-  assert.equal(TRACKER_README.split("\n").length, 2, "one line")
+  assert.ok(trackerReadme("naima-tracker", "https://example.invalid/naima.git").startsWith(`[Naima](https://github.com/vincenzoml/naima) ${ABOUT}\n`))
 })
 
 test("init refuses outside a git repository", async () => {
@@ -92,7 +92,7 @@ test("init refuses outside a git repository", async () => {
   try {
     const r = await naima(dir, ["init"])
     assert.equal(r.code, 2)
-    assert.match(r.err, /not a git repository/)
+    assert.match(r.err, /is not in a git repository/)
     assert.deepEqual(readdirSync(dir), [])
   } finally {
     rmSync(dir, { recursive: true, force: true })
@@ -189,11 +189,11 @@ test("a third-party plugin runs only from inside the program; a first-party name
   }
 })
 
-test("update and carry move the program, so they run only through the launcher; guide points at files that exist", async () => {
+test("update moves the program, so it runs only through the launcher; guide points at files that exist", async () => {
   const h = host()
   try {
     assert.equal((await naima(h.root, ["init"])).code, 0)
-    for (const command of ["update", "carry"]) assert.match((await naima(h.root, [command])).err, /runs through the launcher/)
+    assert.match((await naima(h.root, ["update"])).err, /runs through the launcher/)
     const guide = await naima(NAIMA, ["guide"])
     assert.equal(guide.code, 0)
     const paths = [...guide.out.matchAll(/^ {2}\S+\s+(\S+)$/gm)].map((m) => m[1] as string)

@@ -18,8 +18,8 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { isAbsolute, join, resolve } from "node:path"
-import { cacheDir, type Context, CONTRACT, message, type Plugin } from "../../core/api.ts"
+import { dirname, isAbsolute, join, resolve } from "node:path"
+import { type Context, CONTRACT, message, type Plugin } from "../../core/api.ts"
 
 /** What a run of one program gave: its exit status and output, and whether it was not there or ran out of time. */
 export interface ToolRun {
@@ -79,16 +79,21 @@ type Tool = (typeof TOOLS)[number]
 
 const INSTALL = "install the mCRL2 toolset (https://www.mcrl2.org), put its tools on PATH or set plugins.verifier-mcrl2.options.bin to their directory"
 
+/** The folder beside the program a run keeps its intermediate files in: inside the launcher's fence, and ignored by git through its own .gitignore. */
+export const WORK_DIR = ".naima-work"
+
 /**
- * Where a run keeps its intermediate files: under the per-user cache, which the launcher lets the
- * program write and read (the system's temporary directory is outside its fence); that directory
- * only when there is no cache.
+ * Where a run keeps its intermediate files: in the tracker folder, beside the
+ * program, which the launcher lets the program write and read (the system's
+ * temporary directory is outside its fence); that directory only when no
+ * program is named.
  */
-export function workBase(env: Record<string, string | undefined> = process.env, os: string = process.platform): string {
-  const cache = cacheDir(env, os === "win32" ? "windows" : os)
-  if (!cache) return tmpdir()
-  const dir = join(cache, "verifier-mcrl2")
+export function workBase(program?: string): string {
+  if (!program) return tmpdir()
+  const work = join(dirname(program), WORK_DIR)
+  const dir = join(work, "verifier-mcrl2")
   mkdirSync(dir, { recursive: true })
+  if (!existsSync(join(work, ".gitignore"))) writeFileSync(join(work, ".gitignore"), "*\n")
   return dir
 }
 
@@ -112,7 +117,7 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
   function check({ model, property, options }: VerifyRequest, ctx: Context): VerifyResult {
     const seconds = timeoutOf(options)
     const log: string[] = []
-    const dir = mkdtempSync(join(workBase(), "run-"))
+    const dir = mkdtempSync(join(workBase(ctx.program), "run-"))
     try {
       let formula = formulaFile(property, ctx.root)
       if (formula && !existsSync(formula)) return { verdict: "error", output: `the formula file ${property.trim()} does not exist` }
@@ -163,8 +168,8 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
       const f = formulaFile(property, ctx.root)
       return f ? [model, f] : [model]
     },
-    version: (_ctx) => {
-      const r = run(path("mcrl22lps"), ["--version"], workBase())
+    version: (ctx) => {
+      const r = run(path("mcrl22lps"), ["--version"], workBase(ctx.program))
       if (r.missing) return Promise.reject(new Error(missing("mcrl22lps")))
       if (r.exit !== 0) return Promise.reject(new Error(`mcrl22lps --version exited ${r.exit}: ${shown(r) || r.error || ""}`))
       return Promise.resolve(r.stdout.trim().split("\n")[0]!.trim())

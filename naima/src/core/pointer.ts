@@ -3,9 +3,9 @@
 // AGENTS.md, …), mostly to point at the rulebook; if the pointer names a file
 // that no longer exists, nothing errors — the agent is simply taught
 // nothing. `naima check` reports any such broken reference in a configured
-// entry file; `naima init --write-agent-pointer` (opt-in) writes a line
-// pointing at Naima's own agent docs into each one that lacks it
-// (features/agent-harness-entry-point-check-naima-init).
+// entry file; `naima init --write-agent-pointer` (opt-in) writes the one line
+// that says where Naima is into the host's AGENTS.md, else its CLAUDE.md,
+// else a new AGENTS.md (features/agent-harness-entry-point-check-naima-init).
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
@@ -65,44 +65,45 @@ export function brokenEntryLinks(root: string, entryFiles: readonly string[]): B
   return out
 }
 
-/** The one-line pointer at Naima's own agent docs, relative to `entryFile`'s own directory. */
-export function pointerLine(root: string, program: string, entryFile: string): string {
-  const target = posixRelative(dirname(join(root, entryFile)), join(program, "docs/agents/README.md"))
-  return `Read [${target}](${target}) before anything else: it holds Naima's rules for agents.`
+/** The entry files the pointer is written into, in order: the first that exists, else the first, created. */
+export const POINTER_FILES = ["AGENTS.md", "CLAUDE.md"] as const
+
+/** What every pointer says, wherever its tracker folder is: how an entry file is known to hold one. */
+const POINTER_MARK = "(naima/ the program, naima-data/ the data)"
+
+/** The one line that tells agents where Naima is: the tracker folder, from the project root. */
+export function pointerLine(root: string, tracker: string): string {
+  return `Naima is in ${posixRelative(root, tracker)}/ ${POINTER_MARK}; if you find it elsewhere, update this line.`
 }
 
-/** Whether `entryFile` already links to Naima's own agent docs, wherever it names them from. */
-function hasPointer(root: string, program: string, entryFile: string): boolean {
+/** Whether `entryFile` already says where Naima is, or links Naima's agent docs as an earlier pointer did. */
+function hasPointer(root: string, entryFile: string): boolean {
   const path = join(root, entryFile)
   if (!existsSync(path)) return false
-  const docs = resolve(program, "docs/agents/README.md")
-  const dir = dirname(path)
-  return linksIn(readFileSync(path, "utf8")).some((raw) => {
-    const target = localTarget(raw)
-    return target !== null && resolve(dir, target) === docs
-  })
+  const text = readFileSync(path, "utf8")
+  return text.includes(POINTER_MARK) || linksIn(text).some((raw) => /(^|\/)naima\/docs\/agents\/README\.md$/.test(localTarget(raw) ?? ""))
 }
 
 export interface EntryPointer {
+  /** The entry file the pointer is in, or would be written into. */
   file: string
   line: string
-  /** Already points at Naima's own agent docs. */
+  /** One of the entry files already has it. */
   present: boolean
-  /** The file exists, so the pointer can be appended to it. */
-  writable: boolean
 }
 
-/** Every configured entry file that exists, with the pointer line it already has or would gain. */
-export function entryPointers(root: string, program: string, entryFiles: readonly string[]): EntryPointer[] {
-  return entryFiles
-    .filter((file) => existsSync(join(root, file)))
-    .map((file) => ({ file, line: pointerLine(root, program, file), present: hasPointer(root, program, file), writable: true }))
+/** The pointer: present when any configured entry file (or AGENTS.md, CLAUDE.md) has it; else the file it would be written into. */
+export function agentPointer(root: string, tracker: string, entryFiles: readonly string[]): EntryPointer {
+  const line = pointerLine(root, tracker)
+  const holder = [...new Set([...POINTER_FILES, ...entryFiles])].find((f) => hasPointer(root, f))
+  if (holder) return { file: holder, line, present: true }
+  return { file: POINTER_FILES.find((f) => existsSync(join(root, f))) ?? POINTER_FILES[0], line, present: false }
 }
 
-/** Append the pointer line to `entryFile`, under a blank line, unless it is already there. */
-export function writePointer(root: string, program: string, entryFile: string): void {
+/** Append the pointer line to `entryFile`, under a blank line, creating the file when it does not exist. */
+export function writePointer(root: string, tracker: string, entryFile: string): void {
   const path = join(root, entryFile)
-  const text = readFileSync(path, "utf8")
-  const line = pointerLine(root, program, entryFile)
-  writeFileSync(path, text + (text.endsWith("\n") ? "" : "\n") + (text.trim() ? "\n" : "") + line + "\n")
+  const text = existsSync(path) ? readFileSync(path, "utf8") : ""
+  const line = pointerLine(root, tracker)
+  writeFileSync(path, text + (text && !text.endsWith("\n") ? "\n" : "") + (text.trim() ? "\n" : "") + line + "\n")
 }

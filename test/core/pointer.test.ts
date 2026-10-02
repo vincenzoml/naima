@@ -8,7 +8,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { test } from "node:test"
-import { brokenEntryLinks, entryPointers, pointerLine, writePointer } from "../../naima/src/core/pointer.ts"
+import { agentPointer, brokenEntryLinks, pointerLine, writePointer } from "../../naima/src/core/pointer.ts"
 import { removeTemp } from "./testing.ts"
 
 function world() {
@@ -16,7 +16,7 @@ function world() {
   const program = join(root, "naima-tracker", "naima")
   mkdirSync(join(program, "docs", "agents"), { recursive: true })
   writeFileSync(join(program, "docs", "agents", "README.md"), "# Agents\n")
-  return { root, program, cleanup: () => removeTemp(root) }
+  return { root, program, tracker: join(root, "naima-tracker"), cleanup: () => removeTemp(root) }
 }
 
 test("brokenEntryLinks: a markdown link and a plain-text path that name a missing file; a URL or an anchor is never one", () => {
@@ -53,41 +53,50 @@ test("brokenEntryLinks: a configured entry file that does not exist is skipped, 
   }
 })
 
-test("pointerLine and entryPointers: the one-line pointer at Naima's own agent docs, relative to the entry file", () => {
+test("pointerLine and agentPointer: one line saying where Naima is, for AGENTS.md, else CLAUDE.md, else a new AGENTS.md", () => {
   const w = world()
   try {
     assert.equal(
-      pointerLine(w.root, w.program, "AGENTS.md"),
-      "Read [naima-tracker/naima/docs/agents/README.md](naima-tracker/naima/docs/agents/README.md) before anything else: it holds Naima's rules for agents.",
+      pointerLine(w.root, w.tracker),
+      "Naima is in naima-tracker/ (naima/ the program, naima-data/ the data); if you find it elsewhere, update this line.",
     )
+    assert.deepEqual(
+      agentPointer(w.root, w.tracker, ["CLAUDE.md"]),
+      { file: "AGENTS.md", line: pointerLine(w.root, w.tracker), present: false },
+      "none: AGENTS.md, created",
+    )
+    writeFileSync(join(w.root, "CLAUDE.md"), "# Claude\n")
+    assert.equal(agentPointer(w.root, w.tracker, ["CLAUDE.md"]).file, "CLAUDE.md")
     writeFileSync(join(w.root, "AGENTS.md"), "# Working here\n")
-    const [p] = entryPointers(w.root, w.program, ["AGENTS.md", "CLAUDE.md"])
-    assert.equal(p!.file, "AGENTS.md")
-    assert.equal(p!.present, false)
-    assert.equal(entryPointers(w.root, w.program, ["AGENTS.md", "CLAUDE.md"]).length, 1, "CLAUDE.md does not exist: not reported")
+    assert.equal(agentPointer(w.root, w.tracker, ["CLAUDE.md"]).file, "AGENTS.md", "AGENTS.md first")
   } finally {
     w.cleanup()
   }
 })
 
-test("entryPointers: present once the file links to the agent docs, from wherever it names them", () => {
+test("agentPointer: present once any entry file says where Naima is, or links its agent docs as an earlier pointer did", () => {
   const w = world()
   try {
-    writeFileSync(join(w.root, "AGENTS.md"), "Read [naima-tracker/naima/docs/agents/README.md](naima-tracker/naima/docs/agents/README.md) first.\n")
-    assert.equal(entryPointers(w.root, w.program, ["AGENTS.md"])[0]!.present, true)
+    writeFileSync(join(w.root, "GEMINI.md"), "Naima is in elsewhere/ (naima/ the program, naima-data/ the data); if you find it elsewhere, update this line.\n")
+    assert.equal(agentPointer(w.root, w.tracker, ["GEMINI.md"]).present, true)
+    writeFileSync(join(w.root, "GEMINI.md"), "")
+    writeFileSync(join(w.root, "CLAUDE.md"), "Read [naima-tracker/naima/docs/agents/README.md](naima-tracker/naima/docs/agents/README.md) first.\n")
+    assert.equal(agentPointer(w.root, w.tracker, []).present, true)
   } finally {
     w.cleanup()
   }
 })
 
-test("writePointer: appends the pointer line under a blank line, once", () => {
+test("writePointer: appends the pointer line under a blank line, once, creating the file when there is none", () => {
   const w = world()
   try {
     writeFileSync(join(w.root, "AGENTS.md"), "# Working here\n\nSome rules.\n")
-    writePointer(w.root, w.program, "AGENTS.md")
+    writePointer(w.root, w.tracker, "AGENTS.md")
     const text = readFileSync(join(w.root, "AGENTS.md"), "utf8")
-    assert.match(text, /# Working here\n\nSome rules\.\n\nRead \[naima-tracker\/naima\/docs\/agents\/README\.md]/)
-    assert.equal(entryPointers(w.root, w.program, ["AGENTS.md"])[0]!.present, true)
+    assert.equal(text, "# Working here\n\nSome rules.\n\n" + pointerLine(w.root, w.tracker) + "\n")
+    assert.equal(agentPointer(w.root, w.tracker, ["AGENTS.md"]).present, true)
+    writePointer(w.root, w.tracker, "CLAUDE.md")
+    assert.equal(readFileSync(join(w.root, "CLAUDE.md"), "utf8"), pointerLine(w.root, w.tracker) + "\n")
   } finally {
     w.cleanup()
   }

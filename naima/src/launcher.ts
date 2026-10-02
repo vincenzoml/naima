@@ -2,8 +2,8 @@
 // all it does is work out where things are, then run the program under Deno
 // with only these (docs/guide/install.md says why each one exists):
 //
-//   read    the repository, the program wherever it is, the per-user cache, and the data directory of every other worktree
-//   write   the tracker folder (naima-tracker/), the data and program if moved out of it, and the per-user cache
+//   read    the repository, the program wherever it is, and the data directory of every other worktree
+//   write   the tracker folder (naima-tracker/, the parent of the program), and the data and program if moved out of it
 //   run     git, and the programs the loaded contributions declare (`runs`: a verifier's tool, a metric's command), nothing else
 //   env     an allow-list of the environment (ENV below): what git needs, and Naima's own
 //   net     none: the network is git's, for alignment and update — except for `naima ui` (UI below)
@@ -13,33 +13,29 @@
 // own with the webview's permissions (src/plugins/ui/open.ts) — and run the
 // program that opens the default browser.
 //
-// When the program exits with RELAUNCH it has just aligned the program
-// directory, so the code on disk is not the code that ran: the launcher runs
-// the program directory's own code, which is the locked commit.
-//
-// The per-user cache is where the locked commits are fetched before they are
-// copied into the program (src/core/program.ts): the launcher names it to the
-// program as NAIMA_CACHE.
+// The data is the program's sibling, `dirname(program)/naima-data`, unless
+// --data or NAIMA_DATA names it. When the program exits with RELAUNCH it has
+// just aligned the program directory, so the code on disk is not the code
+// that ran: the launcher runs the program directory's own code, which is the
+// locked commit.
 
-import { existsSync, mkdirSync, readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import {
-  cacheDir,
   DATA_FILE,
   DEFAULT_ENTRY_FILES,
   EXCLUDE_FILES,
   findData,
   globalOptions,
   message,
-  PROGRAM_DIR,
+  POINTER_FILES,
   programOf,
   readConfig,
   real,
   RELAUNCH,
   runtimeOf,
   toplevel,
-  TRACKER_DIR,
   trackerOf,
   worktrees,
 } from "./core/internal.ts"
@@ -127,8 +123,6 @@ export function permissions(
     data: string | null
     program: string
     entry: string
-    /** The per-user cache, read and written: null when there is none. */
-    cache?: string | null
     hostFiles?: string[]
     worktrees?: string[]
     /** The programs the loaded contributions start, besides git: a verifier's `runs`, a metric's program. */
@@ -148,10 +142,8 @@ export function permissions(
     return all.join(",")
   }
   return [
-    `--allow-read=${
-      list([p.root, p.data, p.program, p.entry, p.cache ?? null, ...(p.worktrees ?? []).map(real).filter((x) => !x.includes(",")), ...(p.ui?.read ?? [])])
-    }`,
-    `--allow-write=${list([p.tracker, p.data, p.program, p.cache ?? null, ...(p.hostFiles ?? [])])}`,
+    `--allow-read=${list([p.root, p.data, p.program, p.entry, ...(p.worktrees ?? []).map(real).filter((x) => !x.includes(",")), ...(p.ui?.read ?? [])])}`,
+    `--allow-write=${list([p.tracker, p.data, p.program, ...(p.hostFiles ?? [])])}`,
     `--allow-run=${[...new Set(["git", ...(p.runs ?? []), ...(p.ui?.runs ?? [])])].join(",")}`,
     "--allow-env",
     ...(p.ui ? [`--allow-net=${p.ui.net.join(",")}`] : []),
@@ -244,24 +236,15 @@ function hostFiles(rest: string[], root: string, data: string | null): string[] 
   if (command !== "init") return []
   return [
     ...(args.includes("--write-excludes") ? EXCLUDE_FILES.map((f) => join(root, f)) : []),
-    ...(args.includes("--write-agent-pointer") ? entryFilesOf(data).map((f) => join(root, f)) : []),
+    ...(args.includes("--write-agent-pointer") ? [...new Set([...POINTER_FILES, ...entryFilesOf(data)])].map((f) => join(root, f)) : []),
   ]
 }
 
-/**
- * The per-user cache, made when it does not exist yet; null when the
- * environment names none, it cannot be made, or its path holds a comma —
- * then the program fetches into a scratch repository in the tracker folder.
- */
-function userCache(): string | null {
-  const dir = cacheDir(Deno.env.toObject(), Deno.build.os)
-  if (!dir || dir.includes(",")) return null
-  try {
-    mkdirSync(dir, { recursive: true })
-    return real(dir)
-  } catch {
-    return null
-  }
+/** The nearest directory of `path`, or above it, that exists: what git can be asked about. */
+function existing(path: string): string {
+  let dir = resolve(path)
+  while (!existsSync(dir) && dirname(dir) !== dir) dir = dirname(dir)
+  return dir
 }
 
 export async function launch(args: string[], cwd: string): Promise<number> {
@@ -273,19 +256,20 @@ export async function launch(args: string[], cwd: string): Promise<number> {
   }
   // Resolved: Deno grants real paths, and the program reads its own directory, which may not be the project's.
   const own = real(dirname(dirname(fileURLToPath(import.meta.url))))
-  const data = findData(cwd, parsed.data ?? Deno.env.get("NAIMA_DATA"))
-  const root = toplevel(data ?? cwd) ?? resolve(cwd)
-  const tracker = data ? trackerOf(data) : join(root, TRACKER_DIR)
-  const program = data && existsSync(join(data, DATA_FILE)) ? programOf(data) : join(tracker, PROGRAM_DIR)
-  const cache = userCache()
-  const env = { ...allowedEnv(Deno.env.toObject()), NAIMA_LAUNCHED: "1", ...(data ? { NAIMA_DATA: data } : {}), ...(cache ? { NAIMA_CACHE: cache } : {}) }
+  const given = parsed.data ?? Deno.env.get("NAIMA_DATA")
+  const data = findData(cwd, own, given)
+  // Named, the data says where its program is; beside the program, the data is the program's own and the parent folder bounds the writes.
+  const program = given && existsSync(join(data, DATA_FILE)) ? programOf(data) : own
+  const tracker = given ? trackerOf(data) : dirname(own)
+  const root = toplevel(existing(tracker)) ?? resolve(cwd)
+  const env = { ...allowedEnv(Deno.env.toObject()), NAIMA_LAUNCHED: "1", ...(given ? { NAIMA_DATA: real(data) } : {}) }
   const others = otherWorktrees(root, data)
   const ui = uiGrant(parsed.rest[0], Deno.build.os, Deno.execPath())
   let entry = runtimeOf(program) ?? own
   for (let run = 0; run < MAX_RUNS; run++) {
     let flags: string[]
     try {
-      const fence = { root, tracker, data, program, entry, cache, hostFiles: hostFiles(parsed.rest, root, data), worktrees: others }
+      const fence = { root, tracker, data, program, entry, hostFiles: hostFiles(parsed.rest, root, data), worktrees: others }
       const read = permissions(fence)[0] ?? ""
       flags = permissions({ ...fence, runs: mayRun(data) ? declaredRuns(entry, cwd, read, env) : [], ui })
     } catch (e) {

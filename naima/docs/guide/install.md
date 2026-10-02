@@ -301,7 +301,7 @@ naima carry copy         # back to the ignored copy
 
 Each switch stages exactly what it changed — under `naima-tracker/`, plus
 `.gitmodules` in submodule mode — so it is one commit. The lock and `update`
-work the same in every mode ([the format](../reference/format.md#how-the-program-is-carried)).
+work the same in every mode ([the format](../reference/format.md#the-program)).
 A submodule is git's own checkout of the source, so it holds all of the
 commit, its tests and tracker included; the copy and vendored hold `naima/`
 only.
