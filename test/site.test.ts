@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict"
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, relative, sep } from "node:path"
 import { test } from "node:test"
@@ -179,6 +179,113 @@ test("install.sh installs Naima in a git repository, says so when run again, and
       /Is this the root of your project\? If so, ask your agent to create a repository here and install Naima from https:\/\/vincenzoml\.github\.io\/naima\//,
     )
     assert.ok(!existsSync(join(outside, "naima-tracker")))
+  } finally {
+    removeTemp(base)
+  }
+})
+
+// bugs/installing-tagged-release-naima-ref-v1-0: NAIMA_REF names a tag, not only a branch.
+test("install.sh installs a tagged release: NAIMA_REF may name a tag", {
+  skip: process.platform === "win32",
+  timeout: 30_000,
+}, () => {
+  const base = mkdtempSync(join(tmpdir(), "naima-site-tag-"))
+  try {
+    const source = productRepo(join(base, "naima")).dir
+    const tagged = git(source, "rev-parse", "HEAD")
+    git(source, "tag", "v1.0.0")
+    // The source moves on: installing the tag must not install this later commit.
+    writeFileSync(join(source, "src", "marker.txt"), "moved\n")
+    git(source, "add", "-A")
+    git(source, "commit", "-q", "-m", "change after the tag")
+    assert.notEqual(git(source, "rev-parse", "HEAD"), tagged)
+
+    const project = join(base, "project")
+    mkdirSync(project)
+    mkdirSync(join(base, "tmp"))
+    git(project, "init", "-q", "-b", "main")
+    const run = spawnSync("sh", [join(SITE, "install.sh")], {
+      cwd: project,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        NAIMA_SOURCE: source,
+        NAIMA_REF: "v1.0.0",
+        TMPDIR: join(base, "tmp"),
+        NAIMA_NO_DENO_INSTALL: "1",
+        GIT_CEILING_DIRECTORIES: base,
+        GIT_AUTHOR_NAME: "t",
+        GIT_AUTHOR_EMAIL: "t@t",
+      },
+    })
+    assert.equal(run.status, 0, run.stdout + run.stderr)
+    assert.match(run.stdout, /all invariants hold/)
+    const dir = join(project, "naima-tracker", "naima")
+    assert.equal(git(dir, "rev-parse", "HEAD"), tagged, "the tag's commit, not whatever the source's main moved to since")
+    assert.equal(JSON.parse(readFileSync(join(project, "naima-tracker", "naima-data", "naima.json"), "utf8")).commit, tagged)
+  } finally {
+    removeTemp(base)
+  }
+})
+
+// features/installer-clones-product-into-naima-tracker-naima: a host installed before the program
+// was a git clone (it carries .naima-copy.json) is migrated, never overwritten, on the next run.
+test("install.sh migrates a legacy copy of the program aside and runs naima update", {
+  skip: process.platform === "win32",
+  timeout: 30_000,
+}, () => {
+  const base = mkdtempSync(join(tmpdir(), "naima-site-legacy-"))
+  try {
+    const source = productRepo(join(base, "naima")).dir
+    const project = join(base, "project")
+    mkdirSync(project)
+    mkdirSync(join(base, "tmp"))
+    git(project, "init", "-q", "-b", "main")
+    const run = () =>
+      spawnSync("sh", [join(SITE, "install.sh")], {
+        cwd: project,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          NAIMA_SOURCE: source,
+          TMPDIR: join(base, "tmp"),
+          NAIMA_NO_DENO_INSTALL: "1",
+          GIT_CEILING_DIRECTORIES: base,
+          GIT_AUTHOR_NAME: "t",
+          GIT_AUTHOR_EMAIL: "t@t",
+        },
+      })
+
+    const fresh = run()
+    assert.equal(fresh.status, 0, fresh.stdout + fresh.stderr)
+    const dir = join(project, "naima-tracker", "naima")
+    const installedAt = git(dir, "rev-parse", "HEAD")
+
+    // Turn the clone into the pre-clone-era copy: its .git gone, its marker file dropped.
+    rmSync(join(dir, ".git"), { recursive: true, force: true })
+    writeFileSync(join(dir, ".naima-copy.json"), "{}\n")
+
+    // The source moves on, so the migration (naima update) has something to move the lock to.
+    writeFileSync(join(source, "src", "marker.txt"), "moved\n")
+    git(source, "add", "-A")
+    git(source, "commit", "-q", "-m", "change after the legacy copy")
+    const moved = git(source, "rev-parse", "HEAD")
+    assert.notEqual(moved, installedAt)
+
+    const again = run()
+    assert.equal(again.status, 0, again.stdout + again.stderr)
+    assert.match(again.stdout, /naima-tracker\/naima is from before the program was a git clone: moving it to naima-tracker\/\.naima-legacy-/)
+    assert.match(again.stdout, /commit the migration/)
+    assert.match(again.stdout, /git add naima-tracker && git commit -m "Migrate Naima to a git clone of the product"/)
+    assert.match(again.stdout, /all invariants hold/)
+
+    const legacyDirs = readdirSync(join(project, "naima-tracker")).filter((f) => f.startsWith(".naima-legacy-"))
+    assert.equal(legacyDirs.length, 1, "the old copy was moved aside, once")
+    assert.ok(existsSync(join(project, "naima-tracker", legacyDirs[0]!, ".naima-copy.json")), "untouched, for the owner to look at")
+
+    assert.ok(existsSync(join(dir, ".git")), "the fresh program is a real git clone")
+    assert.equal(git(dir, "rev-parse", "HEAD"), moved, "naima update moved the lock to the source's new head")
+    assert.equal(JSON.parse(readFileSync(join(project, "naima-tracker", "naima-data", "naima.json"), "utf8")).commit, moved)
   } finally {
     removeTemp(base)
   }
