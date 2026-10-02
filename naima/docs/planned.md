@@ -59,7 +59,7 @@ running the checklist on its own, unprompted, at a project's first commit.
   moving the pin forward on request, never silently. A skill pinned this way
   would carry the same two fields, under a `skills` key of its own, and the
   agent would read it from a checkout of that pin the same way it reads
-  [the Naima skill](agents/skill.md) from the copy in `naima-tracker/naima/`,
+  [the Naima skill](agents/skill.md) from the clone in `naima-tracker/naima/`,
   rather than from a second copy kept in the project.
 - **A dashboard**: a visual page of the project's state — boards, gates, the
   ranked queue, claims and notes across branches, the evidence attached to

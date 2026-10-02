@@ -12,7 +12,7 @@
   "triagedOn": "2026-10-01",
   "fixedOn": "2026-10-01",
   "docs": [
-    "naima/docs/guide/install.md#the-copy",
+    "naima/docs/guide/install.md#the-clone",
     "develop/architecture.md#layout"
   ]
 }

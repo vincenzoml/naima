@@ -78,11 +78,12 @@ can align itself and update whatever the format of the data.
 
 `source` and `commit` say which Naima runs the project, the way a lockfile
 says which version of a dependency does. Every run aligns the program
-directory to exactly that source and commit first: everyone on the project,
-and CI, runs the same Naima. No run pulls on its own; `naima update` is the
-only command that asks the source anything, and it moves the lock in one
-reviewable change. How alignment behaves, and when it refuses:
-[installing and updating](../guide/install.md#every-run-aligns-the-program).
+directory — a git clone of `source`, checked out at `commit`, ignored by
+`naima-tracker/.gitignore` — to exactly that source and commit first:
+everyone on the project, and CI, runs the same Naima. No run pulls on its
+own; `naima update` is the only command that asks the source anything, and
+it moves the lock in one reviewable change. How alignment behaves, and when
+it refuses: [installing and updating](../guide/install.md#every-run-aligns-the-program).
 
 Code runs only from the program, never from the data: a plugin is a path
 inside the program, and a project that wants one carries it in its fork.
@@ -97,6 +98,7 @@ with uncommitted changes or commits its source lacks. A commit of the old
 layout, its runtime in `naima/` rather than at the top, is refused by every
 command but `naima update`, which moves the lock to the head of the source's
 `main`.
+
 
 ## Items
 

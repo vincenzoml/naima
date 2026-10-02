@@ -74,9 +74,11 @@ what the stage's own runner claims happened.
    ends the runbook there: open the bug, loop back to stage 1 once it is
    fixed. A runbook that "mostly worked" is not published.
 5. **Publish.** The tag, the public artefact, the public draft made visible —
-   whichever the project's distribution is. This is the irreversible step:
-   confirm with the owner first if it was not already covered by the
-   decision in step 2 of proposing.
+   whichever the project's distribution is. For Naima itself, the tag goes
+   on the product repository (`vincenzoml/naima`), never on the workshop
+   that develops it. This is the irreversible step: confirm with the owner
+   first if it was not already covered by the decision in step 2 of
+   proposing.
 6. **Post-release checks.** The public thing is fetched or installed from
    where a stranger would get it, not from the build directory.
 7. **Announce only what is true.** The changelog goes out once, after step 6

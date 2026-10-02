@@ -20,7 +20,11 @@ test("skills/naima/SKILL.md loads, and its links resolve", () => {
   assert.equal(fields["name"], "naima", "the name is the directory's")
   assert.ok((fields["description"] ?? "").length > 40, "a description that says when to use it")
   assert.match(text, /deno\.land\/install\.sh/, "it installs Deno when it is missing, with the official installer")
-  assert.match(text, /git clone --depth 1 \S+ (\S+)\ndeno run -A \1\/naima\/naima\.ts init\n/, "it installs from a shallow clone of main, outside the project")
+  assert.match(
+    text,
+    /git clone \S+ naima-tracker\/naima\ndeno run -A naima-tracker\/naima\/naima\.ts init\n/,
+    "it installs by cloning Naima straight into naima-tracker/naima",
+  )
   assert.match(text, /naima(\.ts)? init/, "it starts a project that has no naima-tracker/")
   assert.match(text, /naima update --check/, "it checks for an update at the start of a session")
   assert.ok((text.match(/\]\(\.\.\/\.\.\/docs\//g) ?? []).length >= 3, "it points at the docs rather than copying them")

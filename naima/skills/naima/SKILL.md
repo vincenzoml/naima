@@ -64,17 +64,17 @@ When the repository has `naima-tracker/naima-data/naima.json` but no
 `naima-tracker/naima/` (a fresh clone, a new worktree), run the launcher of
 any Naima at hand from inside the project — the main worktree's, or a
 shallow clone of the `source` that `naima.json` names, outside the project.
-The run copies the locked commit's `naima/` into the program by itself.
+The run clones the locked commit into the program by itself
+([fresh clones and worktrees](../../docs/guide/install.md#fresh-clones-and-worktrees)).
 
 When there is none and the work is to be tracked here:
 
 ```sh
-git clone --depth 1 https://github.com/vincenzoml/naima.git /tmp/naima
-deno run -A /tmp/naima/naima/naima.ts init
-rm -rf /tmp/naima
+git clone https://github.com/vincenzoml/naima.git naima-tracker/naima
+deno run -A naima-tracker/naima/naima.ts init
 ```
 
-`init` writes `naima-tracker/`, the copy included, and touches nothing else. Commit
+`init` writes the rest of `naima-tracker/` and touches nothing else. Commit
 `naima-tracker/` with the work; git never shows `naima-tracker/naima/`, which
 is ignored ([bootstrap a project](../../docs/guide/install.md#bootstrap-a-project)).
 
@@ -113,7 +113,7 @@ one ([asking the human](../../docs/agents/asking-the-human.md)).
 ## 5. Work by the rules and the flows
 
 Read the rules before acting, then the flow that applies. They are plain
-files in the copy; `naima guide` prints where:
+files in the clone; `naima guide` prints where:
 
 - [the rules](../../docs/guide/rules.md): every rule a project holds to, each
   marked enforced by a check or kept by convention — read them; they are
