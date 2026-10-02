@@ -13,8 +13,6 @@ Naima keeps a project's work as plain files in the project's own git repository,
 - Per-commit metrics, epics, gates, decisions, a release runbook, and packs for non-software work (data analyses, papers).
 - Naima tracks its own development with itself.
 
-Tested on a clean checkout with Deno, Node and Bun (381 tests), and installed on a real Windows 11 machine.
-
 ## Notes
 
 ### 2026-10-01 — Vincenzo Ciancia, on main
