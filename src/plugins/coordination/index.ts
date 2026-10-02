@@ -9,8 +9,9 @@
 
 import { randomUUID } from "node:crypto"
 import { mkdirSync, readFileSync, unlinkSync } from "node:fs"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import {
+  align,
   allRefNames,
   appliesTo,
   bool,
@@ -24,13 +25,16 @@ import {
   filesAt,
   type Finding,
   gitOrNull,
+  isClone,
   label,
   mustGit,
   parse,
   type Plugin,
   positiveInt,
+  posixRelative,
   readAcrossBranches,
   rendered,
+  short,
   str,
   type SummarySection,
   today,
@@ -545,6 +549,22 @@ function openCommand(policy: Policy): Command {
       if (exists(path)) throw new Error(`${path} already exists: pick another --name`)
       const base = trunk(ctx.root) ?? "HEAD"
       mustGit(ctx.root, "worktree", "add", "-q", "-b", branch, path, base)
+      const newProgram = join(path, posixRelative(ctx.root, ctx.program))
+      if (!isClone(ctx.program)) {
+        ctx.out(`${posixRelative(ctx.root, ctx.program)} is not a program clone yet: ${path} will align its own on its first run (naima check)`)
+      } else {
+        const newData = join(path, ctx.trackerDir)
+        align({
+          root: path,
+          tracker: dirname(newData),
+          program: newProgram,
+          source: ctx.config.source,
+          commit: ctx.config.commit,
+          ...(ctx.config.verify ? { verify: ctx.config.verify } : {}),
+          seeds: [ctx.program],
+        })
+        ctx.out(`cloned ${posixRelative(path, newProgram)} from ${posixRelative(ctx.root, ctx.program)}, at ${short(ctx.config.commit)} — no network`)
+      }
       const others = readClaims(ctx)
       const claim: Claim = { branch, claimedAt: today(ctx), items: [], file: `${randomUUID()}.json`, ref: branch, local: true }
       const note = str(p, "note")
