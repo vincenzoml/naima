@@ -1,7 +1,7 @@
 {
   "id": "e39e0961-e540-4fc7-b6ec-f802dc66b676",
   "title": "rules carry an acknowledgement, enforced in pass, check and check-ack",
-  "status": "open",
+  "status": "passed",
   "created": "2026-10-02",
   "runBy": "agent",
   "links": [
@@ -11,5 +11,7 @@
     }
   ],
   "redSeen": "2026-10-02",
-  "evidenceKind": "observation"
+  "evidenceKind": "observation",
+  "effort": "S",
+  "triagedOn": "2026-10-02"
 }
