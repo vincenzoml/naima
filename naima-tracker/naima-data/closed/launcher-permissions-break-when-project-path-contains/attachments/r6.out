@@ -1,2 +1,0 @@
---allow-read=/private/tmp/claude-501/-Users-vincenzo-data-local-repos-naima/4decf7e6-192f-4bca-ba4f-106d9cf8c64b/scratchpad/core-repro/c,omma/proj,/private/tmp/claude-501/-Users-vincenzo-data-local-repos-naima/4decf7e6-192f-4bca-ba4f-106d9cf8c64b/scratchpad/core-repro/c,omma/proj/naima-tracker/naima
-child exit 1  [0m[1m[31merror[0m: Uncaught (in promise) NotCapable: Requires read access to "/private/tmp/claude-501/-Users-vincenzo-data-local-repos-naima/4decf7e6-192f-4bca-ba4f-106d9cf8c64b/scratchpad/core-repro/c,omma/proj/x.txt", run again with the --allow-read flag

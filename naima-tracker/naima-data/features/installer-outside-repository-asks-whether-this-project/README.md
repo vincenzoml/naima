@@ -1,3 +1,0 @@
-# The installer outside a repository asks whether this is the project root and points to the agent; agent instructions say: in the root of this repository, creating one if missing
-
-Run outside a git repository, install.sh and install.ps1 stop asking whether this is the root of the project and, if so, to have the agent create a repository there and install Naima from the site; inside one they already install at the top of the repository. The agent prompt on the site and in the README, the page's block for agents, llms.txt and the README's agent steps say to install in the root of this repository, creating a repository at the root when it is missing. Held by test/site.test.ts. Commit 3fcd589.

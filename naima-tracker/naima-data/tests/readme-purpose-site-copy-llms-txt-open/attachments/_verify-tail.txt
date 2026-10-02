@@ -1,5 +1,0 @@
-[0m[1mfrom[0m /Users/vincenzo/data/local/repos/naima-worktrees/f-u2-age/test/plugins/triage/triage.test.ts:
-  5[0m[38;5;245m |[0m [0m[1m[31m-[0m[0m[37m[41mimport { byUrgency, createItem, type Context, type Plugin, runChecks } from "../../../naima/src/core/api.ts"[0m
-  5[0m[38;5;245m |[0m [0m[1m[32m+[0m[0m[30m[42mimport { byUrgency, type Context, createItem, type Plugin, runChecks } from "../../../naima/src/core/api.ts"[0m
-
-[0m[1m[31merror[0m: Found 1 not formatted file in 136 files

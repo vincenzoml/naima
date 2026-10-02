@@ -1,1 +1,0 @@
-[Naima](https://github.com/vincenzoml/naima) is a project tracker for software built by people and AI agents together: bugs, work, features, tests and the proofs that close them, kept as plain files in the repository and checked like code.

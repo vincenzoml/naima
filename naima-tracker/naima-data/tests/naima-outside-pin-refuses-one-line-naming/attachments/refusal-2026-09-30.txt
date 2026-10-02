@@ -1,6 +1,0 @@
-✔ a naima outside the pin refuses, in one line naming the version to use (227.085ms)
-ℹ pass 1
-ℹ fail 0
-$ naima check   (naima/config.json pins ^9.1.0; this naima is 0.2.0)
-naima: naima 0.2.0 does not manage this project: naima/config.json pins naima ^9.1.0 — run npx naima@"^9.1.0"
-exit 2

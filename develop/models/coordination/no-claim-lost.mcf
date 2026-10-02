@@ -1,4 +1,0 @@
-% No claim is ever lost: once branch b claims item i, every read of b's claims
-% shows i until b releases it - across commits, merges, syncs and retirement.
-forall b: Br, i: It.
-  [true* . claim(b, i) . (!release(b, i))* . (exists s: FSet(It). read(b, s) && val(!(i in s)))] false

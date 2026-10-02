@@ -1,3 +1,0 @@
-# Triage records what a fix will touch (areas, modules, files), so related items are grouped into one work package and fixed together
-
-The owner's proposal, 2026-10-02. Full triage adds, besides impact, priority and confidence, the areas, modules and files the fix is expected to touch. Items whose expected footprints overlap are grouped into one work package: one agent, one worktree, one branch, one gate run, fixing them together. Expected effect: fewer agents, fewer merges and conflicts, and less cost per closed item; measure it as agents spawned and cost per closed item, before and after. Today items carry a single optional area field, set on a few, and nothing groups by it.

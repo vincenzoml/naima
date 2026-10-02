@@ -1,3 +1,0 @@
-# Release stage hook refuses a premature release, and the view traces a release's stages
-
-node --test test/plugins/planning/planning.test.ts: a release opened with naima new releases is staged; naima set status=released is refused with a message naming the first missing stage; red first — the stage-name regex choked on hyphenated stage names ('pre-release checks') and reported every stage missing after they were all recorded, fixed by matching the whole 'Stage: ...' line before splitting off an optional skip clause; green after. naima view releases shows what a release still owes, and ✓ once every stage is recorded or skipped with who decided.

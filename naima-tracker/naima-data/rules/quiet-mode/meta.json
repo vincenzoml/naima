@@ -1,9 +1,0 @@
-{
-  "id": "e8a8f961-5f29-47ac-937d-0a78b7927394",
-  "title": "Quiet mode",
-  "status": "active",
-  "created": "2026-10-01",
-  "audience": "agents",
-  "strength": "must",
-  "ack": "Quiet mode on"
-}

@@ -1,5 +1,0 @@
-$ node src/cli.ts docs --check docs/reference.md
-docs/reference.md is current, and everything loaded is documented
-
-$ wc -l docs/reference.md
-     838 docs/reference.md

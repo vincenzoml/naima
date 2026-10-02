@@ -1,4 +1,0 @@
-% Deadlock freedom: until the run has finished, the scheduler itself can always
-% take a step; memory pressure and duplicate offers, which come from outside,
-% do not count as progress.
-[(!finished)*] <!(pressure || exists t: Task . reoffer(t))> true

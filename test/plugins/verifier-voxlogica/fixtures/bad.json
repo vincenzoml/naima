@@ -1,6 +1,0 @@
-{
-  "layers": [],
-  "print": [],
-  "log": "[       188ms] [info] Parsing input...\n[       248ms] [info] Preparing computation...\n[       262ms] [info] Importing file \"/opt/VoxLogicA/stdlib.imgql\"\n[       296ms] [info] Unknown identifier nosuch\n                      nosuch at (\"bad.imgql\", Ln: 1, Col: 11)\n[       296ms] [fail] exiting.\n",
-  "error": "VoxLogicA.InterpreterException: Unknown identifier nosuch\nnosuch at (\"bad.imgql\", Ln: 1, Col: 11)\n   at VoxLogicA.Interpreter.batchHopac(Job`1 job)\n   at VoxLogicA.Interpreter.Batch(String libdir, String filename)\n   at VoxLogicA.Main.run@129(IModel model, ModelChecker checker, String filename)\n   at VoxLogicA.Main.main(String[] argv)"
-}

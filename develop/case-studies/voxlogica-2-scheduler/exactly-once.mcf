@@ -1,6 +1,0 @@
-% Exactly once: no task is started twice, the shared subterm A included, and
-% no run finishes with a task never started.
-forall t: Task . (
-  [true* . start(t) . true* . start(t)] false
-  && [(!start(t))* . finished] false
-)
