@@ -35,7 +35,7 @@ repository: [the automatic principle](config.md#the-automatic-principle).
 naima-tracker/
   README.md            one line: what Naima is, and a link to it
   .gitignore           ignores naima/
-  naima/               the program: a copy of Naima's naima/ at the locked commit, never committed
+  naima/               the program: a git clone of Naima, at the locked commit, never committed
   naima-data/
     naima.json         the format, the lock, and the few facts that cannot be inferred
     bugs/<slug>/       one directory per item: README.md, meta.json, attachments/
@@ -50,7 +50,9 @@ naima-tracker/
 
 **Your material is in `naima-data/`, never in `naima/`.** The program
 directory holds only what runs Naima: no tests, no fixtures, no CI, no agent
-rules, and none of Naima's own [items](glossary.md#item). Everything the project tracks — its
+rules, and none of Naima's own [items](glossary.md#item) — those live in
+[`naima-dev`](https://github.com/vincenzoml/naima-dev), a separate
+repository. Everything the project tracks — its
 bugs, its todos, its features, its tests, its rules — is an item in its own
 `naima-data/`, in the directory of its type (a milestone is a
 [gate](glossary.md#gate) with a date, kept with the other gates in
@@ -85,5 +87,3 @@ mark of a branch that has not merged the [trunk](glossary.md#trunk)'s update yet
   say so in the tracker's README, so that the next person finds it.
 - **The program directory** is `program` in `naima.json`, relative to the data
   directory.
-- **How the program is carried** — an ignored copy, the copy committed, or a git
-  submodule — is one command away: [how the program is carried](install.md#how-the-program-is-carried).

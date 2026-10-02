@@ -10,7 +10,7 @@ case for this: Naima's repository uses exactly the model every project uses
 1. **The tracker is managed by the locked commit.** `naima-tracker/naima/` is
    a gitignored copy of Naima's own `naima/`, locked by `naima.json` to a
    commit of `main`, exactly as a project is
-   ([the copy](../naima/docs/guide/install.md#the-copy)); that commit is the
+   ([the clone](../naima/docs/guide/install.md#the-clone)); that commit is the
    "previous version". `deno task naima <command>` runs it, through the
    working tree's launcher. Alignment fetches the commit into the per-user
    cache from this repository's own objects, so it needs no network. A lock

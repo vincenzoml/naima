@@ -18,8 +18,8 @@ A project carries one folder, `naima-tracker/`, at its root:
 ```
 naima-tracker/
   README.md                 one line: what Naima is, and a link to it
-  .gitignore                /naima/ — when the program is carried as a copy, the default
-  naima/                    the program: a copy of Naima's naima/ folder, at the locked commit
+  .gitignore                /naima/
+  naima/                    the program: a git clone of Naima, at the locked commit
   naima-data/               the data
     naima.json              the anchor: the format, the lock, the project's facts
     <type>/<slug>/          one directory per item
@@ -28,12 +28,10 @@ naima-tracker/
     adopted/<file>.json     naima adopt: one record per board brought in
 ```
 
-Naima writes nothing in the project outside this folder, with two
-exceptions: `.gitmodules`, which git itself imposes when the program is
-carried as a submodule, and the marker lines `naima adopt propose --write`
-inserts into the board being adopted, which only add lines
-([adopt an existing board](../guide/adopt-an-existing-board.md)). Outside the project it writes only the per-user cache the program
-is copied from ([the copy](../guide/install.md#the-copy)).
+Naima writes nothing in the project outside this folder, with one exception:
+the marker lines `naima adopt propose --write` inserts into the board being
+adopted, which only add lines
+([adopt an existing board](../guide/adopt-an-existing-board.md)).
 
 Both directories can move. The data directory is found by walking up from the
 current directory to the first `naima-tracker/naima-data/naima.json`, or is
@@ -61,8 +59,7 @@ the one whose `naima.json` carries `format`.
 | `format` | yes | the data format, an integer: this page is format 2 |
 | `formats` | no, `{}` | each plugin's own data format, by plugin name: only the plugins whose format has moved past 1 appear; one absent is at format 1 ([migrations](#migrations)) |
 | `source` | yes | the git URL, or absolute path, of the Naima the project runs: Naima's own repository, or a fork; never starting with `-`, and a path on this disk is absolute |
-| `commit` | yes | the full hash of the `source` commit the project runs: **the lock**; a commit of its `main` ([the copy](../guide/install.md#the-copy)) |
-| `carry` | no, `copy` | how the program is carried: `copy`, `vendored` or `submodule` (below); the default is recorded by leaving `carry` out, and `clone` is read as `copy` |
+| `commit` | yes | the full hash of the `source` commit the project runs: **the lock**; a commit of its `main` ([the clone](../guide/install.md#the-clone)) |
 | `verify` | no | `"signed"`: run a locked commit only when git verifies its signature ([install](../guide/install.md#every-run-aligns-the-program)) |
 | `program` | no, `../naima` | the program directory, relative to the data directory |
 | `plugins` | no, `{}` | plugin name → `{ "options", "enabled", "replacedBy", "source", "checks" }`, first-party plugins included: their options (the project's gates are the `gates` plugin's), switched off, replaced, added from a pinned source — a path inside the program, `{ "path", "sha256" }` or `{ "git", "commit", "path" }` — their checks weighed ([configuration](../guide/config.md#the-plugins-table)) |
@@ -70,7 +67,7 @@ the one whose `naima.json` carries `format`.
 | `extends` | no, `[]` | the project's own additive changes to the loaded plugins' types and fields: `{ "type", "statuses", "traits", "transitions" }` or `{ "field", "values", "appliesTo", "traits" }` ([extending](plugin-contract.md#extending-another-plugins-types-and-fields)) |
 | `entryFiles` | no, sensible defaults | the agent-harness entry files (`CLAUDE.md`, `AGENTS.md`, …) `naima check` and `naima init --write-agent-pointer` act on, project-root relative ([the agent-harness entry point](../guide/install.md#the-agent-harness-entry-point)) |
 
-Any other key is an error. `source`, `commit`, `carry`, `verify` and `program` are the
+Any other key is an error. `source`, `commit`, `verify` and `program` are the
 lock: they keep these names and meanings in every format, so that any Naima
 can align itself and update whatever the format of the data.
 
@@ -78,28 +75,15 @@ can align itself and update whatever the format of the data.
 
 `source` and `commit` say which Naima runs the project, the way a lockfile
 says which version of a dependency does. Every run aligns the program
-directory to exactly that source and commit first: everyone on the project,
-and CI, runs the same Naima. No run pulls on its own; `naima update` is the
-only command that asks the source anything, and it moves the lock in one
-reviewable change. How alignment behaves, and when it refuses:
-[installing and updating](../guide/install.md#every-run-aligns-the-program).
+directory — a git clone of `source`, checked out at `commit`, ignored by
+`naima-tracker/.gitignore` — to exactly that source and commit first:
+everyone on the project, and CI, runs the same Naima. No run pulls on its
+own; `naima update` is the only command that asks the source anything, and
+it moves the lock in one reviewable change. How alignment behaves, and when
+it refuses: [installing and updating](../guide/install.md#every-run-aligns-the-program).
 
 Code runs only from the program, never from the data: a plugin is a path
 inside the program, and a project that wants one carries it in its fork.
-
-### How the program is carried
-
-| `carry` | The program is | The lock is |
-|---|---|---|
-| `copy` | a copy of `naima/` at `commit`, as plain files, ignored by `naima-tracker/.gitignore` | `commit` |
-| `vendored` | the same copy, committed into the project | the committed tree; `commit` records where it came from |
-| `submodule` | a git submodule: all of `commit`, its runtime in its `naima/` | the submodule pointer, which is `commit` |
-
-A copy holds `.naima-copy.json` beside the runtime files: the `source`, the
-`commit` and each file's git blob id it is a copy of, which alignment reads to
-know what is on disk and whether a file was changed.
-
-`naima carry <mode>` switches between them as one staged change.
 
 ## Items
 

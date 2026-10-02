@@ -315,7 +315,7 @@ refuses, and `naima queue --role <role>` is its queue.
   rest is free to change.
 - **Iterate, don't overthink.** The simplest design that works now, improved
   version by version
-  ([design principles](https://github.com/vincenzoml/naima/blob/main/develop/requirements.md#design-principles)).
+  ([design principles](https://github.com/vincenzoml/naima-dev/blob/main/develop/requirements.md#design-principles)).
 - **Plain language.** Every term is defined once, in the
   [glossary](guide/glossary.md), and reports to you say what changed and what
   is needed from you, nothing else.

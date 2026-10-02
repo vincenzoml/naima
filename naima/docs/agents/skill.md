@@ -29,7 +29,7 @@ when to use it.
 - **Work by the rules and the flows.** Read [the rules](../guide/rules.md),
   then the [flow](README.md#the-flows) that applies.
 - **Read the corpus as files.** The [flows](../guide/glossary.md#flow), the rules, the format and the docs
-  are plain markdown in the copy; `naima guide` prints where they are.
+  are plain markdown in the clone; `naima guide` prints where they are.
 
 It is a thin pointer, never a second copy: the rules are on
 [the rules page](../guide/rules.md), the procedures in the [flows](README.md#the-flows),
@@ -40,7 +40,7 @@ checked by `naima check` like every other markdown file in this repository.
 
 ## Loading it
 
-The skill is in the copy, so it is always the one of the Naima the
+The skill is in the clone, so it is always the one of the Naima the
 project runs. Point the agent tool at it rather than copying the file, so its
 links keep resolving. For Claude Code, from the project:
 
