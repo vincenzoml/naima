@@ -58,6 +58,8 @@ Everything it needs to work without asking, because it cannot ask:
   files it must stay out of;
 - **no sub-agents of its own.** A worker that spawns workers loses all of
   their work when it stops.
+- **the acknowledgement line to give back** — every report starts with it
+  ([read the project's rules](read-the-project-rules.md#giving-the-acknowledgement-back)).
 
 ## The jobs
 
@@ -157,6 +159,12 @@ none. The coordinator's own reply to the owner keeps the same order and the
 same restraint — never a preamble, never the number before the work, never a
 restatement of what was just committed or filed: if it is worth explaining,
 it is worth committing.
+
+**Every report starts with the acknowledgement line** the project's rules ask
+for (`naima rules --audience agents`, its last line) — a worker that omits it
+is not reporting, it is talking. The coordinator checks it before trusting
+the rest: `naima rules check-ack <file|->` on the worker's own reply, missing
+phrases named if any; a breach is reported to the owner, not patched over.
 
 ## Safety rules
 

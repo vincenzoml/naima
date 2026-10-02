@@ -10,7 +10,8 @@ Flow: [the coordinator and the workers](../../../../docs/agents/coordinator-and-
   present, do it freely once he is away; while he is deciding, his decision
   comes first and the work waits.
 - **Each worker gets**: its own worktree and branch, the item already filed,
-  what is already measured, the gates, the constraints, and no sub-agents.
+  what is already measured, the gates, the constraints, no sub-agents, and
+  the acknowledgement line to give back.
 - **Model by the job**: strongest for diagnosis and design, cheaper for
   filing, triage, merges and gates. Two workers standing, four only for short
   cheap work.
@@ -18,3 +19,5 @@ Flow: [the coordinator and the workers](../../../../docs/agents/coordinator-and-
   ([the non-stop loop](../../../../docs/agents/the-non-stop-loop.md), `/flow:loop`).
 - **Merge** only `--ff-only`, after the gates over the combined result.
 - **After each merge**: what changed, then `naima queue`, then one question or none.
+- **Every report starts with the acknowledgement line**; check it with
+  `naima rules check-ack <file|->` and report a breach to the owner.

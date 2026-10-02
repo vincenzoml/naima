@@ -9,16 +9,20 @@ brought back together.
 
 ## The report has a fixed shape
 
-1. **What changed** — the work, in the worker's own words, a line or two.
-2. **Red before green, shown, not claimed.** "Tests pass" is not evidence;
+1. **The acknowledgement line**, when the project's rules ask for one
+   ([giving it back](read-the-project-rules.md#giving-the-acknowledgement-back)) —
+   first, exactly as printed, so the coordinator can check it
+   (`naima rules check-ack`) before reading the rest.
+2. **What changed** — the work, in the worker's own words, a line or two.
+3. **Red before green, shown, not claimed.** "Tests pass" is not evidence;
    the failing run that preceded the fix is. A worker that cannot show the
    red run did not prove the green one — rerun the gesture from a clean
    state, or say plainly that it was not captured.
-3. **The gate numbers**, as the commands print them, each with the number it
+4. **The gate numbers**, as the commands print them, each with the number it
    is compared to ([the common gates](coordinator-and-workers.md#gates-run-after-a-batch-not-after-every-commit)).
-4. **The queue after the change** (`naima queue`), which may go up — that is
+5. **The queue after the change** (`naima queue`), which may go up — that is
    why it is announced, not hidden.
-5. **What the owner must decide** — one question, or none.
+6. **What the owner must decide** — one question, or none.
 
 Never a preamble, never the number before the work, and never a restatement
 of what is already committed, filed or noted: if it is worth explaining, it

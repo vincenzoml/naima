@@ -30,6 +30,15 @@ Why: what cannot be undone is the owner's decision.
 | `audience` | `agents`, `people`, `everyone` |
 | `strength` | `must` (always), `should` (unless there is a reason, said where the work is recorded) |
 | `enforcedBy` | optional: the check or [gate](glossary.md#gate) that holds the rule, by name |
+| `ack` | optional: the exact phrase an agent gives back in acknowledgement — unset, none is asked for |
+
+A rule that sets `ack` is checked, not only read. `naima rules` and
+`naima guide` print every active rule's phrase, joined in order, as the one
+line an agent must give back (`Acknowledge: Quiet mode on · Fast mode on`); a
+session note written with `naima pass --ack "<line>"` is refused unless every
+phrase is in it, and `naima check` holds a note dated after the acknowledgement
+line began against carrying one. A coordinator checks a worker's own reply the
+same way, on any text: `naima rules check-ack <file|->`.
 
 ## Retiring a rule
 
