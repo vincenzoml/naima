@@ -1,16 +1,19 @@
 # v1.0.0 — first public release
 
-## Stages
+Naima 1.0 — the first public release.
 
-- pre-release checks
-- private draft
-- test the artifact
-- publish
-- post-release checks
-- announce
+Naima keeps a project's work as plain files in the project's own git repository, so people and AI agents plan, prove and coordinate in one place.
 
-Record each stage's output with `naima note <release> "Stage: <name>\n<what happened>"`.
-A stage skipped on purpose: `Stage: <name> — skipped, decided by <who>`.
+- Install with one line, on macOS, Linux and Windows, from the root of your repository (https://vincenzoml.github.io/naima/); or ask your agent to install it. Only Deno is needed, and the installer gets it if it is missing.
+- Bugs, todos, features, tests and properties as files, with views derived when read: board, list, summary, timeline, coverage, and `naima ui`.
+- Fixed, resolved and closed kept apart: an item closes only with a passed proof, and gates hold only when what is on them is done.
+- Coordination through git: worktrees, claims and session notes, so several agents work in parallel without losing track.
+- Project rules as data, read by every agent at the start of work; a pre-commit hook enforces the ones it can.
+- Model checking as evidence: an mCRL2 verifier plugin runs properties and attaches each run; as an example in Naima's code, a small mCRL2 model of Naima's claim protocol (two branches, two items) is checked with it.
+- Per-commit metrics, epics, gates, decisions, a release runbook, and packs for non-software work (data analyses, papers).
+- Naima tracks its own development with itself.
+
+Tested on a clean checkout with Deno, Node and Bun (381 tests), and installed on a real Windows 11 machine.
 
 ## Notes
 
