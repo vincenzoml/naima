@@ -106,24 +106,35 @@ run git -C "$WORK" update-index --add --cacheinfo "160000,$P,naima"
 run git -C "$WORK" apply --3way --index scripts/split/workshop.patch
 # The script and its patch have done their work: the workshop keeps them in its history.
 run git -C "$WORK" rm -r -q -- scripts/split.sh scripts/split
-# The product, as it will be on GitHub, is read from the bare repository until it is pushed.
+# The product, as it will be on GitHub, is read from the bare repository until
+# it is pushed: the submodule through insteadOf, the stable clone and the lock
+# by naming the bare repository as their source while naima update runs.
 INSTEAD="url.$BARE.insteadOf=$PRODUCT"
+LOCK=$WORK/naima-tracker/naima-data/naima.json
 run git -C "$WORK" -c protocol.file.allow=always -c "$INSTEAD" submodule --quiet update --init naima
-run git -C "$WORK" -c protocol.file.allow=always -c "$INSTEAD" clone --quiet -c core.autocrlf=false -- "$PRODUCT" naima-tracker/naima
+run git -C "$WORK" clone --quiet -c core.autocrlf=false -- "$BARE" naima-tracker/naima
 
 step "W: Naima's own tracker moved to P by P's own naima update"
-run git -C "$WORK" config "url.$BARE.insteadOf" "$PRODUCT"
-run git -C "$WORK/naima-tracker/naima" config "url.$BARE.insteadOf" "$PRODUCT"
+# source: $PRODUCT -> $BARE in the lock, update, then back: the only hand edit, a string, checked.
+swap() { # from to
+  echo "  \$ naima.json: source $1 -> $2"
+  [ "$EXECUTE" = 1 ] || return 0
+  grep -q "\"source\": \"$1\"" "$LOCK" || die "the lock's source is not $1"
+  perl -pi -e 'BEGIN { ($f, $t) = splice @ARGV, 0, 2 } s/"source": "\Q$f\E"/"source": "$t"/' "$1" "$2" "$LOCK"
+}
+OLDSOURCE=$( [ "$EXECUTE" = 1 ] && sed -n 's/.*"source": "\(.*\)".*/\1/p' "$LOCK" | head -1 || echo "$PRODUCT")
+swap "$OLDSOURCE" "$BARE"
 if [ "$EXECUTE" = 1 ]; then
   (cd "$WORK" && deno run -A naima-tracker/naima/naima.ts update) || die "naima update failed"
-  (cd "$WORK" && deno run -A naima-tracker/naima/naima.ts update) >/dev/null || die "naima update failed on its second run"
-  grep -q "\"commit\": \"$P\"" "$WORK/naima-tracker/naima-data/naima.json" || die "the lock does not name P"
-  grep -q "\"source\": \"$PRODUCT\"" "$WORK/naima-tracker/naima-data/naima.json" || die "the lock's source is not $PRODUCT"
+  grep -q "\"commit\": \"$P\"" "$LOCK" || die "the lock does not name P"
 else
-  echo "  \$ deno run -A naima-tracker/naima/naima.ts update  (twice: lock to P, then the data migrated)"
+  echo "  \$ deno run -A naima-tracker/naima/naima.ts update  (the lock moves to P, the data migrates)"
 fi
-run git -C "$WORK" config --unset "url.$BARE.insteadOf"
-run git -C "$WORK/naima-tracker/naima" config --unset "url.$BARE.insteadOf"
+swap "$BARE" "$PRODUCT"
+run git -C "$WORK/naima-tracker/naima" remote set-url origin "$PRODUCT"
+if [ "$EXECUTE" = 1 ]; then
+  (cd "$WORK" && deno run -A naima-tracker/naima/naima.ts guide) | grep -q "^Naima ${P%"${P#????????????}"}" || die "the stable clone does not run P on the moved lock"
+fi
 run git -C "$WORK" add -A -- naima-tracker/naima-data
 run git -C "$WORK" commit --quiet -m "The workshop: naima/ is the product, as a submodule; Naima's tracker runs its stable clone
 
