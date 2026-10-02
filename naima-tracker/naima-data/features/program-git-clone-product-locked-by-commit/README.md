@@ -21,7 +21,8 @@ README is the design this unit implements (sections "Layout of a host",
   code 75). `naima update [--check | --accept-source]`: fetch `origin main`,
   checkout, migrate, record, one change to commit.
 - [ ] `naima update` run from a product clone on a lock naming a legacy
-  monorepo commit records the product commit (the migration path the
+  commit of the old layout (it holds `naima/src/cli.ts`; same repository,
+  same history) moves it to the product head (the migration path the
   installer uses).
 - [ ] Removed: `copyProgram`, `.naima-copy.json`, the manifest, `NAIMA_CACHE`
   and `cacheDir`, `.naima-fetch`, `naima carry` and `CARRY_MODES`, `distSource`
