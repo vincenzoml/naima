@@ -1,0 +1,17 @@
+{
+  "id": "03b565e7-01b7-43ff-8ced-7a0af42348b6",
+  "title": "Product repo is the install; development in naima-dev",
+  "status": "open",
+  "created": "2026-10-02",
+  "impact": "high",
+  "priority": "next",
+  "effort": "XL",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-02",
+  "links": [
+    {
+      "rel": "relates-to",
+      "id": "a46db7bc-89b0-4bfa-980b-0cedc7954478"
+    }
+  ]
+}

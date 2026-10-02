@@ -1,0 +1,22 @@
+{
+  "id": "9719c906-f663-44b7-802f-c3daee0213d1",
+  "title": "The product's documentation describes the clone, and links development pages in naima-dev",
+  "status": "open",
+  "created": "2026-10-02",
+  "impact": "medium",
+  "priority": "next",
+  "effort": "M",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-02",
+  "links": [
+    {
+      "rel": "part-of",
+      "id": "03b565e7-01b7-43ff-8ced-7a0af42348b6"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "900f15f5-6260-4d5c-a534-559c640752da"
+    }
+  ],
+  "runBy": "agent"
+}
