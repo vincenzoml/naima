@@ -14,13 +14,13 @@ import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 import { GUIDE_PAGES } from "../naima/src/core/cli.ts"
 import { RUNTIME_DIR } from "../naima/src/core/internal.ts"
-import { gitIn as git, productRepo, removeTemp, trackedFiles } from "./core/testing.ts"
+import { gitIn as git, productFiles, productRepo, removeTemp, trackedFiles } from "./core/testing.ts"
 
 /** This checkout. */
 const REPO = dirname(dirname(fileURLToPath(import.meta.url)))
 const tracked = trackedFiles(REPO)
-/** The runtime files, by their path in naima/: what the product holds. */
-const shipped = tracked.filter((p) => p.startsWith(`${RUNTIME_DIR}/`)).map((p) => p.slice(RUNTIME_DIR.length + 1)).sort()
+/** The runtime files, by their path in naima/: what the product holds — naima/ a folder of this checkout or a submodule of it. */
+const shipped = productFiles().sort()
 const inCopy = new Set(shipped)
 const here = (f: string): string => join(REPO, RUNTIME_DIR, f)
 
