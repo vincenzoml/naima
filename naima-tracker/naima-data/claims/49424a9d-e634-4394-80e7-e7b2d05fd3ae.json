@@ -1,0 +1,11 @@
+{
+  "branch": "claude/split-restructure",
+  "claimedAt": "2026-10-02",
+  "items": [
+    {
+      "id": "bcda2157-93c9-4008-b667-b613bd111ef0",
+      "ref": "todos/workshop-restructure-split-script-submodule-stable-clone",
+      "title": "The move script and workshop restructure: product commit, submodule, stable clone, tasks and site deploy, rehearsed locally"
+    }
+  ]
+}
