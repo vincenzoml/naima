@@ -1,0 +1,26 @@
+{
+  "id": "a9b7cd4e-f8c2-4cf2-84c1-e99f37551ec8",
+  "title": "The installer clones the product into naima-tracker/naima and migrates a legacy copy",
+  "status": "requested",
+  "created": "2026-10-02",
+  "impact": "high",
+  "priority": "next",
+  "effort": "M",
+  "confidence": "diagnosed",
+  "facing": "user",
+  "triagedOn": "2026-10-02",
+  "links": [
+    {
+      "rel": "part-of",
+      "id": "03b565e7-01b7-43ff-8ced-7a0af42348b6"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "900f15f5-6260-4d5c-a534-559c640752da"
+    },
+    {
+      "rel": "relates-to",
+      "id": "cfc41a94-a312-4a1a-8f20-1fc2be1f7d7b"
+    }
+  ]
+}

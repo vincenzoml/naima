@@ -1,0 +1,38 @@
+{
+  "id": "bcda2157-93c9-4008-b667-b613bd111ef0",
+  "title": "The workshop restructure: split script, submodule, stable clone, tasks and site deploy",
+  "status": "open",
+  "created": "2026-10-02",
+  "impact": "high",
+  "priority": "next",
+  "effort": "L",
+  "confidence": "diagnosed",
+  "triagedOn": "2026-10-02",
+  "links": [
+    {
+      "rel": "part-of",
+      "id": "03b565e7-01b7-43ff-8ced-7a0af42348b6"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "900f15f5-6260-4d5c-a534-559c640752da"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "a9b7cd4e-f8c2-4cf2-84c1-e99f37551ec8"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "dcc71277-8c6f-4fa5-ba61-9df144912b23"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "88d166ee-5de5-490a-8082-a06b1621f6a2"
+    },
+    {
+      "rel": "blocked-by",
+      "id": "9719c906-f663-44b7-802f-c3daee0213d1"
+    }
+  ],
+  "runBy": "agent"
+}
