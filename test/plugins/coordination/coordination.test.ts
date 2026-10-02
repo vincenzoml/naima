@@ -2,9 +2,36 @@ import assert from "node:assert/strict"
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { test } from "node:test"
-import { createItem, DEFAULT_DATA, type Plugin, runChecks } from "../../../naima/src/core/api.ts"
+import { type Context, createItem, DEFAULT_DATA, type Plugin, runChecks, setFields } from "../../../naima/src/core/api.ts"
 import { createContext, DEFAULT_PROGRAM, gitIn, tempProject } from "../../core/testing.ts"
-import coordination, { readClaims, readPasses } from "../../../naima/src/plugins/coordination/index.ts"
+import coordination, { ACK_REQUIRED_FROM, readClaims, readPasses } from "../../../naima/src/plugins/coordination/index.ts"
+
+// What coordination uses of whatever plugin declares a project's rules: plugins never import each
+// other, so a stand-in declares the fields a rule carries, the way the real rules plugin does.
+const ruleStandIn: Plugin = {
+  name: "rules-stand-in",
+  says: "test rules",
+  types: [{
+    id: "rules",
+    dir: "rules",
+    title: "Rules",
+    says: "",
+    statuses: { active: { category: "done", says: "" } },
+    initialStatus: "active",
+  }],
+  fields: [
+    { name: "audience", kind: "enum", says: "", values: { agents: "", people: "", everyone: "" }, appliesTo: ["rules"] },
+    { name: "strength", kind: "enum", says: "", values: { must: "", should: "" }, appliesTo: ["rules"] },
+    { name: "ack", kind: "string", says: "", appliesTo: ["rules"] },
+  ],
+}
+
+function ruleItem(ctx: Context, title: string, ack: string, strength = "must") {
+  const item = createItem(ctx, ctx.registry.types.get("rules")!, title)
+  setFields(ctx, item, [["audience", "agents"], ["strength", strength], ["ack", ack]])
+  ctx.reload()
+  return item
+}
 
 const things: Plugin = {
   name: "things",
@@ -299,6 +326,75 @@ test("an item closed by hand while this branch claims it fails naima check, as n
     p.ctx.reload()
     assert.match(await problems(), /archived\/alpha is closed, yet me\/work, the branch you are on, claims it.*release/)
     assert.equal(await p.run("release", a.slug), 0)
+    assert.equal(await problems(), "")
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("pass --ack refuses a line missing a phrase the active rules ask for, and writes it first in the note otherwise", async () => {
+  const p = tempProject([ruleStandIn, coordination()], { git: true })
+  try {
+    ruleItem(p.ctx, "Quiet mode", "Quiet mode on")
+    ruleItem(p.ctx, "Fast mode", "Fast mode on")
+
+    await assert.rejects(p.run("pass", "did the thing", "--ack", "Quiet mode on"), /pass --ack is missing: Fast mode on/)
+
+    assert.equal(await p.run("pass", "did the thing", "--ack", "Acknowledge: Quiet mode on · Fast mode on"), 0)
+    const [note] = readPasses(p.ctx)
+    assert.equal(note?.ack, "Acknowledge: Quiet mode on · Fast mode on")
+    assert.ok(note?.body.startsWith("Acknowledge: Quiet mode on · Fast mode on\n\ndid the thing"))
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("a session note is written without naming any rule: naima pass never demands --ack on its own", async () => {
+  const p = tempProject([coordination()], { git: true })
+  try {
+    assert.equal(await p.run("pass", "no rules plugin here"), 0)
+    const [note] = readPasses(p.ctx)
+    assert.equal(note?.ack, undefined)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("naima check: a session note dated after the cut-off missing its acknowledgement, or no longer starting with it, is a problem; one dated the cut-off day or earlier is grandfathered", async () => {
+  const p = tempProject([ruleStandIn, coordination()], { git: true })
+  try {
+    ruleItem(p.ctx, "Quiet mode", "Quiet mode on")
+    const problems = async () => (await runChecks(p.ctx)).problems.map((f) => f.message).join("\n")
+    const dayAfter = new Date(`${ACK_REQUIRED_FROM}T00:00:00Z`)
+    dayAfter.setUTCDate(dayAfter.getUTCDate() + 1)
+
+    Object.assign(p.ctx, { now: () => dayAfter })
+    await p.run("pass", "no ack given")
+    assert.match(await problems(), /carries no acknowledgement line/)
+
+    const beforeDir = p.ctx.trackerRoot + "/passes"
+    for (const f of readdirSync(beforeDir)) rmSync(join(beforeDir, f))
+    p.ctx.reload()
+    assert.equal(await problems(), "")
+
+    await p.run("pass", "has an ack", "--ack", "Quiet mode on")
+    assert.equal(await problems(), "")
+    const [file] = readdirSync(beforeDir)
+    const edited = readFileSync(join(beforeDir, file!), "utf8").replace("Quiet mode on\n\nhas an ack", "has an ack, edited after the fact")
+    writeFileSync(join(beforeDir, file!), edited)
+    p.ctx.reload()
+    assert.match(await problems(), /no longer begins with the acknowledgement line/)
+
+    for (const f of readdirSync(beforeDir)) rmSync(join(beforeDir, f))
+    p.ctx.reload()
+    Object.assign(p.ctx, { now: () => new Date(`${ACK_REQUIRED_FROM}T09:00:00Z`) }) // the cut-off day itself: grandfathered, like a closed item the day commits shipped
+    await p.run("pass", "the day acknowledgement lines shipped, written before the plugin that checks them loaded")
+    assert.equal(await problems(), "")
+
+    for (const f of readdirSync(beforeDir)) rmSync(join(beforeDir, f))
+    p.ctx.reload()
+    Object.assign(p.ctx, { now: () => new Date("2026-01-01T09:00:00Z") }) // before the cut-off
+    await p.run("pass", "an old note, from before acknowledgement lines began")
     assert.equal(await problems(), "")
   } finally {
     p.cleanup()

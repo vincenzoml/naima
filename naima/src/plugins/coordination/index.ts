@@ -12,6 +12,7 @@ import { mkdirSync, readFileSync, unlinkSync } from "node:fs"
 import { join } from "node:path"
 import {
   allRefNames,
+  appliesTo,
   bool,
   type BranchFile,
   type Check,
@@ -19,6 +20,7 @@ import {
   type Context,
   CONTRACT,
   currentBranch,
+  fieldValue,
   filesAt,
   type Finding,
   gitOrNull,
@@ -85,9 +87,19 @@ export interface Pass {
   date: string
   at: string
   branch: string
+  /** The acknowledgement line it was written with (`pass --ack`), recorded as it was valid then — a rule change later never invalidates it. */
+  ack?: string
   body: string
   local: boolean
 }
+
+/**
+ * The day acknowledgement lines shipped: a note dated this day or earlier is
+ * grandfathered, the way a closed item on the day `commits` shipped is
+ * (`trackers`' `commitsRequiredFrom`) — `sessionNoteAck` holds only a note
+ * dated strictly after it.
+ */
+export const ACK_REQUIRED_FROM = "2026-10-02"
 
 /** A coordination directory, from the project root, with forward slashes: it is also a path in git. */
 const rel = (ctx: Context, dir: string): string => `${ctx.trackerDir}/${dir}`
@@ -136,7 +148,16 @@ function parsePass(f: BranchFile): Pass | null {
   const field = (k: string) => m[1]?.match(new RegExp(`^${k}:\\s*(.+)$`, "m"))?.[1]?.trim() ?? ""
   const date = field("date")
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
-  return { file: f.name, date, at: field("at"), branch: field("branch") || f.ref, body: f.text.slice(m[0].length).trim(), local: f.local }
+  const ack = field("ack")
+  return {
+    file: f.name,
+    date,
+    at: field("at"),
+    branch: field("branch") || f.ref,
+    ...(ack ? { ack } : {}),
+    body: f.text.slice(m[0].length).trim(),
+    local: f.local,
+  }
 }
 
 /** Every session note on every branch, newest first by instant. */
@@ -146,6 +167,34 @@ export function readPasses(ctx: Context): Pass[] {
     .map(parsePass)
     .filter((p): p is Pass => p !== null)
     .sort((a, b) => (key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : a.file < b.file ? 1 : -1))
+}
+
+/**
+ * The acknowledgement phrases `pass --ack` must see, agents-audience rules
+ * first, must before should — read generically through the registry, by
+ * field name, since plugins never import each other: whichever plugin (the
+ * rules plugin, in this project) declares `ack`, `audience` and `strength`
+ * on a type, and sets an item of it to `status: active`.
+ */
+function expectedAcks(ctx: Context): string[] {
+  const ack = ctx.registry.fields.get("ack")
+  if (!ack) return []
+  const audience = ctx.registry.fields.get("audience")
+  const strength = ctx.registry.fields.get("strength")
+  const rank = (i: (typeof ctx.repo.items)[number]) => {
+    const s = strength ? fieldValue(i, strength) : undefined
+    return s === "must" ? 0 : s === "should" ? 1 : 2
+  }
+  return ctx.repo.items
+    .filter((i) => i.meta.status === "active" && appliesTo(ack, i.type))
+    .filter((i) => {
+      if (!audience) return true
+      const a = fieldValue(i, audience)
+      return a === "agents" || a === "everyone" || a === undefined
+    })
+    .sort((a, b) => rank(a) - rank(b))
+    .map((i) => fieldValue(i, ack))
+    .filter((v): v is string => typeof v === "string" && v.length > 0)
 }
 
 function writeClaim(ctx: Context, claim: Claim): string {
@@ -403,16 +452,27 @@ const prune: Command = {
 const pass: Command = {
   name: "pass",
   says: "write this session's note (one new file), or list the newest",
-  enforces: "a session note is one new file: earlier ones are never rewritten",
-  usage: 'pass "<what changed, what is proven, what is left>" | pass --file <f> | pass --list [n] [--json]',
+  enforces:
+    "a session note is one new file: earlier ones are never rewritten; --ack is refused unless it carries every phrase the project's active rules ask an agent to acknowledge",
+  usage: 'pass "<what changed, what is proven, what is left>" [--ack "<line>"] | pass --file <f> [--ack "<line>"] | pass --list [n] [--json]',
   options: [
     { name: "--file", says: "read the note from a file instead of the arguments" },
+    {
+      name: "--ack",
+      says:
+        "the acknowledgement line the project's rules ask for (naima rules --audience agents, last line) — written first, and refused if a phrase is missing from it",
+    },
     { name: "--list", says: "print the newest n notes across every branch instead of writing one", default: "5" },
-    { name: "--json", says: "with --list, print the notes as JSON: each one's date, instant, branch, file and text" },
+    { name: "--json", says: "with --list, print the notes as JSON: each one's date, instant, branch, ack, file and text" },
   ],
-  examples: ['pass "Exporter keeps alpha; proof owed: tests/export-keeps-alpha"', "pass --file note.md", "pass --list 3", "pass --list 3 --json"],
+  examples: [
+    'pass "Exporter keeps alpha; proof owed: tests/export-keeps-alpha" --ack "Acknowledge: Quiet mode on"',
+    "pass --file note.md",
+    "pass --list 3",
+    "pass --list 3 --json",
+  ],
   run(args, ctx) {
-    const p = parse(args, { file: { type: "string" }, list: { type: "boolean" }, json: { type: "boolean" } })
+    const p = parse(args, { file: { type: "string" }, ack: { type: "string" }, list: { type: "boolean" }, json: { type: "boolean" } })
     if (bool(p, "json") && !bool(p, "list")) throw usageError(this)
     if (bool(p, "list")) {
       const n = positiveInt(p.positionals[0], 5, "pass --list")
@@ -428,13 +488,26 @@ const pass: Command = {
     const file = str(p, "file")
     const text = (file ? readFileSync(file, "utf8") : p.positionals.join(" ")).trim()
     if (!text) throw usageError(this)
+    const ack = str(p, "ack")
+    if (ack !== undefined) {
+      const missing = expectedAcks(ctx).filter((phrase) => !ack.includes(phrase))
+      if (missing.length) {
+        throw new Error(
+          `pass --ack is missing: ${missing.join(" · ")} — naima rules --audience agents prints the line to give back`,
+        )
+      }
+    }
     const now = ctx.now()
     const date = now.toISOString().slice(0, 10)
     const branch = currentBranch(ctx.root)
     const dir = join(ctx.root, rel(ctx, PASSES))
     mkdirSync(dir, { recursive: true })
     const name = `${date}-${randomUUID()}.md`
-    writeFileAtomic(join(dir, name), `---\ndate: ${date}\nat: ${now.toISOString()}\nbranch: ${branch}\n---\n\n${text}\n`)
+    const body = ack ? `${ack}\n\n${text}` : text
+    writeFileAtomic(
+      join(dir, name),
+      `---\ndate: ${date}\nat: ${now.toISOString()}\nbranch: ${branch}${ack ? `\nack: ${ack}` : ""}\n---\n\n${body}\n`,
+    )
     ctx.out(`wrote ${join(rel(ctx, PASSES), name)} — commit it on ${branch} with the work it describes`)
     return 0
   },
@@ -579,6 +652,25 @@ const closedNotClaimed: Check = {
   },
 }
 
+const sessionNoteAck: Check = {
+  name: "session-note-ack",
+  says:
+    `a session note dated after ${ACK_REQUIRED_FROM} carries the acknowledgement line it was written with (naima pass --ack), and its body still begins with it — a rule change afterwards never invalidates a note already written, since what was asked of it then is what it recorded`,
+  run(ctx) {
+    return readPasses(ctx)
+      .filter((p) => p.date > ACK_REQUIRED_FROM)
+      .flatMap((p): Finding[] => {
+        if (!p.ack) {
+          return [{ level: "problem", message: `${p.file}: a session note dated ${p.date} carries no acknowledgement line — naima pass --ack "<line>"` }]
+        }
+        if (!p.body.startsWith(p.ack)) {
+          return [{ level: "problem", message: `${p.file}: its body no longer begins with the acknowledgement line it was written with` }]
+        }
+        return []
+      })
+  },
+}
+
 const whereWeWere: SummarySection = {
   name: "where we were",
   render(ctx) {
@@ -617,7 +709,8 @@ export default function coordination(options: Record<string, unknown> = {}): Plu
       "Work happens by one scheme, checked: the worktree `<worktrees>/<what>` stands on the branch `<who>/<what>` and carries a claim; `open` makes all three in one step. " +
       "A claim marked `--preparing` is told when the trunk moves under it, and which commits were made on the trunk directly; `prune --branch` deletes a branch only when the trunk or an `archive/<branch>` tag holds its commits. " +
       "`naima view timeline` derives every event, with nothing stored: a gate opened is its first item reported (`created`), a gate passed its last item resolved (`closedOn`, else `fixedOn`) once none is open; an epic the same, from the items it groups; a release is a version tag, dated by its commit; a session is its note. " +
-      "What has no date is counted at the foot, never placed at a guess. Only what nothing derives — a decision taken elsewhere, a build handed out, a policy, an outside fact — is a record, one file per event, `events/<date>-<uuid>.md`, written by `naima event`.",
+      "What has no date is counted at the foot, never placed at a guess. Only what nothing derives — a decision taken elsewhere, a build handed out, a policy, an outside fact — is a record, one file per event, `events/<date>-<uuid>.md`, written by `naima event`. " +
+      `\`pass --ack "<line>"\` writes the acknowledgement line whichever plugin declares a rule's \`ack\` field asks an agent to give back — refused if a phrase is missing from it — and records it in the note's front matter; a note dated after ${ACK_REQUIRED_FROM} missing it, or whose body no longer starts with it, is a problem (\`session-note-ack\`), tolerating one written before — on the day it shipped, or earlier, grandfathered like a closed item on the day \`commits\` shipped — since what it recorded is what the rules asked then.`,
     options: [
       { name: "who", says: "who works, when `naima open` is given no `--as`: the branch's first segment" },
       {
@@ -628,7 +721,7 @@ export default function coordination(options: Record<string, unknown> = {}): Plu
       { name: "exempt", says: "branches the naming scheme does not apply to: names, or patterns with *", default: "[]" },
     ],
     dirs: [CLAIMS, PASSES, EVENTS],
-    checks: [claimsResolve, worktreePolicy(policy), trunkMoved, closedNotClaimed],
+    checks: [claimsResolve, worktreePolicy(policy), trunkMoved, closedNotClaimed, sessionNoteAck],
     commands: [openCommand(policy), claim, release, claims, prune, pass, eventCommand],
     views: [timelineView(readPasses)],
     contributes: { "ui-views": [claimsUiView(claimsData), timelineUiView(readPasses), notesUiView(readPasses)] },

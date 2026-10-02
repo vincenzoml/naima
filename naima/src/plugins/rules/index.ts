@@ -3,6 +3,7 @@
 // prints those for agents first, so an agent starting work in any project
 // reads that project's rules before anything else.
 
+import { readFileSync } from "node:fs"
 import {
   bool,
   type Check,
@@ -65,6 +66,13 @@ const ENFORCED_BY: FieldDef = {
   says: "the check or gate that enforces the rule, when one does; unset, the rule is kept by whoever reads it",
   appliesTo: ["rules"],
 }
+const ACK: FieldDef = {
+  name: "ack",
+  kind: "string",
+  says:
+    "the exact phrase an agent must give in acknowledgement of the rule, when it asks for one; unset, none is required. naima rules prints every active one's, joined, as the line an agent must give back; naima pass --ack writes it into the session note, and naima rules check-ack checks any text for it",
+  appliesTo: ["rules"],
+}
 
 /** How this plugin reads its own fields: as plain strings. */
 const read = (f: FieldDef) => ({ name: f.name, kind: "string" }) as const
@@ -76,6 +84,7 @@ export interface Rule {
   audience: string | null
   strength: string | null
   enforcedBy: string | null
+  ack: string | null
   text: string
 }
 
@@ -88,6 +97,7 @@ const asRule = (item: Item): Rule => ({
   audience: fieldValue(item, read(AUDIENCE)) ?? null,
   strength: fieldValue(item, read(STRENGTH)) ?? null,
   enforcedBy: fieldValue(item, read(ENFORCED_BY)) ?? null,
+  ack: fieldValue(item, read(ACK)) ?? null,
   text: ruleText(item),
 })
 
@@ -102,6 +112,12 @@ export function activeRules(ctx: Context, audience?: Audience): Rule[] {
     .sort((a, b) => rank(a) - rank(b))
 }
 
+/** The exact line an agent must give back, from every listed rule that asks for one, in the order they are listed — null when none does. */
+export function ackLine(rules: Rule[]): string | null {
+  const phrases = rules.map((r) => r.ack).filter((a): a is string => !!a)
+  return phrases.length ? `Acknowledge: ${phrases.join(" · ")}` : null
+}
+
 function rulesRendered(rules: Rule[], heading: string): Rendered<Rule[]> {
   return rendered(rules, (rs) =>
     rs.length
@@ -109,26 +125,51 @@ function rulesRendered(rules: Rule[], heading: string): Rendered<Rule[]> {
         heading,
         ...rs.flatMap((r) => [
           "",
-          `${(r.strength ?? "?").toUpperCase()} · ${r.audience ?? "no audience"} · ${r.title} (${r.item}${
-            r.enforcedBy ? `, enforced by ${r.enforcedBy}` : ""
+          `${(r.strength ?? "?").toUpperCase()} · ${r.audience ?? "no audience"} · ${r.title} (${r.item}${r.enforcedBy ? `, enforced by ${r.enforcedBy}` : ""}${
+            r.ack ? `, ack ${JSON.stringify(r.ack)}` : ""
           })`,
           ...r.text.split("\n").map((l) => (l ? `    ${l}` : "")),
         ]),
+        ...(ackLine(rs) ? ["", ackLine(rs) as string] : []),
       ]
       : [])
 }
 
+/** `rules check-ack <file|->`: the phrases missing from `text`, against the active rules for agents — empty when every one is present. */
+export function missingAcks(ctx: Context, text: string): string[] {
+  return activeRules(ctx, "agents")
+    .map((r) => r.ack)
+    .filter((a): a is string => !!a)
+    .filter((phrase) => !text.includes(phrase))
+}
+
+function checkAck(args: string[], ctx: Context): number {
+  const p = parse(args)
+  const [src, ...extra] = p.positionals
+  if (!src || extra.length) throw new Error("usage: naima rules check-ack <file|->")
+  const text = src === "-" ? readFileSync(0, "utf8") : readFileSync(src, "utf8")
+  const missing = missingAcks(ctx, text)
+  if (missing.length) {
+    ctx.out(`missing acknowledgement${missing.length > 1 ? "s" : ""}: ${missing.join(" · ")}`)
+    return 1
+  }
+  ctx.out("every acknowledgement is present")
+  return 0
+}
+
 const command: Command = {
   name: "rules",
-  says: "print the project's active rules, must before should, each with its text and reason: what an agent reads at the start of work",
-  enforces: "nothing: it only prints",
-  usage: "rules [--audience <agents|people|everyone>] [--json]",
+  says:
+    "print the project's active rules, must before should, each with its text and reason, ending with the line an agent must acknowledge back; or check that text carries every one (rules check-ack)",
+  enforces: "nothing: it only reads",
+  usage: "rules [--audience <agents|people|everyone>] [--json] | rules check-ack <file|->",
   options: [
     { name: "--audience", says: "only the rules for that audience, and those for everyone" },
-    { name: "--json", says: "print the rules as JSON: item, title, audience, strength, enforcedBy, text" },
+    { name: "--json", says: "print the rules as JSON: item, title, audience, strength, enforcedBy, ack, text" },
   ],
-  examples: ["rules", "rules --audience agents", "rules --audience people --json"],
+  examples: ["rules", "rules --audience agents", "rules --audience people --json", "rules check-ack reply.txt", "rules check-ack -"],
   run(args, ctx) {
+    if (args[0] === "check-ack") return checkAck(args.slice(1), ctx)
     const p = parse(args, { audience: { type: "string" }, json: { type: "boolean" } })
     const audience = str(p, "audience")
     if (p.positionals.length || (audience !== undefined && !AUDIENCES.includes(audience as Audience))) throw usageError(this)
@@ -185,9 +226,10 @@ export default function rules(): Plugin {
     about:
       "A project's rules — how an agent works here (quiet, simple, fast), how it reports, what it asks before doing — are tracker data, one `rules` item each, so every project carries its own. " +
       "A rule's page is the rule and its reason; `audience` says whom it binds (`agents`, `people`, `everyone`), `strength` how much (`must`, `should`), and `enforcedBy`, when set, the check or gate that holds it. " +
-      "An active rule is shown; a retired one is kept as history. `naima rules --audience agents` is what an agent reads at the start of work, and `naima guide` prints it first. ",
+      "An active rule is shown; a retired one is kept as history. `naima rules --audience agents` is what an agent reads at the start of work, and `naima guide` prints it first. " +
+      "`ack`, when a rule sets it, is the exact phrase an agent gives back in acknowledgement; `naima rules` and `naima guide` print every active one's, joined, as the line to give — `naima rules check-ack <file|->` checks that a piece of text carries them all, naming what is missing and exiting 1 if so.",
     types: [rulesType],
-    fields: [AUDIENCE, STRENGTH, ENFORCED_BY],
+    fields: [AUDIENCE, STRENGTH, ENFORCED_BY, ACK],
     commands: [command],
     checks: [check],
     guide: [guide],

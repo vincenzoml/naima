@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
-import { writeFileSync } from "node:fs"
+import { mkdtempSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { test } from "node:test"
 import { type Context, createItem, runChecks, setFields } from "../../../naima/src/core/api.ts"
@@ -60,6 +61,55 @@ test("the rules check: every active rule has its text, a valid audience, and an 
     assert.match(problems, /rules\/nobody: an active rule with no audience/)
     assert.match(problems, /rules\/ghost: enforcedBy names "no-such-check", which is no check or gate/)
     assert.doesNotMatch(problems, /rules\/kept|retired-and-empty/)
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("a rule's ack is printed with it, and naima rules ends with the line every active one's joins into", async () => {
+  const p = tempProject([rules()])
+  try {
+    rule(p.ctx, "Quiet mode", { audience: "agents", strength: "must", ack: "Quiet mode on" })
+    rule(p.ctx, "Fast mode", { audience: "agents", strength: "must", ack: "Fast mode on" })
+    rule(p.ctx, "No ack asked", { audience: "agents", strength: "should" })
+
+    assert.equal(await p.run("rules", "--audience", "agents"), 0)
+    const out = p.output.join("\n")
+    assert.match(out, /, ack "Quiet mode on"\)/)
+    assert.match(out, /\nAcknowledge: Fast mode on · Quiet mode on\n?$/)
+
+    p.output.length = 0
+    assert.equal(await p.run("rules", "--json"), 0)
+    const all = JSON.parse(p.output.join("\n")) as { title: string; ack: string | null }[]
+    assert.deepEqual(Object.fromEntries(all.map((r) => [r.title, r.ack])), {
+      "Quiet mode": "Quiet mode on",
+      "Fast mode": "Fast mode on",
+      "No ack asked": null,
+    })
+  } finally {
+    p.cleanup()
+  }
+})
+
+test("rules check-ack names what a piece of text is missing, and exits 1 until every phrase is present", async () => {
+  const p = tempProject([rules()])
+  try {
+    rule(p.ctx, "Quiet mode", { audience: "agents", strength: "must", ack: "Quiet mode on" })
+    rule(p.ctx, "Fast mode", { audience: "agents", strength: "must", ack: "Fast mode on" })
+
+    const dir = mkdtempSync(join(tmpdir(), "naima-check-ack-"))
+    const reply = join(dir, "reply.txt")
+
+    writeFileSync(reply, "Done: shipped the thing.\n")
+    assert.equal(await p.run("rules", "check-ack", reply), 1)
+    assert.match(p.output.join("\n"), /missing acknowledgements: Fast mode on · Quiet mode on/)
+
+    p.output.length = 0
+    writeFileSync(reply, "Acknowledge: Fast mode on · Quiet mode on\n\nDone: shipped the thing.\n")
+    assert.equal(await p.run("rules", "check-ack", reply), 0)
+    assert.match(p.output.join("\n"), /every acknowledgement is present/)
+
+    await assert.rejects(p.run("rules", "check-ack"), /usage: naima rules check-ack/)
   } finally {
     p.cleanup()
   }
