@@ -11,14 +11,15 @@ When the owner names a body of work, a release, or a date, turn the sentence int
 | "only when it is proven", "tested, not just written"                | add `--holds-on proof`                                                                              |
 | "how far is the beta?"                                              | `naima gate show <name>`; `naima epic` for epics                                                    |
 | "when did the beta open?", "what happened in September?"            | `naima view timeline`                                                                               |
-| "we handed build 3 out", "we decided in the meeting"                | `naima event <YYYY-MM-DD> "<what>" --kind build\|decision\|policy\|fact`                            |
+| "we handed build 3 out", "we decided in the meeting"                | `naima event <YYYY-MM-DD> "<what>" --kind build\|decision\|policy\|fact [--at HH:MM]`               |
+| "first the specification, then the model", "this waits for that"    | `naima link <item> blocked-by <what it waits on>`                                                   |
+| "what can start now?", "what is next?"                              | `naima ready [gate]`; the whole plan in order: `naima order [gate]`                                 |
+| "keep a diary", "write down what happened today"                    | `naima event <today> "<what happened, and why>" --kind diary`; read it back with `naima diary`      |
 | "every paid feature needs a test", "is every endpoint tested?"      | declare the list in `plugins.gates.options.coverage`, then `naima coverage --check`                 |
 | "the launch needs every paid feature tested"                        | `naima gate new <name> "<title>" --coverage <list>`                                                 |
 
-**Refusal:** whoever prepares a gate's items does not also mark the gate met.
-A gate's and an epic's status is derived from its items, never set by hand —
-so the one who did the work is never also the one who decides the release is
-ready.
+**Refusal:** whoever prepares a gate's items does not also mark the gate met. A gate's and an epic's status is derived from its items, never set by hand — so
+the one who did the work is never also the one who decides the release is ready.
 
 Rules that hold:
 
@@ -29,9 +30,14 @@ Rules that hold:
 - **An epic's status is derived.** Do not `naima set` it; close or remove its items. A write that sets it against them is refused.
 - **A date is the owner's.** Do not invent a `--due`: ask, or leave it out ([asking the human](asking-the-human.md)). An overdue milestone is a `naima check`
   note; report it, do not move the date.
-- **Never copy a timeline or a list.** The timeline is derived from the items and git; record with `naima event` only what nothing derives. A coverage list
-  is named by its source and read from it; a test proves an entry by `covers=<entry>` (or `<list>:<entry>`), not by a hand-kept table.
-- **Commit what the commands wrote** — the epic's folder, the items, `naima-tracker/naima-data/naima.json` and any `events/` file — with the work that motivated it.
+- **Never copy a timeline or a list.** The timeline is derived from the items and git; record with `naima event` only what nothing derives. A coverage list is
+  named by its source and read from it; a test proves an entry by `covers=<entry>` (or `<list>:<entry>`), not by a hand-kept table.
+- **A plan is a graph, not a list.** Say what each item waits on with `blocked-by`, take the next item from `naima ready`, and never link a cycle: `naima check`
+  fails one, naming its items, because none of them could ever start.
+- **The diary is written as things happen.** A diary event of today records its moment; one written later for an earlier day says when with `--at`, or sorts
+  first in its day. Decisions need no diary event: `naima diary` already tells each one with its reason.
+- **Commit what the commands wrote** — the epic's folder, the items, `naima-tracker/naima-data/naima.json` and any `events/` file — with the work that motivated
+  it.
 
 What each command prints and every option: the [reference](../reference/reference.md); for people,
 [plan with epics, milestones and gates](../guide/plan-with-epics-milestones-and-gates.md).

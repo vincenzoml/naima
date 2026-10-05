@@ -66,7 +66,8 @@ beta — Public beta (version 0.9; due 2026-12-01, 17 days left): BLOCKED by 2
 `naima gates`, `naima queue beta` and `naima summary` say the days left, `today`, or how many days overdue. Once the date has passed and the gate does not hold,
 `naima check` warns (the check `milestone-overdue`) — a note, not a failure: a late milestone is news, not a broken project.
 
-`naima gates --json` prints the same as data: each gate's name, title, timing, whether it holds, and the items blocking it or owing only proof. The gates are also a panel of the first screen of `naima ui`.
+`naima gates --json` prints the same as data: each gate's name, title, timing, whether it holds, and the items blocking it or owing only proof. The gates are
+also a panel of the first screen of `naima ui`.
 
 ## See when things happened: the timeline
 
@@ -94,6 +95,58 @@ naima event 2026-09-14 "Build 3 handed to the testers" --kind build
 
 Each is one file in `naima-tracker/naima-data/events/`. The timeline is also a tab of the window `naima ui` opens.
 
+## Say what waits on what: the order of the work
+
+A plan is rarely a list. A specification waits on its requirements, a model on its specification, a release on everything it ships. Say so with one link per
+wait:
+
+```sh
+naima link todos/write-the-specification blocked-by todos/write-the-requirements
+```
+
+Then Naima reads the plan for you:
+
+```sh
+naima ready          # what can start now: every open item whose blockers are all settled
+naima order          # the whole plan in an order that respects every wait, with each item's depth
+```
+
+```text
+$ naima order
+all items: 4 in order, deepest wait 2
+  0  todos/write-requirements  Write the requirements
+  1  todos/write-docs  Write the docs
+  1  todos/write-specification  Write the specification
+  2  todos/model-it  Model it
+```
+
+The depth is how many waits stand before an item. A settled blocker holds nothing back. Both take a gate's name to show only its items, and `--json`. Items that
+wait on each other in a cycle could never start: `naima check` fails such a cycle (the check `dependencies-acyclic`), naming every item on it.
+
+## Keep a diary
+
+The timeline says when gates opened and epics finished. A diary says what happened and why, day after day. Write it as it happens:
+
+```sh
+naima event 2026-10-05 "Work on the new engine starts from its requirements" --kind diary
+```
+
+An event of today records the moment it was written, so the events of one day keep their order; one written later for an earlier day says when with `--at 09:30`
+(a local time) or a timestamp of that day, and without it sorts first in its day. Read the story back:
+
+```sh
+naima diary --from 2026-10-05
+```
+
+```text
+2026-10-05
+  --:--  decision  The GIL is always off. Why: parallel calls into Python are the point.
+  09:30  diary     Work on the new engine starts from its requirements
+  18:40  session   main: Day one closed: the plan is entered.
+```
+
+Each decision is told with its reason, from its page; each session note is told whole. Nothing is stored for the diary beyond those files.
+
 ## Hold a declared list to its tests: coverage
 
 A list the project keeps somewhere else — the paid features in a pricing file, the API endpoints in the code, the limits — is declared once, by where it is, and
@@ -106,8 +159,8 @@ read from there on every run: there is no copy to fall behind. In `plugins.gates
 }
 ```
 
-A JSON source names the file and where the list is in it (keys joined by dots, `*` for every element); an element that is an object is named by its `id`, or
-the field `key` says. A files source names the files and a regular expression: each match is an entry, its first group when it has one.
+A JSON source names the file and where the list is in it (keys joined by dots, `*` for every element); an element that is an object is named by its `id`, or the
+field `key` says. A files source names the files and a regular expression: each match is an entry, its first group when it has one.
 
 A test names the entries it proves in `covers` — `naima set tests/sso-signs-in covers=sso`, or `paid:sso` to say which list. Then:
 
@@ -119,8 +172,8 @@ paid — the paid features: 2 of 3 covered
   audit   tests/audit-log [open]
 ```
 
-`naima coverage --check` exits 1 while any entry has NO TEST. A gate can require a list — `naima gate new launch "Launch" --coverage paid` — and is then
-blocked by each entry with NO TEST. `naima check` notes a test whose `covers` names an entry the list no longer holds. Coverage is also a tab of `naima ui`.
+`naima coverage --check` exits 1 while any entry has NO TEST. A gate can require a list — `naima gate new launch "Launch" --coverage paid` — and is then blocked
+by each entry with NO TEST. `naima check` notes a test whose `covers` names an entry the list no longer holds. Coverage is also a tab of `naima ui`.
 
 ## Where it lives
 

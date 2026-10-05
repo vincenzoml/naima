@@ -62,7 +62,7 @@ import {
 } from "./worktrees.ts"
 import { claimsUiView, notesUiView } from "./ui.ts"
 import { readResources, refusal, type Resource, type ResourcesData, resourcesData } from "./resources.ts"
-import { eventCommand, EVENTS, timelineUiView, timelineView } from "./timeline.ts"
+import { diaryCommand, eventCommand, EVENTS, timelineUiView, timelineView } from "./timeline.ts"
 
 export { type Timeline, type TimelineEvent, timelineOf } from "./timeline.ts"
 export { type Holder, type Resource, type ResourcesData } from "./resources.ts"
@@ -870,7 +870,7 @@ export default function coordination(options: Record<string, unknown> = {}): Plu
     ],
     dirs: [CLAIMS, PASSES, EVENTS],
     checks: [claimsResolve, resourcesOneHolder(declared), worktreePolicy(policy), trunkMoved, closedNotClaimed, sessionNoteAck],
-    commands: [openCommand(policy), claimCommand(declared), release, claimsCommand(declared), prune, pass, eventCommand],
+    commands: [openCommand(policy), claimCommand(declared), release, claimsCommand(declared), prune, pass, eventCommand, diaryCommand(readPasses)],
     views: [timelineView(readPasses)],
     contributes: { "ui-views": [claimsUiView(claimsData), timelineUiView(readPasses), notesUiView(readPasses)] },
     // The claims are a panel of naima ui, the timeline and the session notes tabs, when the ui plugin is loaded; without it, still commands and a view.

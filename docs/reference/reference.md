@@ -64,11 +64,14 @@ Every command: what it does, and the policy or invariant it enforces — or noth
 | [`prune`](#naima-prune) | coordination | list (or with --write remove) claim files naming a branch git no longer has — a resource such a claim holds is held by no one alive, and listed with it; one only another ref carries is listed with that ref, to be dropped there. With --branch, delete a branch and its worktree, refusing one with unmerged commits that no archive/<branch> tag holds | the trunk is never pruned, and a branch with unmerged commits that no archive/<branch> tag holds is refused; nothing is removed without --write |
 | [`pass`](#naima-pass) | coordination | write this session's note (one new file), or list the newest | a session note is one new file: earlier ones are never rewritten; --ack is refused unless it carries every phrase the project's active rules ask an agent to acknowledge |
 | [`event`](#naima-event) | coordination | record an event the timeline cannot derive — a decision taken elsewhere, a build handed out, a policy, an outside fact — as one new file; everything else on `naima view timeline` is derived | an event has a YYYY-MM-DD date and a one-word kind, and is one new file; what the timeline derives is never recorded |
+| [`diary`](#naima-diary) | coordination | the project's story, day by day and in order: events recorded with --kind diary, every decision with its reason, every session note; nothing stored but those files | nothing: it reads the records, the decisions and the session notes, and writes nothing |
 | [`triage`](#naima-triage) | triage | coverage of the four fields; set them; list what needs a human; derive what the page proves | the four fields take only their declared values, through the write hooks; derive writes only with --write |
 | [`gates`](#naima-gates) | gates | every gate, whoever declared it, and whether it holds; --check exits 1 if one does not | with --check, every listed gate holds: exit 1 if one does not |
 | [`gate`](#naima-gate) | gates | declare a gate — a milestone, with a date and a version — put items on it or take them off, and show one; writes go to naima.json and to the items, validated, through the write hooks | writes to naima.json and to the items are validated and pass the write hooks |
 | [`queue`](#naima-queue) | gates | open items on a gate, split by whose hands the proof needs; at its foot, the summary sections that stand beside the work, such as the metrics. With --role, one role's queue instead | nothing: it prints derived state, never stored |
 | [`coverage`](#naima-coverage) | gates | each normative list the project declares — read from its source now, never copied — every entry with the test that proves it, or NO TEST | nothing: it reads each list from its source every time, never a copy, and marks an entry no test proves NO TEST |
+| [`ready`](#naima-ready) | gates | the open items that wait on nothing still open -- every `blocked-by` target settled -- most urgent first: what can start now; on a gate, only its items | nothing: it prints derived state, never stored |
+| [`order`](#naima-order) | gates | every open item in an order that puts it after everything it waits on (`blocked-by`), with its depth -- how many waits stand before it; items stuck on a cycle are listed apart | nothing: it prints derived state, never stored |
 | [`epic`](#naima-epic) | epics | each epic with its progress — n of m closed, what it waits for and whose hands — or put items in an epic and take them out | only an epic groups items and never itself, and its status follows its items: setting it against them is refused |
 | [`spec`](#naima-spec) | planning | each specification: its current version, its drafts, and the open items that follow it; or revise one into its next version | a revision is a new spec item, its next version, that supersedes the old one; the old version is kept as it was |
 | [`decisions`](#naima-decisions) | planning | search the owner's decisions before asking: the settled ones whose title or page hold every word given, newest first | nothing: it only searches, so a settled question is looked up before it is asked again |
@@ -947,18 +950,45 @@ Record an event the timeline cannot derive — a decision taken elsewhere, a bui
 **Enforces**: An event has a YYYY-MM-DD date and a one-word kind, and is one new file; what the timeline derives is never recorded.
 
 ```sh
-naima event <YYYY-MM-DD> "<what happened>" [--kind <kind>]
+naima event <YYYY-MM-DD> "<what happened>" [--kind <kind>] [--at <HH:MM
+naima ISO timestamp>]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
-| `--kind` | `fact` | what sort of event: decision, build, policy, fact, or any word |
+| `--kind` | `fact` | what sort of event: decision, build, policy, fact, diary, or any word |
+| `--at` | `now, for an event of today; none for an earlier day` | the moment it happened: a local time on that day (HH:MM or HH:MM:SS), or a timestamp of that day; recorded so the events of one day keep their order |
 
 Examples:
 
 ```sh
 naima event 2026-09-14 "Build 3 handed to the testers" --kind build
 naima event 2026-09-20 "The vendor ended support for v1"
+naima event 2026-10-05 "Work on the new engine starts from its requirements" --kind diary --at 09:30
+```
+
+### naima diary
+
+The project's story, day by day and in order: events recorded with --kind diary, every decision with its reason, every session note; nothing stored but those files.
+
+**Enforces**: Nothing: it reads the records, the decisions and the session notes, and writes nothing.
+
+```sh
+naima diary [--from <YYYY-MM-DD>] [--to <YYYY-MM-DD>] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--from` |  | the first day to tell |
+| `--to` |  | the last day to tell |
+| `--json` |  | print the entries as data |
+
+Examples:
+
+```sh
+naima diary
+naima diary --from 2026-10-05
+naima event 2026-10-05 "The plan was entered" --kind diary
 ```
 
 **Checks**, run by `naima check`
@@ -1203,6 +1233,48 @@ naima coverage
 naima coverage paid --check
 ```
 
+### naima ready
+
+The open items that wait on nothing still open -- every `blocked-by` target settled -- most urgent first: what can start now; on a gate, only its items.
+
+**Enforces**: Nothing: it prints derived state, never stored.
+
+```sh
+naima ready [gate] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--json` |  | print the items as data |
+
+Examples:
+
+```sh
+naima ready
+naima ready first-public
+```
+
+### naima order
+
+Every open item in an order that puts it after everything it waits on (`blocked-by`), with its depth -- how many waits stand before it; items stuck on a cycle are listed apart.
+
+**Enforces**: Nothing: it prints derived state, never stored.
+
+```sh
+naima order [gate] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--json` |  | print the order as data |
+
+Examples:
+
+```sh
+naima order
+naima order first-public
+```
+
 **Fields**
 
 | Field | Kind | Applies to | Meaning | Values |
@@ -1217,6 +1289,7 @@ naima coverage paid --check
 | `gated-proof-is-gated` | an open item that verifies an open gated item carries a gate itself |
 | `milestone-overdue` | warns when a gate with a due date is past it and does not hold |
 | `coverage-lists` | a coverage list's source can be read; an item's covers names an entry its list holds |
+| `dependencies-acyclic` | no open items wait on each other in a cycle of blocked-by links: none of them could ever start |
 
 **Summary sections**: `gates`.
 

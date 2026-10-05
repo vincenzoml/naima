@@ -8,7 +8,13 @@
 //
 // Only what nothing derives — a decision taken outside the tracker, a build
 // handed out, a policy, an outside fact — is a record: one file per event,
-// `<data>/events/<date>-<uuid>.md`, written by `naima event`.
+// `<data>/events/<date>-<uuid>.md`, written by `naima event`. A record carries
+// the moment it happened (`at:`, as a session note does) when it is known, so
+// the events of one day keep their order; one without it sorts first in its day.
+//
+// The diary (`naima diary`) is the project's story told from the same files:
+// the records of kind `diary`, the decisions with their reasons, and the
+// session notes, day by day, in order.
 //
 // It reads other plugins' vocabulary by name and declares none of it used:
 // without gates or epics loaded there are simply no gate or epic events.
@@ -31,6 +37,7 @@ import {
   linked,
   parse,
   readAcrossBranches,
+  readReadme,
   rendered,
   str,
   usageError,
@@ -44,6 +51,8 @@ export type EventKind = "gate opened" | "gate passed" | "epic opened" | "epic fi
 
 export interface TimelineEvent {
   date: string
+  /** The moment, as an ISO timestamp, when known: it orders the events of one day. */
+  at?: string
   kind: EventKind
   /** What it is about: a gate's name, an epic's or a release's label, a session's branch. */
   subject: string
@@ -120,10 +129,17 @@ function span(
 
 interface RecordFile {
   date: string
+  /** The moment it happened, ISO, when it was recorded with one. */
+  at?: string
   kind: string
   title: string
+  /** The whole text, of which `title` is the first line. */
+  text: string
   file: string
 }
+
+/** A moment written as an ISO timestamp; anything else is no moment. */
+const isMoment = (v: string): boolean => v !== "" && !Number.isNaN(Date.parse(v))
 
 const FRONT = /^---\n([\s\S]*?)\n---\n/
 
@@ -132,8 +148,11 @@ function parseRecord(f: BranchFile): RecordFile | null {
   if (!m?.[1]) return null
   const field = (k: string) => m[1]?.match(new RegExp(`^${k}:\\s*(.+)$`, "m"))?.[1]?.trim() ?? ""
   const date = field("date")
-  const title = f.text.slice(m[0].length).trim().split("\n")[0]?.trim() ?? ""
-  return isDate(date) && title ? { date, kind: field("kind") || "fact", title, file: f.name } : null
+  const at = field("at")
+  const text = f.text.slice(m[0].length).trim()
+  const title = text.split("\n")[0]?.trim() ?? ""
+  if (!isDate(date) || !title) return null
+  return { date, ...(isMoment(at) ? { at } : {}), kind: field("kind") || "fact", title, text, file: f.name }
 }
 
 /** The records of what nothing derives, on every branch. */
@@ -150,8 +169,20 @@ function releases(ctx: Context): { tag: string; date: string }[] {
   })
 }
 
+/** A session note as the timeline and the diary read it. */
+export interface SessionNote {
+  date: string
+  at?: string
+  branch: string
+  body: string
+}
+
+/** Oldest first: by day, then by moment within the day -- one with no moment first -- the sort being stable. */
+const byMoment = (a: { date: string; at?: string }, b: { date: string; at?: string }): number =>
+  a.date < b.date ? -1 : a.date > b.date ? 1 : (a.at ?? "") < (b.at ?? "") ? -1 : (a.at ?? "") > (b.at ?? "") ? 1 : 0
+
 /** Every event, derived from the items, git and the session notes, oldest first; `passes` gives the session notes. */
-export function timelineOf(ctx: Context, passes: { date: string; branch: string; body: string }[]): Timeline {
+export function timelineOf(ctx: Context, passes: SessionNote[]): Timeline {
   const out: Timeline = { events: [], undated: {} }
   const titles = new Map(ctx.registry.contributions("gates").map((c) => [(c.value as { name: string }).name, (c.value as { title?: string }).title ?? ""]))
   const gated = new Map<string, Item[]>()
@@ -168,10 +199,18 @@ export function timelineOf(ctx: Context, passes: { date: string; branch: string;
   for (const r of releases(ctx)) out.events.push({ date: r.date, kind: "release", subject: r.tag, says: `version tag ${r.tag}` })
   for (const p of passes) {
     const first = p.body.split("\n").find((l) => l.trim())?.trim() ?? ""
-    out.events.push({ date: p.date, kind: "session", subject: p.branch, says: `session note on ${p.branch}${first ? `: ${first}` : ""}` })
+    out.events.push({
+      date: p.date,
+      ...(p.at && isMoment(p.at) ? { at: p.at } : {}),
+      kind: "session",
+      subject: p.branch,
+      says: `session note on ${p.branch}${first ? `: ${first}` : ""}`,
+    })
   }
-  for (const r of readRecords(ctx)) out.events.push({ date: r.date, kind: "record", subject: r.kind, says: `${r.kind}: ${r.title}` })
-  out.events.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+  for (const r of readRecords(ctx)) {
+    out.events.push({ date: r.date, ...(r.at ? { at: r.at } : {}), kind: "record", subject: r.kind, says: `${r.kind}: ${r.title}` })
+  }
+  out.events.sort(byMoment)
   return out
 }
 
@@ -183,7 +222,7 @@ const undatedLine = (u: Timeline["undated"]): string[] => {
 }
 
 /** `naima view timeline`. */
-export function timelineView(passes: (ctx: Context) => { date: string; branch: string; body: string }[]): View {
+export function timelineView(passes: (ctx: Context) => SessionNote[]): View {
   return {
     name: "timeline",
     says:
@@ -210,7 +249,7 @@ export function timelineView(passes: (ctx: Context) => { date: string; branch: s
 const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 
 /** The timeline as a tab of `naima ui`: the shape the `ui-views` point takes, declared here since plugins never import each other. */
-export function timelineUiView(passes: (ctx: Context) => { date: string; branch: string; body: string }[]) {
+export function timelineUiView(passes: (ctx: Context) => SessionNote[]) {
   return {
     name: "timeline",
     title: "Timeline",
@@ -237,28 +276,149 @@ export function timelineUiView(passes: (ctx: Context) => { date: string; branch:
   }
 }
 
+const pad = (n: number): string => String(n).padStart(2, "0")
+/** The local day of a moment, YYYY-MM-DD. */
+const localDay = (d: Date): string => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+/** The local time of a moment, HH:MM. */
+const localTime = (iso: string): string => {
+  const d = new Date(iso)
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+/**
+ * The moment an event of `date` happened, as an ISO timestamp: the one given --
+ * a local time on that day, or a timestamp of that day -- else now when the
+ * event is of today, else none: a moment on an earlier day would be a guess.
+ */
+function momentOf(date: string, given: string | undefined, now: Date): string | undefined {
+  if (given === undefined) return localDay(now) === date ? now.toISOString() : undefined
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(given)) {
+    const local = new Date(`${date}T${given.length === 5 ? `${given}:00` : given}`)
+    if (Number.isNaN(local.getTime())) throw new Error(`--at ${given}: not a time of day`)
+    return local.toISOString()
+  }
+  if (!isMoment(given)) throw new Error(`--at is a time of day (HH:MM) or a timestamp, got ${JSON.stringify(given)}`)
+  if (given.slice(0, 10) !== date) throw new Error(`--at ${given} is not on the event's day, ${date}`)
+  return new Date(given).toISOString()
+}
+
 /** `naima event`: record what nothing derives, one file per event. */
 export const eventCommand: Command = {
   name: "event",
   says:
     "record an event the timeline cannot derive — a decision taken elsewhere, a build handed out, a policy, an outside fact — as one new file; everything else on `naima view timeline` is derived",
   enforces: "an event has a YYYY-MM-DD date and a one-word kind, and is one new file; what the timeline derives is never recorded",
-  usage: 'event <YYYY-MM-DD> "<what happened>" [--kind <kind>]',
-  options: [{ name: "--kind", says: "what sort of event: decision, build, policy, fact, or any word", default: "fact" }],
-  examples: ['event 2026-09-14 "Build 3 handed to the testers" --kind build', 'event 2026-09-20 "The vendor ended support for v1"'],
+  usage: 'event <YYYY-MM-DD> "<what happened>" [--kind <kind>] [--at <HH:MM | ISO timestamp>]',
+  options: [
+    { name: "--kind", says: "what sort of event: decision, build, policy, fact, diary, or any word", default: "fact" },
+    {
+      name: "--at",
+      says:
+        "the moment it happened: a local time on that day (HH:MM or HH:MM:SS), or a timestamp of that day; recorded so the events of one day keep their order",
+      default: "now, for an event of today; none for an earlier day",
+    },
+  ],
+  examples: [
+    'event 2026-09-14 "Build 3 handed to the testers" --kind build',
+    'event 2026-09-20 "The vendor ended support for v1"',
+    'event 2026-10-05 "Work on the new engine starts from its requirements" --kind diary --at 09:30',
+  ],
   run(args, ctx) {
-    const p = parse(args, { kind: { type: "string" } })
+    const p = parse(args, { kind: { type: "string" }, at: { type: "string" } })
     const [date, ...words] = p.positionals
     const text = words.join(" ").trim()
     if (!date || !text) throw usageError(this)
     if (!isDate(date)) throw new Error(`an event's date is YYYY-MM-DD, got ${JSON.stringify(date)}`)
     const kind = (str(p, "kind") ?? "fact").trim()
     if (!/^[a-z0-9][a-z0-9-]*$/.test(kind)) throw new Error(`an event's kind is one word of lowercase letters, digits and dashes, got ${JSON.stringify(kind)}`)
+    const at = momentOf(date, str(p, "at"), ctx.now())
     const dir = join(ctx.trackerRoot, EVENTS)
     mkdirSync(dir, { recursive: true })
     const name = `${date}-${randomUUID()}.md`
-    writeFileAtomic(join(dir, name), `---\ndate: ${date}\nkind: ${kind}\n---\n\n${text}\n`)
+    writeFileAtomic(join(dir, name), `---\ndate: ${date}\n${at ? `at: ${at}\n` : ""}kind: ${kind}\n---\n\n${text}\n`)
     ctx.out(`wrote ${ctx.trackerDir}/${EVENTS}/${name} — commit it on ${currentBranch(ctx.root)}`)
     return 0
   },
+}
+
+const DIARY = "diary"
+const DECISIONS = "decisions"
+const DECIDED_ON = { name: "decidedOn", kind: "date" } as const
+
+export interface DiaryEntry {
+  date: string
+  at?: string
+  kind: "decision" | "diary" | "session"
+  text: string
+}
+
+/** The first paragraph under a page's `## <heading>`, or nothing. */
+function section(page: string, heading: string): string {
+  const at = page.search(new RegExp(`^## ${heading}\\s*$`, "m"))
+  if (at < 0) return ""
+  const after = page.slice(at).split("\n").slice(1).join("\n").trim()
+  return after.split(/\n\s*\n|\n## /)[0]?.replace(/\s+/g, " ").trim() ?? ""
+}
+
+/** The diary: records of kind diary, decisions with their reasons, session notes -- oldest first. */
+export function diaryOf(ctx: Context, passes: SessionNote[]): DiaryEntry[] {
+  const out: DiaryEntry[] = []
+  if (ctx.registry.types.has(DECISIONS)) {
+    for (const d of ctx.repo.items.filter((i) => i.type === DECISIONS)) {
+      const date = fieldValue(d, DECIDED_ON) ?? created(d)
+      if (!isDate(date)) continue
+      const why = section(readReadme(d), "Why")
+      out.push({ date, kind: "decision", text: why ? `${d.meta.title}. Why: ${why}` : d.meta.title })
+    }
+  }
+  for (const r of readRecords(ctx).filter((r) => r.kind === DIARY)) {
+    out.push({ date: r.date, ...(r.at ? { at: r.at } : {}), kind: "diary", text: r.text.replace(/\s+/g, " ") })
+  }
+  for (const p of passes) {
+    const body = p.body.trim().replace(/\s+/g, " ")
+    if (body) out.push({ date: p.date, ...(p.at && isMoment(p.at) ? { at: p.at } : {}), kind: "session", text: `${p.branch}: ${body}` })
+  }
+  return out.sort(byMoment)
+}
+
+/** `naima diary`: the project's story, day by day. */
+export function diaryCommand(passes: (ctx: Context) => SessionNote[]): Command {
+  return {
+    name: "diary",
+    says:
+      "the project's story, day by day and in order: events recorded with --kind diary, every decision with its reason, every session note; nothing stored but those files",
+    enforces: "nothing: it reads the records, the decisions and the session notes, and writes nothing",
+    usage: "diary [--from <YYYY-MM-DD>] [--to <YYYY-MM-DD>] [--json]",
+    options: [
+      { name: "--from", says: "the first day to tell" },
+      { name: "--to", says: "the last day to tell" },
+      { name: "--json", says: "print the entries as data" },
+    ],
+    examples: ["diary", "diary --from 2026-10-05", 'event 2026-10-05 "The plan was entered" --kind diary'],
+    run(args, ctx) {
+      const p = parse(args, { from: { type: "string" }, to: { type: "string" }, json: { type: "boolean" } })
+      const from = str(p, "from")
+      const to = str(p, "to")
+      for (const d of [from, to]) if (d !== undefined && !isDate(d)) throw new Error(`a day is YYYY-MM-DD, got ${JSON.stringify(d)}`)
+      const entries = diaryOf(ctx, passes(ctx)).filter((e) => (from === undefined || e.date >= from) && (to === undefined || e.date <= to))
+      if (p.values["json"] === true) {
+        ctx.out(JSON.stringify(entries, null, 2))
+        return 0
+      }
+      if (!entries.length) {
+        ctx.out('the diary is empty -- naima event <day> "<what happened>" --kind diary')
+        return 0
+      }
+      let day = ""
+      for (const e of entries) {
+        if (e.date !== day) {
+          if (day) ctx.out("")
+          day = e.date
+          ctx.out(day)
+        }
+        ctx.out(`  ${e.at ? localTime(e.at) : "--:--"}  ${e.kind.padEnd(8)}  ${e.text}`)
+      }
+      return 0
+    },
+  }
 }

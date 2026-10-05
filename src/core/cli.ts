@@ -473,6 +473,22 @@ function help(ctx: Context | null, data: string, io: IO): number {
 
 const isHelp = (command: string | undefined): boolean => !command || command === "help" || command === "--help" || command === "-h"
 
+/** `naima <command> --help`: the command's usage, what it does, its options and examples -- what the reference says of it. */
+function commandHelp(cmd: Command, io: IO): number {
+  io.out(`usage: naima ${cmd.usage}`)
+  io.out(cmd.says)
+  if (cmd.options?.length) {
+    io.out("options:")
+    const width = Math.max(...cmd.options.map((o) => o.name.length))
+    for (const o of cmd.options) io.out(`  ${o.name.padEnd(width)}  ${o.says}${o.default !== undefined ? ` (default: ${o.default})` : ""}`)
+  }
+  if (cmd.examples?.length) {
+    io.out("examples:")
+    for (const e of cmd.examples) io.out(`  naima ${e}`)
+  }
+  return 0
+}
+
 export async function runCli(argv: string[], opts: CliOptions): Promise<number> {
   const io = opts.io ?? consoleIO
   try {
@@ -524,6 +540,7 @@ export async function runCli(argv: string[], opts: CliOptions): Promise<number> 
     if (isHelp(command)) return help(ctx, data, io)
     const cmd = ctx.registry.find<Command>("commands", command as string)?.value
     if (!cmd) throw new Error(`unknown command "${command}" — naima help`)
+    if (args.includes("--help") || args.includes("-h")) return commandHelp(cmd, io)
     const code = await cmd.run(args, ctx)
     if (code !== RELAUNCH) return code
     // Only the entry point asks for a relaunch; a command's 75 would make the launcher run it again.

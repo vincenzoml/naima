@@ -12,8 +12,17 @@ export interface Parsed {
 }
 
 export function parse(args: string[], flags: Flags = {}): Parsed {
-  const { positionals, values } = parseArgs({ args, options: flags, allowPositionals: true, strict: true })
-  return { positionals, values }
+  try {
+    const { positionals, values } = parseArgs({ args, options: flags, allowPositionals: true, strict: true })
+    return { positionals, values }
+  } catch (e) {
+    // node:util throws a TypeError, with a code, for a flag it does not know or a
+    // flag missing its value: that is a mistake in the command line, not a bug, and
+    // it is reported as a usage error rather than an internal one.
+    const code = (e as { code?: unknown } | null)?.code
+    if (typeof code === "string" && code.startsWith("ERR_PARSE_ARGS_")) throw new NaimaError((e as Error).message, "usage")
+    throw e
+  }
 }
 
 export const str = (p: Parsed, name: string): string | undefined => {
