@@ -178,6 +178,26 @@ function cloneProgram(t: Target): void {
   mustGit(t.program, "remote", "set-url", "origin", t.source)
 }
 
+/**
+ * Clone the program into a worktree this run has just made. The launcher fixed what the run may
+ * read and write when it started, and the new worktree is outside both: every step is a git
+ * subprocess, run from `from` (a directory the run may read) and pointed at the new clone with -C.
+ */
+export function cloneIntoNewWorktree(t: Target, from: string): void {
+  const seed = seeds(t).find((s) => runGit(from, ["-C", s, "cat-file", "-e", `${t.commit}^{commit}`]).ok)
+  if (!seed) throw new Error(`no clone on this disk holds ${short(t.commit)}: run naima in ${where(t)} to align it`)
+  const r = runGit(from, ["clone", "--quiet", "--no-checkout", "-c", "core.autocrlf=false", "--local", "--", seed, t.program])
+  if (!r.ok) throw new Error(`cannot clone ${seed} into ${where(t)}: ${gitReason(r)}`)
+  const g = (...args: string[]) => runGit(from, ["-C", t.program, ...args])
+  if (!g("cat-file", "-e", `${t.commit}^{commit}`).ok) g("fetch", "--quiet", "--", seed, lockedRefspec(t.commit))
+  const steps: string[][] = [["remote", "set-url", "origin", t.source], ["checkout", "--quiet", "--detach", t.commit]]
+  if (t.verify === "signed") steps.unshift(["verify-commit", t.commit])
+  for (const step of steps) {
+    const s = g(...step)
+    if (!s.ok) throw new Error(`${where(t)}: git ${step[0]} failed: ${gitReason(s)}`)
+  }
+}
+
 /** What alignment changed: the commit the program was at before, null for a fresh clone. */
 export interface Moved {
   from: string | null

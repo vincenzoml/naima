@@ -11,12 +11,12 @@ import { randomUUID } from "node:crypto"
 import { mkdirSync, readFileSync, unlinkSync } from "node:fs"
 import { dirname, join } from "node:path"
 import {
-  align,
   allRefNames,
   appliesTo,
   bool,
   type BranchFile,
   type Check,
+  cloneIntoNewWorktree,
   type Command,
   type Context,
   CONTRACT,
@@ -648,7 +648,7 @@ function openCommand(policy: Policy): Command {
         ctx.out(`${posixRelative(ctx.root, ctx.program)} is not a program clone yet: ${path} will align its own on its first run (naima check)`)
       } else {
         const newData = join(path, ctx.trackerDir)
-        align({
+        cloneIntoNewWorktree({
           root: path,
           tracker: dirname(newData),
           program: newProgram,
@@ -656,7 +656,7 @@ function openCommand(policy: Policy): Command {
           commit: ctx.config.commit,
           ...(ctx.config.verify ? { verify: ctx.config.verify } : {}),
           seeds: [ctx.program],
-        })
+        }, ctx.root)
         ctx.out(`cloned ${posixRelative(path, newProgram)} from ${posixRelative(ctx.root, ctx.program)}, at ${short(ctx.config.commit)} — no network`)
       }
       const others = readClaims(ctx)
