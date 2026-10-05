@@ -189,9 +189,13 @@ export function cloneIntoNewWorktree(t: Target, from: string): void {
   const r = runGit(from, ["clone", "--quiet", "--no-checkout", "-c", "core.autocrlf=false", "--local", "--", seed, t.program])
   if (!r.ok) throw new Error(`cannot clone ${seed} into ${where(t)}: ${gitReason(r)}`)
   const g = (...args: string[]) => runGit(from, ["-C", t.program, ...args])
-  if (!g("cat-file", "-e", `${t.commit}^{commit}`).ok) g("fetch", "--quiet", "--", seed, lockedRefspec(t.commit))
-  const steps: string[][] = [["remote", "set-url", "origin", t.source], ["checkout", "--quiet", "--detach", t.commit]]
-  if (t.verify === "signed") steps.unshift(["verify-commit", t.commit])
+  // Always, as cloneProgram does: the seed's own main may lag the lock, and the lock's ref is what makes the commit the source's.
+  const steps: string[][] = [
+    ["fetch", "--quiet", "--", seed, lockedRefspec(t.commit)],
+    ["remote", "set-url", "origin", t.source],
+    ["checkout", "--quiet", "--detach", t.commit],
+  ]
+  if (t.verify === "signed") steps.splice(1, 0, ["verify-commit", t.commit])
   for (const step of steps) {
     const s = g(...step)
     if (!s.ok) throw new Error(`${where(t)}: git ${step[0]} failed: ${gitReason(s)}`)

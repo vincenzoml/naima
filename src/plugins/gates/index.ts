@@ -43,7 +43,6 @@ import {
   fieldValues,
   type Finding,
   groupBy,
-  hasTrait,
   isEvidenceType,
   isOpen,
   type Item,
@@ -63,7 +62,7 @@ import {
   writeJson,
 } from "../../core/api.ts"
 import { type CoverageConfig, coverageLines, coverageOf, coverageReasons, coverageUiView, COVERS, readCoverage, staleCovers } from "./coverage.ts"
-import { dependenciesAcyclic, orderCommand, readyCommand } from "./dependencies.ts"
+import { dependenciesAcyclic, orderCommand, readyCommand, standsFor } from "./dependencies.ts"
 
 export { type CoverageConfig, coverageOf, type CoverageRow } from "./coverage.ts"
 
@@ -191,18 +190,7 @@ const refuted = (ctx: Context, item: Item): boolean => refutes(ctx, item) || lin
 /** Fixed but unproven, or itself a proving gesture — and not refuted: owed, not blocking, under holdsOn "code". */
 const owesOnlyProof = (ctx: Context, item: Item): boolean => !refuted(ctx, item) && (fieldValue(item, FIXED_ON) !== undefined || isEvidenceType(ctx, item.type))
 
-/** The trait of a type whose items group others (an epic): on a gate, such an item stands for what it groups. */
-export const GROUP = "group"
-const HAS_PART = "has-part"
-
-/** What an item stands for on a gate: itself, or — a group with members — its members, a nested group's too. */
-function standsFor(ctx: Context, item: Item, seen: Set<Item> = new Set()): Item[] {
-  if (seen.has(item)) return []
-  seen.add(item)
-  if (!hasTrait(ctx, item, GROUP)) return [item]
-  const members = linked(ctx, item, HAS_PART)
-  return members.length ? members.flatMap((m) => standsFor(ctx, m, seen)) : [item]
-}
+export { GROUP } from "./dependencies.ts"
 
 /** The items a gate waits for — those on it, a group standing for its members — or, with no gate named, every gate's. */
 export function gatedItems(ctx: Context, name?: string): Item[] {

@@ -13,15 +13,37 @@
 // Every walk below is iterative: a plan can be deep, and a recursive walk is a
 // stack overflow waiting for a long enough chain.
 
-import { bool, byUrgency, type Check, type Command, type Context, type Finding, isOpen, type Item, label, linked, parse } from "../../core/api.ts"
+import { bool, byUrgency, type Check, type Command, type Context, type Finding, hasTrait, isOpen, type Item, label, linked, parse } from "../../core/api.ts"
 
 const WAITS_ON = "blocked-by"
 
-/** For every open item, the open items it waits on. */
+/** The trait of a type whose items group others (an epic): such an item stands for what it groups. */
+export const GROUP = "group"
+const HAS_PART = "has-part"
+
+/** A group with members: done by its items, so never itself the work. */
+const groups = (ctx: Context, item: Item): boolean => hasTrait(ctx, item, GROUP) && linked(ctx, item, HAS_PART).length > 0
+
+/** What an item stands for: itself, or -- a group with members -- its members, a nested group's too. */
+export function standsFor(ctx: Context, item: Item): Item[] {
+  const out: Item[] = []
+  const seen = new Set<Item>()
+  const stack = [item]
+  while (stack.length) {
+    const i = stack.pop() as Item
+    if (seen.has(i)) continue
+    seen.add(i)
+    if (groups(ctx, i)) stack.push(...linked(ctx, i, HAS_PART).reverse())
+    else out.push(i)
+  }
+  return out
+}
+
+/** For every open item that is work -- a group is not -- the open items it waits on; a wait on a group is a wait on its items. */
 function waits(ctx: Context): { open: Item[]; on: Map<Item, Item[]> } {
-  const open = ctx.repo.items.filter((i) => isOpen(ctx, i))
+  const open = ctx.repo.items.filter((i) => isOpen(ctx, i) && !groups(ctx, i))
   const openSet = new Set(open)
-  const on = new Map(open.map((i) => [i, linked(ctx, i, WAITS_ON).filter((b) => openSet.has(b))]))
+  const on = new Map(open.map((i) => [i, [...new Set(linked(ctx, i, WAITS_ON).flatMap((b) => standsFor(ctx, b)))].filter((b) => openSet.has(b))]))
   return { open, on }
 }
 
