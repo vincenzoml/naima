@@ -24,6 +24,10 @@ const HAS_PART = "has-part"
 /** A group with members: done by its items, so never itself the work. */
 const groups = (ctx: Context, item: Item): boolean => hasTrait(ctx, item, GROUP) && linked(ctx, item, HAS_PART).length > 0
 
+/** The trait of a type whose items are standards the work is held to (a requirement): met by what proves it, never itself the work. */
+export const STANDARD = "standard"
+const standard = (ctx: Context, item: Item): boolean => hasTrait(ctx, item, STANDARD)
+
 /** What an item stands for: itself, or -- a group with members -- its members, a nested group's too. */
 export function standsFor(ctx: Context, item: Item): Item[] {
   const out: Item[] = []
@@ -39,9 +43,12 @@ export function standsFor(ctx: Context, item: Item): Item[] {
   return out
 }
 
-/** For every open item that is work -- a group is not -- the open items it waits on; a wait on a group is a wait on its items. */
+/**
+ * For every open item that is work -- a group is not, nor a standard -- the open items it waits on; a wait on a group is a
+ * wait on its items, and a wait on a standard is no wait (dependencies-wait-on-work notes it).
+ */
 function waits(ctx: Context): { open: Item[]; on: Map<Item, Item[]> } {
-  const open = ctx.repo.items.filter((i) => isOpen(ctx, i) && !groups(ctx, i))
+  const open = ctx.repo.items.filter((i) => isOpen(ctx, i) && !groups(ctx, i) && !standard(ctx, i))
   const openSet = new Set(open)
   const on = new Map(open.map((i) => [i, [...new Set(linked(ctx, i, WAITS_ON).flatMap((b) => standsFor(ctx, b)))].filter((b) => openSet.has(b))]))
   return { open, on }
@@ -223,6 +230,29 @@ export const dependenciesAcyclic: Check = {
         message: `a cycle of blocked-by links: ${cycle.map(label).join(", ")} wait on each other, so none can ever start -- remove one of the links`,
         item: first,
       })
+    }
+    return out
+  },
+}
+
+/** A `blocked-by` that names a standard: nothing can be done to it, so the wait says nothing about when the work may start. */
+export const dependenciesWaitOnWork: Check = {
+  name: "dependencies-wait-on-work",
+  says: "every blocked-by names work: a requirement is not work, so a wait on it is a note -- wait on what delivers or proves it",
+  run(ctx) {
+    const out: Finding[] = []
+    for (const item of ctx.repo.items) {
+      if (!isOpen(ctx, item)) continue
+      for (const on of linked(ctx, item, WAITS_ON)) {
+        if (!standard(ctx, on) || !isOpen(ctx, on)) continue
+        out.push({
+          level: "note",
+          message: `${label(item)} is blocked by ${
+            label(on)
+          }, which is not work but a standard the work is held to -- wait on what delivers or proves it instead`,
+          item,
+        })
+      }
     }
     return out
   },

@@ -62,7 +62,7 @@ import {
   writeJson,
 } from "../../core/api.ts"
 import { type CoverageConfig, coverageLines, coverageOf, coverageReasons, coverageUiView, COVERS, readCoverage, staleCovers } from "./coverage.ts"
-import { dependenciesAcyclic, orderCommand, readyCommand, standsFor } from "./dependencies.ts"
+import { dependenciesAcyclic, dependenciesWaitOnWork, orderCommand, readyCommand, standsFor } from "./dependencies.ts"
 
 export { type CoverageConfig, coverageOf, type CoverageRow } from "./coverage.ts"
 
@@ -681,7 +681,7 @@ export default function gates(options: Record<string, unknown> = {}): Plugin {
     optional: ["ui-views"],
     migrations: [moveGates],
     rank: [{ name: "gate", score: (i) => (onGates(i).length ? 0 : 4) }],
-    checks: [gatedProofIsGated, overdue, coverageCheck(lists), dependenciesAcyclic],
+    checks: [gatedProofIsGated, overdue, coverageCheck(lists), dependenciesAcyclic, dependenciesWaitOnWork],
     commands: [gatesCommand, gateCommand, queue, coverageCommand(lists), readyCommand(gatedItems), orderCommand(gatedItems)],
     summary: [status],
   }

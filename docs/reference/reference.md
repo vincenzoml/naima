@@ -1290,6 +1290,7 @@ naima order first-public
 | `milestone-overdue` | warns when a gate with a due date is past it and does not hold |
 | `coverage-lists` | a coverage list's source can be read; an item's covers names an entry its list holds |
 | `dependencies-acyclic` | no open items wait on each other in a cycle of blocked-by links: none of them could ever start |
+| `dependencies-wait-on-work` | every blocked-by names work: a requirement is not work, so a wait on it is a note -- wait on what delivers or proves it |
 
 **Summary sections**: `gates`.
 
@@ -1433,6 +1434,8 @@ naima decisions licence --all --json
 ### type: requirements
 
 Requirements: something the result must satisfy, stated so it can be checked: delivered by the items that satisfy it, proven by the tests or properties that verify it. Items live in `naima-tracker/naima-data/requirements/`; a new one starts as `stated`.
+
+Traits: `standard`.
 
 | Status | Category | Flags | Meaning |
 |---|---|---|---|

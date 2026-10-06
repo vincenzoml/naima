@@ -50,8 +50,12 @@ import {
 
 // ── requirements ──────────────────────────────────────────────────────────────
 
+/** The trait the gates plugin reads (dependencies.ts): a standard the work is held to, never itself the work. */
+const STANDARD = "standard"
+
 const requirementsType: TypeDef = {
   id: "requirements",
+  traits: [STANDARD],
   dir: "requirements",
   title: "Requirements",
   says:

@@ -123,6 +123,10 @@ all items: 4 in order, deepest wait 2
 The depth is how many waits stand before an item. A settled blocker holds nothing back. Both take a gate's name to show only its items, and `--json`. Items that
 wait on each other in a cycle could never start: `naima check` fails such a cycle (the check `dependencies-acyclic`), naming every item on it.
 
+Both list work only. An epic is done by its items, so it is not listed and a wait on it is a wait on its open items. A requirement is what the work is held
+to, met when a test or property that verifies it passes, so it is not listed either; a `blocked-by` naming one is a note of `naima check` (the check
+`dependencies-wait-on-work`): wait on the work that delivers or proves it instead.
+
 ## Keep a diary
 
 The timeline says when gates opened and epics finished. A diary says what happened and why, day after day. Write it as it happens:
