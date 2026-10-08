@@ -220,6 +220,20 @@ check `wait-loops`, on every tracked shell script (a session note that
 records such a wait is noted); the rest is **convention**:
 [long work](../agents/long-work.md), [for people](long-work.md).
 
+### Use the state-of-the-art method for the job
+
+Every action is done with the method made for it: a real parser for a
+language, a library built for the format, the tool built for the job. An
+ad-hoc script, a hack or a regular expression is used only where it is
+genuinely the right tool — a flat, regular pattern with nothing nested — and
+never in place of parsing a structured language: markdown, HTML, JSON, YAML,
+source code. **Convention**.
+
+Why: a check that read markdown with regular expressions reported working
+links as broken by the hundred, because it could not see anchors declared in
+HTML; a check that cries wolf is switched off or ignored, and the real
+defects it exists to find go unseen with it.
+
 ## Branches and worktrees
 
 ### One worktree per piece of work
@@ -321,7 +335,7 @@ feature item in status `shipped` names its pages in `docs`.
 | Check | Fails when |
 |---|---|
 | `features-documented` | a shipped feature names no page in `docs`, or names a file or heading that does not exist |
-| `links-resolve` | a relative link in any markdown file the project tracks points at nothing |
+| `links-resolve` | a relative link in any markdown file the project tracks points at nothing: a file that does not exist, or an anchor that no heading and no HTML `id` declares — read by a CommonMark parser, so a link in a list, a quote, a table or a reference definition counts, and one in code does not |
 | `documented` | a loaded plugin's command, type, field, check or [gate](glossary.md#gate) carries no documentation in its manifest |
 | `reference-current` | with the `docs` plugin's `reference` option set, the reference file differs from what `naima docs` generates |
 

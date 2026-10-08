@@ -41,6 +41,7 @@ import {
   walkFiles,
   writeFileAtomic,
 } from "../../core/api.ts"
+import { parseMarkdown } from "./commonmark.ts"
 
 export interface DocsOptions {
   /** The reference file `naima check` holds current; unset, none. */
@@ -174,60 +175,60 @@ export function renderReference(ctx: Context): string {
 }
 
 // ── anchors and links ────────────────────────────────────────────────────────
+//
+// Markdown is parsed by a CommonMark parser (commonmark.ts), never scanned by
+// line: a heading, a link, a code span or an HTML anchor is what a renderer
+// sees, wherever it sits — in a list, a quote, a table cell or a reference
+// definition.
 
-/** A heading's anchor, as GitHub renders it. */
+/** A heading's anchor, as GitHub renders it, from the heading's plain text. */
 export function anchor(heading: string): string {
   return heading
     .trim()
     .toLowerCase()
-    .replace(/<[^>]*>/g, "")
     .replace(/[^\p{L}\p{N}\s_-]/gu, "")
     .replace(/\s/g, "-")
 }
 
-const FENCE = /^\s*(```|~~~)/
-
-const ATX = /^ {0,3}#{1,6}\s+(.+?)\s*#*\s*$/
-/** A setext underline: the line above it is the heading's text. */
-const UNDERLINE = /^ {0,3}(=+|-+)\s*$/
-/** A line that can be the text of a setext heading: a paragraph's, not a list item, quote, table, heading or break. */
-const PARAGRAPH = /^ {0,3}(?![-*+]\s|\d+[.)]\s|>|\||#|(=+|-+)\s*$)\S/
-
-/** Every anchor a markdown file offers, ATX (`# x`) and setext (`x` over `===` or `---`), duplicates numbered as GitHub numbers them. */
+/**
+ * Every anchor a markdown file offers: each heading's (ATX or setext, in any
+ * container), duplicates numbered as GitHub numbers them, and each anchor an
+ * HTML `id` or `<a name>` declares.
+ */
 export function anchorsOf(text: string): Set<string> {
+  const parsed = parseMarkdown(text)
   const out = new Set<string>()
   const seen = new Map<string, number>()
-  const add = (heading: string): void => {
-    const base = anchor(heading.replace(/`/g, "").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1"))
+  for (const h of parsed.headings) {
+    const base = anchor(h.text)
     const n = seen.get(base) ?? 0
     seen.set(base, n + 1)
     out.add(n ? `${base}-${n}` : base)
   }
-  let fenced = false
-  let paragraph: string | null = null // the line above, when it could be a setext heading's text
-  for (const line of text.split("\n")) {
-    if (FENCE.test(line)) fenced = !fenced
-    if (fenced || FENCE.test(line)) {
-      paragraph = null
-      continue
-    }
-    const atx = line.match(ATX)?.[1]
-    if (atx) add(atx)
-    else if (paragraph !== null && UNDERLINE.test(line)) add(paragraph.trim())
-    paragraph = !atx && PARAGRAPH.test(line) && !(paragraph !== null && UNDERLINE.test(line)) ? line : null
-  }
+  for (const id of parsed.htmlAnchors) out.add(id)
   return out
+}
+
+const safeDecode = (s: string): string => {
+  try {
+    return decodeURIComponent(s)
+  } catch {
+    return s
+  }
 }
 
 /** Why `target` (a path from `from`'s directory, optionally `#anchor`) does not resolve, or null. */
 export function unresolved(root: string, fromDir: string, target: string): string | null {
-  const [path = "", hash] = target.split("#", 2)
-  const file = path ? resolve(fromDir, decodeURI(path)) : null
+  const hashAt = target.indexOf("#")
+  const path = hashAt === -1 ? target : target.slice(0, hashAt)
+  const hash = hashAt === -1 ? undefined : safeDecode(target.slice(hashAt + 1))
+  const file = path ? resolve(fromDir, safeDecode(path)) : null
   if (file && !existsSync(file)) return `${relative(root, file) || path} does not exist`
   if (hash === undefined || hash === "") return null
   const md = file ?? null
   if (!md || !md.endsWith(".md") || statSync(md).isDirectory()) return null
-  return anchorsOf(readFileSync(md, "utf8")).has(hash.toLowerCase()) ? null : `${relative(root, md)} has no heading #${hash}`
+  const anchors = anchorsOf(readFileSync(md, "utf8"))
+  return anchors.has(hash) || anchors.has(hash.toLowerCase()) ? null : `${relative(root, md)} has no heading #${hash}`
 }
 
 /** Why a feature's `docs` entry (`path` or `path#heading`, from the root) is not documentation, or null. */
@@ -242,6 +243,9 @@ export function docsRefError(root: string, ref: string): string | null {
 
 const markdown = (path: string): string[] => walkFiles(path).filter((f) => f.endsWith(".md"))
 
+/** An absolute URI's scheme (RFC 3986): such a link points outside the project and is not checked. */
+const URI_SCHEME = /^[a-z][a-z0-9+.-]*:/i
+
 /** Relative links in the markdown under `paths` — unset, every markdown file of the project but the program's — that do not resolve. */
 export function brokenLinks(root: string, paths?: string[], program?: string): string[] {
   const out: string[] = []
@@ -252,19 +256,11 @@ export function brokenLinks(root: string, paths?: string[], program?: string): s
     else files.push(...markdown(join(root, base)))
   }
   for (const file of files) {
-    let fenced = false
-    readFileSync(file, "utf8")
-      .split("\n")
-      .forEach((line, i) => {
-        if (FENCE.test(line)) fenced = !fenced
-        if (fenced) return
-        for (const m of line.replace(/`[^`]*`/g, "").matchAll(/\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)) {
-          const target = m[1] ?? ""
-          if (/^[a-z][a-z0-9+.-]*:/i.test(target)) continue
-          const why = unresolved(root, dirname(file), target.startsWith("#") ? relative(dirname(file), file) + target : target)
-          if (why) out.push(`${relative(root, file)}:${i + 1}: link ${target} — ${why}`)
-        }
-      })
+    for (const { target, line } of parseMarkdown(readFileSync(file, "utf8")).links) {
+      if (target === "" || URI_SCHEME.test(target)) continue
+      const why = unresolved(root, dirname(file), target.startsWith("#") ? relative(dirname(file), file) + target : target)
+      if (why) out.push(`${relative(root, file)}:${line}: link ${target} — ${why}`)
+    }
   }
   return out
 }
@@ -325,7 +321,7 @@ export default function docs(options: Record<string, unknown> = {}): Plugin {
   const linksResolve: Check = {
     name: "links-resolve",
     says:
-      "every relative link in every markdown file of the project (or under the links option) points at a file, and a heading (ATX or setext) when it names one",
+      "every relative link in every markdown file of the project (or under the links option) points at a file, and at an anchor when it names one — a heading's, ATX or setext, in any container, or an HTML id; the markdown is parsed as CommonMark",
     run: (ctx) => brokenLinks(ctx.root, opts.links, ctx.program).map((message): Finding => ({ level: "problem", message })),
   }
 
