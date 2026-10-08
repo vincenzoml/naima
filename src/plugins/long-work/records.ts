@@ -205,7 +205,9 @@ export function view(dir: string, now: number, tail = 0): RunView {
   }
   if (!status) {
     const age = now - Date.parse(spec.started)
-    return age > lostAfterMs(spec.everyMs) ? { ...withFacts, state: "lost", over: true, error: "the supervisor never reported" } : { ...withFacts, state: "starting" }
+    return age > lostAfterMs(spec.everyMs)
+      ? { ...withFacts, state: "lost", over: true, error: "the supervisor never reported" }
+      : { ...withFacts, state: "starting" }
   }
   if (status.state === "ended") {
     const ended: RunView = {

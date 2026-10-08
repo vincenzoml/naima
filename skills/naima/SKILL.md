@@ -110,6 +110,11 @@ Before asking the owner anything, run `naima decisions <words>`: a settled
 decision answers it, and the owner's answer to a new question is recorded as
 one ([asking the human](../../docs/agents/asking-the-human.md)).
 
+A command that will outlast a few minutes, or run on another machine, goes
+through `naima run <name> --budget-time <d> -- <command>` and `naima wait
+<name> --timeout <d>`, never a hand-written wait loop
+([long work](../../docs/agents/long-work.md)).
+
 ## 5. Work by the rules and the flows
 
 Read the rules before acting, then the flow that applies. They are plain

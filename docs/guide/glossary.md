@@ -426,6 +426,14 @@ A merge that only moves the trunk forward onto the branch, adding no merge
 commit: `git merge --ff-only <branch>`. It succeeds only when the branch
 already contains the trunk.
 
+### Run
+
+A long command started by `naima run`: named, detached from the session that
+started it, bounded by a time budget (and a disk budget on what it declares
+it creates), with a log, a progress file and a record in
+`naima-tracker/.runs/`. `naima wait` waits for it, `naima run clean` removes
+what it created ([long work](long-work.md)).
+
 ### Claim file
 
 A note that a branch is working on some items, written by `naima claim` as one

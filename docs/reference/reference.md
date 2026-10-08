@@ -23,6 +23,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [ui](#ui) — the views plugins contribute, shown by `naima ui` in a native window, or the browser, from a server on this machine only
 - [metrics](#metrics) — named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
+- [long-work](#long-work) — long work, run and waited on by Naima: naima run starts a command detached, with budgets, locally or on a host; naima wait blocks on it by its record; naima run list, status, stop and clean; a shipped rule makes them mandatory for agents
 - [commit-hooks](#commit-hooks) — companion records required in the commit that makes a change, and the path-scoped pre-commit hook that holds them
 - [privacy](#privacy) — the owner's material enters the repository only with their recorded yes, and no secret enters it at all
 - [adopt](#adopt) — adopt a board the project already keeps as items, in reviewed phases, without losing a line of it or deleting it
@@ -84,6 +85,8 @@ Every command: what it does, and the policy or invariant it enforces — or noth
 | [`ui`](#naima-ui) | ui | show the views the plugins contribute — first the summary, the gates, what is next and the claims, then the boards, the metrics, the session notes, each item with its evidence and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it | the views are served only on the loopback interface, and every request without this run's token is refused |
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to | numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason, ending with the line an agent must acknowledge back; or check that text carries every one (rules check-ack) | nothing: it only reads |
+| [`run`](#naima-run) | long-work | start a long command detached — locally, or on a declared host through its own Naima — with a log, a progress file, a time budget and, on what it declares it creates, a disk budget, ending itself when one runs out; list the runs against their budgets, show one, stop one, or remove what one created | every run has a time budget, and is ended, its whole process group with it, when it runs out or its declared paths outgrow the disk budget; a declared path is never the root, the home directory, the repository or above it, nor holds a tracked file; a run is never cleaned while it runs; a remote run is always guarded, failing when it changes a tracked file |
+| [`wait`](#naima-wait) | long-work | block until a run started by naima run ends, or the timeout passes, then print its state, exit status, budgets, last progress line and the log's tail: found by its record, never by a process pattern | a wait is always bounded: it ends at its --timeout (default 10m) and says the run is still running, exiting 1, so waiting again is a decision; it exits 0 only for a run that succeeded |
 | [`hooks`](#naima-hooks) | commit-hooks | the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it | the installed pre-commit hook runs the staged checks and the companion rules before every commit; install refuses to take over a core.hooksPath that is not Naima's unless --force |
 | [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused | an owner's file is attached only with their yes restated in --consent, or the writer's own with --own; a file holding a secret, a hidden or path-like name, or a name already used is refused |
 | [`adopt`](#naima-adopt) | adopt | adopt a board the project already keeps (a TODO.md, an issue list in markdown) as items, without losing a line: propose markers, split, audit, links — each a dry run until --write; the source is never deleted | no line of the source is lost and the source is never deleted; nothing is written without --write, and the only edit to the source is adding marker lines |
@@ -95,11 +98,11 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, roles, announce, loop, beta-markers, verifier, ui, metrics, rules, commit-hooks, privacy, adopt, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, roles, announce, loop, beta-markers, verifier, ui, metrics, rules, long-work, commit-hooks, privacy, adopt, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, roles, announce, verifier, rules, privacy, adopt, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
-| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, announce, beta-markers, verifier, metrics, rules, commit-hooks, privacy, docs |
+| `checks` | core | invariants `naima check` holds: a problem fails it, a note does not | core, trackers, coordination, triage, gates, epics, planning, announce, beta-markers, verifier, metrics, rules, long-work, commit-hooks, privacy, docs |
 | `views` | core | `naima view <name>`: a named rendering of derived state | coordination, triage, planning |
 | `dirs` | core | directories under the tracker root a plugin owns that are not item types | coordination, metrics, commit-hooks, adopt |
 | `summary` | core | a block of `naima summary` | core, trackers, coordination, triage, gates, epics, beta-markers, metrics |
@@ -116,6 +119,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `metrics` | metrics | a named measurement: `run` (a program and its arguments) and `kind`, or a code `measure`; a bound — `atMost`, `atLeast` or `equals` — and `better` |  |
 | `code-measures` | metrics | a code-quality number taken in process from the files: `measure({ files, source }, metric) → number \| { error }`, with its `unit` and `better` | metrics |
 | `code-languages` | metrics | a language code measures read: `extensions`, `code`, `comments`, `quotes`, and `functions(stripped) → [{ name, line, lines, complexity }]` when it can find them | metrics |
+| `rules` | rules | a rule a plugin ships, active in every project that loads it beside the project's own rules items: `name`, `title`, `audience`, `strength`, `text`, `why`, and optionally `ack` and `enforcedBy`; a project retires one with the rules plugin's `retire` option | long-work |
 
 ## core
 
@@ -2030,7 +2034,15 @@ The project's own rules, kept as items: shown to agents first by naima guide, li
 
 Its contributions' qualified ids are `rules/<name>`.
 
-A project's rules — how an agent works here (quiet, simple, fast), how it reports, what it asks before doing — are tracker data, one `rules` item each, so every project carries its own. A rule's page is the rule and its reason; `audience` says whom it binds (`agents`, `people`, `everyone`), `strength` how much (`must`, `should`), and `enforcedBy`, when set, the check or gate that holds it. An active rule is shown; a retired one is kept as history. `naima rules --audience agents` is what an agent reads at the start of work, and `naima guide` prints it first. `ack`, when a rule sets it, is the exact phrase an agent gives back in acknowledgement; `naima rules` and `naima guide` print every active one's, joined, as the line to give — `naima rules check-ack <file|->` checks that a piece of text carries them all, naming what is missing and exiting 1 if so.
+A project's rules — how an agent works here (quiet, simple, fast), how it reports, what it asks before doing — are tracker data, one `rules` item each, so every project carries its own. A rule's page is the rule and its reason; `audience` says whom it binds (`agents`, `people`, `everyone`), `strength` how much (`must`, `should`), and `enforcedBy`, when set, the check or gate that holds it. An active rule is shown; a retired one is kept as history. `naima rules --audience agents` is what an agent reads at the start of work, and `naima guide` prints it first. `ack`, when a rule sets it, is the exact phrase an agent gives back in acknowledgement; `naima rules` and `naima guide` print every active one's, joined, as the line to give — `naima rules check-ack <file|->` checks that a piece of text carries them all, naming what is missing and exiting 1 if so. A plugin may also ship rules (the `rules` point): each is active in every project that loads the plugin, listed beside the project's own with the plugin that ships it, and retired by naming it in the `retire` option rather than by editing it.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `retire` | `[]` | the shipped rules this project does not hold to, each by its name or qualified id (`<plugin>/<name>`) |
+
+**Extension points** it declares: `rules`.
 
 ### naima rules
 
@@ -2080,13 +2092,102 @@ Rules: a rule of this project, for agents, people or both: its page is the rule 
 
 | Check | What it holds |
 |---|---|
-| `rules` | every active rule has its text and a valid audience, and names as enforcedBy only a check or gate that exists |
+| `rules` | every active rule has its text and a valid audience, and names as enforcedBy only a check or gate that exists; every name the retire option holds is a rule a loaded plugin ships |
 
 **Guide sections**, printed first by `naima guide`
 
 | Section | What it shows |
 |---|---|
 | `rules` | the project's active rules for agents, read before anything else |
+
+## long-work
+
+Long work, run and waited on by Naima: naima run starts a command detached, with budgets, locally or on a host; naima wait blocks on it by its record; naima run list, status, stop and clean; a shipped rule makes them mandatory for agents.
+
+Its contributions' qualified ids are `long-work/<name>`.
+
+An agent left to wait for a long command improvises — a `sleep` loop, a `pgrep -f` that matches itself — and the wait outlives the work by hours. `naima run <name> --budget-time <d> -- <command>` starts the command detached, under a supervisor of its own, with a log, a progress file (`$NAIMA_RUN_PROGRESS`) and a record in the tracker folder's `.runs/`, which ignores itself. The supervisor writes a heartbeat every `--every`, and ends the command's whole process group when the time budget runs out, when what it declares with `--creates` outgrows `--budget-disk`, or when `naima run stop` asks. `naima wait <name>` reads the record — never the process table — until the run ends or `--timeout` passes, then prints the state, exit status and the log's tail. `naima run list` shows every run against its budgets, marking stale runs (no output for `--stale`) and lost ones (no heartbeat); `naima run clean` removes what a run declared, never a tracked file, never while it runs. A host declared in the `hosts` option is reached over ssh, and a run there is a run of the host's own Naima, always `--guard-tracked`: a tracked file it changes fails it. The plugin ships the rule that makes these mandatory for agents, enforced by the check `wait-loops`.
+
+Options, each with the default it takes when nothing sets it:
+
+| Option | Default | What it does |
+|---|---|---|
+| `hosts` | `{}` | the machines a run may go to: name → { "ssh": the destination ssh is given, "dir": the project's checkout there, "naima": the command that runs its Naima from dir (default `deno run -A naima-tracker/naima/naima.ts`) } |
+
+### naima run
+
+Start a long command detached — locally, or on a declared host through its own Naima — with a log, a progress file, a time budget and, on what it declares it creates, a disk budget, ending itself when one runs out; list the runs against their budgets, show one, stop one, or remove what one created.
+
+**Enforces**: Every run has a time budget, and is ended, its whole process group with it, when it runs out or its declared paths outgrow the disk budget; a declared path is never the root, the home directory, the repository or above it, nor holds a tracked file; a run is never cleaned while it runs; a remote run is always guarded, failing when it changes a tracked file.
+
+```sh
+naima run <name> --budget-time <duration> [--budget-disk <size>] [--creates <path>]... [--every <duration>] [--stale <duration>] [--host <host>] [--guard-tracked] -- <command> [<arg>...]
+naima run list [--json]
+naima run status <name> [--tail <n>] [--json]
+naima run stop <name>
+naima run clean <name>
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--budget-time` |  | how long the run may last, <n>s\|m\|h\|d: past it, it is ended; required |
+| `--budget-disk` |  | how large what it declares it creates may grow, <n>[K\|M\|G\|T]: past it, it is ended; needs --creates |
+| `--creates` |  | a path the run creates (a store, a temporary directory), measured for --budget-disk and removed by run clean; repeatable |
+| `--every` |  | how often the supervisor checks the budgets and a stop request and writes its heartbeat (default 10s) |
+| `--stale` |  | how long with no change to the log or the progress file before the run is reported stale (default 15m) |
+| `--host` |  | run it on this host, declared in the plugin's hosts option, through the host's own Naima over ssh |
+| `--guard-tracked` |  | fail the run if a tracked file changes while it runs; always on for a remote run |
+| `--tail` |  | how many of the log's last lines to print (default 20) |
+| `--json` |  | print the run, or every run, as JSON |
+
+Examples:
+
+```sh
+naima run bench --budget-time 2h --budget-disk 20G --creates /tmp/bench-stores -- 'deno task bench > results.csv'
+naima run models --budget-time 30m -- mcrl2 --all
+naima run bench --host lab --budget-time 6h -- 'deno task bench'
+naima run list
+naima run status bench --tail 50
+naima run stop bench
+naima run clean bench
+```
+
+### naima wait
+
+Block until a run started by naima run ends, or the timeout passes, then print its state, exit status, budgets, last progress line and the log's tail: found by its record, never by a process pattern.
+
+**Enforces**: A wait is always bounded: it ends at its --timeout (default 10m) and says the run is still running, exiting 1, so waiting again is a decision; it exits 0 only for a run that succeeded.
+
+```sh
+naima wait <name> [--timeout <duration>] [--every <duration>] [--tail <n>] [--json]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--timeout` |  | how long to wait at most, <n>s\|m\|h\|d (default 10m) |
+| `--every` |  | how often to look (default 1s; for a remote run 30s, one ssh call each) |
+| `--tail` |  | how many of the log's last lines to print (default 20) |
+| `--json` |  | print the run as JSON |
+
+Examples:
+
+```sh
+naima wait bench
+naima wait bench --timeout 9m --tail 50
+naima wait models --json
+```
+
+**Checks**, run by `naima check`
+
+| Check | What it holds |
+|---|---|
+| `wait-loops` | no tracked shell script holds a hand-written wait — a while/until loop that sleeps, or pgrep -f/pkill -f — and a session note that does is noted; a line marked naima: allow-wait-loop, or the line after it, is exempt |
+
+**Shipped rules**, active in every project that loads the plugin, listed by `naima rules`
+
+| Rule | Title | For | Strength | Enforced by | Ack |
+|---|---|---|---|---|---|
+| `long-work-through-naima-run` | Long work goes through naima run and naima wait; no hand-written wait loop | agents | must | `wait-loops` | `Long work mode on` |
 
 ## commit-hooks
 

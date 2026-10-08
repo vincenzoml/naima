@@ -14,18 +14,7 @@ import { type ChildProcess, spawn, spawnSync } from "node:child_process"
 import { createWriteStream, existsSync, lstatSync, readdirSync, rmSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import {
-  DEFAULTS,
-  LOG_FILE,
-  PROGRESS_FILE,
-  readSpec,
-  type Reason,
-  type RunSpec,
-  type RunStatus,
-  STATUS_FILE,
-  STOP_FILE,
-  writeJsonAtomic,
-} from "./records.ts"
+import { DEFAULTS, LOG_FILE, PROGRESS_FILE, readSpec, type Reason, type RunSpec, type RunStatus, STATUS_FILE, STOP_FILE, writeJsonAtomic } from "./records.ts"
 
 /** How a platform runs a command line, and ends a process tree: the only places the platforms differ. */
 export interface Platform {

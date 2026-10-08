@@ -10,8 +10,8 @@ import {
   code,
   type Command,
   type Context,
-  type Contribution,
   CONTRACT,
+  type Contribution,
   type ExtensionPoint,
   type FieldDef,
   fieldValue,
@@ -198,9 +198,7 @@ function rulesRendered(rules: Rule[], heading: string): Rendered<Rule[]> {
           "",
           `${(r.strength ?? "?").toUpperCase()} · ${r.audience ?? "no audience"} · ${r.title} (${r.item}${r.shippedBy ? `, shipped by ${r.shippedBy}` : ""}${
             r.enforcedBy ? `, enforced by ${r.enforcedBy}` : ""
-          }${
-            r.ack ? `, ack ${JSON.stringify(r.ack)}` : ""
-          })`,
+          }${r.ack ? `, ack ${JSON.stringify(r.ack)}` : ""})`,
           ...r.text.split("\n").map((l) => (l ? `    ${l}` : "")),
         ]),
         ...(ackLine(rs) ? ["", ackLine(rs) as string] : []),
@@ -278,26 +276,30 @@ const check = (retired: ReadonlySet<string>): Check => ({
       level: "problem",
       message: `${c.id}: the shipped rule names as enforcedBy "${c.value.enforcedBy}", which is no check or gate`,
     }))
-    return [...unknown, ...badShipped, ...active(ctx).flatMap((item): Finding[] => {
-      const out: Finding[] = []
-      const text = ruleText(item)
-      if (!text || text === PLACEHOLDER) {
-        out.push({ level: "problem", item, message: `${label(item)}: an active rule with no text — write the rule and its reason on its page` })
-      }
-      const audience = item.meta[AUDIENCE.name]
-      if (!AUDIENCES.includes(audience as Audience)) {
-        out.push({
-          level: "problem",
-          item,
-          message: `${label(item)}: an active rule ${audience === undefined ? "with no audience" : `for ${JSON.stringify(audience)}`} — naima set ${
-            label(item)
-          } audience=${AUDIENCES.join("|")}`,
-        })
-      }
-      const by = fieldValue(item, read(ENFORCED_BY))
-      if (by && !known.has(by)) out.push({ level: "problem", item, message: `${label(item)}: enforcedBy names "${by}", which is no check or gate` })
-      return out
-    })]
+    return [
+      ...unknown,
+      ...badShipped,
+      ...active(ctx).flatMap((item): Finding[] => {
+        const out: Finding[] = []
+        const text = ruleText(item)
+        if (!text || text === PLACEHOLDER) {
+          out.push({ level: "problem", item, message: `${label(item)}: an active rule with no text — write the rule and its reason on its page` })
+        }
+        const audience = item.meta[AUDIENCE.name]
+        if (!AUDIENCES.includes(audience as Audience)) {
+          out.push({
+            level: "problem",
+            item,
+            message: `${label(item)}: an active rule ${audience === undefined ? "with no audience" : `for ${JSON.stringify(audience)}`} — naima set ${
+              label(item)
+            } audience=${AUDIENCES.join("|")}`,
+          })
+        }
+        const by = fieldValue(item, read(ENFORCED_BY))
+        if (by && !known.has(by)) out.push({ level: "problem", item, message: `${label(item)}: enforcedBy names "${by}", which is no check or gate` })
+        return out
+      }),
+    ]
   },
 })
 

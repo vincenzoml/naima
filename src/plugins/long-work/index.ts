@@ -42,9 +42,9 @@ import {
   readSpec,
   recordDirs,
   RUN_FILE,
+  runsDir,
   type RunSpec,
   type RunView,
-  runsDir,
   showDuration,
   showSize,
   STOP_FILE,
@@ -212,7 +212,9 @@ async function start(ctx: Context, hosts: Map<string, Host>, cmd: Command, args:
     throw refuse(`naima run: "${name}" is not a run name — lowercase letters, digits, ".", "_" and "-", at most 64, and none of ${SUBCOMMANDS.join(", ")}`)
   }
   const dir = recordOf(ctx, name)
-  if (existsSync(dir)) throw refuse(`naima run: a run "${name}" is already recorded — naima run status ${name}; naima run clean ${name} before reusing the name`)
+  if (existsSync(dir)) {
+    throw refuse(`naima run: a run "${name}" is already recorded — naima run status ${name}; naima run clean ${name} before reusing the name`)
+  }
   const budgetTime = duration(str(p, "budget-time"), null, "--budget-time")
   if (budgetTime === null) throw refuse("naima run: every run has a time budget — add --budget-time <duration>, such as --budget-time 2h")
   const rawDisk = str(p, "budget-disk")
@@ -258,9 +260,11 @@ async function start(ctx: Context, hosts: Map<string, Host>, cmd: Command, args:
     for (const l of describe(view(dir, Date.now(), DEFAULTS.tail))) ctx.out(l)
     return EXIT.FAILED
   }
-  ctx.out(`run ${name}: started${v.pid !== undefined ? `, pid ${v.pid}` : ""}, time budget ${showDuration(budgetTime)}${
-    budgetDisk !== undefined ? `, disk budget ${showSize(budgetDisk)}` : ""
-  }`)
+  ctx.out(
+    `run ${name}: started${v.pid !== undefined ? `, pid ${v.pid}` : ""}, time budget ${showDuration(budgetTime)}${
+      budgetDisk !== undefined ? `, disk budget ${showSize(budgetDisk)}` : ""
+    }`,
+  )
   ctx.out(`  log: ${join(dir, "log")}`)
   ctx.out(`  progress (the command writes a line to $NAIMA_RUN_PROGRESS): ${join(dir, "progress")}`)
   ctx.out(`  wait: naima wait ${name} --timeout 10m · watch: naima run list · end: naima run stop ${name} · then: naima run clean ${name}`)
@@ -292,7 +296,11 @@ function startRemote(
   if (!r.ok) {
     for (const l of r.err.split("\n").filter(Boolean)) ctx.err(`${host.name}: ${l}`)
     const why = r.err.split("\n").filter(Boolean).pop() ?? ""
-    throw refuse(`naima run: ${host.name} (${host.ssh}) did not start the run (exit ${r.code}${why ? `: ${why}` : ""}) — its own Naima must have the long-work plugin; nothing recorded here`)
+    throw refuse(
+      `naima run: ${host.name} (${host.ssh}) did not start the run (exit ${r.code}${
+        why ? `: ${why}` : ""
+      }) — its own Naima must have the long-work plugin; nothing recorded here`,
+    )
   }
   ensureRunsDir(tracker(ctx))
   const dir = recordOf(ctx, name)
@@ -333,9 +341,17 @@ function list(ctx: Context, hosts: Map<string, Host>, json: boolean): number {
       answers.set(host.name, byName)
     }
     const v = answers.get(host.name)!.get(spec.name)
-    return v
-      ? { ...v, host: host.name }
-      : { name: spec.name, host: host.name, state: "unknown", over: false, started: spec.started, elapsedMs: 0, budgetTimeMs: spec.budgetTimeMs, log: "", error: `${host.ssh} did not report it` }
+    return v ? { ...v, host: host.name } : {
+      name: spec.name,
+      host: host.name,
+      state: "unknown",
+      over: false,
+      started: spec.started,
+      elapsedMs: 0,
+      budgetTimeMs: spec.budgetTimeMs,
+      log: "",
+      error: `${host.ssh} did not report it`,
+    }
   })
   if (json) ctx.out(JSON.stringify(views, null, 2))
   else if (!views.length) ctx.out("no runs — naima run <name> --budget-time <duration> -- <command> starts one")
@@ -356,7 +372,9 @@ function stop(ctx: Context, hosts: Map<string, Host>, name: string): number {
   }
   if (v.over) throw refuse(`run ${name} has already ended (${v.state}) — naima run clean ${name}`)
   writeFileSync(join(dir, STOP_FILE), new Date().toISOString() + "\n")
-  ctx.out(`run ${name}: asked to stop — its supervisor ends it within ${showDuration(spec?.everyMs ?? DEFAULTS.everyMs)}; naima wait ${name} reports it stopped`)
+  ctx.out(
+    `run ${name}: asked to stop — its supervisor ends it within ${showDuration(spec?.everyMs ?? DEFAULTS.everyMs)}; naima wait ${name} reports it stopped`,
+  )
   return EXIT.OK
 }
 
@@ -387,9 +405,17 @@ function cleanRun(ctx: Context, hosts: Map<string, Host>, name: string): number 
     if (why) throw refuse(`naima run clean: ${path} ${why} — nothing removed`)
   }
   const present = creates.filter((c) => existsSync(c))
-  const r = spawnSync(process.execPath, supervisorArgs("clean", dir, [dir, ...present]), { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], windowsHide: true })
+  const r = spawnSync(process.execPath, supervisorArgs("clean", dir, [dir, ...present]), {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+  })
   if (r.status !== 0) throw refuse(`naima run clean: removing failed — ${String(r.stderr ?? r.error?.message ?? "").trim()}`)
-  ctx.out(`run ${name}: removed ${present.length ? present.join(", ") + " and " : ""}its record${creates.length > present.length ? ` (${creates.length - present.length} declared path${creates.length - present.length > 1 ? "s" : ""} already gone)` : ""}`)
+  ctx.out(
+    `run ${name}: removed ${present.length ? present.join(", ") + " and " : ""}its record${
+      creates.length > present.length ? ` (${creates.length - present.length} declared path${creates.length - present.length > 1 ? "s" : ""} already gone)` : ""
+    }`,
+  )
   return EXIT.OK
 }
 
@@ -418,7 +444,11 @@ async function waitFor(ctx: Context, hosts: Map<string, Host>, cmd: Command, arg
   if (bool(p, "json")) ctx.out(JSON.stringify(v, null, 2))
   else {
     for (const l of describe(v)) ctx.out(l)
-    if (!v.over) ctx.out(`naima wait: ${name} is still running after ${showDuration(timeout)} — waiting again is a decision: naima wait ${name}, or naima run stop ${name}`)
+    if (!v.over) {
+      ctx.out(
+        `naima wait: ${name} is still running after ${showDuration(timeout)} — waiting again is a decision: naima wait ${name}, or naima run stop ${name}`,
+      )
+    }
   }
   return v.state === "succeeded" ? EXIT.OK : EXIT.FAILED
 }
@@ -531,7 +561,10 @@ const waitLoops: Check = {
       for (const f of readdirSync(notes).filter((n) => n.endsWith(".md")).sort()) {
         const text = readFileSync(join(notes, f), "utf8")
         for (const w of findWaits(text)) {
-          out.push({ level: "note", message: `${ctx.trackerDir}/passes/${f}:${w.line}: a session note records a hand-written wait (${w.what}) ${advice.replace(/; or mark.*/, "")}` })
+          out.push({
+            level: "note",
+            message: `${ctx.trackerDir}/passes/${f}:${w.line}: a session note records a hand-written wait (${w.what}) ${advice.replace(/; or mark.*/, "")}`,
+          })
         }
       }
     }

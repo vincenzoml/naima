@@ -204,6 +204,22 @@ or attachment — whose exceptions each carry a reason and an item, and only
 shrink; and by `naima attach`, which refuses a file holding one. The rest is
 **convention**: [git, handled for the owner](../agents/git-for-the-owner.md).
 
+### Long work goes through naima run and naima wait
+
+A command expected to outlast a few minutes, or one run on another machine, is
+started with `naima run` and a time budget — with a disk budget on what it
+declares it creates, when it writes stores or temporary data — waited on with
+`naima wait`, and cleaned with `naima run clean`. A hand-written wait loop
+(`while` or `until` with `sleep`) and any process lookup by pattern (`pgrep
+-f`, `pkill -f`) are forbidden. Why: wait loops matching their own command
+line ran for up to 10.5 hours while shown as work in progress, and a remote
+disk filled with stores nobody removed; a run with a budget ends itself, and a
+wait by record ends when the run does. Shipped with Naima, active for agents
+in every project, acknowledged as "Long work mode on". **Enforced by** the
+check `wait-loops`, on every tracked shell script (a session note that
+records such a wait is noted); the rest is **convention**:
+[long work](../agents/long-work.md), [for people](long-work.md).
+
 ## Branches and worktrees
 
 ### One worktree per piece of work
