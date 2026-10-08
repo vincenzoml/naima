@@ -11,7 +11,11 @@
 // `naima ui`, and no other command, may also listen on the loopback interface,
 // read and run the Deno that runs it — to open its window, a process of its
 // own with the webview's permissions (src/plugins/ui/open.ts) — and run the
-// program that opens the default browser.
+// program that opens the default browser. `naima run` and `naima wait`, and no
+// other command, may read and run that Deno too — to start a run's supervisor,
+// a process of its own (src/plugins/long-work/supervisor.ts) — and run ssh,
+// to reach a host; and they are handed the whole environment, which a run's
+// command inherits as the caller's.
 //
 // The data is the program's sibling, `dirname(program)/naima-data`, unless
 // --data or NAIMA_DATA names it. When the program exits with RELAUNCH it has
@@ -96,18 +100,21 @@ export function allowedEnv(env: Record<string, string>): Record<string, string> 
   return Object.fromEntries(Object.entries(env).filter(([name]) => keep(name)))
 }
 
-/** What `naima ui` is granted besides the rest: the loopback interface, the Deno that opens its window, and the browser's opener. */
+/** What one command is granted besides the rest: `naima ui`'s, or `naima run`'s and `naima wait`'s. */
 export interface UiGrant {
   net: string[]
   read: string[]
   runs: string[]
+  /** Hand the program the whole environment rather than ENV's: a run's command inherits it as the caller's. */
+  wholeEnv?: boolean
 }
 
 /** The program that opens the default browser, by operating system: the same src/plugins/ui/open.ts starts. */
 export const BROWSER_OPENER: Record<string, string> = { darwin: "open", windows: "rundll32", linux: "xdg-open" }
 
-/** The grant of `command`: only `ui` has one. */
+/** The grant of `command`: only `ui`, `run` and `wait` have one. */
 export function uiGrant(command: string | undefined, os: string, deno: string): UiGrant | null {
+  if (command === "run" || command === "wait") return { net: [], read: [deno], runs: [deno, "ssh"], wholeEnv: true }
   if (command !== "ui") return null
   return { net: ["127.0.0.1"], read: [deno], runs: [deno, BROWSER_OPENER[os] ?? "xdg-open"] }
 }
@@ -146,7 +153,7 @@ export function permissions(
     `--allow-write=${list([p.tracker, p.data, p.program, ...(p.hostFiles ?? [])])}`,
     `--allow-run=${[...new Set(["git", ...(p.runs ?? []), ...(p.ui?.runs ?? [])])].join(",")}`,
     "--allow-env",
-    ...(p.ui ? [`--allow-net=${p.ui.net.join(",")}`] : []),
+    ...(p.ui?.net.length ? [`--allow-net=${p.ui.net.join(",")}`] : []),
   ]
 }
 
@@ -280,7 +287,7 @@ export async function launch(args: string[], cwd: string): Promise<number> {
       args: ["run", "--no-prompt", "--no-config", "--no-lock", ...flags, join(entry, "src", "cli.ts"), ...args],
       cwd,
       clearEnv: true,
-      env,
+      env: ui?.wholeEnv ? { ...Deno.env.toObject(), ...env } : env,
       stdin: "inherit",
       stdout: "inherit",
       stderr: "inherit",

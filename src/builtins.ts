@@ -13,6 +13,7 @@ import coordination from "./plugins/coordination/index.ts"
 import gates from "./plugins/gates/index.ts"
 import hooks from "./plugins/hooks/index.ts"
 import loop from "./plugins/loop/index.ts"
+import longWork from "./plugins/long-work/index.ts"
 import metrics from "./plugins/metrics/index.ts"
 import packAnalyses from "./plugins/pack-analyses/index.ts"
 import packPapers from "./plugins/pack-papers/index.ts"
@@ -48,6 +49,7 @@ export const firstParty: readonly FirstParty[] = [
   { name: "ui", factory: ui },
   { name: "metrics", factory: metrics },
   { name: "rules", factory: rules },
+  { name: "long-work", factory: longWork },
   { name: "rule-templates", factory: ruleTemplates, optIn: true },
   { name: "commit-hooks", factory: hooks },
   { name: "privacy", factory: privacy },

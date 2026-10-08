@@ -7,9 +7,12 @@ import { readFileSync } from "node:fs"
 import {
   bool,
   type Check,
+  code,
   type Command,
   type Context,
+  type Contribution,
   CONTRACT,
+  type ExtensionPoint,
   type FieldDef,
   fieldValue,
   type Finding,
@@ -22,6 +25,7 @@ import {
   type Rendered,
   rendered,
   str,
+  table,
   type TypeDef,
   usageError,
 } from "../../core/api.ts"
@@ -77,7 +81,56 @@ const ACK: FieldDef = {
 /** How this plugin reads its own fields: as plain strings. */
 const read = (f: FieldDef) => ({ name: f.name, kind: "string" }) as const
 
-/** One rule, as `naima rules --json` prints it. */
+/**
+ * A rule a plugin ships, active in every project that loads the plugin, beside the project's own rules items: what any
+ * plugin contributes to the `rules` point. The project retires one with this plugin's `retire` option, never by editing it.
+ */
+export interface ShippedRule {
+  name: string
+  title: string
+  audience: Audience
+  strength: "must" | "should"
+  /** The rule, said so that it can be followed without asking. */
+  text: string
+  /** The reason it exists. */
+  why: string
+  ack?: string
+  /** The check or gate that enforces it. */
+  enforcedBy?: string
+}
+
+const isText = (v: unknown): boolean => typeof v === "string" && !!v.trim()
+
+/** Why `v` is not a shipped rule, or null. */
+function shippedError(v: unknown): string | null {
+  if (!v || typeof v !== "object") return "is not an object"
+  const r = v as Partial<ShippedRule>
+  for (const key of ["name", "title", "text", "why"] as const) if (!isText(r[key])) return `has no ${key}`
+  if (!AUDIENCES.includes(r.audience as Audience)) return `has no audience among ${AUDIENCES.join(", ")}`
+  if (r.strength !== "must" && r.strength !== "should") return "has no strength, must or should"
+  return null
+}
+
+/** The point this plugin declares: the rules plugins ship. */
+export const rulesPoint: ExtensionPoint<ShippedRule> = {
+  id: "rules",
+  says:
+    "a rule a plugin ships, active in every project that loads it beside the project's own rules items: `name`, `title`, `audience`, `strength`, `text`, `why`, and optionally `ack` and `enforcedBy`; a project retires one with the rules plugin's `retire` option",
+  noun: "shipped rule",
+  key: (r) => r.name,
+  renamed: (r, name) => ({ ...r, name }),
+  validate: shippedError,
+  document: (rs) => [
+    "",
+    "**Shipped rules**, active in every project that loads the plugin, listed by `naima rules`",
+    ...table(
+      ["Rule", "Title", "For", "Strength", "Enforced by", "Ack"],
+      rs.map((r) => [code(r.name), r.title, r.audience, r.strength, r.enforcedBy ? code(r.enforcedBy) : "", r.ack ? code(r.ack) : ""]),
+    ),
+  ],
+}
+
+/** One rule, as `naima rules --json` prints it: a rules item, or a rule a plugin ships (`shippedBy`). */
 export interface Rule {
   item: string
   title: string
@@ -86,6 +139,8 @@ export interface Rule {
   enforcedBy: string | null
   ack: string | null
   text: string
+  /** The plugin that ships it; absent for the project's own rules items. */
+  shippedBy?: string
 }
 
 /** A rule's text: its page without the title heading. */
@@ -103,11 +158,27 @@ const asRule = (item: Item): Rule => ({
 
 const active = (ctx: Context): Item[] => ctx.repo.items.filter((i) => i.type === rulesType.id && i.meta.status === "active")
 
-/** The active rules for `audience` — those for it and those for everyone; every one without an audience — `must` before `should`. */
-export function activeRules(ctx: Context, audience?: Audience): Rule[] {
+/** Every rule the loaded plugins ship, retired or not. */
+const shipped = (ctx: Context): Contribution<ShippedRule>[] => ctx.registry.contributions("rules") as Contribution<ShippedRule>[]
+
+const fromShipped = (c: Contribution<ShippedRule>): Rule => ({
+  item: c.id,
+  title: c.value.title,
+  audience: c.value.audience,
+  strength: c.value.strength,
+  enforcedBy: c.value.enforcedBy ?? null,
+  ack: c.value.ack ?? null,
+  text: `${c.value.text}\n\nWhy: ${c.value.why}`,
+  shippedBy: c.plugin,
+})
+
+/** The names `retire` holds that retire `c`: its short name or its qualified id. */
+const retires = (retire: ReadonlySet<string>, c: Contribution<ShippedRule>): boolean => retire.has(c.name) || retire.has(c.id)
+
+/** The active rules for `audience` — those for it and those for everyone; every one without an audience — `must` before `should`: the project's own, then those plugins ship and the project has not retired. */
+export function activeRules(ctx: Context, audience?: Audience, retired: ReadonlySet<string> = new Set()): Rule[] {
   const rank = (r: Rule) => (r.strength === "must" ? 0 : r.strength === "should" ? 1 : 2)
-  return active(ctx)
-    .map(asRule)
+  return [...active(ctx).map(asRule), ...shipped(ctx).filter((c) => !retires(retired, c)).map(fromShipped)]
     .filter((r) => !audience || r.audience === audience || r.audience === "everyone")
     .sort((a, b) => rank(a) - rank(b))
 }
@@ -125,7 +196,9 @@ function rulesRendered(rules: Rule[], heading: string): Rendered<Rule[]> {
         heading,
         ...rs.flatMap((r) => [
           "",
-          `${(r.strength ?? "?").toUpperCase()} · ${r.audience ?? "no audience"} · ${r.title} (${r.item}${r.enforcedBy ? `, enforced by ${r.enforcedBy}` : ""}${
+          `${(r.strength ?? "?").toUpperCase()} · ${r.audience ?? "no audience"} · ${r.title} (${r.item}${r.shippedBy ? `, shipped by ${r.shippedBy}` : ""}${
+            r.enforcedBy ? `, enforced by ${r.enforcedBy}` : ""
+          }${
             r.ack ? `, ack ${JSON.stringify(r.ack)}` : ""
           })`,
           ...r.text.split("\n").map((l) => (l ? `    ${l}` : "")),
@@ -136,19 +209,19 @@ function rulesRendered(rules: Rule[], heading: string): Rendered<Rule[]> {
 }
 
 /** `rules check-ack <file|->`: the phrases missing from `text`, against the active rules for agents — empty when every one is present. */
-export function missingAcks(ctx: Context, text: string): string[] {
-  return activeRules(ctx, "agents")
+export function missingAcks(ctx: Context, text: string, retired: ReadonlySet<string> = new Set()): string[] {
+  return activeRules(ctx, "agents", retired)
     .map((r) => r.ack)
     .filter((a): a is string => !!a)
     .filter((phrase) => !text.includes(phrase))
 }
 
-function checkAck(args: string[], ctx: Context): number {
+function checkAck(args: string[], ctx: Context, retired: ReadonlySet<string>): number {
   const p = parse(args)
   const [src, ...extra] = p.positionals
   if (!src || extra.length) throw new Error("usage: naima rules check-ack <file|->")
   const text = src === "-" ? readFileSync(0, "utf8") : readFileSync(src, "utf8")
-  const missing = missingAcks(ctx, text)
+  const missing = missingAcks(ctx, text, retired)
   if (missing.length) {
     ctx.out(`missing acknowledgement${missing.length > 1 ? "s" : ""}: ${missing.join(" · ")}`)
     return 1
@@ -157,7 +230,7 @@ function checkAck(args: string[], ctx: Context): number {
   return 0
 }
 
-const command: Command = {
+const command = (retired: ReadonlySet<string>): Command => ({
   name: "rules",
   says:
     "print the project's active rules, must before should, each with its text and reason, ending with the line an agent must acknowledge back; or check that text carries every one (rules check-ack)",
@@ -169,11 +242,11 @@ const command: Command = {
   ],
   examples: ["rules", "rules --audience agents", "rules --audience people --json", "rules check-ack reply.txt", "rules check-ack -"],
   run(args, ctx) {
-    if (args[0] === "check-ack") return checkAck(args.slice(1), ctx)
+    if (args[0] === "check-ack") return checkAck(args.slice(1), ctx, retired)
     const p = parse(args, { audience: { type: "string" }, json: { type: "boolean" } })
     const audience = str(p, "audience")
     if (p.positionals.length || (audience !== undefined && !AUDIENCES.includes(audience as Audience))) throw usageError(this)
-    const rules = activeRules(ctx, audience as Audience | undefined)
+    const rules = activeRules(ctx, audience as Audience | undefined, retired)
     if (bool(p, "json")) {
       ctx.out(JSON.stringify(rules, null, 2))
       return 0
@@ -182,20 +255,30 @@ const command: Command = {
     for (const l of lines.length ? lines : [`no active rules${audience ? ` for ${audience}` : ""} — naima new rules "<the rule>"`]) ctx.out(l)
     return 0
   },
-}
+})
 
-const guide: GuideSection = {
+const guide = (retired: ReadonlySet<string>): GuideSection => ({
   name: "rules",
   says: "the project's active rules for agents, read before anything else",
-  render: (ctx) => rulesRendered(activeRules(ctx, "agents"), "Read first — the project's rules for agents (naima rules --audience agents):"),
-}
+  render: (ctx) => rulesRendered(activeRules(ctx, "agents", retired), "Read first — the project's rules for agents (naima rules --audience agents):"),
+})
 
-const check: Check = {
+const check = (retired: ReadonlySet<string>): Check => ({
   name: "rules",
-  says: "every active rule has its text and a valid audience, and names as enforcedBy only a check or gate that exists",
+  says:
+    "every active rule has its text and a valid audience, and names as enforcedBy only a check or gate that exists; every name the retire option holds is a rule a loaded plugin ships",
   run(ctx) {
     const known = new Set(["checks", "gates"].flatMap((p) => ctx.registry.contributions(p).flatMap((c) => [c.name, c.id])))
-    return active(ctx).flatMap((item): Finding[] => {
+    const ships = shipped(ctx)
+    const unknown: Finding[] = [...retired].filter((name) => !ships.some((c) => retires(new Set([name]), c))).map((name) => ({
+      level: "problem",
+      message: `rules: the retire option names "${name}", which no loaded plugin ships — naima rules lists those shipped`,
+    }))
+    const badShipped: Finding[] = ships.filter((c) => c.value.enforcedBy && !known.has(c.value.enforcedBy)).map((c) => ({
+      level: "problem",
+      message: `${c.id}: the shipped rule names as enforcedBy "${c.value.enforcedBy}", which is no check or gate`,
+    }))
+    return [...unknown, ...badShipped, ...active(ctx).flatMap((item): Finding[] => {
       const out: Finding[] = []
       const text = ruleText(item)
       if (!text || text === PLACEHOLDER) {
@@ -214,11 +297,21 @@ const check: Check = {
       const by = fieldValue(item, read(ENFORCED_BY))
       if (by && !known.has(by)) out.push({ level: "problem", item, message: `${label(item)}: enforcedBy names "${by}", which is no check or gate` })
       return out
-    })
+    })]
   },
+})
+
+/** The `retire` option: the shipped rules the project does not hold to, by name or qualified id. */
+function readRetire(options: Record<string, unknown>): ReadonlySet<string> {
+  const raw = options["retire"] ?? []
+  if (!Array.isArray(raw) || raw.some((x) => typeof x !== "string" || !x.trim())) {
+    throw new Error('rules: option retire must be a list of shipped rule names, such as ["long-work/long-work-through-naima-run"]')
+  }
+  return new Set(raw as string[])
 }
 
-export default function rules(): Plugin {
+export default function rules(options: Record<string, unknown> = {}): Plugin {
+  const retired = readRetire(options)
   return {
     name: "rules",
     contract: CONTRACT,
@@ -227,11 +320,14 @@ export default function rules(): Plugin {
       "A project's rules — how an agent works here (quiet, simple, fast), how it reports, what it asks before doing — are tracker data, one `rules` item each, so every project carries its own. " +
       "A rule's page is the rule and its reason; `audience` says whom it binds (`agents`, `people`, `everyone`), `strength` how much (`must`, `should`), and `enforcedBy`, when set, the check or gate that holds it. " +
       "An active rule is shown; a retired one is kept as history. `naima rules --audience agents` is what an agent reads at the start of work, and `naima guide` prints it first. " +
-      "`ack`, when a rule sets it, is the exact phrase an agent gives back in acknowledgement; `naima rules` and `naima guide` print every active one's, joined, as the line to give — `naima rules check-ack <file|->` checks that a piece of text carries them all, naming what is missing and exiting 1 if so.",
+      "`ack`, when a rule sets it, is the exact phrase an agent gives back in acknowledgement; `naima rules` and `naima guide` print every active one's, joined, as the line to give — `naima rules check-ack <file|->` checks that a piece of text carries them all, naming what is missing and exiting 1 if so. " +
+      "A plugin may also ship rules (the `rules` point): each is active in every project that loads the plugin, listed beside the project's own with the plugin that ships it, and retired by naming it in the `retire` option rather than by editing it.",
+    options: [{ name: "retire", default: "[]", says: "the shipped rules this project does not hold to, each by its name or qualified id (`<plugin>/<name>`)" }],
+    points: [rulesPoint],
     types: [rulesType],
     fields: [AUDIENCE, STRENGTH, ENFORCED_BY, ACK],
-    commands: [command],
-    checks: [check],
-    guide: [guide],
+    commands: [command(retired)],
+    checks: [check(retired)],
+    guide: [guide(retired)],
   }
 }
