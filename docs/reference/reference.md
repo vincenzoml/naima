@@ -19,6 +19,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [loop](#loop) — the non-stop loop: work on an explicit target until only the owner's work is left, then hand him the ordered list
 - [beta-markers](#beta-markers) — markers in the code for behaviour shipped without proof
 - [verifier](#verifier) — properties checked by formal-methods tools, with each run attached as evidence
+- [tools](#tools) — the tools plugins need, installed by Naima into its own directory on the machine it runs on: naima tools reports them, installs one with consent, removes one
 - [verifier-mcrl2](#verifier-mcrl2) — the mCRL2 adapter: a property is a modal mu-calculus formula over an mCRL2 specification
 - [ui](#ui) — the views plugins contribute, shown by `naima ui` in a native window, or the browser, from a server on this machine only
 - [metrics](#metrics) — named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline
@@ -82,6 +83,7 @@ Every command: what it does, and the policy or invariant it enforces — or noth
 | [`beta`](#naima-beta) | beta-markers | list what is marked as shipped without proof, and the state of each proof | nothing: it only reads |
 | [`verify`](#naima-verify) | verifier | run the verifier of properties and attach each run as evidence | a property holds only with a run of its verifier on exactly what it has now, attached as evidence; a model or input outside the project is refused |
 | [`verifiers`](#naima-verifiers) | verifier | list the verifier adapters every plugin contributes | nothing: it only reads |
+| [`tools`](#naima-tools) | tools | the tools the loaded plugins declare, on this machine or a declared host: what is installed, missing or unavailable; show what an install would fetch; install one with consent into Naima's own directory, its download checked and the tool verified, never touching PATH or the system; remove one; print an installed program's path | an install fetches only the declared source, refuses a size or sha256 that differs, keeps nothing that fails its verification, and goes on only with consent — a yes on a terminal, or --consent with --by, recorded in the receipt; nothing is written outside the tools directory; a tool another installed tool needs is not removed |
 | [`ui`](#naima-ui) | ui | show the views the plugins contribute — first the summary, the gates, what is next and the claims, then the boards, the metrics, the session notes, each item with its evidence and the other tabs — in a native window titled Naima, served from this machine only, live from the files; closing the window stops it | the views are served only on the loopback interface, and every request without this run's token is refused |
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to | numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason, ending with the line an agent must acknowledge back; or check that text carries every one (rules check-ack) | nothing: it only reads |
@@ -98,7 +100,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 
 | Point | Declared by | What it is | Contributed by |
 |---|---|---|---|
-| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, roles, announce, loop, beta-markers, verifier, ui, metrics, rules, long-work, commit-hooks, privacy, adopt, docs |
+| `commands` | core | `naima <name>`: a command, with its usage, options and examples | core, trackers, coordination, triage, gates, epics, planning, roles, announce, loop, beta-markers, verifier, tools, ui, metrics, rules, long-work, commit-hooks, privacy, adopt, docs |
 | `types` | core | item types: a directory of items, their statuses, and the status a new one starts in | trackers, epics, planning, verifier, rules |
 | `fields` | core | typed fields of an item's meta.json, and the types they apply to | core, trackers, triage, gates, planning, roles, announce, verifier, rules, privacy, adopt, docs |
 | `relations` | core | link relations between items, each naming its inverse | core, trackers, epics, planning |
@@ -114,6 +116,7 @@ Every kind of contribution is an extension point: the core's own, and any a plug
 | `gates` | gates | a named release or merge condition, backed by items: `title`, `says`, `decides`, `evaluate(ctx) → { holds, blocking, owed }` | verifier |
 | `roles` | roles | a role of the company of agents: `title`, what it `owns`, what it `refuses` (never empty), the `kinds` and `types` on its queue, and `queue(ctx)`, its open items most urgent first | roles |
 | `verifiers` | verifier | an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest | verifier, verifier-mcrl2 |
+| `tools` | tools | a tool a plugin needs, which `naima tools install` installs into Naima's own directory: name, exact version, licence, programs, how an install is verified, and per platform a source (url, size, sha256, format) or the answer saying why there is none | verifier-mcrl2 |
 | `ui-views` | ui | a view `naima ui` shows as a tab, or as a panel of its first screen: `name` (its path), `title`, `says`, `order` (lower first, 0 when absent), `panel` (true: on the first screen, not a tab), `render(params, ctx) → { data, html, css? }`, rendered at each request | coordination, triage, gates, ui, metrics |
 | `metric-kinds` | metrics | how a metric's number is read from its run: `read({ exit, stdout, stderr, seconds }, metric) → number \| { error }`, `readsExit` | metrics |
 | `metrics` | metrics | a named measurement: `run` (a program and its arguments) and `kind`, or a code `measure`; a bound — `atMost`, `atLeast` or `equals` — and `better` |  |
@@ -1840,25 +1843,74 @@ Properties: a property of the software, proven or refuted by a verifier. Items l
 |---|---|
 | `example-regex` | line-regex properties over a text file: "some <re>" or "never <re>" |
 
+## tools
+
+The tools plugins need, installed by Naima into its own directory on the machine it runs on: naima tools reports them, installs one with consent, removes one.
+
+Its contributions' qualified ids are `tools/<name>`.
+
+A plugin declares each tool it needs under `contributes.tools`: an exact version, a licence, its programs, how an install is verified, and per platform a source — url, size, sha256, format — or the answer saying why there is none. `naima tools` reports, for this machine, each declared tool as installed, missing or unavailable. `naima tools install <tool>` prints the plan — the tool and those it needs, each with source, size and licence — and goes on only with consent: a yes on a terminal, or `--consent` with `--by`, recorded in the receipt. It downloads into a staging directory, checks the size and the sha256, unpacks with the platform's own programs (`tar`, `hdiutil`; a `.deb` without dpkg; a `pip` source into a venv, hash-checked), runs the declared check, and renames the install into `<dir>/<tool>/<version>`. The directory is `$NAIMA_TOOLS`, or `~/Library/Application Support/naima/tools` (macOS), `~/.local/share/naima/tools` (Linux), `%LOCALAPPDATA%\naima\tools` (Windows): nothing goes on PATH or into the system, and deleting it removes every tool. A plugin finds an installed program with `installedProgram`. `--host` asks a host the long-work plugin declares, through its own Naima; an install there shows its plan and asks the consent here.
+
+**Extension points** it declares: `tools`.
+
+### naima tools
+
+The tools the loaded plugins declare, on this machine or a declared host: what is installed, missing or unavailable; show what an install would fetch; install one with consent into Naima's own directory, its download checked and the tool verified, never touching PATH or the system; remove one; print an installed program's path.
+
+**Enforces**: An install fetches only the declared source, refuses a size or sha256 that differs, keeps nothing that fails its verification, and goes on only with consent — a yes on a terminal, or --consent with --by, recorded in the receipt; nothing is written outside the tools directory; a tool another installed tool needs is not removed.
+
+```sh
+naima tools [--json] [--host <h>]
+naima tools show <tool> [--json] [--host <h>]
+naima tools install <tool> [--consent "<the yes, restated>" --by <who>] [--host <h>]
+naima tools remove <tool> [--host <h>]
+naima tools path <tool> [<program>]
+```
+
+| Option | Default | What it does |
+|---|---|---|
+| `--json` |  | print the report, or the plan, as JSON |
+| `--host` |  | ask this host, declared in the long-work plugin's hosts option, through its own Naima over ssh |
+| `--consent` |  | the yes of the person whose machine it is, restated: an install without a terminal needs it |
+| `--by` |  | who gave the consent: needed with --consent |
+
+Examples:
+
+```sh
+naima tools
+naima tools show mcrl2
+naima tools install mcrl2
+naima tools install storm --consent "yes, install Storm" --by owner
+naima tools install mcrl2 --host lab
+naima tools remove storm
+naima tools path storm python
+```
+
 ## verifier-mcrl2
 
 The mCRL2 adapter: a property is a modal mu-calculus formula over an mCRL2 specification.
 
 Its contributions' qualified ids are `verifier-mcrl2/<name>`.
 
-Off until `naima.json` names it under `plugins`, since it starts programs. Contributes the `mcrl2` verifier. `model` is an mCRL2 specification; `property` is a modal mu-calculus formula, inline, or the path of an `.mcf` file from the project root, which is then an input of the run. `naima verify` runs `mcrl22lps`, `lps2pbes --counter-example`, and `pbessolve` with an evidence file: `true` holds; `false` is violated, and the evidence, printed by `lps2lts` as an `.aut` labelled transition system, is the counterexample; any other answer, or `verifierOptions.timeoutSeconds` reached by a step, is unknown. A tool that is not there is an error run whose output begins `tool missing:`; a tool that fails is an error with its output. The version recorded is the first line of `mcrl22lps --version`.
+Off until `naima.json` names it under `plugins`, since it starts programs. Contributes the `mcrl2` verifier and the `mcrl2` tool. `model` is an mCRL2 specification; `property` is a modal mu-calculus formula, inline, or the path of an `.mcf` file from the project root, which is then an input of the run. `naima verify` runs `mcrl22lps`, `lps2pbes --counter-example`, and `pbessolve` with an evidence file: `true` holds; `false` is violated, and the evidence, printed by `lps2lts` as an `.aut` labelled transition system, is the counterexample; any other answer, or `verifierOptions.timeoutSeconds` reached by a step, is unknown. The tools are taken from `bin` when it is given, otherwise from the mCRL2 202607.0 that `naima tools install mcrl2` installed on this machine, otherwise from PATH; the plugin declares that tool, so `naima tools` reports it. A tool that is not there is an error run whose output begins `tool missing:`; a tool that fails is an error with its output. The version recorded is the first line of `mcrl22lps --version`.
 
 Options, each with the default it takes when nothing sets it:
 
 | Option | Default | What it does |
 |---|---|---|
-| `bin` | `PATH` | the absolute directory holding the mCRL2 tools; absent, they are looked up on PATH |
+| `bin` | `installed, then PATH` | the absolute directory holding the mCRL2 tools; absent, the mCRL2 naima tools installed on this machine, then PATH |
 
 **Verifiers**, used by `naima verify`
 
 | Verifier | What it checks |
 |---|---|
 | `mcrl2` | an mCRL2 specification against a modal mu-calculus formula, inline or an .mcf file: mcrl22lps, lps2pbes, pbessolve; the evidence is the counterexample |
+
+**Tools**, installed by `naima tools install`
+
+| Tool | Version | Licence | Platforms |
+|---|---|---|---|
+| `mcrl2` | 202607.0 | BSL-1.0 | darwin-arm64, darwin-x64, linux-x64, linux-arm64 (none), windows-x64 |
 
 ## ui
 

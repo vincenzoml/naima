@@ -87,9 +87,13 @@ export function declarationRefusal(t: unknown): string | null {
   if (!d || typeof d !== "object" || !nonEmpty(d.name) || !NAME.test(d.name)) return "has no name: one lowercase word"
   for (const k of ["title", "says", "version", "licence", "homepage"] as const) if (!nonEmpty(d[k])) return `has no ${k}`
   if (!Array.isArray(d.programs) || !d.programs.length || !d.programs.every(nonEmpty)) return "has no programs"
-  if (d.needs !== undefined && (!Array.isArray(d.needs) || !d.needs.every((n) => typeof n === "string" && NAME.test(n)))) return "has needs that are not tool names"
+  if (d.needs !== undefined && (!Array.isArray(d.needs) || !d.needs.every((n) => typeof n === "string" && NAME.test(n)))) {
+    return "has needs that are not tool names"
+  }
   const v = d.verify
-  if (!v || !nonEmpty(v.program) || !Array.isArray(v.args) || !nonEmpty(v.expect)) return "has no verify: a program, its arguments and what its output must contain"
+  if (!v || !nonEmpty(v.program) || !Array.isArray(v.args) || !nonEmpty(v.expect)) {
+    return "has no verify: a program, its arguments and what its output must contain"
+  }
   if (!d.programs.includes(v.program)) return `verifies with ${v.program}, which is not one of its programs`
   if (!d.platforms || typeof d.platforms !== "object") return "has no platforms"
   for (const [platform, s] of Object.entries(d.platforms)) {

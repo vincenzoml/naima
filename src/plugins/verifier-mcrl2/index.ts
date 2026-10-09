@@ -124,7 +124,8 @@ export function toolPath(tool: string, bin?: string): string {
 export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Verifier {
   const run = config.run ?? realRun
   const path = (tool: Tool): string => toolPath(tool, config.bin)
-  const missing = (tool: Tool): string => `tool missing: ${tool} is not ${config.bin ? `in ${config.bin}` : "installed by naima tools, nor on PATH"} — ${INSTALL}`
+  const missing = (tool: Tool): string =>
+    `tool missing: ${tool} is not ${config.bin ? `in ${config.bin}` : "installed by naima tools, nor on PATH"} — ${INSTALL}`
 
   function check({ model, property, options }: VerifyRequest, ctx: Context): VerifyResult {
     const seconds = timeoutOf(options)

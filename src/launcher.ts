@@ -37,7 +37,6 @@ import {
   EXCLUDE_FILES,
   findData,
   globalOptions,
-  toolsDir,
   message,
   POINTER_FILES,
   programOf,
@@ -45,6 +44,7 @@ import {
   real,
   RELAUNCH,
   runtimeOf,
+  toolsDir,
   toplevel,
   trackerOf,
   worktrees,
@@ -165,7 +165,9 @@ export function permissions(
   // A tools directory Deno cannot name is left out: no command reads it, and `naima tools` says why.
   const tools = p.tools && !real(p.tools).includes(",") ? [p.tools] : []
   return [
-    `--allow-read=${list([p.root, p.data, p.program, p.entry, ...(p.worktrees ?? []).map(real).filter((x) => !x.includes(",")), ...(p.ui?.read ?? []), ...tools])}`,
+    `--allow-read=${
+      list([p.root, p.data, p.program, p.entry, ...(p.worktrees ?? []).map(real).filter((x) => !x.includes(",")), ...(p.ui?.read ?? []), ...tools])
+    }`,
     `--allow-write=${list([p.tracker, p.data, p.program, ...(p.hostFiles ?? []), ...(p.ui?.write ?? []).filter((w) => tools.includes(w))])}`,
     p.ui?.runAll ? "--allow-run" : `--allow-run=${[...new Set(["git", ...(p.runs ?? []), ...(p.ui?.runs ?? [])])].join(",")}`,
     "--allow-env",

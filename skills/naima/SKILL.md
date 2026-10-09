@@ -115,6 +115,11 @@ through `naima run <name> --budget-time <d> -- <command>` and `naima wait
 <name> --timeout <d>`, never a hand-written wait loop
 ([long work](../../docs/agents/long-work.md)).
 
+A tool a verifier needs that is missing (`tool missing:`) is installed with
+`naima tools install <tool>`, only after showing the owner the plan and
+getting their yes, passed as `--consent "<their yes, restated>" --by <who>`
+([tools](../../docs/agents/tools.md)).
+
 ## 5. Work by the rules and the flows
 
 Read the rules before acting, then the flow that applies. They are plain

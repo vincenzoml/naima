@@ -29,6 +29,9 @@ The order is the order of the work: the first entries come first.
   property in Naima's own tracker.
 - **Red-then-green shown by the run itself**: the failing run on the old work
   attached and checked, not only its day recorded in `redSeen`.
+- **A Storm verifier**: Storm is installed by `naima tools install storm`
+  ([tools](guide/tools.md)), but no verifier runs it yet; on Windows, reaching
+  it through a Linux environment is not built.
 - **Today:** properties, `naima verify` and expiring proofs work, with the
   mCRL2 and VoxLogicA verifiers and an example one
   ([prove and close](guide/prove-and-close.md#two-model-checkers-mcrl2-and-voxlogica)).

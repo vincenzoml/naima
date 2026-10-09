@@ -98,7 +98,9 @@ export function readAr(bytes: Uint8Array): Map<string, Uint8Array> {
 }
 
 const failed = (what: string, r: ExecResult): NaimaError =>
-  refuse(`${what} failed (${r.error ?? `exit ${r.status}`})${r.stderr.trim() ? `: ${r.stderr.trim().split("\n").slice(-3).join(" ")}` : ""} — nothing installed`)
+  refuse(
+    `${what} failed (${r.error ?? `exit ${r.status}`})${r.stderr.trim() ? `: ${r.stderr.trim().split("\n").slice(-3).join(" ")}` : ""} — nothing installed`,
+  )
 
 /** Run a step; its result, or the refusal saying what failed. */
 function step(exec: Exec, what: string, program: string, args: string[], options?: { cwd?: string; input?: string }): ExecResult {
@@ -132,7 +134,9 @@ export function unpack(source: Source, archive: string, root: string, stage: str
       const mount = join(stage, "mnt")
       mkdirSync(mount, { recursive: true })
       // The image may ask to accept its licence agreement: the consent already given named that licence, so it is answered yes.
-      step(exec, "mounting the image with hdiutil", "hdiutil", ["attach", "-readonly", "-nobrowse", "-noautoopen", "-mountpoint", mount, archive], { input: "Y\n" })
+      step(exec, "mounting the image with hdiutil", "hdiutil", ["attach", "-readonly", "-nobrowse", "-noautoopen", "-mountpoint", mount, archive], {
+        input: "Y\n",
+      })
       try {
         const app = join(mount, source.app!)
         if (!existsSync(app)) throw refuse(`the image holds no ${source.app} — nothing installed`)
@@ -210,7 +214,9 @@ export async function installTool(tool: ToolDeclaration, source: Source, run: In
       run.out(`  ${tool.name}: downloading ${source.url}`)
       const got = await download(source.url, archive, source.size)
       if (got.bytes !== source.size) throw refuse(`${tool.name}: downloaded ${got.bytes} bytes, the declaration says ${source.size} — nothing installed`)
-      if (got.sha256 !== source.sha256) throw refuse(`${tool.name}: the download's sha256 is ${got.sha256}, the declaration says ${source.sha256} — nothing installed`)
+      if (got.sha256 !== source.sha256) {
+        throw refuse(`${tool.name}: the download's sha256 is ${got.sha256}, the declaration says ${source.sha256} — nothing installed`)
+      }
       run.out(`  ${tool.name}: ${got.bytes} bytes, sha256 as declared`)
     } else run.out(`  ${tool.name}: pip install from ${source.url}, every requirement hash-checked`)
     unpack(source, archive, root, stage, run.exec, run.os, run.python)

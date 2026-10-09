@@ -199,8 +199,9 @@ naima verify <property>
 It holds when mCRL2 says `true`. When it says `false`, the evidence mCRL2
 found — the steps that break the formula — is attached as the
 counterexample. The tools (`mcrl22lps`, `lps2pbes`, `pbessolve`, `lps2lts`)
-are looked up on `PATH`, or in the directory given as
-`plugins.verifier-mcrl2.options.bin`.
+are taken from the directory given as `plugins.verifier-mcrl2.options.bin`;
+otherwise from the mCRL2 202607.0 that `naima tools install mcrl2` installed
+on this machine ([tools](tools.md)); otherwise from `PATH`.
 
 **VoxLogicA** (`voxlogica`), for properties of images: a region is inside
 another, a lesion is found, a structure is connected. The model is a

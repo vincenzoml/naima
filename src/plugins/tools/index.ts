@@ -22,11 +22,11 @@ import {
   installDirOf,
   NaimaError,
   parse,
-  type Plugin,
   platformKey,
+  type Plugin,
   programFile,
-  RECEIPT,
   readHosts,
+  RECEIPT,
   str,
   toolsDir,
   usageError,
@@ -118,7 +118,13 @@ function installedAt(dir: string, tool: ToolDeclaration, platform: string, os: s
 }
 
 const sizeOf = (bytes: number): string =>
-  bytes >= 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : bytes >= 1e6 ? `${Math.round(bytes / 1e6)} MB` : bytes >= 1e3 ? `${Math.round(bytes / 1e3)} kB` : `${bytes} B`
+  bytes >= 1e9
+    ? `${(bytes / 1e9).toFixed(1)} GB`
+    : bytes >= 1e6
+    ? `${Math.round(bytes / 1e6)} MB`
+    : bytes >= 1e3
+    ? `${Math.round(bytes / 1e3)} kB`
+    : `${bytes} B`
 
 /** The machine the command looks at: its platform and tools directory. */
 function machine(world: ToolsWorld): { platform: string; dir: string } {
@@ -306,7 +312,9 @@ async function onHost(ctx: Context, world: ToolsWorld, host: Host, sub: string |
     plan = JSON.parse(asked.out) as PlanStep[]
   } catch {
     relay(ctx, host, asked)
-    throw refuse(`${host.name} (${host.ssh}) did not give its plan for ${name} (exit ${asked.code}) — its own Naima must have the tools plugin and the plugin declaring ${name}`)
+    throw refuse(
+      `${host.name} (${host.ssh}) did not give its plan for ${name} (exit ${asked.code}) — its own Naima must have the tools plugin and the plugin declaring ${name}`,
+    )
   }
   for (const l of planLines(plan, `${host.name} (${host.ssh})`)) ctx.out(l)
   const blocked = plan.find((s) => s.unavailable && !s.installed)
@@ -328,15 +336,23 @@ const toolsCommand = (world: () => ToolsWorld): Command => ({
   enforces:
     "an install fetches only the declared source, refuses a size or sha256 that differs, keeps nothing that fails its verification, and goes on only with consent — a yes on a terminal, or --consent with --by, recorded in the receipt; nothing is written outside the tools directory; a tool another installed tool needs is not removed",
   usage:
-    "tools [--json] [--host <h>] | tools show <tool> [--json] [--host <h>] | tools install <tool> [--consent \"<the yes, restated>\" --by <who>] [--host <h>] | tools remove <tool> [--host <h>] | tools path <tool> [<program>]",
+    'tools [--json] [--host <h>] | tools show <tool> [--json] [--host <h>] | tools install <tool> [--consent "<the yes, restated>" --by <who>] [--host <h>] | tools remove <tool> [--host <h>] | tools path <tool> [<program>]',
   options: [
     { name: "--json", says: "print the report, or the plan, as JSON" },
     { name: "--host", says: "ask this host, declared in the long-work plugin's hosts option, through its own Naima over ssh" },
     { name: "--consent", says: "the yes of the person whose machine it is, restated: an install without a terminal needs it" },
     { name: "--by", says: "who gave the consent: needed with --consent" },
   ],
-  examples: ["tools", "tools show mcrl2", "tools install mcrl2", 'tools install storm --consent "yes, install Storm" --by owner', "tools install mcrl2 --host lab", "tools remove storm", "tools path storm python"],
-  async run(args, ctx) {
+  examples: [
+    "tools",
+    "tools show mcrl2",
+    "tools install mcrl2",
+    'tools install storm --consent "yes, install Storm" --by owner',
+    "tools install mcrl2 --host lab",
+    "tools remove storm",
+    "tools path storm python",
+  ],
+  run(args, ctx) {
     const p = parse(args, { json: { type: "boolean" }, host: { type: "string" }, consent: { type: "string" }, by: { type: "string" } })
     const [sub, ...rest] = p.positionals
     const w = world()
@@ -366,6 +382,8 @@ const toolsCommand = (world: () => ToolsWorld): Command => ({
     }
     ctx.out(`tools on this machine (${r.platform}), in ${r.dir}:`)
     if (!r.tools.length) ctx.out("  no loaded plugin declares a tool")
+    const nameWidth = Math.max(8, ...r.tools.map((t) => t.name.length))
+    const versionWidth = Math.max(10, ...r.tools.map((t) => t.version.length))
     for (const t of r.tools) {
       const state = t.state === "installed"
         ? "installed"
@@ -374,7 +392,11 @@ const toolsCommand = (world: () => ToolsWorld): Command => ({
         : t.state === "unavailable"
         ? `unavailable here — ${t.answer}`
         : `no declaration for ${r.platform}`
-      ctx.out(`  ${t.name.padEnd(8)} ${t.version.padEnd(10)} ${state}${t.other?.length ? ` (also installed: ${t.other.join(", ")})` : ""}  [${t.plugin}]`)
+      ctx.out(
+        `  ${t.name.padEnd(nameWidth)} ${t.version.padEnd(versionWidth)} ${state}${
+          t.other?.length ? ` (also installed: ${t.other.join(", ")})` : ""
+        }  [${t.plugin}]`,
+      )
     }
     return EXIT.OK
   },

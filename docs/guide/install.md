@@ -22,9 +22,14 @@ curl -fsSL https://deno.land/install.sh | sh     # macOS, Linux
 irm https://deno.land/install.ps1 | iex          # Windows PowerShell
 ```
 
+The same by hand, step by step for each system, and how to check it:
+[Deno by hand](../../README.md#deno-by-hand).
+
 Nothing is installed globally for Naima itself: no `deno install -g`, no
 package, no binary on the path. Each project carries the Naima it runs, so
-two projects on one machine never share one, and never clash.
+two projects on one machine never share one, and never clash. The tools a
+plugin needs, such as a model checker, go into one directory of Naima's own
+([tools](tools.md)), never into the system.
 
 ## Bootstrap a project
 
@@ -272,9 +277,9 @@ under Deno with only these:
 
 | Permission | Granted | Why |
 |---|---|---|
-| read | the repository, the program wherever it is, and the data directory of every other worktree of the project | items, the project's markdown and source (the docs and beta-marker checks read them), git's view of branches, the commits the program is cloned from, and the uncommitted claims and notes of the other worktrees |
+| read | the repository, the program wherever it is, the data directory of every other worktree of the project, and the [tools directory](tools.md#where-the-tools-go) | items, the project's markdown and source (the docs and beta-marker checks read them), git's view of branches, the commits the program is cloned from, and the uncommitted claims and notes of the other worktrees |
 | write | `naima-tracker/` only, and the data or program directory if moved out of it | items, claims, notes, the program's own alignment, the commits fetched for it; nothing else in the project |
-| run | `git`, and the programs the loaded contributions declare | alignment, update, and reading claims and notes across branches; a [verifier](glossary.md#verifier)'s model checker (its `runs`, [the contract](../reference/plugin-contract.md#the-verifier-contract)); a declared [metric](metrics-and-budgets.md)'s program, the first word of its `run` |
+| run | `git`, and the programs the loaded contributions declare, by name or by their absolute path in the [tools directory](tools.md#where-the-tools-go) | alignment, update, and reading claims and notes across branches; a [verifier](glossary.md#verifier)'s model checker (its `runs`, [the contract](../reference/plugin-contract.md#the-verifier-contract)); a declared [metric](metrics-and-budgets.md)'s program, the first word of its `run` |
 | env | an allow-list: `HOME`, `PATH`, the user, shell, terminal, locale and temporary-directory variables, the proxy variables, Windows' system ones, and every `NAIMA_*`, `GIT_*`, `SSH_*`, `LC_*` and `DENO_*` | what git needs to reach a source, and Naima's own; nothing else of the environment reaches the program, nor the git it runs |
 | net | none, but the loopback interface for `naima ui` | the network is git's, in alignment and update; `naima ui` serves its window from this machine only |
 
@@ -291,6 +296,12 @@ run, and the environment. The program itself never calls native code nor
 loads code over the network. Running Deno is a wide grant — Deno can be
 asked for any permission — and is why only `ui` has it. The grant is
 `uiGrant` in `src/launcher.ts`.
+
+**`naima tools`, and no other command,** may also write the tools
+directory, reach any host, and run any program: an install downloads from a
+host a redirect chooses (a release's content server), and runs the unpackers
+(`tar`, `hdiutil`, `ditto`, `unzip`), a Python and the tool it verifies, none
+of which exists when the launcher starts ([tools](tools.md)).
 
 The list is `ENV` in `src/launcher.ts`. Deno cannot grant a named list of
 variables and still let the program hand git its environment, so the

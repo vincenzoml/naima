@@ -41,6 +41,7 @@ then any project, with its own checks in place of tests.
 | leave agents working and come back to only my part | [What happens while you are away](while-you-are-away.md) |
 | run a benchmark or a batch that takes hours, here or on another machine, and clean up after it | [Long work: run it, wait for it, clean up after it](long-work.md) |
 | prove a fix and close it | [Prove and close](prove-and-close.md) |
+| install the model checkers a plugin needs (mCRL2, Storm), here or on another machine | [Tools: what a plugin needs, installed by Naima](tools.md) |
 | know what may be announced, and keep the README true | [Announce only what is true](announce.md) |
 | measure the work — test time, coverage, warnings, complexity — hold it to a budget, and see how your code's quality moves over time | [Metrics and budgets](metrics-and-budgets.md) |
 | work on several things at once | [Work on several branches at once](several-branches.md) |
