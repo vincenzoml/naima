@@ -6,7 +6,7 @@
 
 import { spawnSync } from "node:child_process"
 import { createHash, randomUUID } from "node:crypto"
-import { closeSync, cpSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeFileSync, writeSync } from "node:fs"
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeFileSync, writeSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { installDirOf, NaimaError, programFile, RECEIPT } from "../../core/api.ts"
 import type { Source, ToolDeclaration } from "./contract.ts"
@@ -136,7 +136,8 @@ export function unpack(source: Source, archive: string, root: string, stage: str
       try {
         const app = join(mount, source.app!)
         if (!existsSync(app)) throw refuse(`the image holds no ${source.app} — nothing installed`)
-        cpSync(app, join(root, source.app!), { recursive: true, verbatimSymlinks: true })
+        // ditto, macOS's own copier, keeps the bundle's symlinks, modes and signature; Deno's cpSync cannot make a symlink inside the launcher's fence.
+        step(exec, "copying the app out of the image with ditto", "ditto", [app, join(root, source.app!)])
       } finally {
         const r = exec("hdiutil", ["detach", mount])
         if (r.status !== 0) exec("hdiutil", ["detach", "-force", mount])
