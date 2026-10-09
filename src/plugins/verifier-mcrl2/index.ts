@@ -19,7 +19,10 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, isAbsolute, join, resolve } from "node:path"
-import { type Context, CONTRACT, message, type Plugin } from "../../core/api.ts"
+import { type Context, CONTRACT, installedProgram, message, type Plugin } from "../../core/api.ts"
+import { MCRL2 } from "./tool.ts"
+
+export { MCRL2 } from "./tool.ts"
 
 /** What a run of one program gave: its exit status and output, and whether it was not there or ran out of time. */
 export interface ToolRun {
@@ -77,7 +80,8 @@ export const realRun: Runner = (program, args, cwd, timeoutMs) => {
 const TOOLS = ["mcrl22lps", "lps2pbes", "pbessolve", "lps2lts"] as const
 type Tool = (typeof TOOLS)[number]
 
-const INSTALL = "install the mCRL2 toolset (https://www.mcrl2.org), put its tools on PATH or set plugins.verifier-mcrl2.options.bin to their directory"
+const INSTALL =
+  "naima tools install mcrl2 installs mCRL2 202607.0 into Naima's own tools directory; or set plugins.verifier-mcrl2.options.bin to the directory of an mCRL2 installed otherwise"
 
 /** The folder beside the program a run keeps its intermediate files in: inside the launcher's fence, and ignored by git through its own .gitignore. */
 export const WORK_DIR = ".naima-work"
@@ -108,11 +112,19 @@ const timeoutOf = (options: Record<string, unknown>): number | undefined => {
 
 const shown = (r: ToolRun): string => [r.stdout.trim(), r.stderr.trim()].filter(Boolean).join("\n")
 
-/** The adapter, its tools from `bin` (a directory) or PATH, started by `run`. */
+/**
+ * Where a tool is: in `bin` when it is given; otherwise the mCRL2 `naima tools install mcrl2` installed on this
+ * machine; otherwise its name, looked up on PATH.
+ */
+export function toolPath(tool: string, bin?: string): string {
+  return bin ? join(bin, tool) : installedProgram(MCRL2, tool) ?? tool
+}
+
+/** The adapter, its tools from `bin` (a directory), the installed mCRL2 or PATH, started by `run`. */
 export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Verifier {
   const run = config.run ?? realRun
-  const path = (tool: Tool): string => (config.bin ? join(config.bin, tool) : tool)
-  const missing = (tool: Tool): string => `tool missing: ${tool} is not ${config.bin ? `in ${config.bin}` : "on PATH"} — ${INSTALL}`
+  const path = (tool: Tool): string => toolPath(tool, config.bin)
+  const missing = (tool: Tool): string => `tool missing: ${tool} is not ${config.bin ? `in ${config.bin}` : "installed by naima tools, nor on PATH"} — ${INSTALL}`
 
   function check({ model, property, options }: VerifyRequest, ctx: Context): VerifyResult {
     const seconds = timeoutOf(options)
@@ -188,12 +200,18 @@ export function mcrl2Plugin(options: Record<string, unknown> = {}, run: Runner =
     contract: CONTRACT,
     says: "the mCRL2 adapter: a property is a modal mu-calculus formula over an mCRL2 specification",
     about:
-      "Off until `naima.json` names it under `plugins`, since it starts programs. Contributes the `mcrl2` verifier. `model` is an mCRL2 specification; `property` is a modal mu-calculus formula, inline, or the path of an `.mcf` file from the project root, which is then an input of the run. " +
+      "Off until `naima.json` names it under `plugins`, since it starts programs. Contributes the `mcrl2` verifier and the `mcrl2` tool. `model` is an mCRL2 specification; `property` is a modal mu-calculus formula, inline, or the path of an `.mcf` file from the project root, which is then an input of the run. " +
       "`naima verify` runs `mcrl22lps`, `lps2pbes --counter-example`, and `pbessolve` with an evidence file: `true` holds; `false` is violated, and the evidence, printed by `lps2lts` as an `.aut` labelled transition system, is the counterexample; any other answer, or `verifierOptions.timeoutSeconds` reached by a step, is unknown. " +
-      "A tool that is not there is an error run whose output begins `tool missing:`; a tool that fails is an error with its output. The version recorded is the first line of `mcrl22lps --version`.",
-    options: [{ name: "bin", says: "the absolute directory holding the mCRL2 tools; absent, they are looked up on PATH", default: "PATH" }],
-    contributes: { verifiers: [mcrl2Verifier({ ...(typeof bin === "string" ? { bin } : {}), run })] },
-    optional: ["verifiers"],
+      "The tools are taken from `bin` when it is given, otherwise from the mCRL2 202607.0 that `naima tools install mcrl2` installed on this machine, otherwise from PATH; the plugin declares that tool, so `naima tools` reports it. A tool that is not there is an error run whose output begins `tool missing:`; a tool that fails is an error with its output. The version recorded is the first line of `mcrl22lps --version`.",
+    options: [
+      {
+        name: "bin",
+        says: "the absolute directory holding the mCRL2 tools; absent, the mCRL2 naima tools installed on this machine, then PATH",
+        default: "installed, then PATH",
+      },
+    ],
+    contributes: { verifiers: [mcrl2Verifier({ ...(typeof bin === "string" ? { bin } : {}), run })], tools: [MCRL2] },
+    optional: ["verifiers", "tools"],
   }
 }
 

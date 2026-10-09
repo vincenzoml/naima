@@ -15,7 +15,12 @@
 // other command, may read and run that Deno too — to start a run's supervisor,
 // a process of its own (src/plugins/long-work/supervisor.ts) — and run ssh,
 // to reach a host; and they are handed the whole environment, which a run's
-// command inherits as the caller's.
+// command inherits as the caller's. Every command may read the tools
+// directory, where an installed tool's programs are (src/core/tools.ts);
+// `naima tools`, and no other command, may write it, use the network and run
+// any program: an install downloads from a host a redirect chooses, and runs
+// unpackers, a Python and the tool it verifies, none of which exists when the
+// launcher starts.
 //
 // The data is the program's sibling, `dirname(program)/naima-data`, unless
 // --data or NAIMA_DATA names it. When the program exits with RELAUNCH it has
@@ -32,6 +37,7 @@ import {
   EXCLUDE_FILES,
   findData,
   globalOptions,
+  toolsDir,
   message,
   POINTER_FILES,
   programOf,
@@ -100,11 +106,16 @@ export function allowedEnv(env: Record<string, string>): Record<string, string> 
   return Object.fromEntries(Object.entries(env).filter(([name]) => keep(name)))
 }
 
-/** What one command is granted besides the rest: `naima ui`'s, or `naima run`'s and `naima wait`'s. */
+/** What one command is granted besides the rest: `naima ui`'s, `naima run`'s and `naima wait`'s, or `naima tools`'. */
 export interface UiGrant {
   net: string[]
   read: string[]
   runs: string[]
+  /** Directories it may write besides the tracker folder. */
+  write?: string[]
+  /** Any host, any program: what an install needs (`naima tools`). */
+  netAll?: boolean
+  runAll?: boolean
   /** Hand the program the whole environment rather than ENV's: a run's command inherits it as the caller's. */
   wholeEnv?: boolean
 }
@@ -112,8 +123,9 @@ export interface UiGrant {
 /** The program that opens the default browser, by operating system: the same src/plugins/ui/open.ts starts. */
 export const BROWSER_OPENER: Record<string, string> = { darwin: "open", windows: "rundll32", linux: "xdg-open" }
 
-/** The grant of `command`: only `ui`, `run` and `wait` have one. */
-export function uiGrant(command: string | undefined, os: string, deno: string): UiGrant | null {
+/** The grant of `command`: only `ui`, `run`, `wait` and `tools` have one; `tools` is the tools directory to write. */
+export function uiGrant(command: string | undefined, os: string, deno: string, tools: string | null = null): UiGrant | null {
+  if (command === "tools") return { net: [], read: [], runs: [], write: tools ? [tools] : [], netAll: true, runAll: true }
   if (command === "run" || command === "wait") return { net: [], read: [deno], runs: [deno, "ssh"], wholeEnv: true }
   if (command !== "ui") return null
   return { net: ["127.0.0.1"], read: [deno], runs: [deno, BROWSER_OPENER[os] ?? "xdg-open"] }
@@ -136,6 +148,8 @@ export function permissions(
     runs?: string[]
     /** What `naima ui` is granted besides: null for every other command. */
     ui?: UiGrant | null
+    /** The tools directory, which every command may read: null when there is none. */
+    tools?: string | null
   },
 ): string[] {
   const list = (paths: (string | null)[]) => {
@@ -148,12 +162,14 @@ export function permissions(
     }
     return all.join(",")
   }
+  // A tools directory Deno cannot name is left out: no command reads it, and `naima tools` says why.
+  const tools = p.tools && !real(p.tools).includes(",") ? [p.tools] : []
   return [
-    `--allow-read=${list([p.root, p.data, p.program, p.entry, ...(p.worktrees ?? []).map(real).filter((x) => !x.includes(",")), ...(p.ui?.read ?? [])])}`,
-    `--allow-write=${list([p.tracker, p.data, p.program, ...(p.hostFiles ?? [])])}`,
-    `--allow-run=${[...new Set(["git", ...(p.runs ?? []), ...(p.ui?.runs ?? [])])].join(",")}`,
+    `--allow-read=${list([p.root, p.data, p.program, p.entry, ...(p.worktrees ?? []).map(real).filter((x) => !x.includes(",")), ...(p.ui?.read ?? []), ...tools])}`,
+    `--allow-write=${list([p.tracker, p.data, p.program, ...(p.hostFiles ?? []), ...(p.ui?.write ?? []).filter((w) => tools.includes(w))])}`,
+    p.ui?.runAll ? "--allow-run" : `--allow-run=${[...new Set(["git", ...(p.runs ?? []), ...(p.ui?.runs ?? [])])].join(",")}`,
     "--allow-env",
-    ...(p.ui?.net.length ? [`--allow-net=${p.ui.net.join(",")}`] : []),
+    ...(p.ui?.netAll ? ["--allow-net"] : p.ui?.net.length ? [`--allow-net=${p.ui.net.join(",")}`] : []),
   ]
 }
 
@@ -169,7 +185,7 @@ function otherWorktrees(root: string, data: string | null): string[] {
 }
 
 /** The first-party plugins loaded only when the project's plugins table names them: each starts a program. Kept equal to builtins.ts's `optIn` by a test. */
-export const OPT_IN: readonly string[] = ["verifier-mcrl2", "verifier-voxlogica"]
+export const OPT_IN: readonly string[] = ["verifier-mcrl2", "verifier-voxlogica", "storm"]
 
 /** An entry of the plugins table that switches its plugin on: present, and not `enabled: false`. */
 const isOn = (e: unknown): boolean => !!e && typeof e === "object" && (e as { enabled?: unknown }).enabled !== false
@@ -271,12 +287,13 @@ export async function launch(args: string[], cwd: string): Promise<number> {
   const root = toplevel(existing(tracker)) ?? resolve(cwd)
   const env = { ...allowedEnv(Deno.env.toObject()), NAIMA_LAUNCHED: "1", ...(given ? { NAIMA_DATA: real(data) } : {}) }
   const others = otherWorktrees(root, data)
-  const ui = uiGrant(parsed.rest[0], Deno.build.os, Deno.execPath())
+  const tools = toolsDir(Deno.env.toObject(), Deno.build.os)
+  const ui = uiGrant(parsed.rest[0], Deno.build.os, Deno.execPath(), tools)
   let entry = runtimeOf(program) ?? own
   for (let run = 0; run < MAX_RUNS; run++) {
     let flags: string[]
     try {
-      const fence = { root, tracker, data, program, entry, hostFiles: hostFiles(parsed.rest, root, data), worktrees: others }
+      const fence = { root, tracker, data, program, entry, hostFiles: hostFiles(parsed.rest, root, data), worktrees: others, tools }
       const read = permissions(fence)[0] ?? ""
       flags = permissions({ ...fence, runs: mayRun(data) ? declaredRuns(entry, cwd, read, env) : [], ui })
     } catch (e) {

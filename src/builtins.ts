@@ -18,10 +18,12 @@ import metrics from "./plugins/metrics/index.ts"
 import packAnalyses from "./plugins/pack-analyses/index.ts"
 import packPapers from "./plugins/pack-papers/index.ts"
 import planning from "./plugins/planning/index.ts"
+import storm from "./plugins/storm/index.ts"
 import ruleTemplates from "./plugins/rule-templates/index.ts"
 import privacy from "./plugins/privacy/index.ts"
 import roles from "./plugins/roles/index.ts"
 import rules from "./plugins/rules/index.ts"
+import tools from "./plugins/tools/index.ts"
 import trackers from "./plugins/trackers/index.ts"
 import triage from "./plugins/triage/index.ts"
 import ui from "./plugins/ui/index.ts"
@@ -42,8 +44,10 @@ export const firstParty: readonly FirstParty[] = [
   { name: "loop", factory: loop },
   { name: "beta-markers", factory: betaMarkers },
   { name: "verifier", factory: verifier },
+  { name: "tools", factory: tools },
   { name: "verifier-mcrl2", factory: verifierMcrl2, optIn: true },
   { name: "verifier-voxlogica", factory: verifierVoxlogica, optIn: true },
+  { name: "storm", factory: storm, optIn: true },
   { name: "pack-analyses", factory: packAnalyses, optIn: true },
   { name: "pack-papers", factory: packPapers, optIn: true },
   { name: "ui", factory: ui },
