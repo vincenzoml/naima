@@ -17,6 +17,8 @@ export interface VerifyResult {
   verdict: Verdict
   output: string
   counterexample?: string
+  /** How the verdict was reached — the route, the sizes, the tools' versions — as a JSON object the run record keeps. */
+  details?: Record<string, unknown>
 }
 
 /** An adapter to a formal-methods tool. */
@@ -42,7 +44,7 @@ export interface Verifier {
 export const verifiersPoint: ExtensionPoint<Verifier> = {
   id: "verifiers",
   says:
-    "an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest",
+    "an adapter to a formal-methods tool: `verify({ model, property, options }, ctx) → { verdict, output, counterexample?, details? }`; optionally `inputs(request, ctx)`, every file a run reads, and `version(ctx)`, the tool's version, both kept in the run's digest",
   noun: "verifier",
   stored: true,
   key: (v) => v.id,

@@ -71,6 +71,8 @@ export interface RunRecord {
   verdict: Verdict
   output: string
   counterexample?: string
+  /** How the adapter reached the verdict, as it said: a JSON object; absent when it said nothing. */
+  details?: Record<string, unknown>
   at: string
 }
 
@@ -86,7 +88,7 @@ const VERDICTS: readonly Verdict[] = ["holds", "violated", "error", "unknown"]
 /** An adapter's answer held to the contract: anything outside it is an `error`, with an output that says why. */
 export function inContract(id: string, result: unknown): VerifyResult {
   if (!result || typeof result !== "object") return { verdict: "error", output: `adapter "${id}" returned ${String(result)}, not a result` }
-  const { verdict, output, counterexample } = result as Record<string, unknown>
+  const { verdict, output, counterexample, details } = result as Record<string, unknown>
   if (!VERDICTS.includes(verdict as Verdict)) {
     return {
       verdict: "error",
@@ -96,8 +98,16 @@ export function inContract(id: string, result: unknown): VerifyResult {
     }
   }
   if (typeof output !== "string") return { verdict: "error", output: `adapter "${id}" returned verdict ${String(verdict)} with no string output` }
-  return { verdict: verdict as Verdict, output, ...(typeof counterexample === "string" ? { counterexample } : {}) }
+  if (details !== undefined && !isObject(details)) return { verdict: "error", output: `adapter "${id}" returned details that are not a JSON object` }
+  return {
+    verdict: verdict as Verdict,
+    output,
+    ...(typeof counterexample === "string" ? { counterexample } : {}),
+    ...(details !== undefined ? { details: details as Record<string, unknown> } : {}),
+  }
 }
+
+const isObject = (v: unknown): boolean => !!v && typeof v === "object" && !Array.isArray(v)
 
 const sha256 = (path: string): string => createHash("sha256").update(readFileSync(path)).digest("hex")
 
@@ -145,6 +155,7 @@ function asRun(value: unknown): RunRecord | string {
   for (const k of ["optionsSha256", "counterexample", "toolVersion", "inputsSha256"]) {
     if (r[k] !== undefined && typeof r[k] !== "string") return `${k} is not text`
   }
+  if (r["details"] !== undefined && !isObject(r["details"])) return "details is not a JSON object"
   const inputs = r["inputs"]
   if (
     inputs !== undefined &&
@@ -237,6 +248,7 @@ export async function verifyItem(ctx: Context, item: Item): Promise<Verdict> {
     output: result.output,
     at,
     ...(result.counterexample !== undefined ? { counterexample: result.counterexample } : {}),
+    ...(result.details !== undefined ? { details: result.details } : {}),
   }
   const name = `run-${stamp}.json`
   writeJson(join(item.dir, ATTACHMENTS, name), record)
@@ -422,7 +434,7 @@ export default function verifier(): Plugin {
     says: "properties checked by formal-methods tools, with each run attached as evidence",
     about:
       "A `properties` item names a `verifier` (an adapter any plugin can contribute), a `model` file (a path from the project root) and a `property` in the verifier's own language. " +
-      "`naima verify` runs the adapter and attaches the run — verdict, output, the model's sha256, and one digest over every file the run read (the model and what the adapter's `inputs` says it includes) and the tool's version (the adapter's `version`) — and the counterexample as its own file, then sets the status from the verdict. " +
+      "`naima verify` runs the adapter and attaches the run — verdict, output, the adapter's `details` of how it reached the verdict when it gives them, the model's sha256, and one digest over every file the run read (the model and what the adapter's `inputs` says it includes) and the tool's version (the adapter's `version`) — and the counterexample as its own file, then sets the status from the verdict. " +
       "A property that holds is evidence exactly as a passed test is: it can `verify` a bug and close it. A verdict is only as good as what it was reached on, so `naima check` fails when a property claims to hold and its property, verifier, model path, `verifierOptions`, model contents, any file it includes, the set of files it reads, or the tool's version have changed since the run. " +
       "The shipped adapter, `example-regex`, is a stand-in that shows the shape of a real one; the opt-in `verifier-mcrl2` and `verifier-voxlogica` plugins contribute the real ones.",
     types: [

@@ -198,10 +198,44 @@ naima verify <property>
 
 It holds when mCRL2 says `true`. When it says `false`, the evidence mCRL2
 found — the steps that break the formula — is attached as the
-counterexample. The tools (`mcrl22lps`, `lps2pbes`, `pbessolve`, `lps2lts`)
-are taken from the directory given as `plugins.verifier-mcrl2.options.bin`;
-otherwise from the mCRL2 202607.0 that `naima tools install mcrl2` installed
-on this machine ([tools](tools.md)); otherwise from `PATH`.
+counterexample. The tools (`mcrl22lps`, `lps2pbes`, `pbessolve`, `lps2lts`,
+and for the LTS route `ltsinfo`, `ltsconvert`, `lts2pbes`) are taken from the
+directory given as `plugins.verifier-mcrl2.options.bin`; otherwise from the
+mCRL2 202607.0 that `naima tools install mcrl2` installed on this machine
+([tools](tools.md)); otherwise from `PATH`.
+
+Some models have few states but heavy data, and mCRL2's standard route
+spends hours on them rewriting data. For those, a property can take the
+**LTS route**: the state space of the model is generated once, and each
+formula is checked on it after hiding the actions the formula does not
+mention and shrinking what is left without changing the answer — seconds per
+property, where the standard route took hours. Choose it in
+`verifierOptions`:
+
+```sh
+naima set <property> 'verifierOptions={"route":"lts","threads":8}'
+```
+
+- The shrinking is exact only for formulas that never count internal steps.
+  Naima checks each formula before using the route: every action named in a
+  box or a diamond must come right after a `true*`-like star (`[true* .
+  ready(n)]`, not `[ready(n)]`), and a fixpoint must be one of the usual
+  "eventually" shapes, such as `mu X . ([!done]X && <true>true)`. A formula
+  that does not pass is recorded as an error beginning `LTS route refused:`,
+  saying which part fails; the standard route still decides it.
+- The state space is generated once per version of the model and shared by
+  every property on that model, in Naima's work folder; changing the model
+  makes a new one.
+- The run record says how the verdict was reached: the route, the size of
+  the state space before and after shrinking, the hidden actions, and the
+  version of every tool. On `false`, the counterexample comes from the full
+  state space, over the model's own actions.
+- `"route":"cross-check"` runs both routes and holds only when they agree;
+  if they disagree the run is an error. Run it once on a model small enough
+  for the standard route, to see that the two give the same answers, before
+  trusting the LTS route alone on the large ones.
+- `threads` speeds up generating the state space; on macOS more than one
+  thread can crash on some models, as mCRL2 itself warns.
 
 **VoxLogicA** (`voxlogica`), for properties of images: a region is inside
 another, a lesion is found, a structure is connected. The model is a
