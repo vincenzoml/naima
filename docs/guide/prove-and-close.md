@@ -162,7 +162,10 @@ names a hash git does not have.
 A [property](glossary.md#property) is proven by a [verifier](glossary.md#verifier)
 — a model checker — instead of by hand. `naima verifiers` lists the ones
 available; `naima verify <property>` runs it and attaches the run. A property
-becomes `holds` only that way, never with `naima set`.
+becomes `holds` only that way, never with `naima set`. A long verification says
+how far it is while it runs: the properties done of those asked, and each
+step of the tool — for mCRL2, the states explored and the equations
+generated, with their rate.
 
 The run records every file the tool read — the model and each file it
 includes, as the adapter declares them — with one digest over all of them

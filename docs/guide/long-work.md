@@ -24,8 +24,40 @@ naima run bench --budget-time 2h --budget-disk 20G --creates /tmp/bench-stores -
 
 The command runs in the folder you start it from, with your environment,
 detached: closing the session does not stop it. Its output goes to a log, and
-it may write a line to the file named by `$NAIMA_RUN_PROGRESS` to say how far
-it is.
+it says how far it is in the file named by `$NAIMA_RUN_PROGRESS` (below).
+
+## Say how far it is
+
+Long work reports its progress: that is
+[a rule](rules.md#long-work-reports-its-progress-or-says-why-it-cannot-and-what-it-reports-instead).
+The command writes one line at a time to `$NAIMA_RUN_PROGRESS`; the last line
+counts. A JSON object is read field by field, each field optional:
+
+```sh
+echo '{"stage":"render","done":12,"total":40,"unit":"frames"}' >> "$NAIMA_RUN_PROGRESS"
+```
+
+- `stage` — what it is doing now; `done`, `total`, `unit` — how much of it is
+  done, of how much, of what;
+- `note` — anything else worth saying;
+- `overall` — `{ "done", "total", "unit" }` for the whole work around the
+  stage, such as scenes around frames.
+
+Any other line is shown as it is. Naima works out the rate and, when the total
+is known, the time left, and shows them as
+`render: 12/40 frames (30%) · 2/s · ETA 14s`. Naima's own commands — `naima
+verify`, `naima metrics run`, `naima tools install` — write these lines by
+themselves when they run inside `naima run`, and print them on the terminal
+otherwise, once they have run for a couple of seconds.
+
+A command that truly cannot say how far it is — a solver with no progress
+output — is started with the reason instead:
+
+```sh
+naima run solve --budget-time 12h --no-progress "the solver prints nothing until it ends" -- ./solve.sh
+```
+
+It is then shown with its elapsed time and the last line of its log.
 
 ## Wait for it, see it, stop it
 
@@ -36,14 +68,16 @@ naima run status bench --tail 50  # one run, with the end of its log
 naima run stop bench              # end it now
 ```
 
-`naima wait` prints how the run ended — succeeded, failed with its exit code,
-killed by a budget, stopped — with the end of its log, and exits 0 only when
-it succeeded. If the run is still going when the timeout passes, it says so
+While it waits, `naima wait` prints every 30 seconds (`--report`) how long
+the run has been going and its progress. Then it prints how the run ended —
+succeeded, failed with its exit code, killed by a budget, stopped — with the
+end of its log, and exits 0 only when it succeeded. If the run is still going when the timeout passes, it says so
 and exits 1: waiting again is a decision, never an accident.
 
 `naima run list` marks two kinds of runs in capitals: **STALE**, still
-running but silent (neither the log nor the progress file has changed for
-`--stale`, 15 minutes by default), and **LOST**, whose supervisor stopped
+running but silent — no new progress line for `--stale`, 2 minutes by
+default; for a run started with `--no-progress`, nothing new in its log or
+progress file for 15 minutes — and **LOST**, whose supervisor stopped
 reporting — killed, or the machine restarted — so nobody knows how it ended.
 
 ## Clean up
@@ -81,3 +115,5 @@ folder ignores itself, so nothing of it is ever committed.
 macOS and Linux: everything above. Windows: local runs, ended with `taskkill`;
 a Windows machine cannot be a `--host`. The rule that makes these commands
 mandatory for agents: [long work goes through naima run](rules.md#long-work-goes-through-naima-run-and-naima-wait).
+The rule that it says how far it is:
+[long work reports its progress](rules.md#long-work-reports-its-progress-or-says-why-it-cannot-and-what-it-reports-instead).

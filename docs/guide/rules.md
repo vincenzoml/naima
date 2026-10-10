@@ -220,6 +220,27 @@ check `wait-loops`, on every tracked shell script (a session note that
 records such a wait is noted); the rest is **convention**:
 [long work](../agents/long-work.md), [for people](long-work.md).
 
+### Long work reports its progress, or says why it cannot and what it reports instead
+
+Work that can last more than a few seconds reports its progress at least
+every few seconds: how much is done of the total, or the stage it is in with
+a count, and an estimate of the time left whenever the total is known. Where
+that is truly impossible — a tool with no progress interface — the work
+declares so, with the reason, and reports what it can: the elapsed time, the
+stage, and the tool's own log lines. A run started with `naima run` writes
+its progress to `$NAIMA_RUN_PROGRESS`, or is started with `--no-progress
+"<reason>"`; a Naima command that can run long declares how it reports, or
+why it cannot. Why: a solver ran for more than 11 hours on each of two
+properties with nothing to show whether it was moving, how fast, or when it
+would end; a silent run cannot be told apart from a hung one. Shipped with
+Naima, active for everyone in every project, acknowledged as "Progress mode
+on". **Enforced by** the check `progress-declared`: a command declared long
+that says neither, a `naima run` in a tracked shell script with neither
+progress nor a reason, and (noted) a run here silent past its threshold that
+never wrote progress; the rest is **convention**:
+[saying how far it is](long-work.md#say-how-far-it-is),
+[long work, for agents](../agents/long-work.md).
+
 ### Use the state-of-the-art method for the job
 
 Every action is done with the method made for it: a real parser for a

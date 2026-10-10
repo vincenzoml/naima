@@ -28,11 +28,11 @@
 // The verifier point belongs to the verifier plugin, and plugins never import
 // each other: the shapes it takes are declared here.
 
-import { spawnSync } from "node:child_process"
+import { spawn } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
-import { type Context, CONTRACT, installedProgram, message, type Plugin } from "../../core/api.ts"
+import { type Context, CONTRACT, installedProgram, message, NO_PROGRESS, type Plugin, type Progress } from "../../core/api.ts"
 import { checkFragment, labelActions } from "./formula.ts"
 import { cacheKey, cacheRoot, discard, ENTRY_LPS, ENTRY_LTS, freshFolder, type LtsRecord, prune, publish, readEntry, sha256File } from "./lts-cache.ts"
 import { MCRL2 } from "./tool.ts"
@@ -49,13 +49,14 @@ export interface ToolRun {
   error?: string
 }
 
-/** Runs one program: the real one starts it; a test replays recorded output. */
-export type Runner = (program: string, args: string[], cwd: string, timeoutMs?: number) => ToolRun
+/** Runs one program: the real one starts it; a test replays recorded output. `onStderr` is given its standard error as it comes. */
+export type Runner = (program: string, args: string[], cwd: string, timeoutMs?: number, onStderr?: (chunk: string) => void) => ToolRun | Promise<ToolRun>
 
 interface VerifyRequest {
   model: string
   property: string
   options: Record<string, unknown>
+  progress?: Progress
 }
 interface VerifyResult {
   verdict: "holds" | "violated" | "error" | "unknown"
@@ -72,25 +73,72 @@ interface Verifier {
   version(ctx: Context): Promise<string>
 }
 
-/** The program, started for real: colour off, no shell. */
-export const realRun: Runner = (program, args, cwd, timeoutMs) => {
-  try {
-    const r = spawnSync(program, args, {
-      cwd,
-      encoding: "utf8",
-      maxBuffer: 256 * 1024 * 1024,
-      env: { ...process.env, NO_COLOR: "1" },
-      ...(timeoutMs ? { timeout: timeoutMs } : {}),
+/** The program, started for real: colour off, no shell; its standard error handed to `onStderr` as it comes, so a long step reports while it runs. */
+export const realRun: Runner = (program, args, cwd, timeoutMs, onStderr) =>
+  new Promise<ToolRun>((done) => {
+    let settled = false
+    const finish = (r: ToolRun): void => {
+      if (settled) return
+      settled = true
+      if (timer !== undefined) clearTimeout(timer)
+      done(r)
+    }
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let child: ReturnType<typeof spawn>
+    try {
+      child = spawn(program, args, { cwd, env: { ...process.env, NO_COLOR: "1" }, stdio: ["ignore", "pipe", "pipe"], windowsHide: true })
+    } catch (e) {
+      // Deno refuses a program the launcher did not grant by throwing, not by an error on the result.
+      finish({ exit: -1, stdout: "", stderr: "", error: message(e) })
+      return
+    }
+    let stdout = ""
+    let stderr = ""
+    let timedOut = false
+    child.stdout!.setEncoding("utf8")
+    child.stderr!.setEncoding("utf8")
+    child.stdout!.on("data", (c: string) => (stdout += c))
+    child.stderr!.on("data", (c: string) => {
+      stderr += c
+      onStderr?.(c)
     })
-    const code = (r.error as { code?: string } | undefined)?.code
-    if (code === "ENOENT") return { exit: -1, stdout: "", stderr: "", missing: true }
-    if (code === "ETIMEDOUT" || (timeoutMs && r.signal === "SIGTERM")) return { exit: -1, stdout: r.stdout ?? "", stderr: r.stderr ?? "", timedOut: true }
-    if (r.error) return { exit: -1, stdout: "", stderr: "", error: message(r.error) }
-    return { exit: r.status ?? -1, stdout: r.stdout ?? "", stderr: r.stderr ?? "" }
-  } catch (e) {
-    // Deno refuses a program the launcher did not grant by throwing, not by an error on the result.
-    return { exit: -1, stdout: "", stderr: "", error: message(e) }
-  }
+    if (timeoutMs) {
+      timer = setTimeout(() => {
+        timedOut = true
+        child.kill("SIGTERM")
+      }, timeoutMs)
+    }
+    child.once("error", (e: Error & { code?: string }) => {
+      if (e.code === "ENOENT") finish({ exit: -1, stdout: "", stderr: "", missing: true })
+      else finish({ exit: -1, stdout, stderr, error: message(e) })
+    })
+    child.once("close", (code: number | null) => {
+      if (timedOut) finish({ exit: -1, stdout, stderr, timedOut: true })
+      else finish({ exit: code ?? -1, stdout, stderr })
+    })
+  })
+
+const numberIn = (pattern: RegExp, fragment: string): number | null => {
+  const m = pattern.exec(fragment.trim())
+  return m ? Number(m[1]) : null
+}
+
+/**
+ * The tools whose `--verbose` output counts their work, with the unit and how a counting line says it: `lps2lts`
+ * the states explored (`<n>st, <m>tr, explored …`), `pbessolve` the BES equations generated (`Generated <n> BES
+ * equations`). Their counting lines come separated by carriage returns as well as newlines
+ * (specs/progress-long-work-says-how-far, §6).
+ */
+export const COUNTING: Record<string, { unit: string; count(fragment: string): number | null }> = {
+  lps2lts: { unit: "states", count: (f) => numberIn(/^(\d+)st, \d+tr, explored\b/, f) },
+  pbessolve: { unit: "BES equations", count: (f) => numberIn(/^Generated (\d+) BES equations\b/, f) },
+}
+
+/** A counting tool's output without its counting lines: what the run keeps (§6). */
+export function withoutCounting(tool: string, text: string): string {
+  const c = COUNTING[tool]
+  if (!c) return text
+  return text.split(/\r\n|\r|\n/).filter((f) => c.count(f) === null).join("\n")
 }
 
 const TOOLS = ["mcrl22lps", "lps2pbes", "pbessolve", "lps2lts", "ltsinfo", "ltsconvert", "lts2pbes"] as const
@@ -189,13 +237,33 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
   const missing = (tool: Tool): string =>
     `tool missing: ${tool} is not ${config.bin ? `in ${config.bin}` : "installed by naima tools, nor on PATH"} — ${INSTALL}`
 
-  /** The steps of one route: each tool's output kept in the log, the tools it started remembered for their versions. */
-  function steps(seconds: number | undefined, cwd: string) {
+  /**
+   * The steps of one route: each tool's output kept in the log, the tools it started remembered for their versions.
+   * Each step is a stage of `progress`; a counting tool is started with `--verbose`, its counting lines read as the
+   * stage's count and left out of the log (specs/progress-long-work-says-how-far, §6).
+   */
+  function steps(seconds: number | undefined, cwd: string, progress: Progress) {
     const log: string[] = []
     const used = new Set<Tool>()
     /** One step: its output kept in the log; a failure is the result to return. */
-    const step = (tool: Tool, args: string[], at = cwd): { out: ToolRun } | { stop: VerifyResult } => {
-      const r = run(path(tool), args, at, seconds ? seconds * 1000 : undefined)
+    const step = async (tool: Tool, given: string[], at = cwd): Promise<{ out: ToolRun } | { stop: VerifyResult }> => {
+      const counting = COUNTING[tool]
+      const args = counting ? ["--verbose", ...given] : given
+      progress.stage(tool, undefined, counting?.unit)
+      let pending = ""
+      const onStderr = counting
+        ? (chunk: string): void => {
+          const fragments = (pending + chunk).split(/\r\n|\r|\n/)
+          pending = fragments.pop() ?? ""
+          for (const f of fragments) {
+            const n = counting.count(f)
+            if (n !== null) progress.at(n)
+            else if (f.trim()) progress.note(f.trim())
+          }
+        }
+        : undefined
+      const raw = await run(path(tool), args, at, seconds ? seconds * 1000 : undefined, onStderr)
+      const r = counting ? { ...raw, stderr: withoutCounting(tool, raw.stderr) } : raw
       if (r.missing) return { stop: { verdict: "error", output: [missing(tool), ...log].join("\n") } }
       used.add(tool)
       log.push(`$ ${tool} ${args.join(" ")}`, ...(shown(r) ? [shown(r)] : []))
@@ -205,35 +273,36 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
       return { out: r }
     }
     /** Each tool this route started, with the first line of its `--version` (§5). */
-    const tools = (): Record<string, string> =>
-      Object.fromEntries(
-        [...used].sort().map((t) => {
-          const r = run(path(t), ["--version"], cwd)
-          return [t, r.exit === 0 ? r.stdout.trim().split("\n")[0]!.trim() : `unknown: --version exited ${r.exit}`]
-        }),
-      )
+    const tools = async (): Promise<Record<string, string>> => {
+      const out: Record<string, string> = {}
+      for (const t of [...used].sort()) {
+        const r = await run(path(t), ["--version"], cwd)
+        out[t] = r.exit === 0 ? r.stdout.trim().split("\n")[0]!.trim() : `unknown: --version exited ${r.exit}`
+      }
+      return out
+    }
     return { log, step, tools }
   }
 
   /** The standard route: the formula against the linearised model. */
-  function lpsRoute(model: string, formula: string, dir: string, seconds: number | undefined): Outcome {
-    const s = steps(seconds, dir)
-    const done = (r: VerifyResult): Outcome => ({ ...r, details: { route: "lps", tools: s.tools() } })
+  async function lpsRoute(model: string, formula: string, dir: string, seconds: number | undefined, progress: Progress): Promise<Outcome> {
+    const s = steps(seconds, dir, progress)
+    const done = async (r: VerifyResult): Promise<Outcome> => ({ ...r, details: { route: "lps", tools: await s.tools() } })
     const lps = join(dir, "model.lps")
     const pbes = join(dir, "model.pbes")
     const evidence = join(dir, "evidence.lps")
     for (const [tool, args] of [["mcrl22lps", [model, lps]], ["lps2pbes", ["--counter-example", `--formula=${formula}`, lps, pbes]]] as const) {
-      const r = s.step(tool, [...args])
+      const r = await s.step(tool, [...args])
       if ("stop" in r) return done(r.stop)
     }
-    const solved = s.step("pbessolve", [`--file=${lps}`, `--evidence-file=${evidence}`, pbes])
+    const solved = await s.step("pbessolve", [`--file=${lps}`, `--evidence-file=${evidence}`, pbes])
     if ("stop" in solved) return done(solved.stop)
     const answer = answerOf(solved.out)
     const output = s.log.join("\n")
     if (answer === "true") return done({ verdict: "holds", output })
     if (answer !== "false") return done({ verdict: "unknown", output: `${output}\npbessolve answered neither true nor false` })
     const aut = join(dir, "evidence.aut")
-    const printed = s.step("lps2lts", [evidence, aut])
+    const printed = await s.step("lps2lts", [evidence, aut])
     const counterexample = "out" in printed && existsSync(aut)
       ? readFileSync(aut, "utf8")
       : `pbessolve answered false; its evidence could not be printed:\n${"stop" in printed ? printed.stop.output : ""}`
@@ -241,13 +310,13 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
   }
 
   /** The LTS of the model, from the cache or generated into it (§4). */
-  function ltsOf(
+  async function ltsOf(
     model: string,
     ctx: Context,
     s: ReturnType<typeof steps>,
     threads: number,
-  ): { stop: VerifyResult } | { dir: string; record: LtsRecord; reused: boolean } {
-    const version = run(path("mcrl22lps"), ["--version"], workBase(ctx.program))
+  ): Promise<{ stop: VerifyResult } | { dir: string; record: LtsRecord; reused: boolean }> {
+    const version = await run(path("mcrl22lps"), ["--version"], workBase(ctx.program))
     if (version.missing) return { stop: { verdict: "error", output: missing("mcrl22lps") } }
     if (version.exit !== 0) return { stop: { verdict: "error", output: `mcrl22lps --version exited ${version.exit}: ${shown(version)}` } }
     const toolVersion = version.stdout.trim().split("\n")[0]!.trim()
@@ -268,11 +337,11 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
       const started = Date.now()
       const threaded = threads > 1 ? [`--threads=${threads}`] : []
       for (const [tool, args] of [["mcrl22lps", [model, lps]], ["lps2lts", [...threaded, lps, lts]]] as const) {
-        const r = s.step(tool, [...args], folder)
+        const r = await s.step(tool, [...args], folder)
         if ("stop" in r) return r
       }
       const generationSeconds = Math.round((Date.now() - started) / 100) / 10
-      const info = s.step("ltsinfo", ["--action-label", lts], folder)
+      const info = await s.step("ltsinfo", ["--action-label", lts], folder)
       if ("stop" in info) return info
       const read = readLtsInfo(`${info.out.stdout}\n${info.out.stderr}`)
       if (!read) return { stop: { verdict: "error", output: [...s.log, "ltsinfo printed no number of states and transitions"].join("\n") } }
@@ -296,11 +365,19 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
   }
 
   /** The LTS route (§2): refused outside the fragment (§3), on the cached LTS, hidden and reduced per formula. */
-  function ltsRoute(model: string, formula: string, dir: string, ctx: Context, seconds: number | undefined, threads: number): Outcome {
-    const s = steps(seconds, dir)
+  async function ltsRoute(
+    model: string,
+    formula: string,
+    dir: string,
+    ctx: Context,
+    seconds: number | undefined,
+    threads: number,
+    progress: Progress,
+  ): Promise<Outcome> {
+    const s = steps(seconds, dir, progress)
     const details: Record<string, unknown> = { route: "lts" }
-    const done = (r: VerifyResult): Outcome => ({ ...r, details: { ...details, tools: s.tools() } })
-    const refuse = (why: string): Outcome =>
+    const done = async (r: VerifyResult): Promise<Outcome> => ({ ...r, details: { ...details, tools: await s.tools() } })
+    const refuse = (why: string): Promise<Outcome> =>
       done({
         verdict: "error",
         output: [`LTS route refused: ${why}.`, `Route "lps" decides this property by the standard route.`, ...s.log].join("\n"),
@@ -310,7 +387,7 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
     if (!fragment.ok) return refuse(`${fragment.reason} (specs/verifier-mcrl2-lts-route-cross-check, §3.1)`)
     details["mentioned"] = fragment.mentioned
 
-    const lts = ltsOf(model, ctx, s, threads)
+    const lts = await ltsOf(model, ctx, s, threads)
     if ("stop" in lts) return done(lts.stop)
     const { record } = lts
     details["lts"] = {
@@ -337,18 +414,18 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
     const full = join(lts.dir, ENTRY_LTS)
     const reduced = join(dir, "reduced.lts")
     const tau = hiddenNames.length ? [`--tau=${hiddenNames.join(",")}`] : []
-    const converted = s.step("ltsconvert", [...tau, `--equivalence=${EQUIVALENCE}`, full, reduced])
+    const converted = await s.step("ltsconvert", [...tau, `--equivalence=${EQUIVALENCE}`, full, reduced])
     if ("stop" in converted) return done(converted.stop)
-    const info = s.step("ltsinfo", [reduced])
+    const info = await s.step("ltsinfo", [reduced])
     if ("stop" in info) return done(info.stop)
     const size = readLtsInfo(`${info.out.stdout}\n${info.out.stderr}`)
     if (!size) return done({ verdict: "error", output: [...s.log, "ltsinfo printed no number of states and transitions"].join("\n") })
     details["reduced"] = { equivalence: EQUIVALENCE, states: size.states, transitions: size.transitions }
 
     const pbes = join(dir, "reduced.pbes")
-    const translated = s.step("lts2pbes", [`--formula=${formula}`, reduced, pbes])
+    const translated = await s.step("lts2pbes", [`--formula=${formula}`, reduced, pbes])
     if ("stop" in translated) return done(translated.stop)
-    const solved = s.step("pbessolve", [pbes])
+    const solved = await s.step("pbessolve", [pbes])
     if ("stop" in solved) return done(solved.stop)
     const answer = answerOf(solved.out)
     if (answer === "true") return done({ verdict: "holds", output: s.log.join("\n") })
@@ -358,9 +435,9 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
     details["counterexampleFrom"] = "unreduced LTS"
     const fullPbes = join(dir, "full.pbes")
     const evidence = join(dir, "evidence.lts")
-    const again = s.step("lts2pbes", ["--counter-example", `--formula=${formula}`, full, fullPbes])
+    const again = await s.step("lts2pbes", ["--counter-example", `--formula=${formula}`, full, fullPbes])
     if ("stop" in again) return done(again.stop)
-    const confirmed = s.step("pbessolve", [`--file=${full}`, `--evidence-file=${evidence}`, fullPbes])
+    const confirmed = await s.step("pbessolve", [`--file=${full}`, `--evidence-file=${evidence}`, fullPbes])
     if ("stop" in confirmed) return done(confirmed.stop)
     const second = answerOf(confirmed.out)
     if (second !== "false") {
@@ -370,7 +447,7 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
       })
     }
     const aut = join(dir, "evidence.aut")
-    const printed = s.step("ltsconvert", [evidence, aut])
+    const printed = await s.step("ltsconvert", [evidence, aut])
     const counterexample = "out" in printed && existsSync(aut)
       ? readFileSync(aut, "utf8")
       : `pbessolve answered false; its evidence could not be printed:\n${"stop" in printed ? printed.stop.output : ""}`
@@ -391,7 +468,7 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
     return { verdict: lps.verdict === "error" || lts.verdict === "error" ? "error" : "unknown", output: logs, details }
   }
 
-  function check({ model, property, options }: VerifyRequest, ctx: Context): VerifyResult {
+  async function check({ model, property, options, progress = NO_PROGRESS }: VerifyRequest, ctx: Context): Promise<VerifyResult> {
     const chosen = routeOf(options)
     if ("wrong" in chosen) return { verdict: "error", output: chosen.wrong }
     const threads = threadsOf(options)
@@ -402,14 +479,16 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
       let formula = formulaFile(property, ctx.root)
       if (formula && !existsSync(formula)) return { verdict: "error", output: `the formula file ${property.trim()} does not exist` }
       if (!formula) writeFileSync(formula = join(dir, "property.mcf"), property.trim() + "\n")
-      if (chosen.route === "lps") return lpsRoute(model, formula, dir, seconds)
-      if (chosen.route === "lts") return ltsRoute(model, formula, dir, ctx, seconds, threads)
+      if (chosen.route === "lps") return await lpsRoute(model, formula, dir, seconds, progress)
+      if (chosen.route === "lts") return await ltsRoute(model, formula, dir, ctx, seconds, threads, progress)
       const sub = (name: string): string => {
         const d = join(dir, name)
         mkdirSync(d)
         return d
       }
-      return crossCheck(lpsRoute(model, formula, sub("lps"), seconds), ltsRoute(model, formula, sub("lts"), ctx, seconds, threads))
+      const lps = await lpsRoute(model, formula, sub("lps"), seconds, { ...progress, stage: (n, t, u) => progress.stage(`lps: ${n}`, t, u) })
+      const lts = await ltsRoute(model, formula, sub("lts"), ctx, seconds, threads, { ...progress, stage: (n, t, u) => progress.stage(`lts: ${n}`, t, u) })
+      return crossCheck(lps, lts)
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }
@@ -420,16 +499,16 @@ export function mcrl2Verifier(config: { bin?: string; run?: Runner } = {}): Veri
     says:
       "an mCRL2 specification against a modal mu-calculus formula, inline or an .mcf file: by the standard route (mcrl22lps, lps2pbes, pbessolve), by the LTS route (the state space once per model, hidden and reduced per formula, lts2pbes, pbessolve) for a formula the reduction preserves, or both, cross-checked; the evidence is the counterexample",
     runs: TOOLS.map(path),
-    verify: (request, ctx) => Promise.resolve(check(request, ctx)),
+    verify: (request, ctx) => check(request, ctx),
     inputs: ({ model, property }, ctx) => {
       const f = formulaFile(property, ctx.root)
       return f ? [model, f] : [model]
     },
-    version: (ctx) => {
-      const r = run(path("mcrl22lps"), ["--version"], workBase(ctx.program))
-      if (r.missing) return Promise.reject(new Error(missing("mcrl22lps")))
-      if (r.exit !== 0) return Promise.reject(new Error(`mcrl22lps --version exited ${r.exit}: ${shown(r) || r.error || ""}`))
-      return Promise.resolve(r.stdout.trim().split("\n")[0]!.trim())
+    version: async (ctx) => {
+      const r = await run(path("mcrl22lps"), ["--version"], workBase(ctx.program))
+      if (r.missing) throw new Error(missing("mcrl22lps"))
+      if (r.exit !== 0) throw new Error(`mcrl22lps --version exited ${r.exit}: ${shown(r) || r.error || ""}`)
+      return r.stdout.trim().split("\n")[0]!.trim()
     },
   }
 }

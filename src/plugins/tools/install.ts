@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process"
 import { createHash, randomUUID } from "node:crypto"
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeFileSync, writeSync } from "node:fs"
 import { dirname, join } from "node:path"
-import { installDirOf, NaimaError, programFile, RECEIPT } from "../../core/api.ts"
+import { installDirOf, NaimaError, NO_PROGRESS, programFile, type Progress, RECEIPT } from "../../core/api.ts"
 import type { Source, ToolDeclaration } from "./contract.ts"
 
 /** What one program run gave. */
@@ -61,8 +61,13 @@ export interface Receipt {
 
 const refuse = (msg: string): NaimaError => new NaimaError(msg)
 
-/** Download `url` into `file`, refusing past `size` bytes; the bytes written and their sha256. */
-export async function download(url: string, file: string, size: number): Promise<{ bytes: number; sha256: string }> {
+/** Download `url` into `file`, refusing past `size` bytes; the bytes written and their sha256, each chunk's total told to `received`. */
+export async function download(
+  url: string,
+  file: string,
+  size: number,
+  received: (bytes: number) => void = () => {},
+): Promise<{ bytes: number; sha256: string }> {
   const res = await fetch(url)
   if (!res.ok || !res.body) throw refuse(`download of ${url} failed: HTTP ${res.status}`)
   const hash = createHash("sha256")
@@ -74,6 +79,7 @@ export async function download(url: string, file: string, size: number): Promise
       if (bytes > size) throw refuse(`download of ${url}: larger than the declared ${size} bytes — stopped, nothing installed`)
       hash.update(chunk)
       writeSync(fd, chunk)
+      received(bytes)
     }
   } finally {
     closeSync(fd)
@@ -199,10 +205,13 @@ export interface InstallRun {
   /** The Python a pip source installs with, already installed; null when it is not. */
   python: string | null
   out(line: string): void
+  /** Where the install reports its stages: the download in bytes, then unpack and verify (specs/progress-long-work-says-how-far, §6). */
+  progress?: Progress
 }
 
 /** Install `tool` from `source` into `<dir>/<tool>/<version>`: the path, once verified and in place. */
 export async function installTool(tool: ToolDeclaration, source: Source, run: InstallRun): Promise<string> {
+  const progress = run.progress ?? NO_PROGRESS
   mkdirSync(run.dir, { recursive: true })
   const stage = join(run.dir, `.staging-${randomUUID()}`)
   const root = join(stage, "root")
@@ -212,14 +221,17 @@ export async function installTool(tool: ToolDeclaration, source: Source, run: In
     if (source.format !== "pip") {
       archive = join(stage, "download")
       run.out(`  ${tool.name}: downloading ${source.url}`)
-      const got = await download(source.url, archive, source.size)
+      progress.stage(`${tool.name}: download`, source.size, "bytes")
+      const got = await download(source.url, archive, source.size, (n) => progress.at(n))
       if (got.bytes !== source.size) throw refuse(`${tool.name}: downloaded ${got.bytes} bytes, the declaration says ${source.size} — nothing installed`)
       if (got.sha256 !== source.sha256) {
         throw refuse(`${tool.name}: the download's sha256 is ${got.sha256}, the declaration says ${source.sha256} — nothing installed`)
       }
       run.out(`  ${tool.name}: ${got.bytes} bytes, sha256 as declared`)
     } else run.out(`  ${tool.name}: pip install from ${source.url}, every requirement hash-checked`)
+    progress.stage(`${tool.name}: unpack`)
     unpack(source, archive, root, stage, run.exec, run.os, run.python)
+    progress.stage(`${tool.name}: verify`)
     const said = verifyInstall(tool, source, root, run.exec, run.os)
     run.out(`  ${tool.name}: verified — ${said}`)
     const receipt: Receipt = {

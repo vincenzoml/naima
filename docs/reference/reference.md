@@ -24,7 +24,7 @@ Every contribution below has a qualified id, `<plugin>/<name>`, and goes by its 
 - [ui](#ui) — the views plugins contribute, shown by `naima ui` in a native window, or the browser, from a server on this machine only
 - [metrics](#metrics) — named measurements — a command's number, or a code-quality number taken in process — recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline
 - [rules](#rules) — the project's own rules, kept as items: shown to agents first by naima guide, listed by naima rules
-- [long-work](#long-work) — long work, run and waited on by Naima: naima run starts a command detached, with budgets, locally or on a host; naima wait blocks on it by its record; naima run list, status, stop and clean; a shipped rule makes them mandatory for agents
+- [long-work](#long-work) — long work, run and waited on by Naima: naima run starts a command detached, with budgets and a progress channel, locally or on a host; naima wait blocks on it by its record; naima run list, status, stop and clean; shipped rules make them mandatory for agents and make long work report its progress
 - [commit-hooks](#commit-hooks) — companion records required in the commit that makes a change, and the path-scoped pre-commit hook that holds them
 - [privacy](#privacy) — the owner's material enters the repository only with their recorded yes, and no secret enters it at all
 - [adopt](#adopt) — adopt a board the project already keeps as items, in reviewed phases, without losing a line of it or deleting it
@@ -88,7 +88,7 @@ Every command: what it does, and the policy or invariant it enforces — or noth
 | [`metrics`](#naima-metrics) | metrics | the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to | numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why |
 | [`rules`](#naima-rules) | rules | print the project's active rules, must before should, each with its text and reason, ending with the line an agent must acknowledge back; or check that text carries every one (rules check-ack) | nothing: it only reads |
 | [`run`](#naima-run) | long-work | start a long command detached — locally, or on a declared host through its own Naima — with a log, a progress file, a time budget and, on what it declares it creates, a disk budget, ending itself when one runs out; list the runs against their budgets, show one, stop one, or remove what one created | every run has a time budget, and is ended, its whole process group with it, when it runs out or its declared paths outgrow the disk budget; a declared path is never the root, the home directory, the repository or above it, nor holds a tracked file; a run is never cleaned while it runs; a remote run is always guarded, failing when it changes a tracked file |
-| [`wait`](#naima-wait) | long-work | block until a run started by naima run ends, or the timeout passes, then print its state, exit status, budgets, last progress line and the log's tail: found by its record, never by a process pattern | a wait is always bounded: it ends at its --timeout (default 10m) and says the run is still running, exiting 1, so waiting again is a decision; it exits 0 only for a run that succeeded |
+| [`wait`](#naima-wait) | long-work | block until a run started by naima run ends, or the timeout passes, saying how it goes meanwhile, then print its state, exit status, budgets, last progress line and the log's tail: found by its record, never by a process pattern | a wait is always bounded: it ends at its --timeout (default 10m) and says the run is still running, exiting 1, so waiting again is a decision; it exits 0 only for a run that succeeded |
 | [`hooks`](#naima-hooks) | commit-hooks | the pre-commit hook and the companion rules it holds: list them, install the hook — tracked in the data directory, named by core.hooksPath once per clone — or uninstall it | the installed pre-commit hook runs the staged checks and the companion rules before every commit; install refuses to take over a core.hooksPath that is not Naima's unless --force |
 | [`attach`](#naima-attach) | privacy | copy a file into an item's attachments with a record of whose it is: the owner's, only with their explicit yes restated in --consent, or your own with --own; a file holding a secret is refused | an owner's file is attached only with their yes restated in --consent, or the writer's own with --own; a file holding a secret, a hidden or path-like name, or a name already used is refused |
 | [`adopt`](#naima-adopt) | adopt | adopt a board the project already keeps (a TODO.md, an issue list in markdown) as items, without losing a line: propose markers, split, audit, links — each a dry run until --write; the source is never deleted | no line of the source is lost and the source is never deleted; nothing is written without --write, and the only edit to the source is adding marker lines |
@@ -1765,6 +1765,8 @@ Run the verifier of properties and attach each run as evidence.
 
 **Enforces**: A property holds only with a run of its verifier on exactly what it has now, attached as evidence; a model or input outside the project is refused.
 
+**Progress**: The properties done of those asked, with a rate and an ETA; within a property, each stage of its verifier with the count its tool exposes — for mCRL2 each tool, with the states lps2lts explores and the BES equations pbessolve generates.
+
 ```sh
 naima verify <property>...
 naima verify --all
@@ -1858,6 +1860,8 @@ A plugin declares each tool it needs under `contributes.tools`: an exact version
 The tools the loaded plugins declare, on this machine or a declared host: what is installed, missing or unavailable; show what an install would fetch; install one with consent into Naima's own directory, its download checked and the tool verified, never touching PATH or the system; remove one; print an installed program's path.
 
 **Enforces**: An install fetches only the declared source, refuses a size or sha256 that differs, keeps nothing that fails its verification, and goes on only with consent — a yes on a terminal, or --consent with --by, recorded in the receipt; nothing is written outside the tools directory; a tool another installed tool needs is not removed.
+
+**Progress**: Install: the stage download with the bytes received of the declared size, its rate and ETA; then unpack and verify, without a count; with tools it needs, the tools installed of those to install.
 
 ```sh
 naima tools [--json] [--host <h>]
@@ -1975,6 +1979,8 @@ Options, each with the default it takes when nothing sets it:
 The project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to.
 
 **Enforces**: Numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why.
+
+**Progress**: Run: the metrics taken of those asked, each a stage named by its metric; backfill: the commits measured of those to measure; a metric's own command reports nothing while it runs, so the count moves between metrics.
 
 ```sh
 naima metrics [list]
@@ -2154,11 +2160,11 @@ Rules: a rule of this project, for agents, people or both: its page is the rule 
 
 ## long-work
 
-Long work, run and waited on by Naima: naima run starts a command detached, with budgets, locally or on a host; naima wait blocks on it by its record; naima run list, status, stop and clean; a shipped rule makes them mandatory for agents.
+Long work, run and waited on by Naima: naima run starts a command detached, with budgets and a progress channel, locally or on a host; naima wait blocks on it by its record; naima run list, status, stop and clean; shipped rules make them mandatory for agents and make long work report its progress.
 
 Its contributions' qualified ids are `long-work/<name>`.
 
-An agent left to wait for a long command improvises — a `sleep` loop, a `pgrep -f` that matches itself — and the wait outlives the work by hours. `naima run <name> --budget-time <d> -- <command>` starts the command detached, under a supervisor of its own, with a log, a progress file (`$NAIMA_RUN_PROGRESS`) and a record in the tracker folder's `.runs/`, which ignores itself. The supervisor writes a heartbeat every `--every`, and ends the command's whole process group when the time budget runs out, when what it declares with `--creates` outgrows `--budget-disk`, or when `naima run stop` asks. `naima wait <name>` reads the record — never the process table — until the run ends or `--timeout` passes, then prints the state, exit status and the log's tail. `naima run list` shows every run against its budgets, marking stale runs (no output for `--stale`) and lost ones (no heartbeat); `naima run clean` removes what a run declared, never a tracked file, never while it runs. A host declared in the `hosts` option is reached over ssh, and a run there is a run of the host's own Naima, always `--guard-tracked`: a tracked file it changes fails it. The plugin ships the rule that makes these mandatory for agents, enforced by the check `wait-loops`.
+An agent left to wait for a long command improvises — a `sleep` loop, a `pgrep -f` that matches itself — and the wait outlives the work by hours. `naima run <name> --budget-time <d> -- <command>` starts the command detached, under a supervisor of its own, with a log, a progress file (`$NAIMA_RUN_PROGRESS`) and a record in the tracker folder's `.runs/`, which ignores itself. The supervisor writes a heartbeat every `--every`, and ends the command's whole process group when the time budget runs out, when what it declares with `--creates` outgrows `--budget-disk`, or when `naima run stop` asks. `naima wait <name>` reads the record — never the process table — until the run ends or `--timeout` passes, then prints the state, exit status and the log's tail. `naima run list` shows every run against its budgets, marking stale runs (no output for `--stale`) and lost ones (no heartbeat); `naima run clean` removes what a run declared, never a tracked file, never while it runs. A host declared in the `hosts` option is reached over ssh, and a run there is a run of the host's own Naima, always `--guard-tracked`: a tracked file it changes fails it. A run's progress is the last line of its progress file: a JSON object — `stage`, `done`, `total`, `unit`, `note`, `overall` — or free text. The supervisor keeps the first sample of each stage, and every reader shows the count with its rate and, when the total is known, its ETA; a run silent past `--stale` (2 minutes) is stale. A command that cannot report says so with `--no-progress "<reason>"`, and is shown with its elapsed time and the log's last line. The plugin ships the rule that makes these mandatory for agents, enforced by the check `wait-loops`, and the rule that long work reports its progress, enforced by the check `progress-declared`.
 
 Options, each with the default it takes when nothing sets it:
 
@@ -2173,7 +2179,7 @@ Start a long command detached — locally, or on a declared host through its own
 **Enforces**: Every run has a time budget, and is ended, its whole process group with it, when it runs out or its declared paths outgrow the disk budget; a declared path is never the root, the home directory, the repository or above it, nor holds a tracked file; a run is never cleaned while it runs; a remote run is always guarded, failing when it changes a tracked file.
 
 ```sh
-naima run <name> --budget-time <duration> [--budget-disk <size>] [--creates <path>]... [--every <duration>] [--stale <duration>] [--host <host>] [--guard-tracked] -- <command> [<arg>...]
+naima run <name> --budget-time <duration> [--budget-disk <size>] [--creates <path>]... [--every <duration>] [--stale <duration>] [--host <host>] [--guard-tracked] [--no-progress <reason>] -- <command> [<arg>...]
 naima run list [--json]
 naima run status <name> [--tail <n>] [--json]
 naima run stop <name>
@@ -2186,9 +2192,10 @@ naima run clean <name>
 | `--budget-disk` |  | how large what it declares it creates may grow, <n>[K\|M\|G\|T]: past it, it is ended; needs --creates |
 | `--creates` |  | a path the run creates (a store, a temporary directory), measured for --budget-disk and removed by run clean; repeatable |
 | `--every` |  | how often the supervisor checks the budgets and a stop request and writes its heartbeat (default 10s) |
-| `--stale` |  | how long with no change to the log or the progress file before the run is reported stale (default 15m) |
+| `--stale` |  | how long with no new progress line before the run is reported stale (default 2m); for a run declared --no-progress, with no change to the log or the progress file (default 15m) |
 | `--host` |  | run it on this host, declared in the plugin's hosts option, through the host's own Naima over ssh |
 | `--guard-tracked` |  | fail the run if a tracked file changes while it runs; always on for a remote run |
+| `--no-progress` |  | declare that the command cannot report progress, and why: the run is then shown with its elapsed time and the log's last line, and judged stale on its log |
 | `--tail` |  | how many of the log's last lines to print (default 20) |
 | `--json` |  | print the run, or every run, as JSON |
 
@@ -2196,7 +2203,8 @@ Examples:
 
 ```sh
 naima run bench --budget-time 2h --budget-disk 20G --creates /tmp/bench-stores -- 'deno task bench > results.csv'
-naima run models --budget-time 30m -- mcrl2 --all
+naima run models --budget-time 30m -- naima verify --all
+naima run solve --budget-time 12h --no-progress "the solver has no progress interface" -- ./solve.sh
 naima run bench --host lab --budget-time 6h -- 'deno task bench'
 naima run list
 naima run status bench --tail 50
@@ -2206,18 +2214,21 @@ naima run clean bench
 
 ### naima wait
 
-Block until a run started by naima run ends, or the timeout passes, then print its state, exit status, budgets, last progress line and the log's tail: found by its record, never by a process pattern.
+Block until a run started by naima run ends, or the timeout passes, saying how it goes meanwhile, then print its state, exit status, budgets, last progress line and the log's tail: found by its record, never by a process pattern.
 
 **Enforces**: A wait is always bounded: it ends at its --timeout (default 10m) and says the run is still running, exiting 1, so waiting again is a decision; it exits 0 only for a run that succeeded.
 
+**Progress**: Every --report, on standard error: the run's state, elapsed time and progress line with its rate and ETA.
+
 ```sh
-naima wait <name> [--timeout <duration>] [--every <duration>] [--tail <n>] [--json]
+naima wait <name> [--timeout <duration>] [--every <duration>] [--report <duration>] [--tail <n>] [--json]
 ```
 
 | Option | Default | What it does |
 |---|---|---|
 | `--timeout` |  | how long to wait at most, <n>s\|m\|h\|d (default 10m) |
 | `--every` |  | how often to look (default 1s; for a remote run 30s, one ssh call each) |
+| `--report` |  | how often to print, on standard error, the run's elapsed time and progress while waiting (default 30s) |
 | `--tail` |  | how many of the log's last lines to print (default 20) |
 | `--json` |  | print the run as JSON |
 
@@ -2234,12 +2245,14 @@ naima wait models --json
 | Check | What it holds |
 |---|---|
 | `wait-loops` | no tracked shell script holds a hand-written wait — a while/until loop that sleeps, or pgrep -f/pkill -f — and a session note that does is noted; a line marked naima: allow-wait-loop, or the line after it, is exempt |
+| `progress-declared` | long work is declared with its progress or with why it cannot report one: a command declared long says how it reports or why it cannot and what instead; a naima run in a tracked shell script has --no-progress with a reason, or a command that writes $NAIMA_RUN_PROGRESS or runs a Naima command that reports; a run recorded here silent past its threshold without ever writing progress is noted |
 
 **Shipped rules**, active in every project that loads the plugin, listed by `naima rules`
 
 | Rule | Title | For | Strength | Enforced by | Ack |
 |---|---|---|---|---|---|
 | `long-work-through-naima-run` | Long work goes through naima run and naima wait; no hand-written wait loop | agents | must | `wait-loops` | `Long work mode on` |
+| `long-work-reports-progress` | Long work reports its progress, or says why it cannot and what it reports instead | everyone | must | `progress-declared` | `Progress mode on` |
 
 ## commit-hooks
 

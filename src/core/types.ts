@@ -165,6 +165,11 @@ export interface Command {
   examples?: string[]
   /** The policy or invariant the command enforces, and how; one that enforces none says `nothing` and what it does instead. */
   enforces?: string
+  /**
+   * For a command whose work can last more than a few seconds: how it reports its progress, or why it cannot and
+   * what it reports instead (rule long-work/long-work-reports-progress, checked by `progress-declared`).
+   */
+  long?: { reports: string } | { cannot: string; instead: string }
   run(args: string[], ctx: Context): number | Promise<number>
 }
 

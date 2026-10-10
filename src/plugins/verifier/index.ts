@@ -24,8 +24,11 @@ import {
   type Finding,
   type Item,
   label,
+  NO_PROGRESS,
   parse,
   type Plugin,
+  type Progress,
+  progressFor,
   saveMeta,
   setFieldValue,
   usageError,
@@ -201,7 +204,7 @@ export function modelPath(root: string, model: string): string | null {
 }
 
 /** Run one property's verifier and attach the result. Returns the verdict. */
-export async function verifyItem(ctx: Context, item: Item): Promise<Verdict> {
+export async function verifyItem(ctx: Context, item: Item, progress: Progress = NO_PROGRESS): Promise<Verdict> {
   const { verifier: id, model, property } = item.meta
   if (typeof id !== "string" || typeof model !== "string" || typeof property !== "string") {
     throw new Error(`${label(item)}: set verifier, model and property first`)
@@ -212,7 +215,11 @@ export async function verifyItem(ctx: Context, item: Item): Promise<Verdict> {
   if (!path) throw new Error(`${label(item)}: model ${model} is outside the project — model is a path from the project root`)
   if (!existsSync(path)) throw new Error(`${label(item)}: model ${model} does not exist`)
   const options = optionsOf(item)
-  const request = { model: path, property, options }
+  // The adapter's stages are reported as the property's: `<property>: <stage>` (specs/progress-long-work-says-how-far, §6).
+  const own = label(item)
+  const within: Progress = { ...progress, stage: (name, total, unit) => progress.stage(`${own}: ${name}`, total, unit) }
+  progress.stage(own)
+  const request = { model: path, property, options, progress: within }
   const inputs = (await inputsOf(ctx, verifier, item, request)).map((rel): RunInput => {
     const abs = resolve(ctx.root, rel)
     if (!existsSync(abs)) throw new Error(`${label(item)}: input ${rel} does not exist`)
@@ -267,6 +274,10 @@ const verify: Command = {
   enforces:
     "a property holds only with a run of its verifier on exactly what it has now, attached as evidence; a model or input outside the project is refused",
   usage: "verify <property>... | verify --all",
+  long: {
+    reports:
+      "the properties done of those asked, with a rate and an ETA; within a property, each stage of its verifier with the count its tool exposes — for mCRL2 each tool, with the states lps2lts explores and the BES equations pbessolve generates",
+  },
   options: [{ name: "--all", says: "every property item" }],
   examples: ["verify no-deadlock", "verify --all"],
   async run(args, ctx) {
@@ -274,11 +285,18 @@ const verify: Command = {
     const items = bool(p, "all") ? properties(ctx) : p.positionals.map((r) => ctx.repo.resolve(r))
     if (!items.length) throw usageError(this)
     let failing = 0
-    for (const item of items) {
-      if (item.type !== TYPE) throw new Error(`${label(item)} is not a property`)
-      const verdict = await verifyItem(ctx, item)
-      if (verdict !== "holds") failing++
-      ctx.out(`${verdict.padEnd(9)} ${label(item)}  ${item.meta.title}`)
+    for (const item of items) if (item.type !== TYPE) throw new Error(`${label(item)} is not a property`)
+    const progress = progressFor((l) => ctx.err(l))
+    try {
+      for (const [i, item] of items.entries()) {
+        progress.overall(i, items.length, "properties")
+        const verdict = await verifyItem(ctx, item, progress)
+        if (verdict !== "holds") failing++
+        ctx.out(`${verdict.padEnd(9)} ${label(item)}  ${item.meta.title}`)
+      }
+      progress.overall(items.length, items.length, "properties")
+    } finally {
+      progress.end()
     }
     return failing ? 1 : 0
   },

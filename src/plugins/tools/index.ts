@@ -25,6 +25,7 @@ import {
   platformKey,
   type Plugin,
   programFile,
+  progressFor,
   readHosts,
   RECEIPT,
   str,
@@ -229,22 +230,30 @@ async function install(ctx: Context, world: ToolsWorld, name: string, words: str
     return EXIT.OK
   }
   const consent = await consentFor(world, words, by, plan, `naima tools install ${name}`)
-  for (const s of plan.filter((x) => !x.installed)) {
-    const decl = declOf(ctx, s.tool)
-    const source = decl.platforms[platform as keyof ToolDeclaration["platforms"]] as Source
-    const pythonDecl = source.python ? declOf(ctx, source.python) : null
-    const python = pythonDecl ? installedAt(dir, pythonDecl, platform, world.os) : null
-    const pythonSource = pythonDecl?.platforms[platform as keyof ToolDeclaration["platforms"]] as Source | undefined
-    const target = await installTool(decl, source, {
-      dir,
-      platform,
-      os: world.os === "win32" ? "windows" : world.os,
-      exec: world.exec,
-      consent,
-      python: python && pythonSource ? join(python, pythonSource.bin, programFile("python", world.os)) : null,
-      out: (l) => ctx.out(l),
-    })
-    ctx.out(`installed ${decl.name} ${decl.version}: ${target}`)
+  const todo = plan.filter((x) => !x.installed)
+  const progress = progressFor((l) => ctx.err(l))
+  try {
+    for (const [i, s] of todo.entries()) {
+      if (todo.length > 1) progress.overall(i, todo.length, "tools")
+      const decl = declOf(ctx, s.tool)
+      const source = decl.platforms[platform as keyof ToolDeclaration["platforms"]] as Source
+      const pythonDecl = source.python ? declOf(ctx, source.python) : null
+      const python = pythonDecl ? installedAt(dir, pythonDecl, platform, world.os) : null
+      const pythonSource = pythonDecl?.platforms[platform as keyof ToolDeclaration["platforms"]] as Source | undefined
+      const target = await installTool(decl, source, {
+        dir,
+        platform,
+        os: world.os === "win32" ? "windows" : world.os,
+        exec: world.exec,
+        consent,
+        python: python && pythonSource ? join(python, pythonSource.bin, programFile("python", world.os)) : null,
+        out: (l) => ctx.out(l),
+        progress,
+      })
+      ctx.out(`installed ${decl.name} ${decl.version}: ${target}`)
+    }
+  } finally {
+    progress.end()
   }
   return EXIT.OK
 }
@@ -335,6 +344,10 @@ const toolsCommand = (world: () => ToolsWorld): Command => ({
     "the tools the loaded plugins declare, on this machine or a declared host: what is installed, missing or unavailable; show what an install would fetch; install one with consent into Naima's own directory, its download checked and the tool verified, never touching PATH or the system; remove one; print an installed program's path",
   enforces:
     "an install fetches only the declared source, refuses a size or sha256 that differs, keeps nothing that fails its verification, and goes on only with consent — a yes on a terminal, or --consent with --by, recorded in the receipt; nothing is written outside the tools directory; a tool another installed tool needs is not removed",
+  long: {
+    reports:
+      "install: the stage download with the bytes received of the declared size, its rate and ETA; then unpack and verify, without a count; with tools it needs, the tools installed of those to install",
+  },
   usage:
     'tools [--json] [--host <h>] | tools show <tool> [--json] [--host <h>] | tools install <tool> [--consent "<the yes, restated>" --by <who>] [--host <h>] | tools remove <tool> [--host <h>] | tools path <tool> [<program>]',
   options: [

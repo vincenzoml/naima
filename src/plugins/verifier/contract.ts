@@ -2,13 +2,15 @@
 // plugin contributes one under `contributes.verifiers`; `naima verify` runs
 // the one a property names.
 
-import { code, type Context, type ExtensionPoint, table } from "../../core/api.ts"
+import { code, type Context, type ExtensionPoint, type Progress, table } from "../../core/api.ts"
 
 export interface VerifyRequest {
   /** Absolute path of the model or specification file. */
   model: string
   property: string
   options: Record<string, unknown>
+  /** Where the adapter reports its stages and counts, when the tool exposes them (specs/progress-long-work-says-how-far, §6). Absent: nothing reports. */
+  progress?: Progress
 }
 
 export type Verdict = "holds" | "violated" | "error" | "unknown"

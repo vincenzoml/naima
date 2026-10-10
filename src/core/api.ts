@@ -94,3 +94,23 @@ export { contributionsOf } from "./manifest.ts"
 export { shortOrId } from "./names.ts"
 export { cliCommands } from "./entry.ts"
 export { asRendered, type Format, FORMATS, linesAs, rendered } from "./rendered.ts"
+export {
+  type Count,
+  estimate,
+  NO_PROGRESS,
+  type Progress,
+  PROGRESS_TIMING,
+  type ProgressEstimate,
+  progressFor,
+  type ProgressLine,
+  progressLineOf,
+  progressReporter,
+  type ProgressSample,
+  readProgressLine,
+  type ReporterOptions,
+  sameStage,
+  showCount,
+  showDuration,
+  showProgress,
+  showRate,
+} from "./progress.ts"

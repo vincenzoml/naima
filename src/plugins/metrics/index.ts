@@ -52,9 +52,12 @@ import {
   type Finding,
   type Item,
   label,
+  NO_PROGRESS,
   parse,
   type Plugin,
   positiveInt,
+  type Progress,
+  progressFor,
   rendered,
   str,
   type SummarySection,
@@ -651,10 +654,19 @@ export function sparkline(values: number[]): string {
 }
 
 /** A record of the numbers taken at a site, each judged against its bound. */
-function takeAll(ctx: Context, wanted: MetricDef[], site: Site): { values: MetricRecord["values"]; errors: Map<string, string> } {
+function takeAll(
+  ctx: Context,
+  wanted: MetricDef[],
+  site: Site,
+  progress: Progress = NO_PROGRESS,
+  counted = true,
+): { values: MetricRecord["values"]; errors: Map<string, string> } {
   const values: MetricRecord["values"] = {}
   const errors = new Map<string, string>()
-  for (const m of wanted) {
+  for (const [i, m] of wanted.entries()) {
+    // The metrics taken of those asked, the stage named by the one being taken (specs/progress-long-work-says-how-far, §6).
+    if (counted) progress.overall(i, wanted.length, "metrics")
+    progress.stage(m.name)
     const r = measure(ctx, m, site)
     if (r.value === null) {
       values[m.name] = { value: null, exit: r.exit, holds: false }
@@ -682,6 +694,7 @@ export function backfill(
   ctx: Context,
   wanted: MetricDef[],
   opts: { since?: string; last?: number; every?: number; again?: boolean },
+  progress: Progress = NO_PROGRESS,
 ): { recorded: { commit: string; values: MetricRecord["values"]; errors: Map<string, string> }[]; skipped: number } {
   const range = opts.since ? `${opts.since}..HEAD` : "HEAD"
   const all = (git(ctx, "rev-list", "--first-parent", "--reverse", range) ?? "").split("\n").filter(Boolean)
@@ -703,7 +716,9 @@ export function backfill(
     throw new Error(`could not make a temporary worktree at ${tree} — git worktree add failed`)
   }
   try {
-    for (const commit of todo) {
+    for (const [i, commit] of todo.entries()) {
+      // The commits measured of those to measure (specs/progress-long-work-says-how-far, §6).
+      progress.overall(i, todo.length, "commits")
       if (needsTree) {
         const at = (...args: string[]) => spawnSync("git", ["-C", tree, ...args], { encoding: "utf8" }).status === 0
         if (!at("checkout", "--quiet", "--detach", "--force", commit) || !at("clean", "-q", "-ffdx")) {
@@ -712,7 +727,7 @@ export function backfill(
       }
       let source: CodeSource | undefined
       const site: Site = { root: tree, source: () => (source ??= commitSource(ctx.root, commit, [ctx.trackerDir])), runs: new Map() }
-      const { values, errors } = takeAll(ctx, wanted, site)
+      const { values, errors } = takeAll(ctx, wanted, site, progress, false)
       const date = commitDate(ctx, commit)
       writeRecord(ctx, { commit, dirty: false, at: ctx.now().toISOString(), ...(date ? { date } : {}), backfill: true, values })
       recorded.push({ commit, values, errors })
@@ -800,6 +815,10 @@ const metricsCommand: Command = {
     "the project's metrics — each a name and the command or code measure that takes it — run, recorded per commit, held to a budget, a floor or a baseline, and read back along the commit timeline as a trend, a table or a chart; every number with the one it is compared to",
   enforces:
     "numbers are recorded with the commit they measure; a ratcheted bound only tightens, and loosening one is refused without --because naming the item that says why",
+  long: {
+    reports:
+      "run: the metrics taken of those asked, each a stage named by its metric; backfill: the commits measured of those to measure; a metric's own command reports nothing while it runs, so the count moves between metrics",
+  },
   usage:
     "metrics [list] | metrics run [name...] [--record] | metrics bound <name> <value> [--because <item>] | metrics trend <name> | metrics history [name...] [--json | --csv] [--last <n>] | metrics backfill [name...] [--since <ref>] [--last <n>] [--every <n>] [--again] | metrics plot [name...] [--out <file>] [--html] [--last <n>] [--title <t>] | metrics presets [--json]",
   options: [
@@ -868,7 +887,15 @@ const metricsCommand: Command = {
       const wanted = named()
       if (!wanted.length) throw new Error(`no metrics declared — plugins.metrics.options.metrics in ${ctx.trackerDir}/${DATA_FILE}`)
       const dirty = (git(ctx, "status", "--porcelain", "--", ".", `:(exclude)${ctx.trackerDir}`) ?? "") !== ""
-      const { values, errors } = takeAll(ctx, wanted, workingSite(ctx))
+      const progress = progressFor((l) => ctx.err(l))
+      let taken: ReturnType<typeof takeAll>
+      try {
+        taken = takeAll(ctx, wanted, workingSite(ctx), progress)
+        progress.overall(wanted.length, wanted.length, "metrics")
+      } finally {
+        progress.end()
+      }
+      const { values, errors } = taken
       let failed = 0
       for (const m of wanted) {
         const v = values[m.name]!
@@ -960,12 +987,19 @@ const metricsCommand: Command = {
       if (!wanted.length) throw new Error(`no metrics declared — plugins.metrics.options.metrics in ${ctx.trackerDir}/${DATA_FILE}`)
       const every = str(p, "every") === undefined ? undefined : positiveInt(str(p, "every"), 1, "metrics backfill --every")
       const since = str(p, "since")
-      const { recorded, skipped } = backfill(ctx, wanted, {
-        ...(since !== undefined ? { since } : {}),
-        ...(last !== undefined ? { last } : {}),
-        ...(every !== undefined ? { every } : {}),
-        again: bool(p, "again"),
-      })
+      const progress = progressFor((l) => ctx.err(l))
+      let filled: ReturnType<typeof backfill>
+      try {
+        filled = backfill(ctx, wanted, {
+          ...(since !== undefined ? { since } : {}),
+          ...(last !== undefined ? { last } : {}),
+          ...(every !== undefined ? { every } : {}),
+          again: bool(p, "again"),
+        }, progress)
+      } finally {
+        progress.end()
+      }
+      const { recorded, skipped } = filled
       for (const r of recorded) {
         const said = wanted.map((m) => {
           const v = r.values[m.name]?.value

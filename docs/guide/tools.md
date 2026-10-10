@@ -40,8 +40,9 @@ asks you, and passes your answer with `--consent "<your yes, restated>" --by
 
 Then Naima downloads the file, checks that its size and sha256 are the
 declared ones, unpacks it, and runs the tool once to see that it works on this
-machine (for mCRL2, `mcrl22lps --version` must say `202607.0`). If any step
-fails, nothing is kept. The verifier that declared the tool uses it from then
+machine (for mCRL2, `mcrl22lps --version` must say `202607.0`). While it
+downloads it says how many bytes it has of the total, with the rate and the
+time left. If any step fails, nothing is kept. The verifier that declared the tool uses it from then
 on, without anything on your `PATH`.
 
 ## Where the tools go

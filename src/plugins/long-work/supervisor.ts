@@ -8,13 +8,27 @@
 //   supervisor.ts supervise <record dir>
 //   supervisor.ts clean <record dir>
 //
-// It imports nothing of the core: it is started on its own, by Deno, Node or Bun.
+// Of the core it imports only the API, through the record's module: it is started on its own, by Deno, Node or Bun.
 
 import { type ChildProcess, spawn, spawnSync } from "node:child_process"
 import { createWriteStream, existsSync, lstatSync, readdirSync, rmSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import { DEFAULTS, LOG_FILE, PROGRESS_FILE, readSpec, type Reason, type RunSpec, type RunStatus, STATUS_FILE, STOP_FILE, writeJsonAtomic } from "./records.ts"
+import {
+  DEFAULTS,
+  lastLine,
+  LOG_FILE,
+  mtime,
+  PROGRESS_FILE,
+  readSpec,
+  type Reason,
+  type RunSpec,
+  type RunStatus,
+  sampleProgress,
+  STATUS_FILE,
+  STOP_FILE,
+  writeJsonAtomic,
+} from "./records.ts"
 
 /** How a platform runs a command line, and ends a process tree: the only places the platforms differ. */
 export interface Platform {
@@ -142,6 +156,11 @@ export async function supervise(dir: string, graceMs: number = DEFAULTS.graceMs)
   }
   const tick = (): void => {
     const patch: Partial<RunStatus> = {}
+    // The progress line's first sample in each stage: what readers measure a rate from (specs/progress-long-work-says-how-far, §3.1).
+    const progressFile = join(dir, PROGRESS_FILE)
+    const sampled = sampleProgress(lastLine(progressFile), mtime(progressFile), status)
+    if (sampled.progressFrom) patch.progressFrom = sampled.progressFrom
+    if (sampled.overallFrom) patch.overallFrom = sampled.overallFrom
     if (spec.creates.length) {
       const size = spec.creates.reduce((n, path) => n + sizeOf(path), 0)
       patch.sizeBytes = size

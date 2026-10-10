@@ -3,10 +3,13 @@
 // (status.json, log) and the command may write to (progress). Every reader
 // derives the reported state from these files alone — liveness from the
 // supervisor's heartbeat, never from a search of the process table.
-// Shared by the commands and the supervisor, so it imports nothing of the core.
+// Shared by the commands and the supervisor; of the core, only the API.
 
 import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, readSync, renameSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join } from "node:path"
+import { estimate, type ProgressEstimate, type ProgressSample, readProgressLine, showDuration } from "../../core/api.ts"
+
+export { showDuration }
 
 /** The folder of every record, beside the data directory; it ignores itself, so no record is ever tracked. */
 export const RUNS_DIR = ".runs"
@@ -24,11 +27,16 @@ export const STOP_FILE = "stop"
 /** The defaults the specification fixes. */
 export const DEFAULTS = {
   everyMs: 10_000,
-  staleMs: 15 * 60_000,
+  /** A run that reports progress is stale after this long without a progress line (specs/progress-long-work-says-how-far, §4). */
+  staleMs: 2 * 60_000,
+  /** A run declared --no-progress is stale after this long without output. */
+  staleNoProgressMs: 15 * 60_000,
   timeoutMs: 10 * 60_000,
   waitEveryMs: 1_000,
   remoteEveryMs: 30_000,
   tail: 20,
+  /** How often `naima wait` says how the run goes while it waits. */
+  reportMs: 30_000,
   /** How long an ended run's group is given between SIGTERM and SIGKILL. */
   graceMs: 10_000,
   /** How long `naima run` waits for the supervisor to report the command started. */
@@ -52,6 +60,8 @@ export interface RunSpec {
   started: string
   /** Set for a remote run: the host it runs on, whose own Naima keeps the real record. */
   host?: string
+  /** Set by --no-progress: why the command cannot report progress. */
+  noProgress?: string
 }
 
 export type Reason = "exit" | "budget-time" | "budget-disk" | "stopped" | "start-failed"
@@ -72,6 +82,9 @@ export interface RunStatus {
   /** Under --guard-tracked: the tracked files the run changed. */
   changedTracked?: string[]
   error?: string
+  /** The first sample of the current stage of the progress line, and of its overall count: what rates are measured from. */
+  progressFrom?: ProgressSample
+  overallFrom?: ProgressSample
 }
 
 export type Reported = "starting" | "running" | "stale" | "lost" | "succeeded" | "failed" | "killed" | "stopped" | "unknown"
@@ -95,7 +108,11 @@ export interface RunView {
   reason?: Reason
   ended?: string
   changedTracked?: string[]
-  progress?: { line: string; ageMs: number }
+  /** The last progress line, how old it is, and, for a structured one, its fields with the rate and ETA computed from it. */
+  progress?: { line: string; ageMs: number } & ProgressEstimate
+  /** For a run declared --no-progress: why, and the log's last line, the most it can say. */
+  noProgress?: string
+  lastLog?: string
   log: string
   tail?: string[]
   error?: string
@@ -147,7 +164,7 @@ export function recordDirs(tracker: string): string[] {
     .map((x) => x.d)
 }
 
-const mtime = (file: string): number | null => {
+export const mtime = (file: string): number | null => {
   try {
     return statSync(file).mtimeMs
   } catch {
@@ -169,6 +186,70 @@ export function tailOf(file: string, n: number): string[] {
   }
   const lines = buf.toString("utf8").replace(/\n$/, "").split("\n")
   return (size > want ? lines.slice(1) : lines).slice(-n)
+}
+
+/** The last non-empty line of `file`, or undefined. */
+export function lastLine(file: string): string | undefined {
+  return tailOf(file, 5).filter((l) => l.trim()).pop()
+}
+
+/** The progress line, as read at `now`, with its rate and ETA from the samples the supervisor kept (§3). */
+export function progressOf(line: string, at: number, status: RunStatus | null, now: number): { line: string; ageMs: number } & ProgressEstimate {
+  const out: { line: string; ageMs: number } & ProgressEstimate = { line, ageMs: Math.max(0, now - at) }
+  const p = readProgressLine(line)
+  if (!p) return out
+  Object.assign(out, p)
+  if (p.done !== undefined) {
+    const from = status?.progressFrom
+    const same = from && from.stage === p.stage && from.unit === p.unit && from.total === p.total
+    const e = estimate(same ? from : undefined, p.done, at, p.total, now)
+    if (e.rate !== undefined) out.rate = e.rate
+    if (e.etaMs !== undefined) out.etaMs = e.etaMs
+  }
+  if (p.overall) {
+    const from = status?.overallFrom
+    const same = from && from.unit === p.overall.unit && from.total === p.overall.total
+    const e = estimate(same ? from : undefined, p.overall.done, at, p.overall.total, now)
+    if (e.rate !== undefined) out.overallRate = e.rate
+    if (e.etaMs !== undefined) out.overallEtaMs = e.etaMs
+  }
+  return out
+}
+
+/** The samples to keep after reading `line`, written at `at`: a new stage, or a new overall total, starts afresh (§3.1). */
+export function sampleProgress(
+  line: string | undefined,
+  at: number | null,
+  kept: Pick<RunStatus, "progressFrom" | "overallFrom">,
+): Pick<RunStatus, "progressFrom" | "overallFrom"> {
+  if (line === undefined || at === null) return kept
+  const p = readProgressLine(line)
+  if (!p) return kept
+  const out = { ...kept }
+  if (p.done !== undefined) {
+    const k = kept.progressFrom
+    if (!k || k.stage !== p.stage || k.unit !== p.unit || k.total !== p.total) {
+      out.progressFrom = {
+        ...(p.stage !== undefined ? { stage: p.stage } : {}),
+        ...(p.unit !== undefined ? { unit: p.unit } : {}),
+        ...(p.total !== undefined ? { total: p.total } : {}),
+        done: p.done,
+        at,
+      }
+    }
+  }
+  if (p.overall) {
+    const k = kept.overallFrom
+    if (!k || k.unit !== p.overall.unit || k.total !== p.overall.total) {
+      out.overallFrom = {
+        ...(p.overall.unit !== undefined ? { unit: p.overall.unit } : {}),
+        ...(p.overall.total !== undefined ? { total: p.overall.total } : {}),
+        done: p.overall.done,
+        at,
+      }
+    }
+  }
+  return out
 }
 
 /** How long a heartbeat may age before the supervisor is taken for gone. */
@@ -194,13 +275,16 @@ export function view(dir: string, now: number, tail = 0): RunView {
   if (!spec) return { ...base, state: "lost", over: true, error: "the record has no run.json" }
   const progressFile = join(dir, PROGRESS_FILE)
   const progressAt = mtime(progressFile)
-  const progressLine = tailOf(progressFile, 1)[0]
+  const progressLine = lastLine(progressFile)
+  const lastLog = spec.noProgress !== undefined ? lastLine(log) : undefined
   const withFacts: RunView = {
     ...base,
     ...(status?.pid !== undefined ? { pid: status.pid } : {}),
     ...(status?.sizeBytes !== undefined ? { sizeBytes: status.sizeBytes } : {}),
     ...(status?.peakBytes !== undefined ? { peakBytes: status.peakBytes } : {}),
-    ...(progressLine !== undefined && progressAt !== null ? { progress: { line: progressLine, ageMs: Math.max(0, now - progressAt) } } : {}),
+    ...(progressLine !== undefined && progressAt !== null ? { progress: progressOf(progressLine, progressAt, status, now) } : {}),
+    ...(spec.noProgress !== undefined ? { noProgress: spec.noProgress } : {}),
+    ...(lastLog !== undefined ? { lastLog } : {}),
     ...(tail > 0 ? { tail: tailOf(log, tail) } : {}),
   }
   if (!status) {
@@ -233,7 +317,8 @@ export function view(dir: string, now: number, tail = 0): RunView {
   if (now - beat > lostAfterMs(spec.everyMs)) {
     return { ...withFacts, elapsedMs: Math.max(status.elapsedMs, now - Date.parse(spec.started)), state: "lost", over: true }
   }
-  const active = Math.max(Date.parse(spec.started), mtime(log) ?? 0, progressAt ?? 0)
+  // A run that reports progress is judged on its progress file; one declared --no-progress on whatever it writes.
+  const active = Math.max(Date.parse(spec.started), spec.noProgress !== undefined ? mtime(log) ?? 0 : 0, progressAt ?? 0)
   const state: Reported = status.state === "starting" ? "starting" : now - active > spec.staleMs ? "stale" : "running"
   return { ...withFacts, elapsedMs: Math.max(status.elapsedMs, now - Date.parse(spec.started)), state }
 }
@@ -254,15 +339,6 @@ export function parseSize(raw: string): number | null {
   const m = /^(\d+)([KMGT]?)$/i.exec(raw)
   if (!m || Number(m[1]) < 1) return null
   return Number(m[1]) * SIZES[(m[2] ?? "").toUpperCase()]!
-}
-
-/** A duration for people: `45s`, `3m 20s`, `2h 5m`, `1d 3h`. */
-export function showDuration(ms: number): string {
-  const s = Math.round(ms / 1000)
-  if (s < 60) return `${s}s`
-  if (s < 3600) return `${Math.floor(s / 60)}m${s % 60 ? ` ${s % 60}s` : ""}`
-  if (s < 86400) return `${Math.floor(s / 3600)}h${Math.floor(s / 60) % 60 ? ` ${Math.floor(s / 60) % 60}m` : ""}`
-  return `${Math.floor(s / 86400)}d${Math.floor(s / 3600) % 24 ? ` ${Math.floor(s / 3600) % 24}h` : ""}`
 }
 
 /** A size for people, in binary units: `512 B`, `1.5 MiB`. */
